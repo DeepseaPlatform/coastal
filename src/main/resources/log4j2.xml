@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" strict="true">
+	<Appenders>
+		<Console name="CONSOLE" target="SYSTEM_OUT" direct="true">
+			<ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+      		<PatternLayout pattern="%-6level %msg%n"/>
+  		</Console>
+		<File name="FILE" fileName="/tmp/coastal.log" append="false">
+      		<PatternLayout pattern="%d{HH:mm:ss.SSS} %style{%-6level}{dim} %msg%n"/>
+		</File>
+	</Appenders>
+	<Loggers>
+		<Logger name="GREEN" level="ALL" additivity="false">
+			<AppenderRef ref="FILE"/>
+		</Logger>
+   		<Root level="ALL">
+			<AppenderRef ref="CONSOLE"/>
+			<AppenderRef ref="FILE"/>
+		</Root>
+	</Loggers>
+</Configuration>
