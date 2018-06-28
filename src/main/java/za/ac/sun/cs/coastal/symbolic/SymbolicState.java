@@ -25,6 +25,8 @@ public class SymbolicState {
 
 	protected static final Stack<SymbolicFrame> frames = new Stack<>();
 
+	private static int objectIdCount = 0;
+
 	private static final Stack<Expression> args = new Stack<>();
 
 	private static SegmentedPC spc = SegmentedPC.ZERO;
@@ -38,6 +40,7 @@ public class SymbolicState {
 	public static void reset(Map<String, Constant> concreteValues) {
 		symbolicMode = false;
 		frames.clear();
+		objectIdCount = 0;
 		args.clear();
 		spc = SegmentedPC.ZERO;
 		pendingExtraConjunct = null;
@@ -61,6 +64,10 @@ public class SymbolicState {
 		return frames.peek().pop();
 	}
 
+	private static Expression peek() {
+		return frames.peek().peek();
+	}
+	
 	private static Expression getLocal(int index) {
 		return frames.peek().getLocal(index);
 	}
@@ -91,6 +98,10 @@ public class SymbolicState {
 			symbolicMode = false;
 		}
 		return symbolicMode;
+	}
+
+	private static int incrAndGetNewObjectId() {
+		return ++objectIdCount;
 	}
 
 	// ======================================================================
@@ -156,6 +167,9 @@ public class SymbolicState {
 		case Opcodes.ICONST_5:
 			push(new IntConstant(5));
 			break;
+		case Opcodes.DUP:
+			push(peek());
+			break;
 		case Opcodes.IADD:
 			Expression e0 = pop();
 			push(new Operation(Operator.ADD, pop(), e0));
@@ -203,6 +217,105 @@ public class SymbolicState {
 			break;
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", opcode2str(opcode), owner, name, descriptor, opcode);
+			System.exit(1);
+		}
+	}
+	
+	public static void fieldInsn(int opcode, String owner, String name, String descriptor) {
+		if (!symbolicMode) {
+			return;
+		}
+		switch (opcode) {
+		case Opcodes.GETSTATIC:
+			push(new IntConstant(0));
+			break;
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", opcode2str(opcode), owner, name, descriptor, opcode);
+			System.exit(1);
+		}
+	}
+	
+	public static void iincInsn(int opcode, int increment) {
+		if (!symbolicMode) {
+			return;
+		}
+		switch (opcode) {
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", opcode2str(opcode), increment, opcode);
+			System.exit(1);
+		}
+	}
+	
+	public static void invokeDynamicInsn(int opcode) {
+		if (!symbolicMode) {
+			return;
+		}
+		switch (opcode) {
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", opcode2str(opcode), opcode);
+			System.exit(1);
+		}
+	}
+	
+	public static void ldcInsn(int opcode, Object value) {
+		if (!symbolicMode) {
+			return;
+		}
+		switch (opcode) {
+		case Opcodes.LDC:
+			lgr.info("$$$$$$$$$$$$$ " + value.getClass().getName() + "$$$$" + value.toString());
+			push(new IntConstant(0));
+			break;
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", opcode2str(opcode), opcode);
+			System.exit(1);
+		}
+	}
+	
+	public static void lookupSwitchInsn(int opcode) {
+		if (!symbolicMode) {
+			return;
+		}
+		switch (opcode) {
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", opcode2str(opcode), opcode);
+			System.exit(1);
+		}
+	}
+	
+	public static void multiANewArrayInsn(int opcode) {
+		if (!symbolicMode) {
+			return;
+		}
+		switch (opcode) {
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", opcode2str(opcode), opcode);
+			System.exit(1);
+		}
+	}
+	
+	public static void tableSwitchInsn(int opcode) {
+		if (!symbolicMode) {
+			return;
+		}
+		switch (opcode) {
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", opcode2str(opcode), opcode);
+			System.exit(1);
+		}
+	}
+	
+	public static void typeInsn(int opcode) {
+		if (!symbolicMode) {
+			return;
+		}
+		switch (opcode) {
+		case Opcodes.NEW:
+			int id = incrAndGetNewObjectId();
+			push(new IntConstant(id));
+			break;
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", opcode2str(opcode), opcode);
 			System.exit(1);
 		}
 	}

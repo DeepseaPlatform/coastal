@@ -56,7 +56,7 @@ public class Diver implements Reporter {
 		return runs;
 	}
 	
-	private static final PrintStream nul = new PrintStream(new OutputStream() {
+	private static final PrintStream NUL = new PrintStream(new OutputStream() {
 		@Override
 		public void write(int b) throws IOException {
 			// do nothing
@@ -70,7 +70,7 @@ public class Diver implements Reporter {
 			Method meth = clas.getMethod("main", String[].class);
 			// Redirect System.out/System.err
 			if (!Configuration.getEchoOutput()) {
-				System.setOut(nul); System.setErr(nul);
+				System.setOut(NUL); System.setErr(NUL);
 			}
 			meth.invoke(null, new Object[] { new String[0] });
 		} catch (ClassNotFoundException x) {
