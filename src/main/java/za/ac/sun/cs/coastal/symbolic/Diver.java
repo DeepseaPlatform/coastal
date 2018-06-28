@@ -52,6 +52,10 @@ public class Diver implements Reporter {
 		} while (concreteValues != null);
 	}
 
+	public int getRuns() {
+		return runs;
+	}
+	
 	private static final PrintStream nul = new PrintStream(new OutputStream() {
 		@Override
 		public void write(int b) throws IOException {
