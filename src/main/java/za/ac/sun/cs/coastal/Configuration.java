@@ -2,6 +2,7 @@ package za.ac.sun.cs.coastal;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -19,7 +20,30 @@ import za.ac.sun.cs.coastal.strategy.Strategy;
 
 public class Configuration {
 
-	public static final String VERSION = "0.1";
+	// ======================================================================
+	//
+	// VERSION
+	//
+	// ======================================================================
+	
+	public static final String VERSION;
+
+	static {
+		String version = "unspecified";
+		String resourceName = "app.properties";
+		Properties props = new Properties();
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		try(InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
+		    props.load(resourceStream);
+		    String v = props.getProperty("version");
+		    if ((v != null) && (v.charAt(0) != '%')) {
+		    	version = v;
+		    }
+		} catch (IOException x) {
+			// ignore
+		}
+		VERSION = version;
+	}
 
 	// ======================================================================
 	//
