@@ -157,10 +157,15 @@ public class SymbolicState {
 			push(new IntConstant(5));
 			break;
 		case Opcodes.IADD:
-			push(new Operation(Operator.ADD, pop(), pop()));
+			Expression e0 = pop();
+			push(new Operation(Operator.ADD, pop(), e0));
+			break;
+		case Opcodes.ISUB:
+			e0 = pop();
+			push(new Operation(Operator.SUB, pop(), e0));
 			break;
 		case Opcodes.IRETURN:
-			Expression e0 = pop();
+			e0 = pop();
 			if (methodReturn()) {
 				push(e0);
 			}
@@ -185,6 +190,20 @@ public class SymbolicState {
 		}
 	}
 
+	public static void methodInsn(int opcode, String owner, String name, String descriptor) {
+		if (!symbolicMode) {
+			return;
+		}
+		switch (opcode) {
+		case Opcodes.INVOKESTATIC:
+			// do nothing
+			break;
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", opcode2str(opcode), owner, name, descriptor, opcode);
+			System.exit(1);
+		}
+	}
+	
 	/* Missing offset because destination not yet known. */
 	public static void jumpInsn(int opcode) {
 		if (!symbolicMode) {

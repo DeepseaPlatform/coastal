@@ -114,7 +114,10 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
 		lgr.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		mv.visitLdcInsn(opcode);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(I)V", false);
+		mv.visitLdcInsn(owner);
+		mv.visitLdcInsn(name);
+		mv.visitLdcInsn(descriptor);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn", "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 		mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 	}
 
@@ -132,7 +135,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		lgr.trace("visitFieldInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		mv.visitFieldInsn(opcode, owner, name, descriptor);
 		mv.visitLdcInsn(opcode);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(I)V", false);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "XXX", "(I)V", false);
 	}
 
 	@Override
@@ -149,7 +152,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	public void visitIincInsn(int var, int increment) {
 		lgr.trace("visitJumpInsn(var:{}, increment:{})", var, increment);
 		mv.visitLdcInsn(132);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(I)V", false);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "XXX", "(I)V", false);
 		mv.visitIincInsn(var, increment);
 	}
 
