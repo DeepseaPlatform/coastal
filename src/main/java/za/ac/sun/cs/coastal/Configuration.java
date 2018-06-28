@@ -6,10 +6,13 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,8 +27,11 @@ public class Configuration {
 	//
 	// VERSION
 	//
+	// Reads version from "app.properties" file.  This gives "unspecified"
+	// in Eclipse, but works when built with gradle & return the git version.
+	//
 	// ======================================================================
-	
+
 	public static final String VERSION;
 
 	static {
@@ -33,12 +39,12 @@ public class Configuration {
 		String resourceName = "app.properties";
 		Properties props = new Properties();
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		try(InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
-		    props.load(resourceStream);
-		    String v = props.getProperty("version");
-		    if ((v != null) && (v.charAt(0) != '%')) {
-		    	version = v;
-		    }
+		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
+			props.load(resourceStream);
+			String v = props.getProperty("version");
+			if ((v != null) && (v.charAt(0) != '%')) {
+				version = v;
+			}
 		} catch (IOException x) {
 			// ignore
 		}
@@ -66,6 +72,10 @@ public class Configuration {
 	//
 	// ======================================================================
 
+	private static final int DEFAULT_MIN_INT_VALUE = 0;
+
+	private static final int DEFAULT_MAX_INT_VALUE = 99;
+
 	/**
 	 * Properties associated with these settings.
 	 */
@@ -88,11 +98,21 @@ public class Configuration {
 	protected static final List<String> targets = new ArrayList<>();
 
 	/**
-	 * The database of triggers. Each trigger is a method that will switch the dive
-	 * to symbolic mode. The trigger also describes which arguments are treated
-	 * symbolically, and which arguments stay concrete.
+	 * The database of triggers. Each trigger is a method that will switch the
+	 * dive to symbolic mode. The trigger also describes which arguments are
+	 * treated symbolically, and which arguments stay concrete.
 	 */
 	private static final List<Trigger> triggers = new ArrayList<>();
+
+	/**
+	 * Maps variable names to lower bounds.
+	 */
+	private static final Map<String, Integer> minBounds = new HashMap<>();
+
+	/**
+	 * Maps variable names to upper bounds.
+	 */
+	private static final Map<String, Integer> maxBounds = new HashMap<>();
 
 	/**
 	 * The strategy that directs the investigation of target programs.
@@ -171,6 +191,38 @@ public class Configuration {
 		}
 	}
 
+	public static int getMinBound(String variable) {
+		return getMinBound(variable, DEFAULT_MIN_INT_VALUE);
+	}
+
+	public static int getMinBound(String variable, int defaultValue) {
+		Integer min = minBounds.get(variable);
+		if (min == null) {
+			min = defaultValue;
+		}
+		return min;
+	}
+
+	public static void setMinBound(String variable, int min) {
+		minBounds.put(variable, min);
+	}
+
+	public static int getMaxBound(String variable) {
+		return getMaxBound(variable, DEFAULT_MAX_INT_VALUE);
+	}
+
+	public static int getMaxBound(String variable, int defaultValue) {
+		Integer max = maxBounds.get(variable);
+		if (max == null) {
+			max = defaultValue;
+		}
+		return max;
+	}
+
+	public static void setMaxBound(String variable, int max) {
+		maxBounds.put(variable, max);
+	}
+
 	public static Strategy getStrategy() {
 		return strategy;
 	}
@@ -198,11 +250,11 @@ public class Configuration {
 	public static boolean getEchoOutput() {
 		return echoOutput;
 	}
-	
+
 	public static void setEchoOutput(boolean echoOutput) {
 		Configuration.echoOutput = echoOutput;
 	}
-	
+
 	// ======================================================================
 	//
 	// LOAD AND PARSE CONFIGURATION PROPERTIES
@@ -251,6 +303,34 @@ public class Configuration {
 			}
 		}
 
+		// Process coastal.bounds = ...
+		for (Object key : properties.keySet()) {
+			String k = (String) key;
+			if (k.startsWith("coastal.bounds.")) {
+				String var = k.substring("coastal.bounds.".length());
+				if (var.endsWith(".min")) {
+					Integer min = getIntegerProperty(properties, k);
+					if (min != null) {
+						setMinBound(var.substring(0, var.length() - 4), min);
+					}
+				} else if (var.endsWith(".max")) {
+					Integer max = getIntegerProperty(properties, k);
+					if (max != null) {
+						setMaxBound(var.substring(0, var.length() - 4), max);
+					}
+				} else {
+					String[] bounds = properties.getProperty(k).split("\\.\\.");
+					assert bounds.length >= 2;
+					try {
+						setMinBound(var, Integer.parseInt(bounds[0].trim()));
+						setMaxBound(var, Integer.parseInt(bounds[1].trim()));
+					} catch (NumberFormatException x) {
+						LOGGER.warn("BOUNDS IN \"" + k + "\" IS MALFORMED AND IGNORED");
+					}
+				}
+			}
+		}
+
 		// Process coastal.strategy = ...
 		p = properties.getProperty("coastal.strategy");
 		if (p != null) {
@@ -265,7 +345,7 @@ public class Configuration {
 
 		// Process coastal.echooutput = ...
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", getEchoOutput()));
-		
+
 		// All done
 		LOGGER.debug("Configuration loaded");
 		dump();
@@ -290,6 +370,28 @@ public class Configuration {
 			// ignore
 		}
 		return defaultValue;
+	}
+
+	public static int getIntegerProperty(Properties properties, String key, int defaultValue) {
+		String s = properties.getProperty(key, Integer.toString(defaultValue));
+		try {
+			return Integer.parseInt(s);
+		} catch (NumberFormatException x) {
+			// ignore
+		}
+		return defaultValue;
+	}
+
+	public static Integer getIntegerProperty(Properties properties, String key) {
+		String s = properties.getProperty(key);
+		if (s != null) {
+			try {
+				return Integer.parseInt(s);
+			} catch (NumberFormatException x) {
+				// ignore
+			}
+		}
+		return null;
 	}
 
 	private static Object createInstance(String objectName) {
@@ -326,7 +428,7 @@ public class Configuration {
 		Class<?> clas = null;
 		if ((className != null) && (className.length() > 0)) {
 			try {
-				ClassLoader cl = Configuration.class.getClassLoader(); 
+				ClassLoader cl = Configuration.class.getClassLoader();
 				clas = cl.loadClass(className);
 			} catch (ClassNotFoundException x) {
 				LOGGER.error("CLASS NOT FOUND: " + className, x);
@@ -357,6 +459,17 @@ public class Configuration {
 			String post = (i > 1) ? ";\\" : "";
 			LOGGER.info("{}{}{}", pre, trigger.toString(), post);
 			i--;
+		}
+		Set<String> vars = new TreeSet<>(minBounds.keySet());
+		vars.addAll(maxBounds.keySet());
+		for (String var : vars) {
+			if (!minBounds.containsKey(var)) {
+				LOGGER.info("coastal.bounds.{}.max = {}", var, maxBounds.get(var));
+			} else if (!maxBounds.containsKey(var)) {
+				LOGGER.info("coastal.bounds.{}.min = {}", var, minBounds.get(var));
+			} else {
+				LOGGER.info("coastal.bounds.{} = {}..{}", var, minBounds.get(var), maxBounds.get(var));
+			}
 		}
 		LOGGER.info("coastal.dumpasm = {}", getDumpAsm());
 		LOGGER.info("coastal.dumpconfig = {}", getDumpConfig());
@@ -501,16 +614,26 @@ public class Configuration {
 				StringBuilder sb = new StringBuilder();
 				sb.append(methodName).append('(');
 				for (int i = 0; i < paramNames.length; i++) {
-					if (i > 0) { sb.append(", "); }
+					if (i > 0) {
+						sb.append(", ");
+					}
 					if (paramNames[i] != null) {
 						sb.append(paramNames[i]).append(": ");
 					}
-					if (paramTypes[i] == null) { sb.append('?'); }
-					else if (paramTypes[i] == boolean.class) { sb.append("boolean"); }
-					else if (paramTypes[i] == int.class) { sb.append("int"); }
-					else if (paramTypes[i] == String.class) { sb.append("string"); }
-					else if (paramTypes[i] == int[].class) { sb.append("int[]"); } // int[5]? int[4]?...
-					else { sb.append('*'); }
+					if (paramTypes[i] == null) {
+						sb.append('?');
+					} else if (paramTypes[i] == boolean.class) {
+						sb.append("boolean");
+					} else if (paramTypes[i] == int.class) {
+						sb.append("int");
+					} else if (paramTypes[i] == String.class) {
+						sb.append("string");
+					} else if (paramTypes[i] == int[].class) {
+						sb.append("int[]");
+					} // int[5]? int[4]?...
+					else {
+						sb.append('*');
+					}
 				}
 				stringRepr = sb.append(')').toString();
 			}
