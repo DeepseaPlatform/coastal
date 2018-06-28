@@ -21,7 +21,7 @@ public class COASTAL {
 		// Display banner to start with
 		new Banner('~').println("COASTAL version " + Configuration.VERSION).display(lgr, Level.INFO);
 		new CoastReporter();
-		
+
 		// Load and check configuration
 		if (args.length < 1) {
 			new Banner('@').println("COASTAL PROBLEM\nMISSING PROPERTIES FILE\n")
@@ -40,8 +40,13 @@ public class COASTAL {
 		}
 
 		// Configuration has now been loaded and seems OK
-		new Diver().dive();
+		Diver d = new Diver();
+		d.dive();
 		Reporters.report();
+		if (d.getRuns() < 2) {
+			new Banner('@').println("ONLY A SINGLE RUN EXECUTED\n")
+					.println("CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE").display(lgr, Level.INFO);
+		}
 		new Banner('~').println("COASTAL DONE").display(lgr, Level.INFO);
 	}
 
@@ -53,7 +58,7 @@ public class COASTAL {
 		public CoastReporter() {
 			Reporters.register(this);
 		}
-		
+
 		@Override
 		public String getName() {
 			return "COASTAL";
