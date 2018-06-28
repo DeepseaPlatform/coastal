@@ -184,6 +184,9 @@ public class SymbolicState {
 		case Opcodes.BIPUSH:
 			push(new IntConstant(operand));
 			break;
+		case Opcodes.SIPUSH:
+			push(new IntConstant(operand));
+			break;
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", opcode2str(opcode), operand, opcode);
 			System.exit(1);
