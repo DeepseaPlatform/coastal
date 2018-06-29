@@ -1,6 +1,7 @@
+@import url('https://fonts.googleapis.com/css?family=Overpass|Roboto');
 /* Common styles ------------------------------------------------------------ */
 html {
-	/* font-family: "Open Sans"; */
+	font-family: "Roboto", sans-serif;
 	font-size: 14px;
 	line-height: 1.4285;
 	color: rgb(51, 51, 51);
@@ -11,8 +12,8 @@ body {
 }
 
 h1, h2, h3 {
-	/* font-family: "Raleway"; */
-	font-weight: 200;
+	font-family: "Overpass", sans-serif;
+	font-weight: 300;
 	line-height: 1.1;
 	color: rgb(0, 158, 255);
 }
