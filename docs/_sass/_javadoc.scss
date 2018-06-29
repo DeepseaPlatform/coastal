@@ -1,0 +1,128 @@
+main {
+	section {
+		article.inheritance {
+			h3 {
+				display: none;
+			}
+			ul {
+				margin: 0;
+				padding: 0;
+				list-style-type: none;
+				font-family: monospace;
+				li[level="1"] { padding-left:  0.0rem; }
+				li[level="2"] { padding-left:  1.5rem; }
+				li[level="3"] { padding-left:  3.0rem; }
+				li[level="4"] { padding-left:  4.5rem; }
+				li[level="5"] { padding-left:  6.0rem; }
+				li[level="6"] { padding-left:  7.5rem; }
+				li[level="7"] { padding-left:  9.0rem; }
+				li[level="8"] { padding-left: 10.5rem; }
+				li[level="9"] { padding-left: 12.0rem; }
+			}
+		}
+		article.superinterfaces, article.subclasses {
+			h3 {
+				font-size: 1rem;
+				margin: 1rem 0 0;
+			}
+			ul {
+				margin: 0;
+				padding: 0;
+				list-style-type: none;
+				font-family: monospace;
+				display: block;
+				li {
+					display: inline;
+					margin: 0;
+					padding: 0;
+					&:after { content: ","; }
+					&:last-child:after { content: ""; }
+				}
+			}
+		}
+		article.declaration {
+			margin-top: 2rem;
+			padding-top: 1rem;
+			border-top: 1px solid #333333;
+			font-family: monospace;
+			font-size: 1.2rem;
+		}
+		article.description {
+			h3:first-child {
+				display: none;
+			}
+		}
+		article.details {
+			table.member-table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-bottom: 2rem;
+				caption {
+					text-align: left;
+					font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+					font-weight: 600;
+					margin: 0 0 1rem 0;
+					padding: 0;
+					color: $ds-main-hx-fg-color;
+					font-size: 1.2rem;
+					line-height: 2rem;
+					margin-top: 1rem;
+				}
+				thead tr {
+					background-color: #cccccc;
+					th {
+						padding-top: .6rem;
+						padding-bottom: .6rem;
+						padding-left: .6rem;
+						text-align: left;
+						font-size: .9375rem;
+					}
+				}
+				tbody tr {
+					border-bottom: 1px dashed #999999;
+					td {
+						padding-top: .4rem;
+						padding-bottom: .4rem;
+						font-family: monospace;
+						vertical-align: top;
+						div {
+							font-family: $ds-font-family;
+							font-size: .9375rem;
+							h4 {
+								margin-bottom: 0;
+							}
+							span.param {
+								font-family: monospace;
+								&:after {
+									content: "--";
+								}
+							}
+						}
+						&:first-child {
+							width: 30%;
+							padding-right: .6rem;
+						}
+					}
+				}
+			}
+			h3 {
+				font-size: 1rem;
+				margin: 1rem 0 0;
+			}
+			ul {
+				margin: 0;
+				padding: 0;
+				list-style-type: none;
+				font-family: monospace;
+				display: block;
+				li {
+					display: inline;
+					margin: 0;
+					padding: 0;
+					&:after { content: ","; }
+					&:last-child:after { content: ""; }
+				}
+			}
+		}
+	}
+}

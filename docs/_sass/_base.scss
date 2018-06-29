@@ -1,0 +1,42 @@
+html, body {
+	height: 100%;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	font-family: $ds-font-family;
+	font-size: $ds-font-size;
+	line-height: $ds-line-height;
+	margin: 0;
+	padding: 0;
+	&#overview a#menu-overview { background-color: $ds-header-active-color; }
+	&#installation a#menu-installation { background-color: $ds-header-active-color; }
+	&#api a#menu-api { background-color: $ds-header-active-color; }
+}
+
+div.clearfix {
+	clear: both;
+	height: 0px;
+}
+
+a {
+	color: $ds-link-fg-color;
+	cursor: pointer;
+	text-decoration: none;
+	&:hover {
+		color: $ds-link-hover-fg-color;
+		text-decoration: underline;
+	}
+}
+
+span.icon-diver {
+	display: inline-block;
+	position: relative;
+	height: 0;
+	svg {
+		position: absolute;
+		top: -2rem;
+	}
+}
+

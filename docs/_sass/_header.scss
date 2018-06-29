@@ -1,0 +1,57 @@
+header {
+	height: 3.75rem;
+	min-height: 3.75rem;
+	box-sizing: border-box;
+	box-shadow: 0 1px 0 0 $ds-header-border-color;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	background-color: $ds-header-bg-color;
+	z-index: 2;
+	display: flex;
+	flex-grow: 1;
+	a {
+		color: $ds-link-fg-color;
+		text-decoration: none;
+		&:hover {
+			color: $ds-link-fg-color;
+			text-decoration: none;
+		}
+	}
+	h1 {
+		display: inline-flex;
+		position: relative;
+		font-size: 1.2rem;
+		line-height: 3.75rem;
+		margin: 0;
+		padding: 0 1.5rem;
+		justify-content: center;
+		color: $ds-header-h1-color;
+	}
+	nav {
+		font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+		font-weight: 600;
+		display: flex;
+		flex-grow: 1;
+		a {
+			display: flex;
+			flex-direction: row;
+			text-decoration: none;
+			font-size: 0.8125rem;
+			font-weight: 600;
+			line-height: 3.75rem;
+			margin: 0;
+			padding: 0 1.5rem;
+			color: $ds-header-link-color;
+			&:hover {
+				background-color: $ds-header-hover-color;
+				color: $ds-header-link-color;
+				text-decoration: none;
+			}
+			&.active {
+				background-color: $ds-header-active-color;
+			}
+		}
+	}
+}

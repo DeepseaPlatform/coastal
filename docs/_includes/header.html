@@ -1,0 +1,11 @@
+<header>
+	<h1><a href="{{ "/" | relative_url }}">{% include icon-diver.html size="2.8rem" fill="#4a6782" %}<span>{{ site.title | escape }}</span></a></h1>
+	<nav id="menu">
+	{% assign navmenu = site.data.nav.entries %}
+	{% for entry in navmenu %}
+		{% assign urllen = entry.url | size %}
+		{% assign urlprefix = page.url | slice: 0, urllen %}
+		<a {% if entry.url == urlprefix %}class="active" {% endif %}href="{{ entry.url | relative_url }}">{{ entry.title }}</a>
+	{% endfor %}
+	</nav>
+</header>

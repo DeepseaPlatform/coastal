@@ -1,0 +1,28 @@
+footer {
+	height: 7.5rem;
+	min-height: 7.5rem;
+	font-size: 0.9rem;
+	font-weight: 300;
+	line-height: 1.4rem;
+	margin: 0;
+	padding: $ds-footer-vpadding $ds-footer-rpadding $ds-footer-vpadding $ds-footer-lpadding;
+	color: $ds-footer-fg-color;
+	background-color: $ds-footer-bg-color;
+	div.footerleft {
+		float: left;
+	}
+	div.footerright {
+		float: right;
+	}
+	a {
+		color: $ds-footer-link-color;
+		text-decoration: none;
+		&:hover {
+			color: $ds-footer-link-color;
+			text-decoration: underline;
+		}
+	}
+	p {
+		margin: 0;
+	}
+}
