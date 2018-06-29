@@ -1,2 +1,2 @@
-Documentation for the DEEPSEA project.
+Documentation for the COASTAL project.
 

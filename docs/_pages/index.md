@@ -3,13 +3,12 @@ layout: home
 permalink: /
 ---
 
-<h1><span>Welcome to DEEPSEA</span>{% include icon-diver.html size="5rem" offset="-2rem" %}</h1>
+<h1><span>Welcome to COASTAL</span></h1>
 
-Deep Symbolic Execution Agent (DEEPSEA) is a program analysis tool that uses
-the Java Platform Debugger Architecture (<a
-href="https://docs.oracle.com/javase/8/docs/technotes/guides/jpda/index.html">JPDA</a>)
+COASTAL is a program analysis tool that uses
+the instrumentation
 to monitor the execution of a Java
-program.  As the program executes concretely, DEEPSEA collects information and
+program.  As the program executes concretely, COASTAL collects information and
 tracks the execution symbolically. 
 When the program terminates, the symbolic information is used to calculate
 different inputs that will force the program to follow a different path.  In

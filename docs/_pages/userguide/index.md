@@ -4,10 +4,10 @@ title: User guide
 permalink: /userguide/
 ---
 
-DEEPSEA is a dynamic symbolic execution tool.  In short, it explores all
+COASTAL is a dynamic symbolic execution tool.  In short, it explores all
 possible executions of a program.
 
-- [Overview of how DEEPSEA works]({{ "/userguide/overview/" | relative_url }})
+- [Overview of how COASTAL works]({{ "/userguide/overview/" | relative_url }})
 - use cases
 
 ## Getting started

@@ -1,17 +1,17 @@
 ---
 layout: page
-title: How to contribute to DEEPSEA
+title: Our code of conduct
 permalink: /devguide/codeofconduct
 ---
 
 In order to foster an inclusive, kind, harassment-free, and cooperative
-community, thoughtbot enforces this code of conduct on our open source
-projects.
+community, the core team tries to enforce this code of conduct on our
+open source projects.
 
 ## Summary
 
 Harassment in code and discussion or violation of physical boundaries is
-completely unacceptable anywhere in thoughtbot’s project codebases, issue
+completely unacceptable anywhere in the project's codebases, issue
 trackers, chatrooms, mailing lists, meetups, and other events. Violators will
 be warned by the core team. Repeat violations will result in being blocked or
 banned by the core team at or before the 3rd violation.
@@ -35,9 +35,9 @@ escalation to GitHub support.
 
 If you are being harassed, notice that someone else is being harassed, or have
 any other concerns, please contact a member of the core team or email
-conduct@thoughtbot.com immediately.
+the core team immediately.
 
-We expect everyone to follow these rules anywhere in thoughtbot's project
+We expect everyone to follow these rules anywhere in the project's
 codebases, issue trackers, chatrooms, and mailing lists.
 
 Finally, don't forget that it is human to make mistakes! We all do. Let’s work
@@ -54,9 +54,4 @@ Thanks to the
 [Contributor Covenant](http://contributor-covenant.org/)
 for inspiration and ideas.
 
-## License
-
-To the extent possible under law, the thoughtbot team has waived all copyright
-and related or neighboring rights to thoughtbot Code of Conduct. This work is
-published from the United States. 
 

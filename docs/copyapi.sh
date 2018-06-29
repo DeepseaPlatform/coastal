@@ -4,15 +4,15 @@
 # Variables
 #-------------------------------------------------------------------------------
 
-ARTIFACTS="https://git.cs.sun.ac.za/deepsea/deepsea/-/jobs/artifacts/master/download?job=build"
+ARTIFACTS="https://git.cs.sun.ac.za/coastal/coastal/-/jobs/artifacts/master/download?job=build"
 ZIP="artifacts.zip"
 
-#ARTIFACT="https://git.cs.sun.ac.za/deepsea/deepsea/-/jobs/artifacts/master/download?job=build"
+#ARTIFACT="https://git.cs.sun.ac.za/coastal/coastal/-/jobs/artifacts/master/download?job=build"
 TEMPDIR=`pwd`"/_temp"
 DEST=`pwd`"/_pages/api"
 
 #-------------------------------------------------------------------------------
-# Fetch the artifact from the deepsea / deepsea project.
+# Fetch the artifact from the coastal / deepsea project.
 #-------------------------------------------------------------------------------
 
 mkdir -p ${TEMPDIR} 2>/dev/null
@@ -24,7 +24,7 @@ else
 	curl --location --output ${ZIP} "${ARTIFACTS}"
 fi
 # curl -Ls ${ARTIFACT} > artifacts.zip
-#wget -q -O artifacts.zip http://git.cs.sun.ac.za/deepsea/deepsea/-/jobs/artifacts/master/download?job=build
+#wget -q -O artifacts.zip http://git.cs.sun.ac.za/coastal/coastal/-/jobs/artifacts/master/download?job=build
 # UGLY HACK!!!
 # cp /Users/Jaco/Documents/DOCUMENTS/DOWNLOADS/MISC/artifacts.zip .
 unzip -o ${ZIP} &>/dev/null

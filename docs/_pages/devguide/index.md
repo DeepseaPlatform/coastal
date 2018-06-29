@@ -6,16 +6,16 @@ permalink: /devguide/
 
 This is the developer's guide.  It should include:
 
-- architecture of DEEPSEA
+- architecture of COASTAL
 - design decisions
 - limitations
 
 ## Support
 
 - Slack
-- IRC channel: `#deepseateam` on `irc.freenode.ent`
+- IRC channel: `#coastal` on `irc.freenode.ent`
 
-## Contributing to DEEPSEA
+## Contributing to COASTAL
 
 - [How to contribute to the project](/devguide/contribute)
 - [The code of conduct](/devguide/codeofconduct)
