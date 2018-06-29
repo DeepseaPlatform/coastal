@@ -69,7 +69,7 @@ public class COASTAL {
 			stopped = Calendar.getInstance();
 			out.println("  Started: " + dateFormat.format(started.getTime()));
 			out.println("  Stopped: " + dateFormat.format(stopped.getTime()));
-			out.println("  Total time: " + (System.currentTimeMillis() - startTime));
+			out.println("  Overall time: " + (System.currentTimeMillis() - startTime));
 		}
 
 	}

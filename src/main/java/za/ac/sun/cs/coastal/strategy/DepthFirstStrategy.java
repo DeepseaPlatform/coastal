@@ -253,7 +253,7 @@ public class DepthFirstStrategy implements Strategy {
 		out.println("  Revisited paths: " + revisitCount);
 		out.println("  Infeasible paths: " + infeasibleCount);
 		out.println("  Solver time: " + solverTime);
-		out.println("  Total time: " + totalTime);
+		out.println("  Overall strategy time: " + totalTime);
 	}
 
 }
