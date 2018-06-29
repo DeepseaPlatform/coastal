@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal.symbolic;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +21,8 @@ import za.ac.sun.cs.green.expr.Operation.Operator;
 
 public class SymbolicState {
 
+	private static final String FIELD_SEPARATOR = "/";
+
 	protected static final Logger lgr = Configuration.getLogger();
 
 	protected static boolean symbolicMode = false;
@@ -29,7 +32,9 @@ public class SymbolicState {
 	private static int objectIdCount = 0;
 
 	private static int newVariableCount = 0;
-	
+
+	private static final Map<String, Expression> instanceData = new HashMap<>();
+
 	private static final Stack<Expression> args = new Stack<>();
 
 	private static SegmentedPC spc = SegmentedPC.ZERO;
@@ -39,12 +44,17 @@ public class SymbolicState {
 	private static final Set<String> conjunctSet = new HashSet<>();
 
 	private static Map<String, Constant> concreteValues = null;
+
+	private static boolean dumpTrace = Configuration.getDumpTrace();
+
+	private static boolean dumpFrame = Configuration.getDumpFrame();
 	
 	public static void reset(Map<String, Constant> concreteValues) {
 		symbolicMode = false;
 		frames.clear();
 		objectIdCount = 0;
 		// newVariableCount must NOT be reset
+		instanceData.clear();
 		args.clear();
 		spc = SegmentedPC.ZERO;
 		pendingExtraConjunct = null;
@@ -71,13 +81,34 @@ public class SymbolicState {
 	private static Expression peek() {
 		return frames.peek().peek();
 	}
-	
+
 	private static Expression getLocal(int index) {
 		return frames.peek().getLocal(index);
 	}
 
 	private static void setLocal(int index, Expression value) {
 		frames.peek().setLocal(index, value);
+	}
+
+	private static void putField(int objectId, String fieldName, Expression value) {
+		String fullFieldName = objectId + FIELD_SEPARATOR + fieldName;
+		instanceData.put(fullFieldName, value);
+	}
+
+	private static Expression getField(int objectId, String fieldName) {
+		String fullFieldName = objectId + FIELD_SEPARATOR + fieldName;
+		Expression value = instanceData.get(fullFieldName);
+		if (value == null) {
+			int min = Configuration.getDefaultMinBound();
+			int max = Configuration.getDefaultMaxBound();
+			value = new IntVariable(getNewVariableName(), min, max);
+			instanceData.put(fullFieldName, value);
+		}
+		return value;
+	}
+	
+	private static Expression getArrayValue(int arrayId, int index) {
+		return getField(arrayId, "" + index);
 	}
 
 	private static void pushConjunct(Expression conjunct) {
@@ -108,8 +139,15 @@ public class SymbolicState {
 		return ++objectIdCount;
 	}
 
-	public static String getNewVariableName() {
+	private static String getNewVariableName() {
 		return "$" + newVariableCount++;
+	}
+
+	private static void dumpFrames() {
+		int n = frames.size();
+		for (int i = n - 1; i >= 0; i--) {
+			lgr.trace("--> st{} locals:{} data:{}", frames.get(i).stack, frames.get(i).locals, instanceData);
+		}
 	}
 
 	// ======================================================================
@@ -121,21 +159,59 @@ public class SymbolicState {
 	public static int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
 		Trigger trigger = Configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
-		Constant concrete = ((name == null) || (concreteValues == null)) ? null : concreteValues.get(name);
-		int value = (concrete == null) ? currentValue : ((IntConstant) concrete).getValue();
-		if (name == null) {
-			setLocal(address, new IntConstant(value));
-		} else {
-			setLocal(address, new IntVariable(name, 0, 99));
+		if (name == null) { // not symbolic
+			setLocal(address, new IntConstant(currentValue));
+			return currentValue;
 		}
+		Constant concrete = (concreteValues == null) ? null : concreteValues.get(name);
+		int value = (concrete == null) ? currentValue : ((IntConstant) concrete).getValue();
+		int min = Configuration.getMinBound(name);
+		int max = Configuration.getMaxBound(name);
+		setLocal(address, new IntVariable(name, min, max));
+		return value;
+	}
+
+	public static int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
+		Trigger trigger = Configuration.getTrigger(triggerIndex);
+		String name = trigger.getParamName(index);
+		int length = currentValue.length;
+		int arrayId = incrAndGetNewObjectId();
+		int[] value;
+		if (name == null) { // not symbolic
+			value = currentValue;
+			for (int i = 0; i < length; i++) {
+				putField(arrayId, "" + i, new IntConstant(value[i]));
+			}
+		} else {
+			value = new int[length];
+			for (int i = 0; i < length; i++) {
+				String entryName = name + "$" + i;
+				Constant concrete = ((name == null) || (concreteValues == null)) ? null : concreteValues.get(entryName);
+				if ((concrete != null) && (concrete instanceof IntConstant)) {
+					value[i] = ((IntConstant) concrete).getValue();
+				} else {
+					value[i] = currentValue[i];
+				}
+				int min = Configuration.getMinBound(entryName, name);
+				int max = Configuration.getMaxBound(entryName, name);
+				Expression entryExpr = new IntVariable(entryName, min, max);
+				putField(arrayId, "" + i, entryExpr);
+			}
+		}
+		setLocal(index, new IntConstant(arrayId));
 		return value;
 	}
 
 	public static void triggerMethod() {
 		if (!symbolicMode) {
-			lgr.trace(">>> symbolic mode switched on");
+			if (dumpTrace) {
+				lgr.trace(">>> symbolic mode switched on");
+			}
 			symbolicMode = true;
 			frames.push(new SymbolicFrame());
+			if (dumpFrame) {
+				dumpFrames();
+			}
 		}
 	}
 
@@ -143,7 +219,9 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		lgr.trace(">>> transferring arguments");
+		if (dumpTrace) {
+			lgr.trace(">>> transferring arguments");
+		}
 		assert args.isEmpty();
 		for (int i = 0; i < argCount; i++) {
 			args.push(pop());
@@ -152,14 +230,25 @@ public class SymbolicState {
 		for (int i = 0; i < argCount; i++) {
 			setLocal(i, args.pop());
 		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
 	}
 
 	public static void insn(int opcode) {
 		if (!symbolicMode) {
 			return;
 		}
-		lgr.trace("{}", () -> Bytecodes.toString(opcode));
+		if (dumpTrace) {
+			lgr.trace("{}", () -> Bytecodes.toString(opcode));
+		}
 		switch (opcode) {
+		case Opcodes.ICONST_M1:
+			push(new IntConstant(-1));
+			break;
+		case Opcodes.ICONST_0:
+			push(Operation.ZERO);
+			break;
 		case Opcodes.ICONST_1:
 			push(Operation.ONE);
 			break;
@@ -174,6 +263,11 @@ public class SymbolicState {
 			break;
 		case Opcodes.ICONST_5:
 			push(new IntConstant(5));
+			break;
+		case Opcodes.IALOAD:
+			int i = ((IntConstant) pop()).getValue();
+			int a = ((IntConstant) pop()).getValue();
+			push(getArrayValue(a, i));
 			break;
 		case Opcodes.DUP:
 			push(peek());
@@ -203,11 +297,17 @@ public class SymbolicState {
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
 	}
 
 	public static void intInsn(int opcode, int operand) {
 		if (!symbolicMode) {
 			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("{} {}", Bytecodes.toString(opcode), operand);
 		}
 		switch (opcode) {
 		case Opcodes.BIPUSH:
@@ -220,11 +320,88 @@ public class SymbolicState {
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", Bytecodes.toString(opcode), operand, opcode);
 			System.exit(1);
 		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
+	}
+
+	public static void varInsn(int opcode, int var) {
+		if (!symbolicMode) {
+			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("{} {}", Bytecodes.toString(opcode), var);
+		}
+		switch (opcode) {
+		case Opcodes.ALOAD:
+			push(getLocal(var));
+			break;
+		case Opcodes.ILOAD:
+			push(getLocal(var));
+			break;
+		case Opcodes.ASTORE:
+			setLocal(var, pop());
+			break;
+		case Opcodes.ISTORE:
+			setLocal(var, pop());
+			break;
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			System.exit(1);
+		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
+	}
+
+	public static void typeInsn(int opcode) {
+		if (!symbolicMode) {
+			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
+		switch (opcode) {
+		case Opcodes.NEW:
+			int id = incrAndGetNewObjectId();
+			push(new IntConstant(id));
+			break;
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			System.exit(1);
+		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
+	}
+
+	public static void fieldInsn(int opcode, String owner, String name, String descriptor) {
+		if (!symbolicMode) {
+			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
+		}
+		switch (opcode) {
+		case Opcodes.GETSTATIC:
+			push(Operation.ZERO);
+			break;
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", Bytecodes.toString(opcode), owner, name,
+					descriptor, opcode);
+			System.exit(1);
+		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
 	}
 
 	public static void methodInsn(int opcode, String owner, String name, String descriptor) {
 		if (!symbolicMode) {
 			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
 		}
 		switch (opcode) {
 		case Opcodes.INVOKESPECIAL:
@@ -261,116 +438,40 @@ public class SymbolicState {
 			}
 			break;
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", Bytecodes.toString(opcode), owner, name, descriptor, opcode);
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", Bytecodes.toString(opcode), owner, name,
+					descriptor, opcode);
 			System.exit(1);
 		}
-	}
-	
-	public static void fieldInsn(int opcode, String owner, String name, String descriptor) {
-		if (!symbolicMode) {
-			return;
-		}
-		switch (opcode) {
-		case Opcodes.GETSTATIC:
-			push(Operation.ZERO);
-			break;
-		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", Bytecodes.toString(opcode), owner, name, descriptor, opcode);
-			System.exit(1);
+		if (dumpFrame) {
+			dumpFrames();
 		}
 	}
-	
-	public static void iincInsn(int opcode, int increment) {
-		if (!symbolicMode) {
-			return;
-		}
-		switch (opcode) {
-		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", Bytecodes.toString(opcode), increment, opcode);
-			System.exit(1);
-		}
-	}
-	
+
 	public static void invokeDynamicInsn(int opcode) {
 		if (!symbolicMode) {
 			return;
 		}
-		switch (opcode) {
-		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
-			System.exit(1);
-		}
-	}
-	
-	public static void ldcInsn(int opcode, Object value) {
-		if (!symbolicMode) {
-			return;
-		}
-		switch (opcode) {
-		case Opcodes.LDC:
-			// TODO lgr.info("$$$$$$$$$$$$$ " + value.getClass().getName() + "$$$$" + value.toString());
-			push(Operation.ZERO);
-			break;
-		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
-			System.exit(1);
-		}
-	}
-	
-	public static void lookupSwitchInsn(int opcode) {
-		if (!symbolicMode) {
-			return;
+		if (dumpTrace) {
+			lgr.trace("{}", Bytecodes.toString(opcode));
 		}
 		switch (opcode) {
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
-	}
-	
-	public static void multiANewArrayInsn(int opcode) {
-		if (!symbolicMode) {
-			return;
-		}
-		switch (opcode) {
-		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
-			System.exit(1);
+		if (dumpFrame) {
+			dumpFrames();
 		}
 	}
-	
-	public static void tableSwitchInsn(int opcode) {
-		if (!symbolicMode) {
-			return;
-		}
-		switch (opcode) {
-		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
-			System.exit(1);
-		}
-	}
-	
-	public static void typeInsn(int opcode) {
-		if (!symbolicMode) {
-			return;
-		}
-		switch (opcode) {
-		case Opcodes.NEW:
-			int id = incrAndGetNewObjectId();
-			push(new IntConstant(id));
-			break;
-		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
-			System.exit(1);
-		}
-	}
-	
+
 	/* Missing offset because destination not yet known. */
 	public static void jumpInsn(int opcode) {
 		if (!symbolicMode) {
 			return;
 		}
-		lgr.trace("{}", Bytecodes.toString(opcode));
+		if (dumpTrace) {
+			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
 		switch (opcode) {
 		case Opcodes.GOTO:
 			// do nothing
@@ -395,32 +496,108 @@ public class SymbolicState {
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
 	}
 
 	public static void postJumpInsn(int opcode) {
 		if (!symbolicMode) {
 			return;
 		}
-		lgr.trace("(POST) {}", Bytecodes.toString(opcode));
-		lgr.trace(">>> previous conjunct is false");
+		if (dumpTrace) {
+			lgr.trace("(POST) {}", Bytecodes.toString(opcode));
+			lgr.trace(">>> previous conjunct is false");
+		}
 		spc = spc.negate();
 	}
 
-	public static void varInsn(int opcode, int var) {
+	public static void ldcInsn(int opcode, Object value) {
 		if (!symbolicMode) {
 			return;
 		}
-		lgr.trace("{} {}", Bytecodes.toString(opcode), var);
+		if (dumpTrace) {
+			lgr.trace("{} {}", Bytecodes.toString(opcode), value);
+		}
 		switch (opcode) {
-		case Opcodes.ILOAD:
-			push(getLocal(var));
-			break;
-		case Opcodes.ISTORE:
-			setLocal(var, pop());
+		case Opcodes.LDC:
+			// TODO lgr.info("$$$$$$$$$$$$$ " + value.getClass().getName() + "$$$$" + value.toString());
+			push(Operation.ZERO);
 			break;
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
+		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
+	}
+
+	public static void iincInsn(int opcode, int increment) {
+		if (!symbolicMode) {
+			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("{} {}", Bytecodes.toString(opcode), increment);
+		}
+		switch (opcode) {
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", Bytecodes.toString(opcode), increment, opcode);
+			System.exit(1);
+		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
+	}
+
+	public static void tableSwitchInsn(int opcode) {
+		if (!symbolicMode) {
+			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
+		switch (opcode) {
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			System.exit(1);
+		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
+	}
+
+	public static void lookupSwitchInsn(int opcode) {
+		if (!symbolicMode) {
+			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
+		switch (opcode) {
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			System.exit(1);
+		}
+		if (dumpFrame) {
+			dumpFrames();
+		}
+	}
+
+	public static void multiANewArrayInsn(int opcode) {
+		if (!symbolicMode) {
+			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
+		switch (opcode) {
+		default:
+			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			System.exit(1);
+		}
+		if (dumpFrame) {
+			dumpFrames();
 		}
 	}
 

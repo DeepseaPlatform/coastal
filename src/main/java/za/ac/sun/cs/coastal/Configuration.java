@@ -74,7 +74,7 @@ public class Configuration {
 
 	private static final int DEFAULT_MIN_INT_VALUE = 0;
 
-	private static final int DEFAULT_MAX_INT_VALUE = 99;
+	private static final int DEFAULT_MAX_INT_VALUE = 9999;
 
 	/**
 	 * Properties associated with these settings.
@@ -120,10 +120,25 @@ public class Configuration {
 	private static Strategy strategy;
 
 	/**
+	 * Whether or not the instrumentation trace is dumped.
+	 */
+	private static boolean dumpInstrumenter = false;
+
+	/**
 	 * Whether or not the instrumented code should be dumped to the log.
 	 */
 	private static boolean dumpAsm = false;
-
+	
+	/**
+	 * Whether or not instructions are logged as they execute.
+	 */
+	private static boolean dumpTrace = false;
+	
+	/**
+	 * Whether or not the symbolic frame is printed as instructions execute.
+	 */
+	private static boolean dumpFrame = false;
+	
 	/**
 	 * Whether or not the settings should be dumped to the log.
 	 */
@@ -191,10 +206,18 @@ public class Configuration {
 		}
 	}
 
+	public static int getDefaultMinBound() {
+		return DEFAULT_MIN_INT_VALUE;
+	}
+	
 	public static int getMinBound(String variable) {
 		return getMinBound(variable, DEFAULT_MIN_INT_VALUE);
 	}
 
+	public static int getMinBound(String variable1, String variable2) {
+		return getMinBound(variable1, getMinBound(variable2, DEFAULT_MIN_INT_VALUE));
+	}
+	
 	public static int getMinBound(String variable, int defaultValue) {
 		Integer min = minBounds.get(variable);
 		if (min == null) {
@@ -207,10 +230,18 @@ public class Configuration {
 		minBounds.put(variable, min);
 	}
 
+	public static int getDefaultMaxBound() {
+		return DEFAULT_MAX_INT_VALUE;
+	}
+	
 	public static int getMaxBound(String variable) {
 		return getMaxBound(variable, DEFAULT_MAX_INT_VALUE);
 	}
 
+	public static int getMaxBound(String variable1, String variable2) {
+		return getMaxBound(variable1, getMaxBound(variable2, DEFAULT_MAX_INT_VALUE));
+	}
+	
 	public static int getMaxBound(String variable, int defaultValue) {
 		Integer max = maxBounds.get(variable);
 		if (max == null) {
@@ -231,14 +262,38 @@ public class Configuration {
 		Configuration.strategy = strategy;
 	}
 
+	public static boolean getDumpInstrumenter() {
+		return dumpInstrumenter;
+	}
+
+	public static void setDumpInstrumenter(boolean dumpInstrumenter) {
+		Configuration.dumpInstrumenter = dumpInstrumenter;
+	}
+
 	public static boolean getDumpAsm() {
 		return dumpAsm;
 	}
-
+	
 	public static void setDumpAsm(boolean dumpAsm) {
 		Configuration.dumpAsm = dumpAsm;
 	}
-
+	
+	public static boolean getDumpTrace() {
+		return dumpTrace;
+	}
+	
+	public static void setDumpTrace(boolean dumpTrace) {
+		Configuration.dumpTrace = dumpTrace;
+	}
+	
+	public static boolean getDumpFrame() {
+		return dumpFrame;
+	}
+	
+	public static void setDumpFrame(boolean dumpFrame) {
+		Configuration.dumpFrame = dumpFrame;
+	}
+	
 	public static boolean getDumpConfig() {
 		return dumpConfig;
 	}
@@ -337,9 +392,18 @@ public class Configuration {
 			setStrategy((Strategy) createInstance(p));
 		}
 
+		// Process coastal.dumpinstrumenter = ...
+		setDumpInstrumenter(getBooleanProperty(properties, "coastal.dumpinstrumenter", getDumpInstrumenter()));
+
 		// Process coastal.dumpasm = ...
 		setDumpAsm(getBooleanProperty(properties, "coastal.dumpasm", getDumpAsm()));
-
+		
+		// Process coastal.dumptrace = ...
+		setDumpTrace(getBooleanProperty(properties, "coastal.dumptrace", getDumpTrace()));
+		
+		// Process coastal.dumpframe = ...
+		setDumpFrame(getBooleanProperty(properties, "coastal.dumpframe", getDumpFrame()));
+		
 		// Process coastal.dumpconfig = ...
 		setDumpConfig(getBooleanProperty(properties, "coastal.dumpconfig", getDumpConfig()));
 
@@ -471,7 +535,10 @@ public class Configuration {
 				LOGGER.info("coastal.bounds.{} = {}..{}", var, minBounds.get(var), maxBounds.get(var));
 			}
 		}
+		LOGGER.info("coastal.dumpinstrumenter = {}", getDumpInstrumenter());
 		LOGGER.info("coastal.dumpasm = {}", getDumpAsm());
+		LOGGER.info("coastal.dumptrace = {}", getDumpTrace());
+		LOGGER.info("coastal.dumpframe = {}", getDumpFrame());
 		LOGGER.info("coastal.dumpconfig = {}", getDumpConfig());
 		LOGGER.info("coastal.echooutput = {}", getEchoOutput());
 	}
@@ -563,7 +630,15 @@ public class Configuration {
 		}
 
 		private static Class<?> parseType(String type) {
-			if (type.equals("int")) {
+			int i = type.indexOf('[');
+			if (i > -1) {
+				String arrayType = type.substring(0, i);
+				if (arrayType.equals("int")) {
+					return int[].class;
+				} else {
+					return Object[].class;
+				}
+			} else if (type.equals("int")) {
 				return int.class;
 			} else {
 				return Object.class;
