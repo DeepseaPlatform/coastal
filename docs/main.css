@@ -1,0 +1,181 @@
+/* Common styles ------------------------------------------------------------ */
+html {
+	/* font-family: "Open Sans"; */
+	font-size: 14px;
+	line-height: 1.4285;
+	color: rgb(51, 51, 51);
+}
+
+body {
+	margin: 0;
+}
+
+h1, h2, h3 {
+	/* font-family: "Raleway"; */
+	font-weight: 200;
+	line-height: 1.1;
+	color: rgb(0, 158, 255);
+}
+
+h1 {
+	font-size: 34px;
+}
+
+h2 {
+	font-size: 26px;
+}
+
+h3 {
+	font-size: 23px;
+}
+
+p {
+	margin: 0 0 16px 0;
+}
+
+a {
+	color: rgb(0, 158, 255);
+	text-decoration: none;
+}
+
+a:hover, a:focus {
+	color: rgb(0, 111, 179);
+	text-decoration: underline;
+}
+
+b {
+	font-weight: 700;
+}
+
+pre {
+	width: 80ch;
+	padding: 8px;
+	background-color: #fafafa;
+}
+
+/* Header bar --------------------------------------------------------------- */
+.header {
+	display: flex;
+	height: 50px;
+	color: rgb(119, 119, 119);
+	background-color: rgb(240, 240, 240);
+	border-bottom: 1px solid rgb(200, 200, 200);
+	flex-direction: row;
+	align-items: center;
+}
+
+.burger-icon {
+	height: 24px;
+	padding: 8px 16px;
+	cursor: pointer;
+}
+
+.project-icon, .github-icon {
+	height: 42px;
+	padding: 4px 8px;
+}
+
+.project-title {
+	padding-left: 8px;
+	font-size: 34px;
+	flex-grow: 1;
+}
+
+/* Nav menu (closed state) -------------------------------------------------- */
+.nav-overlay {
+	display: none;
+	position: fixed;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(255, 255, 255, 0.9);
+	z-index: 1;
+}
+
+nav {
+	position: fixed;
+	width: 200px;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	background-color: rgb(250, 250, 250);
+	border-right: 1px solid rgb(200, 200, 200);
+	box-shadow: inset 0 0 0 #e5e5e5, 2px 0 3px rgba(0, 0, 0, 0.1);
+	transform: translateX(-100%);
+	/*transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);*/
+	overflow-y: auto;
+	z-index: 2;
+}
+
+/* Nav menu (open state) ---------------------------------------------------- */
+#nav-trigger:checked ~ .nav-overlay {
+	display: block;
+}
+
+#nav-trigger:checked ~ nav {
+	transform: none;
+}
+
+/* Nav menu items ----------------------------------------------------------- */
+nav ul, nav li {
+	margin: 0;
+	padding: 0;
+}
+
+nav a {
+	text-decoration: none;
+	color: rgb(112, 112, 112);
+	display: block;
+	font-size: 14px;
+	padding: 12px 0 12px 24px;
+}
+
+nav li li a {
+	padding-left: 48px;
+}
+
+nav a:hover {
+	color: #FFF;
+	background-color: rgb(0, 158, 255);
+	text-decoration: none;
+}
+
+/* Page content ------------------------------------------------------------- */
+.page-content {
+	margin: 24px;
+}
+
+@media ( min-width : 1088px) { /* calc(200px + 840px + 48px) */
+	.page-content {
+		max-width: 840px;
+		margin: 24px auto;
+	}
+}
+
+/* Desktop layout ----------------------------------------------------------- */
+@media ( min-width : 50em) {
+	.header {
+		position: fixed;
+		left: 0;
+		top: 0;
+		right: 0;
+		z-index: 1;
+	}
+	.nav-trigger {
+		display: none;
+	}
+	nav {
+		top: 51px;
+		box-shadow: initial;
+		transform: none;
+	}
+	.page-content {
+		padding-top: 50px;
+		padding-left: 200px;
+	}
+	:target {
+		padding-top: 50px;
+		margin-top: -50px;
+	}
+}
