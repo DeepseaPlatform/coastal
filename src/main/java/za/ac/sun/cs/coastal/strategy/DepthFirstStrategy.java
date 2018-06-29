@@ -55,6 +55,7 @@ public class DepthFirstStrategy implements Strategy {
 			spc = PathTree.insertPath(spc, infeasible);
 			if (spc == null) {
 				totalTime += System.currentTimeMillis() - t0;
+				lgr.info("no further paths");
 				return null;
 			}
 			infeasible = false;
