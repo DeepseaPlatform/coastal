@@ -16,8 +16,9 @@ Remember to specify how to change logging settings
 | `coastal.triggers` | Classes to instrument | - |
 | `coastal.bounds` | Bounds on symbolic variables | - |
 | `coastal.echooutput` | Whether program output is displayed | `false` |
-| `coastal.limit.path` | Limit on number of paths investigated | 0 |
 | `coastal.limit.run` | Limit on number of runs executed | 0 |
+| `coastal.limit.time` | Limit on number of seconds allowed for runs | 0 |
+| `coastal.limit.path` | Limit on number of paths investigated | 0 |
 | `coastal.dump.config` | Whether configuration settings are displayed | `false` |
 | `coastal.dump.asm` | Whether instrumented code displayed (at end) | `false` |
 | `coastal.dump.trace` | Whether instructions are displayed as executed | `false` |
@@ -121,6 +122,15 @@ A value of zero means that there is no limit.
 
 ~~~
 coastal.limit.run = 100
+~~~
+
+## coastal.limit.time
+
+An upper limit on the number of seconds allowed for run execution.
+A value of zero means that there is no limit.
+
+~~~
+coastal.limit.time = 6000
 ~~~
 
 ## coastal.limit.path

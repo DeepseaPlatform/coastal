@@ -43,7 +43,14 @@ public class Diver implements Reporter {
 		Map<String, Constant> concreteValues = null;
 		long runLimit = Configuration.getRunLimit();
 		if (runLimit == 0) { runLimit = Long.MIN_VALUE; }
+		long timeLimit = Configuration.getTimeLimit();
+		if (timeLimit == 0) { timeLimit = Long.MAX_VALUE; }
+		long tl0 = System.currentTimeMillis();
 		do {
+			if ((System.currentTimeMillis() - tl0) / 1000 > timeLimit) {
+				lgr.warn("time limit reached");
+				return;
+			}
 			if (--runLimit < 0) {
 				lgr.warn("run limit reached");
 				return;
