@@ -122,7 +122,7 @@ public class Configuration {
 	/**
 	 * Cap of the number of paths to explore.
 	 */
-	private static long pathLimit = Long.MIN_VALUE;
+	private static long pathLimit = 0;
 	
 	/**
 	 * Whether or not the instrumentation trace is dumped.
