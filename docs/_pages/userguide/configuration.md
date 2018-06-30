@@ -6,6 +6,24 @@ permalink: /userguide/configuration/
 
 Remember to specify how to change logging settings
 
+## Summary
+
+| Setting | Description | Default |
+|:--------|:------------|:--------|
+| `coastal.targets` | Classes to be instrumented | - |
+| `coastal.main` | Class to execute | - |
+| `coastal.args` | Arguments passe to `main` | - |
+| `coastal.triggers` | Classes to instrument | - |
+| `coastal.bounds` | Bounds on symbolic variables | - |
+| `coastal.echooutput` | Whether program output is displayed | `false` |
+| `coastal.limit.path` | Limit on number of paths investigated | `false` |
+| `coastal.dump.config` | Whether configuration settings are displayed | `false` |
+| `coastal.dump.asm` | Whether instrumented code displayed (at end) | `false` |
+| `coastal.dump.trace` | Whether instructions are displayed as executed | `false` |
+| `coastal.dump.frame` | Whether stack/locals are displayed after every instruction | `false` |
+| `coastal.dump.instrumenter` | Whether code instrumenter produces debugging | `false` |
+| `coastal.dump` | Set all dump settings | - |
+
 ## coastal.targets
 
 List of class prefixes that will be instrumented.
@@ -92,64 +110,86 @@ coastal.echooutput = true
 ~~~
 
 The default value is _false_.
+Values that count as _true_ are: "`true`", "`yes`", "`on`", and "`1`".
+Case is ignored.  All other values count as _false_.
 
-## coastal.dumpconfig
+## coastal.limit.path
+
+An upper limit on the number of paths that are recorded.
+This is distinct from the number of runs, because one run may lead to
+several (infeasible) paths being generated.
+A value of zero means that there is no limit.
+
+~~~
+coastal.limit.path = 200
+~~~
+
+The default value is 0.
+
+## coastal.dump.config
 
 A boolean setting to control whether the tool configuration should be
 dumped to the log.
 
 ~~~
-coastal.dumpconfig = true
+coastal.dump.config = true
 ~~~
 
 The default value is _false_.
 
-## coastal.dumpinstrumenter
-
-A boolean setting to control whether the instrumenting method calls should
-be dumped to the log as they are executed.
-This is mainly for debugging purposes and users should not need to use this.
-
-~~~
-coastal.dumpinstrumenter = false
-~~~
-
-The default value is _false_.
-Values that count as _true_ are: "`true`", "`yes`", "`on`", and "`1`".
-Case is ignored.  All other values count as _false_.
-
-## coastal.dumpasm
+## coastal.dump.asm
 
 A boolean setting to control whether the instrumented bytecodes should
 be dumped to the log at the end of the execution of the tool.
 This is mainly for debugging purposes and users should not need to use this.
 
 ~~~
-coastal.dumpasm = false
+coastal.dump.asm = false
 ~~~
 
 The default value is _false_.
 
-## coastal.dumptrace
+## coastal.dump.trace
 
 A boolean setting to control whether the instructions should be dumped to
 the log as they are executed.
 This is mainly for debugging purposes and users should not need to use this.
 
 ~~~
-coastal.dumptrace = false
+coastal.dump.trace = false
 ~~~
 
 The default value is _false_.
 
-## coastal.dumpframe
+## coastal.dump.frame
 
 A boolean setting to control whether the frames (operand stack, local variables,
 and the heap) should be dumped to the log after each instruction.
 This is mainly for debugging purposes and users should not need to use this.
 
 ~~~
-coastal.dumpframe = false
+coastal.dump.frame = false
 ~~~
 
 The default value is _false_.
+
+## coastal.dump.instrumenter
+
+A boolean setting to control whether the instrumenting method calls should
+be dumped to the log as they are executed.
+This is mainly for debugging purposes and users should not need to use this.
+
+~~~
+coastal.dump.instrumenter = false
+~~~
+
+The default value is _false_.
+
+## coastal.dump
+
+This settings will set all of the above `coastal.dump...` settings at once.
+Subsequent (individual) settings will override this value. 
+
+~~~
+coastal.dump = true
+~~~

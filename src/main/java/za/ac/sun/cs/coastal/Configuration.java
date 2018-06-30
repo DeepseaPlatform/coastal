@@ -120,6 +120,11 @@ public class Configuration {
 	private static Strategy strategy;
 
 	/**
+	 * Cap of the number of paths to explore.
+	 */
+	private static long pathLimit = Long.MIN_VALUE;
+	
+	/**
 	 * Whether or not the instrumentation trace is dumped.
 	 */
 	private static boolean dumpInstrumenter = false;
@@ -262,14 +267,22 @@ public class Configuration {
 		Configuration.strategy = strategy;
 	}
 
+	public static long getPathLimit() {
+		return pathLimit;
+	}
+
+	public static void setPathLimit(long pathLimit) {
+		Configuration.pathLimit = pathLimit;
+	}
+
 	public static boolean getDumpInstrumenter() {
 		return dumpInstrumenter;
 	}
-
+	
 	public static void setDumpInstrumenter(boolean dumpInstrumenter) {
 		Configuration.dumpInstrumenter = dumpInstrumenter;
 	}
-
+	
 	public static boolean getDumpAsm() {
 		return dumpAsm;
 	}
@@ -392,20 +405,33 @@ public class Configuration {
 			setStrategy((Strategy) createInstance(p));
 		}
 
-		// Process coastal.dumpinstrumenter = ...
-		setDumpInstrumenter(getBooleanProperty(properties, "coastal.dumpinstrumenter", getDumpInstrumenter()));
+		// Process coastal.limit.path = ...
+		setPathLimit(getLongProperty(properties, "coastal.limit.path", getPathLimit()));
 
-		// Process coastal.dumpasm = ...
-		setDumpAsm(getBooleanProperty(properties, "coastal.dumpasm", getDumpAsm()));
+		// Process coastal.dump
+		Boolean dumpAll = getBooleanProperty(properties, "coastal.dump");
+		if (dumpAll != null) {
+			setDumpInstrumenter(dumpAll);
+			setDumpAsm(dumpAll);
+			setDumpTrace(dumpAll);
+			setDumpFrame(dumpAll);
+			setDumpConfig(dumpAll);
+		}
 		
-		// Process coastal.dumptrace = ...
-		setDumpTrace(getBooleanProperty(properties, "coastal.dumptrace", getDumpTrace()));
+		// Process coastal.dump.instrumenter = ...
+		setDumpInstrumenter(getBooleanProperty(properties, "coastal.dump.instrumenter", getDumpInstrumenter()));
+
+		// Process coastal.dump.asm = ...
+		setDumpAsm(getBooleanProperty(properties, "coastal.dump.asm", getDumpAsm()));
 		
-		// Process coastal.dumpframe = ...
-		setDumpFrame(getBooleanProperty(properties, "coastal.dumpframe", getDumpFrame()));
+		// Process coastal.dump.trace = ...
+		setDumpTrace(getBooleanProperty(properties, "coastal.dump.trace", getDumpTrace()));
 		
-		// Process coastal.dumpconfig = ...
-		setDumpConfig(getBooleanProperty(properties, "coastal.dumpconfig", getDumpConfig()));
+		// Process coastal.dump.frame = ...
+		setDumpFrame(getBooleanProperty(properties, "coastal.dump.frame", getDumpFrame()));
+		
+		// Process coastal.dump.config = ...
+		setDumpConfig(getBooleanProperty(properties, "coastal.dump.config", getDumpConfig()));
 
 		// Process coastal.echooutput = ...
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", getEchoOutput()));
@@ -436,6 +462,28 @@ public class Configuration {
 		return defaultValue;
 	}
 
+	public static Boolean getBooleanProperty(Properties properties, String key) {
+		String s = properties.getProperty(key).trim();
+		if (s != null) {
+			try {
+				if (s.equalsIgnoreCase("true")) {
+					return true;
+				} else if (s.equalsIgnoreCase("yes")) {
+					return true;
+				} else if (s.equalsIgnoreCase("on")) {
+					return true;
+				} else if (s.equalsIgnoreCase("1")) {
+					return true;
+				} else {
+					return false;
+				}
+			} catch (NumberFormatException x) {
+				// ignore
+			}
+		}
+		return null;
+	}
+	
 	public static int getIntegerProperty(Properties properties, String key, int defaultValue) {
 		String s = properties.getProperty(key, Integer.toString(defaultValue));
 		try {
@@ -458,6 +506,28 @@ public class Configuration {
 		return null;
 	}
 
+	public static long getLongProperty(Properties properties, String key, long defaultValue) {
+		String s = properties.getProperty(key, Long.toString(defaultValue));
+		try {
+			return Long.parseLong(s);
+		} catch (NumberFormatException x) {
+			// ignore
+		}
+		return defaultValue;
+	}
+	
+	public static Long getLongProperty(Properties properties, String key) {
+		String s = properties.getProperty(key);
+		if (s != null) {
+			try {
+				return Long.parseLong(s);
+			} catch (NumberFormatException x) {
+				// ignore
+			}
+		}
+		return null;
+	}
+	
 	private static Object createInstance(String objectName) {
 		Class<?> classx = loadClass(objectName);
 		if (classx == null) {
@@ -535,23 +605,15 @@ public class Configuration {
 				LOGGER.info("coastal.bounds.{} = {}..{}", var, minBounds.get(var), maxBounds.get(var));
 			}
 		}
-		LOGGER.info("coastal.dumpinstrumenter = {}", getDumpInstrumenter());
-		LOGGER.info("coastal.dumpasm = {}", getDumpAsm());
-		LOGGER.info("coastal.dumptrace = {}", getDumpTrace());
-		LOGGER.info("coastal.dumpframe = {}", getDumpFrame());
-		LOGGER.info("coastal.dumpconfig = {}", getDumpConfig());
 		LOGGER.info("coastal.echooutput = {}", getEchoOutput());
+		LOGGER.info("coastal.limit.path = {}", getPathLimit());
+		LOGGER.info("coastal.dump.config = {}", getDumpConfig());
+		LOGGER.info("coastal.dump.asm = {}", getDumpAsm());
+		LOGGER.info("coastal.dump.trace = {}", getDumpTrace());
+		LOGGER.info("coastal.dump.frame = {}", getDumpFrame());
+		LOGGER.info("coastal.dump.instrumenter = {}", getDumpInstrumenter());
 	}
 
-	// // --- TRIGGERS ---
-	// int t = getNumberOfTriggers(), i = t;
-	// for (Trigger trigger : getTriggers()) {
-	// String pre = (i == t) ? "deepsea.triggers = " : "\t";
-	// String post = (i > 1) ? ";\\" : "";
-	// LOGGER.log(CONF, "{}{}{}", pre, trigger.toString(), post);
-	// i--;
-	//
-	// }
 	// // --- DELEGATES ---
 	// int d = getNumberOfDelegateTargets(), j = d;
 	// for (String target : getDelegateTargets()) {
@@ -562,23 +624,6 @@ public class Configuration {
 	// post);
 	// j--;
 	// }
-	// // --- BOUNDS ---
-	// Set<String> vars = new TreeSet<>(minBounds.keySet());
-	// vars.addAll(maxBounds.keySet());
-	// for (String var : vars) {
-	// if (!minBounds.containsKey(var)) {
-	// LOGGER.log(CONF, "deepsea.bounds.{}.max = {}", var, maxBounds.get(var));
-	// } else if (!maxBounds.containsKey(var)) {
-	// LOGGER.log(CONF, "deepsea.bounds.{}.min = {}", var, minBounds.get(var));
-	// } else {
-	// LOGGER.log(CONF, "deepsea.bounds.{} = {}..{}", var, minBounds.get(var),
-	// maxBounds.get(var));
-	// }
-	// }
-	// // --- SOME BOOLEAN SETTINGS ---
-	// LOGGER.log(CONF, "deepsea.echooutput = {}", getEchoOutput());
-	// LOGGER.log(CONF, "deepsea.dumpproperties = {}", getDumpProperties());
-	// LOGGER.log(CONF, "deepsea.distributed = {}", getDistributed());
 
 	// ======================================================================
 	//

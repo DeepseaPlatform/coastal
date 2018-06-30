@@ -1,4 +1,4 @@
-$ds-font-family: 'opensans', sans-serif;
+$ds-font-family: 'Roboto', sans-serif;
 $ds-font-size: 16px;
 $ds-line-height: 1.6;
 $ds-link-fg-color: #0066aa;
@@ -13,6 +13,12 @@ $ds-header-active-color: #e1effa;
 // $ds-header-active-color: #a1d3fa;
 $ds-header-h1-color: #2196f3;
 
+$ds-monospace-font-family: 'Fira Mono', monospace;
+
+$ds-nav-font-family: 'Roboto', sans-serif;
+
+$ds-heading-font-family: 'Overpass', sans-serif;
+
 $ds-main-bg-color: #fcfcfc;
 $ds-main-fg-color: #393939;
 $ds-main-hx-fg-color: #000000;
@@ -26,6 +32,8 @@ $ds-section-lpadding: 12rem;
 $ds-section-rpadding: 10rem;
 $ds-section-gray-bg-color: #989fce;
 $ds-section-pre-bg-color: #ebf4fa;
+$ds-section-pre-font-family: $ds-monospace-font-family;
+$ds-section-code-font-family: $ds-monospace-font-family;
 
 // $ds-section-pre-bg-color: #d4eafa;
 $ds-footer-fg-color: #ffffff;

@@ -8,7 +8,7 @@ main {
 				margin: 0;
 				padding: 0;
 				list-style-type: none;
-				font-family: monospace;
+				font-family: $ds-monospace-font-family;
 				li[level="1"] { padding-left:  0.0rem; }
 				li[level="2"] { padding-left:  1.5rem; }
 				li[level="3"] { padding-left:  3.0rem; }
@@ -29,7 +29,7 @@ main {
 				margin: 0;
 				padding: 0;
 				list-style-type: none;
-				font-family: monospace;
+				font-family: $ds-monospace-font-family;
 				display: block;
 				li {
 					display: inline;
@@ -44,7 +44,7 @@ main {
 			margin-top: 2rem;
 			padding-top: 1rem;
 			border-top: 1px solid #333333;
-			font-family: monospace;
+			font-family: $ds-monospace-font-family;
 			font-size: 1.2rem;
 		}
 		article.description {
@@ -59,7 +59,7 @@ main {
 				margin-bottom: 2rem;
 				caption {
 					text-align: left;
-					font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+					font-family: $ds-heading-font-family;;
 					font-weight: 600;
 					margin: 0 0 1rem 0;
 					padding: 0;
@@ -83,7 +83,7 @@ main {
 					td {
 						padding-top: .4rem;
 						padding-bottom: .4rem;
-						font-family: monospace;
+						font-family: $ds-monospace-font-family;
 						vertical-align: top;
 						div {
 							font-family: $ds-font-family;
@@ -92,7 +92,7 @@ main {
 								margin-bottom: 0;
 							}
 							span.param {
-								font-family: monospace;
+								font-family: $ds-monospace-font-family;
 								&:after {
 									content: "--";
 								}
@@ -113,7 +113,7 @@ main {
 				margin: 0;
 				padding: 0;
 				list-style-type: none;
-				font-family: monospace;
+				font-family: $ds-monospace-font-family;
 				display: block;
 				li {
 					display: inline;

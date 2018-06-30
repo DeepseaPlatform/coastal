@@ -4,7 +4,7 @@ main {
 	color: $ds-main-fg-color;
 	background-color: $ds-main-bg-color;
 	h1, h2, h3, h4, h5, h5 {
-		font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+		font-family: $ds-heading-font-family;
 		font-weight: 600;
 		margin: 0 0 2rem 0;
 		padding: 0;
@@ -41,7 +41,11 @@ main {
 			font-size: 1.3rem;
 			line-height: 2.25rem;
 		}
+		code {
+			font-family: $ds-section-code-font-family;
+		}
 		pre {
+			font-family: $ds-section-pre-font-family;
 			padding: .5rem;
 			border: 1px solid #cccccc;
 			border-radius: .5rem;
@@ -102,6 +106,11 @@ main {
 				content: "Contents";
 				font-weight: 600;
 				margin-bottom: .5rem;
+			}
+		}
+		table {
+			th, td {
+				padding-right: 1rem;
 			}
 		}
 	}
@@ -187,7 +196,7 @@ main {
 				font-size: .85rem;
 			}
 			span.boxtitle {
-				font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+				font-family: $ds-heading-font-family;
 				display: block;
 				color: white;
 				background-color: #0960a4;

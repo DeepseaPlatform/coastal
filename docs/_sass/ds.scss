@@ -7,7 +7,7 @@
 @import "reset";
 
 // Fonts
-@import "opensans";
+@import url('https://fonts.googleapis.com/css?family=Overpass|Roboto|Fira+Mono');
 
 // HTML
 @import "base";
@@ -27,7 +27,7 @@ ul.classhierarchy {
 	margin: 0;
 	padding: 0;
 	list-style: none;
-	li { font-family: monospace; }
+	li { font-family: $ds-monospace-font-family; }
 	li.level0 { margin-left: 0rem; }
 	li.level1 { margin-left: 1.5rem; }
 	li.level2 { margin-left: 3rem; }
@@ -71,7 +71,7 @@ table.packagelist, table.classlist {
 			border-bottom: 0.75px dashed $ds-packagelist-border-color; 
 			td:first-child {
 				width: 33%;
-				font-family: monospace;
+				font-family: $ds-monospace-font-family;
 			}
 		}
 		tr.packagename {
@@ -87,7 +87,7 @@ table.packagelist, table.classlist {
 			}
 		}
 		a {
-			font-family: monospace;
+			font-family: $ds-monospace-font-family;
 			color: inherit; 
 		}
 	}

@@ -30,7 +30,7 @@ header {
 		color: $ds-header-h1-color;
 	}
 	nav {
-		font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+		font-family: $ds-nav-font-family;
 		font-weight: 600;
 		display: flex;
 		flex-grow: 1;

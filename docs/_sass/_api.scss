@@ -18,7 +18,7 @@ section.api {
 		}
 	}
 	ul.inheritance {
-		font-family: monospace;
+		font-family: $ds-monospace-font-family;
 		font-size: .9rem;
 		margin: 0;
 		padding: 0 0 2rem 0;
@@ -64,7 +64,7 @@ section.api {
 		td {
 			padding: .2rem 0 .2rem .2rem;
 			&.colFirst {
-				font-family: monospace;
+				font-family: $ds-monospace-font-family;
 				width: 33%;
 			}
 		}
