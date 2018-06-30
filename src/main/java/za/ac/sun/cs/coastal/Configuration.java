@@ -611,6 +611,13 @@ public class Configuration {
 		if (!getDumpConfig()) {
 			return;
 		}
+		int t = targets.size(), i = t;
+		for (String target : targets) {
+			String pre = (i == t) ? "coastal.triggers = " : "\t";
+			String post = (i > 1) ? ";\\" : "";
+			LOGGER.info("{}{}{}", pre, target, post);
+			i--;
+		}
 		if (getMain() != null) {
 			LOGGER.info("coastal.main = {}", getMain());
 		}
@@ -621,7 +628,7 @@ public class Configuration {
 		if (s != null) {
 			LOGGER.info("coastal.strategy = {}", s.getClass().getName());
 		}
-		int t = triggers.size(), i = t;
+		t = triggers.size(); i = t;
 		for (Trigger trigger : triggers) {
 			String pre = (i == t) ? "coastal.triggers = " : "\t";
 			String post = (i > 1) ? ";\\" : "";

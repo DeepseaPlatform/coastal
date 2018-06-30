@@ -13,6 +13,7 @@ Remember to specify how to change logging settings
 | `coastal.targets` | Classes to be instrumented | - |
 | `coastal.main` | Class to execute | - |
 | `coastal.args` | Arguments passe to `main` | - |
+| `coastal.strategy` | Strategy for generating new path conditions | - |
 | `coastal.triggers` | Classes to instrument | - |
 | `coastal.bounds` | Bounds on symbolic variables | - |
 | `coastal.echooutput` | Whether program output is displayed | `false` |
@@ -52,6 +53,17 @@ The command-line arguments required to run the class under analysis.
 
 ~~~
 coastal.args = 2 3
+~~~
+
+## coastal.strategy
+
+A fully-qualified name of a class that implements a strategy for generating
+new path conditions and therefore new inputs for the program-under-test.
+
+This is an important property that is required for COASTAL to execute at all.
+
+~~~
+coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
 ~~~
 
 ## coastal.triggers
