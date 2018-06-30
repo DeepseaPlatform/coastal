@@ -36,7 +36,7 @@ public class DepthFirstStrategy implements Strategy {
 	public DepthFirstStrategy() {
 		Reporters.register(this);
 		Properties greenProperties = new Properties();
-		greenProperties.setProperty("green.log.level", "OFF");
+		greenProperties.setProperty("green.log.level", "ALL");
 		greenProperties.setProperty("green.services", "model");
 		greenProperties.setProperty("green.service.model", "(bounder modeller)");
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
