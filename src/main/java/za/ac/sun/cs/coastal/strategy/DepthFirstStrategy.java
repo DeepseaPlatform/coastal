@@ -31,6 +31,8 @@ public class DepthFirstStrategy implements Strategy {
 	
 	private static int infeasibleCount = 0;
 	
+	private long pathLimit = 0;
+
 	private long totalTime = 0, solverTime = 0;
 	
 	public DepthFirstStrategy() {
@@ -43,6 +45,8 @@ public class DepthFirstStrategy implements Strategy {
 		greenProperties.setProperty("green.service.model.canonizer", "za.ac.sun.cs.green.service.canonizer.ModelCanonizerService");
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3JavaService");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
+		pathLimit = Configuration.getPathLimit();
+		if (pathLimit == 0) { pathLimit = Long.MIN_VALUE; }
 	}
 
 	@Override
@@ -52,6 +56,10 @@ public class DepthFirstStrategy implements Strategy {
 		lgr.info("explored <" + spc.getSignature() + "> " + spc.getPathCondition());
 		boolean infeasible = false;
 		while (true) {
+			if (--pathLimit < 0) {
+				lgr.info("path limit reached");
+				return null;
+			}
 			spc = PathTree.insertPath(spc, infeasible);
 			if (spc == null) {
 				totalTime += System.currentTimeMillis() - t0;

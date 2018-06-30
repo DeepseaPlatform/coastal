@@ -399,14 +399,15 @@ public class Configuration {
 			}
 		}
 
+		// Process coastal.limit.path = ...
+		// NOTE: Initialize before coastal.strategy setting
+		setPathLimit(getLongProperty(properties, "coastal.limit.path", getPathLimit()));
+		
 		// Process coastal.strategy = ...
 		p = properties.getProperty("coastal.strategy");
 		if (p != null) {
 			setStrategy((Strategy) createInstance(p));
 		}
-
-		// Process coastal.limit.path = ...
-		setPathLimit(getLongProperty(properties, "coastal.limit.path", getPathLimit()));
 
 		// Process coastal.dump
 		Boolean dumpAll = getBooleanProperty(properties, "coastal.dump");
@@ -463,8 +464,9 @@ public class Configuration {
 	}
 
 	public static Boolean getBooleanProperty(Properties properties, String key) {
-		String s = properties.getProperty(key).trim();
+		String s = properties.getProperty(key);
 		if (s != null) {
+			s = s.trim();
 			try {
 				if (s.equalsIgnoreCase("true")) {
 					return true;
