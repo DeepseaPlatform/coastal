@@ -120,6 +120,11 @@ public class Configuration {
 	private static Strategy strategy;
 
 	/**
+	 * Cap of the number of runs executed.
+	 */
+	private static long runLimit = 0;
+	
+	/**
 	 * Cap of the number of paths to explore.
 	 */
 	private static long pathLimit = 0;
@@ -267,6 +272,14 @@ public class Configuration {
 		Configuration.strategy = strategy;
 	}
 
+	public static long getRunLimit() {
+		return runLimit;
+	}
+	
+	public static void setRunLimit(long runLimit) {
+		Configuration.runLimit = runLimit;
+	}
+	
 	public static long getPathLimit() {
 		return pathLimit;
 	}
@@ -399,6 +412,9 @@ public class Configuration {
 			}
 		}
 
+		// Process coastal.limit.run = ...
+		setRunLimit(getLongProperty(properties, "coastal.limit.run", getRunLimit()));
+		
 		// Process coastal.limit.path = ...
 		// NOTE: Initialize before coastal.strategy setting
 		setPathLimit(getLongProperty(properties, "coastal.limit.path", getPathLimit()));
@@ -608,6 +624,7 @@ public class Configuration {
 			}
 		}
 		LOGGER.info("coastal.echooutput = {}", getEchoOutput());
+		LOGGER.info("coastal.limit.run = {}", getRunLimit());
 		LOGGER.info("coastal.limit.path = {}", getPathLimit());
 		LOGGER.info("coastal.dump.config = {}", getDumpConfig());
 		LOGGER.info("coastal.dump.asm = {}", getDumpAsm());

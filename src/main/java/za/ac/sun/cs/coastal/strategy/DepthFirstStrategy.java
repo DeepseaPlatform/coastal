@@ -57,7 +57,7 @@ public class DepthFirstStrategy implements Strategy {
 		boolean infeasible = false;
 		while (true) {
 			if (--pathLimit < 0) {
-				lgr.info("path limit reached");
+				lgr.warn("path limit reached");
 				return null;
 			}
 			spc = PathTree.insertPath(spc, infeasible);

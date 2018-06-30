@@ -41,9 +41,13 @@ public class Diver implements Reporter {
 			System.exit(1);
 		}
 		Map<String, Constant> concreteValues = null;
-		// int limit = 8;  CONFIGURE
+		long runLimit = Configuration.getRunLimit();
+		if (runLimit == 0) { runLimit = Long.MIN_VALUE; }
 		do {
-			// if (limit-- == 0) { break; }
+			if (--runLimit < 0) {
+				lgr.warn("run limit reached");
+				return;
+			}
 			runs++;
 			lgr.info(Banner.getBannerLine("starting dive " + runs, '-'));
 			long t0 = System.currentTimeMillis();
