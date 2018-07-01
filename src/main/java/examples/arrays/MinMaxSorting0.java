@@ -2,7 +2,7 @@ package examples.arrays;
 
 public class MinMaxSorting0 {
 
-	private static final int N = 20;
+	private static final int N = 3;
 
 	public static void sort(int[] arr) {
 		boolean sorted = false;
