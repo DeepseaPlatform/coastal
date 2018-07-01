@@ -24,6 +24,7 @@ Remember to specify how to change logging settings
 | `coastal.dump.asm` | Whether instrumented code displayed (at end) | `false` |
 | `coastal.dump.trace` | Whether instructions are displayed as executed | `false` |
 | `coastal.dump.frame` | Whether stack/locals are displayed after every instruction | `false` |
+| `coastal.dump.paths` | Whether path tree construction information is logged | `false` |
 | `coastal.dump.instrumenter` | Whether code instrumenter produces debugging | `false` |
 | `coastal.dump` | Set all dump settings | - |
 
@@ -201,6 +202,20 @@ This is mainly for debugging purposes and users should not need to use this.
 
 ~~~
 coastal.dump.frame = false
+~~~
+
+The default value is _false_.
+
+## coastal.dump.paths
+
+A boolean setting to control whether step-by-step debugging information is displayed
+as the tree of paths is updated.
+This includes a textual representation of the tree which is of considerable help
+when tracking down errors.
+This is mainly for debugging purposes and users should not need to use this.
+
+~~~
+coastal.dump.paths = false
 ~~~
 
 The default value is _false_.
