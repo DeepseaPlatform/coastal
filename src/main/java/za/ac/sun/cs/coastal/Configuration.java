@@ -123,17 +123,17 @@ public class Configuration {
 	 * Cap on the number of runs executed.
 	 */
 	private static long runLimit = 0;
-	
+
 	/**
 	 * Cap on the time use.
 	 */
 	private static long timeLimit = 0;
-	
+
 	/**
 	 * Cap on the number of paths to explore.
 	 */
 	private static long pathLimit = 0;
-	
+
 	/**
 	 * Whether or not the instrumentation trace is dumped.
 	 */
@@ -143,17 +143,22 @@ public class Configuration {
 	 * Whether or not the instrumented code should be dumped to the log.
 	 */
 	private static boolean dumpAsm = false;
-	
+
 	/**
 	 * Whether or not instructions are logged as they execute.
 	 */
 	private static boolean dumpTrace = false;
-	
+
 	/**
 	 * Whether or not the symbolic frame is printed as instructions execute.
 	 */
 	private static boolean dumpFrame = false;
-	
+
+	/**
+	 * Whether or not information about the path tree is logged.
+	 */
+	private static boolean dumpPaths = false;
+
 	/**
 	 * Whether or not the settings should be dumped to the log.
 	 */
@@ -224,7 +229,7 @@ public class Configuration {
 	public static int getDefaultMinBound() {
 		return DEFAULT_MIN_INT_VALUE;
 	}
-	
+
 	public static int getMinBound(String variable) {
 		return getMinBound(variable, DEFAULT_MIN_INT_VALUE);
 	}
@@ -232,7 +237,7 @@ public class Configuration {
 	public static int getMinBound(String variable1, String variable2) {
 		return getMinBound(variable1, getMinBound(variable2, DEFAULT_MIN_INT_VALUE));
 	}
-	
+
 	public static int getMinBound(String variable, int defaultValue) {
 		Integer min = minBounds.get(variable);
 		if (min == null) {
@@ -248,7 +253,7 @@ public class Configuration {
 	public static int getDefaultMaxBound() {
 		return DEFAULT_MAX_INT_VALUE;
 	}
-	
+
 	public static int getMaxBound(String variable) {
 		return getMaxBound(variable, DEFAULT_MAX_INT_VALUE);
 	}
@@ -256,7 +261,7 @@ public class Configuration {
 	public static int getMaxBound(String variable1, String variable2) {
 		return getMaxBound(variable1, getMaxBound(variable2, DEFAULT_MAX_INT_VALUE));
 	}
-	
+
 	public static int getMaxBound(String variable, int defaultValue) {
 		Integer max = maxBounds.get(variable);
 		if (max == null) {
@@ -280,19 +285,19 @@ public class Configuration {
 	public static long getRunLimit() {
 		return runLimit;
 	}
-	
+
 	public static void setRunLimit(long runLimit) {
 		Configuration.runLimit = runLimit;
 	}
-	
+
 	public static long getTimeLimit() {
 		return timeLimit;
 	}
-	
+
 	public static void setTimeLimit(long timeLimit) {
 		Configuration.timeLimit = timeLimit;
 	}
-	
+
 	public static long getPathLimit() {
 		return pathLimit;
 	}
@@ -304,35 +309,43 @@ public class Configuration {
 	public static boolean getDumpInstrumenter() {
 		return dumpInstrumenter;
 	}
-	
+
 	public static void setDumpInstrumenter(boolean dumpInstrumenter) {
 		Configuration.dumpInstrumenter = dumpInstrumenter;
 	}
-	
+
 	public static boolean getDumpAsm() {
 		return dumpAsm;
 	}
-	
+
 	public static void setDumpAsm(boolean dumpAsm) {
 		Configuration.dumpAsm = dumpAsm;
 	}
-	
+
 	public static boolean getDumpTrace() {
 		return dumpTrace;
 	}
-	
+
 	public static void setDumpTrace(boolean dumpTrace) {
 		Configuration.dumpTrace = dumpTrace;
 	}
-	
+
 	public static boolean getDumpFrame() {
 		return dumpFrame;
 	}
-	
+
 	public static void setDumpFrame(boolean dumpFrame) {
 		Configuration.dumpFrame = dumpFrame;
 	}
-	
+
+	public static boolean getDumpPaths() {
+		return dumpPaths;
+	}
+
+	public static void setDumpPaths(boolean dumpPaths) {
+		Configuration.dumpPaths = dumpPaths;
+	}
+
 	public static boolean getDumpConfig() {
 		return dumpConfig;
 	}
@@ -355,17 +368,28 @@ public class Configuration {
 	//
 	// ======================================================================
 
+	private static final String DEFAULT_PROPERTY_FILE = "coastal.properties";
+
 	public static boolean processProperties(String filename) {
 		Properties properties = new Properties();
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		try (InputStream resourceStream = loader.getResourceAsStream(DEFAULT_PROPERTY_FILE)) {
+			if (resourceStream != null) {
+				properties.load(resourceStream);
+			}
+		} catch (IOException x) {
+			// ignore
+		}
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException x) {
 			return false;
 		}
-		return processProperties(properties);
+		processProperties(properties);
+		return true;
 	}
 
-	public static boolean processProperties(Properties properties) {
+	private static void processProperties(Properties properties) {
 		LOGGER.debug("Loading configuration...");
 		Configuration.properties = properties;
 
@@ -427,19 +451,12 @@ public class Configuration {
 
 		// Process coastal.limit.run = ...
 		setRunLimit(getLongProperty(properties, "coastal.limit.run", getRunLimit()));
-		
+
 		// Process coastal.limit.time = ...
 		setTimeLimit(getLongProperty(properties, "coastal.limit.time", getTimeLimit()));
-		
+
 		// Process coastal.limit.path = ...
-		// NOTE: Initialize before coastal.strategy setting
 		setPathLimit(getLongProperty(properties, "coastal.limit.path", getPathLimit()));
-		
-		// Process coastal.strategy = ...
-		p = properties.getProperty("coastal.strategy");
-		if (p != null) {
-			setStrategy((Strategy) createInstance(p));
-		}
 
 		// Process coastal.dump
 		Boolean dumpAll = getBooleanProperty(properties, "coastal.dump");
@@ -448,31 +465,41 @@ public class Configuration {
 			setDumpAsm(dumpAll);
 			setDumpTrace(dumpAll);
 			setDumpFrame(dumpAll);
+			setDumpPaths(dumpAll);
 			setDumpConfig(dumpAll);
 		}
-		
+
 		// Process coastal.dump.instrumenter = ...
 		setDumpInstrumenter(getBooleanProperty(properties, "coastal.dump.instrumenter", getDumpInstrumenter()));
 
 		// Process coastal.dump.asm = ...
 		setDumpAsm(getBooleanProperty(properties, "coastal.dump.asm", getDumpAsm()));
-		
+
 		// Process coastal.dump.trace = ...
 		setDumpTrace(getBooleanProperty(properties, "coastal.dump.trace", getDumpTrace()));
-		
+
 		// Process coastal.dump.frame = ...
 		setDumpFrame(getBooleanProperty(properties, "coastal.dump.frame", getDumpFrame()));
-		
+
+		// Process coastal.dump.paths = ...
+		setDumpPaths(getBooleanProperty(properties, "coastal.dump.paths", getDumpPaths()));
+
 		// Process coastal.dump.config = ...
 		setDumpConfig(getBooleanProperty(properties, "coastal.dump.config", getDumpConfig()));
 
 		// Process coastal.echooutput = ...
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", getEchoOutput()));
 
+		// Process coastal.strategy = ...
+		// INITIALIZE this last because it may use other settings
+		p = properties.getProperty("coastal.strategy");
+		if (p != null) {
+			setStrategy((Strategy) createInstance(p));
+		}
+
 		// All done
 		LOGGER.debug("Configuration loaded");
 		dump();
-		return true;
 	}
 
 	public static boolean getBooleanProperty(Properties properties, String key, boolean defaultValue) {
@@ -517,7 +544,7 @@ public class Configuration {
 		}
 		return null;
 	}
-	
+
 	public static int getIntegerProperty(Properties properties, String key, int defaultValue) {
 		String s = properties.getProperty(key, Integer.toString(defaultValue));
 		try {
@@ -549,7 +576,7 @@ public class Configuration {
 		}
 		return defaultValue;
 	}
-	
+
 	public static Long getLongProperty(Properties properties, String key) {
 		String s = properties.getProperty(key);
 		if (s != null) {
@@ -561,7 +588,7 @@ public class Configuration {
 		}
 		return null;
 	}
-	
+
 	private static Object createInstance(String objectName) {
 		Class<?> classx = loadClass(objectName);
 		if (classx == null) {
@@ -628,7 +655,8 @@ public class Configuration {
 		if (s != null) {
 			LOGGER.info("coastal.strategy = {}", s.getClass().getName());
 		}
-		t = triggers.size(); i = t;
+		t = triggers.size();
+		i = t;
 		for (Trigger trigger : triggers) {
 			String pre = (i == t) ? "coastal.triggers = " : "\t";
 			String post = (i > 1) ? ";\\" : "";
@@ -654,6 +682,7 @@ public class Configuration {
 		LOGGER.info("coastal.dump.asm = {}", getDumpAsm());
 		LOGGER.info("coastal.dump.trace = {}", getDumpTrace());
 		LOGGER.info("coastal.dump.frame = {}", getDumpFrame());
+		LOGGER.info("coastal.dump.paths = {}", getDumpPaths());
 		LOGGER.info("coastal.dump.instrumenter = {}", getDumpInstrumenter());
 	}
 

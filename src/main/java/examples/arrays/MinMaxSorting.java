@@ -2,7 +2,7 @@ package examples.arrays;
 
 public class MinMaxSorting {
 
-	private static final int N = 20;
+	private static final int N = 3;
 
 	public static int minOf(int x, int y) {
 		if (x < y) {
@@ -42,7 +42,7 @@ public class MinMaxSorting {
 		long t0 = System.currentTimeMillis();
 		int[] a = new int[N];
 		for (int i = 0; i < N; i++) {
-			a[i] = (i * 3019) % 2003;
+			a[i] = (i * 3019) % 2003; // 0 1016 29 1045 58 1074 87 1103 116 1132
 		}
 		sort(a);
 		System.out.print(a[0]);

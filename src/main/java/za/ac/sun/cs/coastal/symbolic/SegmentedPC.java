@@ -1,7 +1,5 @@
 package za.ac.sun.cs.coastal.symbolic;
 
-import java.util.Stack;
-
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
@@ -21,40 +19,54 @@ import za.ac.sun.cs.green.expr.Operation.Operator;
  */
 public class SegmentedPC {
 
-	public static final SegmentedPC ZERO = new SegmentedPC(null, Operation.TRUE, Operation.TRUE, 'x');
+	private final SegmentedPC parent;
 
-	protected final SegmentedPC parent;
+	private final Expression activeConjunct;
 
-	protected SegmentedPC child;
+	private final Expression passiveConjunct;
 
-	protected final Expression activeConjunct;
+	private final boolean isFalse;
 
-	protected final Expression passiveConjunct;
+	private final Expression pathCondition;
 
-	protected final char signal;
+	private final String signature;
 
-	protected Expression pathCondition = null;
+	private final int depth;
 
-	protected String signature = null;
+	private String stringRep = null, stringRep0 = null;
 
-	protected String stringRep = null, stringRep0 = null;
-
-	public SegmentedPC(SegmentedPC parent, Expression activeConjunct, Expression passiveConjunct, char signal) {
+	public SegmentedPC(SegmentedPC parent, Expression activeConjunct, Expression passiveConjunct, boolean isFalse) {
+		assert activeConjunct != null;
+		assert activeConjunct != Operation.TRUE;
 		this.parent = parent;
-		if (parent != null) {
-			parent.child = this;
-		}
 		this.activeConjunct = activeConjunct;
 		this.passiveConjunct = passiveConjunct;
-		this.signal = signal;
+		this.isFalse = isFalse;
+		Expression a = activeConjunct;
+		if (isFalse) {
+			this.signature = ((parent == null) ? "" : parent.getSignature()) + "0";
+			a = negate(a);
+		} else {
+			this.signature = ((parent == null) ? "" : parent.getSignature()) + "1";
+		}
+		if (parent == null) {
+			if ((passiveConjunct != Operation.TRUE) && (passiveConjunct != Operation.TRUE)) {
+				this.pathCondition = a; 
+			} else {
+				this.pathCondition = new Operation(Operator.AND, a, passiveConjunct); 
+			}
+		} else {
+			if ((passiveConjunct != Operation.TRUE) && (passiveConjunct != Operation.TRUE)) {
+				this.pathCondition = new Operation(Operator.AND, a, parent.getPathCondition());
+			} else {
+				this.pathCondition = new Operation(Operator.AND, a, new Operation(Operator.AND, passiveConjunct, parent.getPathCondition())); 
+			}
+		}
+		this.depth = (parent == null) ? 1 : (1 + parent.getDepth());
 	}
 
 	public SegmentedPC getParent() {
 		return parent;
-	}
-
-	public SegmentedPC getChild() {
-		return child;
 	}
 
 	public Expression getActiveConjunct() {
@@ -65,52 +77,24 @@ public class SegmentedPC {
 		return passiveConjunct;
 	}
 
-	public char getSignal() {
-		return signal;
+	public boolean isLastConjunctFalse() {
+		return isFalse;
 	}
 
 	public Expression getPathCondition() {
-		if (pathCondition == null) {
-			Stack<Expression> conjuncts = new Stack<>();
-			for (SegmentedPC spc = this; spc != null; spc = spc.parent) {
-				if ((spc.activeConjunct != Operation.TRUE) && (spc.activeConjunct != null)) {
-					if (spc.signal == '1') {
-						conjuncts.push(spc.activeConjunct);
-					} else {
-						conjuncts.push(negate(spc.activeConjunct));
-					}
-				}
-				if ((spc.passiveConjunct != Operation.TRUE) && (spc.passiveConjunct != null)) {
-					conjuncts.push(spc.passiveConjunct);
-				}
-			}
-			if (conjuncts.isEmpty()) {
-				pathCondition = Operation.TRUE;
-			} else {
-				pathCondition = conjuncts.pop();
-				while (!conjuncts.isEmpty()) {
-					pathCondition = new Operation(Operator.AND, conjuncts.pop(), pathCondition);
-				}
-			}
-		}
 		return pathCondition;
 	}
-
+	
 	public String getSignature() {
-		if (signature == null) {
-			StringBuilder sb = new StringBuilder();
-			for (SegmentedPC spc = this; spc != null; spc = spc.parent) {
-				if (spc.signal != 'x') {
-					sb.insert(0, spc.signal);
-				}
-			}
-			signature = sb.toString();
-		}
 		return signature;
 	}
 
+	public int getDepth() {
+		return depth;
+	}
+	
 	public SegmentedPC negate() {
-		return new SegmentedPC(parent, activeConjunct, passiveConjunct, (signal == '0') ? '1' : '0');
+		return new SegmentedPC(parent, activeConjunct, passiveConjunct, !isFalse);
 	}
 
 	public static Expression negate(Expression expression) {
@@ -151,19 +135,13 @@ public class SegmentedPC {
 	public String toString0() {
 		if (stringRep0 == null) {
 			StringBuilder sb = new StringBuilder();
-			sb.append(signal);
-			if (activeConjunct == null) {
-				sb.append("  ").append(String.format("%-30s", "null"));
-			} else {
-				sb.append("  ").append(String.format("%-30s", activeConjunct.toString()));
-			}
-			if (passiveConjunct == null) {
-				sb.append("  null");
-			} else {
-				sb.append("  ").append(passiveConjunct.toString());
-			}
-			if (parent != null) {
-				sb.append('\n').append(parent.toString0());
+			sb.append(isLastConjunctFalse() ? "FALSE" : "TRUE ");
+			sb.append("  ").append(String.format("%-30s", getActiveConjunct().toString()));
+			Expression e = getPassiveConjunct();
+			sb.append("  ").append(String.format("%s", ((e == null) ? "NULL" : e.toString())));
+			SegmentedPC p = getParent();
+			if (p != null) {
+				sb.append('\n').append(p.toString0());
 			}
 			stringRep0 = sb.toString();
 		}

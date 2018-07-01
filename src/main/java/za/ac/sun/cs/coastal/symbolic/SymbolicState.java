@@ -23,11 +23,15 @@ public class SymbolicState {
 
 	private static final String FIELD_SEPARATOR = "/";
 
-	protected static final Logger lgr = Configuration.getLogger();
+	private static final Logger lgr = Configuration.getLogger();
 
-	protected static boolean symbolicMode = false;
+	private static final boolean dumpTrace = Configuration.getDumpTrace();
 
-	protected static final Stack<SymbolicFrame> frames = new Stack<>();
+	private static final boolean dumpFrame = Configuration.getDumpFrame();
+
+	private static boolean symbolicMode = false;
+
+	private static final Stack<SymbolicFrame> frames = new Stack<>();
 
 	private static int objectIdCount = 0;
 
@@ -37,18 +41,18 @@ public class SymbolicState {
 
 	private static final Stack<Expression> args = new Stack<>();
 
-	private static SegmentedPC spc = SegmentedPC.ZERO;
+	private static SegmentedPC spc = null;
 
 	private static Expression pendingExtraConjunct = null;
+
+	private static boolean isPreviousConjunctConstant = false;
+
+	private static boolean isPreviousConjunctDuplicate = false;
 
 	private static final Set<String> conjunctSet = new HashSet<>();
 
 	private static Map<String, Constant> concreteValues = null;
 
-	private static boolean dumpTrace = Configuration.getDumpTrace();
-
-	private static boolean dumpFrame = Configuration.getDumpFrame();
-	
 	public static void reset(Map<String, Constant> concreteValues) {
 		symbolicMode = false;
 		frames.clear();
@@ -56,7 +60,7 @@ public class SymbolicState {
 		// newVariableCount must NOT be reset
 		instanceData.clear();
 		args.clear();
-		spc = SegmentedPC.ZERO;
+		spc = null;
 		pendingExtraConjunct = null;
 		conjunctSet.clear();
 		SymbolicState.concreteValues = concreteValues;
@@ -106,21 +110,31 @@ public class SymbolicState {
 		}
 		return value;
 	}
-	
+
 	private static Expression getArrayValue(int arrayId, int index) {
 		return getField(arrayId, "" + index);
 	}
 
+	private static void addArrayValue(int arrayId, int index, Expression value) {
+		putField(arrayId, "" + index, value);
+	}
+
 	private static void pushConjunct(Expression conjunct) {
 		String c = conjunct.toString();
-		if (isConstantConjunct(conjunct)) {
+		isPreviousConjunctConstant = isConstantConjunct(conjunct);
+		isPreviousConjunctDuplicate = false;
+		if (isPreviousConjunctConstant) {
 			lgr.trace(">>> constant conjunct ignored: {}", c);
 		} else if (conjunctSet.add(c)) {
-			spc = new SegmentedPC(spc, conjunct, pendingExtraConjunct, '1');
+			spc = new SegmentedPC(spc, conjunct, pendingExtraConjunct, false);
 			pendingExtraConjunct = null;
 			lgr.trace(">>> adding conjunct: {}", c);
+			if (dumpTrace) {
+				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+			}
 		} else {
 			lgr.trace(">>> duplicate conjunct ignored: {}", c);
+			isPreviousConjunctDuplicate = true;
 		}
 	}
 
@@ -146,8 +160,9 @@ public class SymbolicState {
 	private static void dumpFrames() {
 		int n = frames.size();
 		for (int i = n - 1; i >= 0; i--) {
-			lgr.trace("--> st{} locals:{} data:{}", frames.get(i).stack, frames.get(i).locals, instanceData);
+			lgr.trace("--> st{} locals:{}", frames.get(i).stack, frames.get(i).locals);
 		}
+		lgr.trace("--> data:{}", instanceData);
 	}
 
 	// ======================================================================
@@ -269,11 +284,17 @@ public class SymbolicState {
 			int a = ((IntConstant) pop()).getValue();
 			push(getArrayValue(a, i));
 			break;
+		case Opcodes.IASTORE:
+			Expression e0 = pop();
+			i = ((IntConstant) pop()).getValue();
+			a = ((IntConstant) pop()).getValue();
+			addArrayValue(a, i, e0);
+			break;
 		case Opcodes.DUP:
 			push(peek());
 			break;
 		case Opcodes.IADD:
-			Expression e0 = pop();
+			e0 = pop();
 			push(new Operation(Operator.ADD, pop(), e0));
 			break;
 		case Opcodes.IMUL:
@@ -476,21 +497,53 @@ public class SymbolicState {
 		case Opcodes.GOTO:
 			// do nothing
 			break;
-		case Opcodes.IF_ICMPGE:
+		case Opcodes.IFEQ:
 			Expression e0 = pop();
-			pushConjunct(new Operation(Operator.GE, pop(), e0));
+			pushConjunct(new Operation(Operator.EQ, e0, Operation.ZERO));
 			break;
-		case Opcodes.IF_ICMPLE:
+		case Opcodes.IFNE:
 			e0 = pop();
-			pushConjunct(new Operation(Operator.LE, pop(), e0));
+			pushConjunct(new Operation(Operator.NE, e0, Operation.ZERO));
+			break;
+		case Opcodes.IFLT:
+			e0 = pop();
+			pushConjunct(new Operation(Operator.LT, e0, Operation.ZERO));
+			break;
+		case Opcodes.IFGE:
+			e0 = pop();
+			pushConjunct(new Operation(Operator.GE, e0, Operation.ZERO));
+			break;
+		case Opcodes.IFGT:
+			e0 = pop();
+			pushConjunct(new Operation(Operator.GT, e0, Operation.ZERO));
+			break;
+		case Opcodes.IFLE:
+			e0 = pop();
+			pushConjunct(new Operation(Operator.LE, e0, Operation.ZERO));
+			break;
+		case Opcodes.IF_ICMPEQ:
+			e0 = pop();
+			pushConjunct(new Operation(Operator.EQ, pop(), e0));
 			break;
 		case Opcodes.IF_ICMPNE:
 			e0 = pop();
 			pushConjunct(new Operation(Operator.NE, pop(), e0));
 			break;
-		case Opcodes.IFGT:
+		case Opcodes.IF_ICMPLT:
 			e0 = pop();
-			pushConjunct(new Operation(Operator.GT, e0, Operation.ZERO));
+			pushConjunct(new Operation(Operator.LT, pop(), e0));
+			break;
+		case Opcodes.IF_ICMPGE:
+			e0 = pop();
+			pushConjunct(new Operation(Operator.GE, pop(), e0));
+			break;
+		case Opcodes.IF_ICMPGT:
+			e0 = pop();
+			pushConjunct(new Operation(Operator.GT, pop(), e0));
+			break;
+		case Opcodes.IF_ICMPLE:
+			e0 = pop();
+			pushConjunct(new Operation(Operator.LE, pop(), e0));
 			break;
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
@@ -507,9 +560,14 @@ public class SymbolicState {
 		}
 		if (dumpTrace) {
 			lgr.trace("(POST) {}", Bytecodes.toString(opcode));
-			lgr.trace(">>> previous conjunct is false");
 		}
-		spc = spc.negate();
+		if (!isPreviousConjunctConstant && !isPreviousConjunctDuplicate) {
+			lgr.trace(">>> previous conjunct is false");
+			spc = spc.negate();
+			if (dumpTrace) {
+				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+			}
+		}
 	}
 
 	public static void ldcInsn(int opcode, Object value) {
@@ -533,18 +591,17 @@ public class SymbolicState {
 		}
 	}
 
-	public static void iincInsn(int opcode, int increment) {
+	public static void iincInsn(int var, int increment) {
+		final int opcode = 132;
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{} {}", Bytecodes.toString(opcode), increment);
 		}
-		switch (opcode) {
-		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", Bytecodes.toString(opcode), increment, opcode);
-			System.exit(1);
-		}
+		Expression e0 = getLocal(var);
+		Expression e1 = new IntConstant(increment);
+		setLocal(var, Operation.apply(Operator.ADD, e0, e1));
 		if (dumpFrame) {
 			dumpFrames();
 		}

@@ -2,8 +2,10 @@ package za.ac.sun.cs.coastal.strategy;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -24,10 +26,14 @@ import za.ac.sun.cs.green.expr.IntVariable;
 public class DepthFirstStrategy implements Strategy {
 
 	private static final Logger lgr = Configuration.getLogger();
+	
+	private static final boolean dumpTrace = Configuration.getDumpTrace();
 
 	private static final Logger greenLgr = LogManager.getLogger("GREEN");
 
 	private static final Green green = new Green("COASTAL", greenLgr);
+	
+	private static final Set<String> visitedModels = new HashSet<>();
 	
 	private static int infeasibleCount = 0;
 	
@@ -69,7 +75,7 @@ public class DepthFirstStrategy implements Strategy {
 			infeasible = false;
 			Expression pc = spc.getPathCondition();
 			String sig = spc.getSignature();
-			lgr.info("trying <" + sig + "> " + pc);
+			lgr.info("trying   <" + sig + "> " + pc);
 			Instance instance = new Instance(green, null, pc);
 			long t1 = System.currentTimeMillis();
 			@SuppressWarnings("unchecked")
@@ -77,6 +83,9 @@ public class DepthFirstStrategy implements Strategy {
 			solverTime += System.currentTimeMillis() - t1;
 			if (model == null) {
 				lgr.info("no model");
+				if (dumpTrace) {
+					lgr.info("(The spc is {})", spc.getPathCondition().toString());
+				}
 				infeasible = true;
 				infeasibleCount++;
 			} else {
@@ -88,13 +97,13 @@ public class DepthFirstStrategy implements Strategy {
 				}
 				String modelString = newModel.entrySet().stream().filter(p -> !p.getKey().startsWith("$")).collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue())).toString();
 				lgr.info("new model: {}", modelString);
-//				if (visitedModels.add(modelString)) {
+				if (visitedModels.add(modelString)) {
 					totalTime += System.currentTimeMillis() - t0;
 					return newModel;
-//				} else {
-//					lgr.debug("model {} has been visited before, recurring", modelString);
-//					spc = PathTree.insertPath(spc, false);
-//				}
+				} else {
+					lgr.info("model {} has been visited before, retrying", modelString);
+					spc = PathTree.insertPath(spc, false);
+				}
 			}
 		}
 

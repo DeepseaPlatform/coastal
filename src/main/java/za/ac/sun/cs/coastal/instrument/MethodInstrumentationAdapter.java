@@ -210,7 +210,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		if (dumpInstrumenter) {
 			lgr.trace("visitJumpInsn(var:{}, increment:{})", var, increment);
 		}
-		mv.visitLdcInsn(132);
+		mv.visitLdcInsn(var);
 		mv.visitLdcInsn(increment);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "iincInsn", "(II)V", false);
 		mv.visitIincInsn(var, increment);
