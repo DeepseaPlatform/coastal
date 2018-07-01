@@ -258,6 +258,9 @@ public class SymbolicState {
 			lgr.trace("{}", () -> Bytecodes.toString(opcode));
 		}
 		switch (opcode) {
+		case Opcodes.ACONST_NULL:
+			push(Operation.ZERO);
+			break;
 		case Opcodes.ICONST_M1:
 			push(new IntConstant(-1));
 			break;
@@ -289,6 +292,9 @@ public class SymbolicState {
 			i = ((IntConstant) pop()).getValue();
 			a = ((IntConstant) pop()).getValue();
 			addArrayValue(a, i, e0);
+			break;
+		case Opcodes.POP:
+			pop();
 			break;
 		case Opcodes.DUP:
 			push(peek());
@@ -407,6 +413,15 @@ public class SymbolicState {
 		case Opcodes.GETSTATIC:
 			push(Operation.ZERO);
 			break;
+		case Opcodes.GETFIELD:
+			int id = ((IntConstant) pop()).getValue();
+			push(getField(id, name));
+			break;
+		case Opcodes.PUTFIELD:
+			Expression e = pop();
+			id = ((IntConstant) pop()).getValue();
+			putField(id, name, e);
+			break;
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", Bytecodes.toString(opcode), owner, name,
 					descriptor, opcode);
@@ -498,52 +513,68 @@ public class SymbolicState {
 			// do nothing
 			break;
 		case Opcodes.IFEQ:
-			Expression e0 = pop();
-			pushConjunct(new Operation(Operator.EQ, e0, Operation.ZERO));
+			Expression e = pop();
+			pushConjunct(new Operation(Operator.EQ, e, Operation.ZERO));
 			break;
 		case Opcodes.IFNE:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.NE, e0, Operation.ZERO));
+			e = pop();
+			pushConjunct(new Operation(Operator.NE, e, Operation.ZERO));
 			break;
 		case Opcodes.IFLT:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.LT, e0, Operation.ZERO));
+			e = pop();
+			pushConjunct(new Operation(Operator.LT, e, Operation.ZERO));
 			break;
 		case Opcodes.IFGE:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.GE, e0, Operation.ZERO));
+			e = pop();
+			pushConjunct(new Operation(Operator.GE, e, Operation.ZERO));
 			break;
 		case Opcodes.IFGT:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.GT, e0, Operation.ZERO));
+			e = pop();
+			pushConjunct(new Operation(Operator.GT, e, Operation.ZERO));
 			break;
 		case Opcodes.IFLE:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.LE, e0, Operation.ZERO));
+			e = pop();
+			pushConjunct(new Operation(Operator.LE, e, Operation.ZERO));
 			break;
 		case Opcodes.IF_ICMPEQ:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.EQ, pop(), e0));
+			e = pop();
+			pushConjunct(new Operation(Operator.EQ, pop(), e));
 			break;
 		case Opcodes.IF_ICMPNE:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.NE, pop(), e0));
+			e = pop();
+			pushConjunct(new Operation(Operator.NE, pop(), e));
 			break;
 		case Opcodes.IF_ICMPLT:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.LT, pop(), e0));
+			e = pop();
+			pushConjunct(new Operation(Operator.LT, pop(), e));
 			break;
 		case Opcodes.IF_ICMPGE:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.GE, pop(), e0));
+			e = pop();
+			pushConjunct(new Operation(Operator.GE, pop(), e));
 			break;
 		case Opcodes.IF_ICMPGT:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.GT, pop(), e0));
+			e = pop();
+			pushConjunct(new Operation(Operator.GT, pop(), e));
 			break;
 		case Opcodes.IF_ICMPLE:
-			e0 = pop();
-			pushConjunct(new Operation(Operator.LE, pop(), e0));
+			e = pop();
+			pushConjunct(new Operation(Operator.LE, pop(), e));
+			break;
+		case Opcodes.IF_ACMPEQ:
+			e = pop();
+			pushConjunct(new Operation(Operator.EQ, pop(), e));
+			break;
+		case Opcodes.IF_ACMPNE:
+			e = pop();
+			pushConjunct(new Operation(Operator.NE, pop(), e));
+			break;
+		case Opcodes.IFNULL:
+			e = pop();
+			pushConjunct(new Operation(Operator.EQ, e, Operation.ZERO));
+			break;
+		case Opcodes.IFNONNULL:
+			e = pop();
+			pushConjunct(new Operation(Operator.NE, e, Operation.ZERO));
 			break;
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
