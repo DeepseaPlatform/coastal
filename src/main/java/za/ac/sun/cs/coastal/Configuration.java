@@ -115,6 +115,15 @@ public class Configuration {
 	private static final Map<String, Integer> maxBounds = new HashMap<>();
 
 	/**
+	 * The database of delegates. Each delegate is an object that may (or may
+	 * not) contain routines that are invoked when the responding method of the
+	 * class named by the key is called. In other words, if the database
+	 * contains the key-value pair <C, O>, and the method C.M is invoked, the
+	 * delegate O.M is invoked, if it exists.
+	 */
+	private static final Map<String, Object> delegates = new HashMap<>();
+
+	/**
 	 * The strategy that directs the investigation of target programs.
 	 */
 	private static Strategy strategy;
@@ -272,6 +281,10 @@ public class Configuration {
 
 	public static void setMaxBound(String variable, int max) {
 		maxBounds.put(variable, max);
+	}
+
+	public static void addDelegate(String target, Object delegate) {
+		delegates.put(target, delegate);
 	}
 
 	public static Strategy getStrategy() {
@@ -495,6 +508,19 @@ public class Configuration {
 		p = properties.getProperty("coastal.strategy");
 		if (p != null) {
 			setStrategy((Strategy) createInstance(p));
+		}
+
+		// Process coastal.delegates = ...
+		p = properties.getProperty("coastal.delegates");
+		if (p != null) {
+			String[] delegates = p.trim().split(";");
+			for (String delegate : delegates) {
+				String[] pair = delegate.split(":");
+				Object to = createInstance(pair[1].trim());
+				if (to != null) {
+					addDelegate(pair[0].trim(), to);
+				}
+			}
 		}
 
 		// All done
@@ -752,11 +778,15 @@ public class Configuration {
 				String arrayType = type.substring(0, i);
 				if (arrayType.equals("int")) {
 					return int[].class;
+				} else if (arrayType.equals("String")) {
+					return String[].class;
 				} else {
 					return Object[].class;
 				}
 			} else if (type.equals("int")) {
 				return int.class;
+			} else if (type.equals("String")) {
+				return String.class;
 			} else {
 				return Object.class;
 			}

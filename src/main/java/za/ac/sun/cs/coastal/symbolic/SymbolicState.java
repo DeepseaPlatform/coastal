@@ -111,11 +111,16 @@ public class SymbolicState {
 		return value;
 	}
 
+	// Arrays are just objects
+	public static int createArray() {
+		return incrAndGetNewObjectId();
+	}
+
 	private static Expression getArrayValue(int arrayId, int index) {
 		return getField(arrayId, "" + index);
 	}
 
-	private static void addArrayValue(int arrayId, int index, Expression value) {
+	private static void setArrayValue(int arrayId, int index, Expression value) {
 		putField(arrayId, "" + index, value);
 	}
 
@@ -195,7 +200,7 @@ public class SymbolicState {
 		if (name == null) { // not symbolic
 			value = currentValue;
 			for (int i = 0; i < length; i++) {
-				putField(arrayId, "" + i, new IntConstant(value[i]));
+				setArrayValue(arrayId, i, new IntConstant(value[i]));
 			}
 		} else {
 			value = new int[length];
@@ -210,7 +215,7 @@ public class SymbolicState {
 				int min = Configuration.getMinBound(entryName, name);
 				int max = Configuration.getMaxBound(entryName, name);
 				Expression entryExpr = new IntVariable(entryName, min, max);
-				putField(arrayId, "" + i, entryExpr);
+				setArrayValue(arrayId, i, entryExpr);
 			}
 		}
 		setLocal(index, new IntConstant(arrayId));
@@ -291,7 +296,7 @@ public class SymbolicState {
 			Expression e0 = pop();
 			i = ((IntConstant) pop()).getValue();
 			a = ((IntConstant) pop()).getValue();
-			addArrayValue(a, i, e0);
+			setArrayValue(a, i, e0);
 			break;
 		case Opcodes.POP:
 			pop();
@@ -610,8 +615,19 @@ public class SymbolicState {
 		}
 		switch (opcode) {
 		case Opcodes.LDC:
-			// TODO lgr.info("$$$$$$$$$$$$$ " + value.getClass().getName() + "$$$$" + value.toString());
-			push(Operation.ZERO);
+			if (value instanceof Integer) {
+				push(new IntConstant((int) value));
+			} else if (value instanceof String) {
+				String s = (String) value;
+				int id = createArray();
+				putField(id, "length", new IntConstant(s.length()));
+				for (int i = 0; i < s.length(); i++) {
+					setArrayValue(id, i, new IntConstant(s.charAt(i)));
+				}
+				push(new IntConstant(id));
+			} else {
+				push(Operation.ZERO);
+			}
 			break;
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
