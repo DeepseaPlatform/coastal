@@ -116,7 +116,7 @@ public class Diver implements Reporter {
 	@Override
 	public void report(PrintWriter out) {
 		out.println("  Runs: " + runs);
-		out.println("  overall dive time: " + time);
+		out.println("  Overall dive time: " + time);
 	}
 
 }

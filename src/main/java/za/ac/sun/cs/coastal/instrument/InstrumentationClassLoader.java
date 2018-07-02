@@ -26,6 +26,8 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 
 	private int requestCount = 0, cachedCount = 0, instrumentedCount = 0;
 	
+	private int preInstrumentedSize = 0, postInstrumentedSize = 0;
+
 	private long ltime = 0, itime = 0;
 	
 	public InstrumentationClassLoader(String classPath) {
@@ -78,6 +80,8 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		InstrumentationAdapter ia = new InstrumentationAdapter(name, cw); 
 		cr.accept(ia, 0);
 		byte[] out = cw.toByteArray();
+		preInstrumentedSize += in.length;
+		postInstrumentedSize += out.length;
 		if (dumpInstrumenter) {
 			lgr.trace("*** instrumented {}: {} -> {} bytes", name, in.length, out.length);
 		}
@@ -124,6 +128,8 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		out.println("  Class load requests: " + requestCount);
 		out.println("  Cache hits: " + cachedCount);
 		out.println("  Classes instrumented: " + instrumentedCount);
+		out.println("  Pre-instrumented size: " + preInstrumentedSize);
+		out.println("  Post-instrumented size: " + postInstrumentedSize);
 		out.println("  Load time: " + ltime);
 		out.println("  Instrumentation time: " + itime);
 	}
