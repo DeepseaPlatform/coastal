@@ -118,6 +118,14 @@ public class SymbolicState {
 		return incrAndGetNewObjectId();
 	}
 
+	public static int getArrayLength(int arrayId) {
+		return ((IntConstant) getField(arrayId, "length")).getValue();
+	}
+	
+	public static void setArrayLength(int arrayId, int length) {
+		putField(arrayId, "length", new IntConstant(length));
+	}
+	
 	public static Expression getArrayValue(int arrayId, int index) {
 		return getField(arrayId, "" + index);
 	}
@@ -306,6 +314,7 @@ public class SymbolicState {
 		String name = trigger.getParamName(index);
 		int length = currentValue.length;
 		int arrayId = createArray();
+		setArrayLength(arrayId, length);
 		int[] value;
 		if (name == null) { // not symbolic
 			value = currentValue;
@@ -416,7 +425,16 @@ public class SymbolicState {
 			break;
 		case Opcodes.IADD:
 			e = pop();
-			push(new Operation(Operator.ADD, pop(), e));
+			if (e instanceof IntConstant) {
+				Expression f = pop();
+				if (f instanceof IntConstant) {
+					push(new IntConstant(((IntConstant) e).getValue() + ((IntConstant) f).getValue()));
+				} else {
+					push(new Operation(Operator.ADD, f, e));
+				}
+			} else {
+				push(new Operation(Operator.ADD, pop(), e));
+			}
 			break;
 		case Opcodes.IMUL:
 			e = pop();
@@ -424,7 +442,16 @@ public class SymbolicState {
 			break;
 		case Opcodes.ISUB:
 			e = pop();
-			push(new Operation(Operator.SUB, pop(), e));
+			if (e instanceof IntConstant) {
+				Expression f = pop();
+				if (f instanceof IntConstant) {
+					push(new IntConstant(((IntConstant) e).getValue() - ((IntConstant) f).getValue()));
+				} else {
+					push(new Operation(Operator.SUB, f, e));
+				}
+			} else {
+				push(new Operation(Operator.SUB, pop(), e));
+			}
 			break;
 		case Opcodes.IRETURN:
 			e = pop();
@@ -440,6 +467,10 @@ public class SymbolicState {
 			break;
 		case Opcodes.RETURN:
 			methodReturn();
+			break;
+		case Opcodes.ARRAYLENGTH:
+			int id = ((IntConstant) peek()).getValue();
+			push(getField(id, "length"));
 			break;
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
@@ -463,6 +494,17 @@ public class SymbolicState {
 			break;
 		case Opcodes.SIPUSH:
 			push(new IntConstant(operand));
+			break;
+		case Opcodes.NEWARRAY:
+			assert operand == Opcodes.T_INT;
+			Expression e = pop();
+			int n = ((IntConstant) e).getValue();
+			int id = createArray();
+			setArrayLength(id, n);
+			for (int i = 0; i < n; i++) {
+				setArrayValue(id, i, Operation.ZERO);
+			}
+			push(new IntConstant(id));
 			break;
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", Bytecodes.toString(opcode), operand, opcode);
