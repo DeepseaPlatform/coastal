@@ -7,7 +7,6 @@ plugins {
 
 mainClassName = 'za.ac.sun.cs.coastal.COASTAL'
 
-ext.greenRepoUrl = 
 repositories {
 	jcenter()
 	maven { url 'http://repo.jacogeld.org:8081/repository/snapshots/' }
@@ -15,7 +14,7 @@ repositories {
 }
 
 dependencies {
-	compile group: 'za.ac.sun.cs', name: 'green', version: '0.0.1-SNAPSHOT'
+	compile group: 'za.ac.sun.cs', name: 'green', version: '0.0.2-SNAPSHOT'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
 	compile group: 'org.ow2.asm', name: 'asm', version: '6.2'
