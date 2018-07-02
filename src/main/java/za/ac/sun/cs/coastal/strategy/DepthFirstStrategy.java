@@ -39,7 +39,7 @@ public class DepthFirstStrategy implements Strategy {
 
 	private long pathLimit = 0;
 
-	private long totalTime = 0, solverTime = 0;
+	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
 	public DepthFirstStrategy() {
 		Reporters.register(this);
@@ -57,33 +57,41 @@ public class DepthFirstStrategy implements Strategy {
 			pathLimit = Long.MIN_VALUE;
 		}
 	}
-
+	
 	@Override
 	public Map<String, Constant> refine() {
 		long t0 = System.currentTimeMillis();
+		Map<String, Constant> refinement = refine0();
+		totalTime += System.currentTimeMillis() - t0;
+		return refinement;
+	}
+
+	private Map<String, Constant> refine0() {
+		long t;
 		SegmentedPC spc = SymbolicState.getSegmentedPathCondition();
-		lgr.info("explored <" + spc.getSignature() + "> " + SegmentedPC.constraintBeautify(spc.getPathCondition().toString()));
+		lgr.info("explored <{}> {}", spc.getSignature(), SegmentedPC.constraintBeautify(spc.getPathCondition().toString()));
 		boolean infeasible = false;
 		while (true) {
 			if (--pathLimit < 0) {
 				lgr.warn("path limit reached");
 				return null;
 			}
+			t = System.currentTimeMillis();
 			spc = PathTree.insertPath(spc, infeasible);
+			pathTreeTime += System.currentTimeMillis() - t;
 			if (spc == null) {
-				totalTime += System.currentTimeMillis() - t0;
 				lgr.info("no further paths");
 				return null;
 			}
 			infeasible = false;
 			Expression pc = spc.getPathCondition();
 			String sig = spc.getSignature();
-			lgr.info("trying   <" + sig + "> " + SegmentedPC.constraintBeautify(pc.toString()));
+			lgr.info("trying   <{}> {}", sig, SegmentedPC.constraintBeautify(pc.toString()));
 			Instance instance = new Instance(green, null, pc);
-			long t1 = System.currentTimeMillis();
+			t = System.currentTimeMillis();
 			@SuppressWarnings("unchecked")
 			Map<IntVariable, Object> model = (Map<IntVariable, Object>) instance.request("model");
-			solverTime += System.currentTimeMillis() - t1;
+			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				lgr.info("no model");
 				if (dumpTrace) {
@@ -92,6 +100,7 @@ public class DepthFirstStrategy implements Strategy {
 				infeasible = true;
 				infeasibleCount++;
 			} else {
+				t = System.currentTimeMillis();
 				Map<String, Constant> newModel = new HashMap<>();
 				for (IntVariable variable : model.keySet()) {
 					String name = variable.getName();
@@ -100,13 +109,15 @@ public class DepthFirstStrategy implements Strategy {
 				}
 				String modelString = newModel.entrySet().stream().filter(p -> !p.getKey().startsWith("$"))
 						.collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue())).toString();
+				modelExtractionTime += System.currentTimeMillis() - t;
 				lgr.info("new model: {}", SegmentedPC.modelBeautify(modelString));
 				if (visitedModels.add(modelString)) {
-					totalTime += System.currentTimeMillis() - t0;
 					return newModel;
 				} else {
 					lgr.info("model {} has been visited before, retrying", modelString);
+					t = System.currentTimeMillis();
 					spc = PathTree.insertPath(spc, false);
+					pathTreeTime += System.currentTimeMillis() - t;
 				}
 			}
 		}
@@ -129,6 +140,8 @@ public class DepthFirstStrategy implements Strategy {
 		out.println("  Revisited paths: " + PathTree.getRevisitCount());
 		out.println("  Infeasible paths: " + infeasibleCount);
 		out.println("  Solver time: " + solverTime);
+		out.println("  Path tree time: " + pathTreeTime);
+		out.println("  Model extraction time: " + modelExtractionTime);
 		out.println("  Overall strategy time: " + totalTime);
 	}
 
