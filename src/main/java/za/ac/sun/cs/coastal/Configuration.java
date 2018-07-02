@@ -235,7 +235,7 @@ public class Configuration {
 		}
 	}
 
-	public static int getDefaultMinBound() {
+	public static int getDefaultMinIntValue() {
 		return DEFAULT_MIN_INT_VALUE;
 	}
 
@@ -259,7 +259,7 @@ public class Configuration {
 		minBounds.put(variable, min);
 	}
 
-	public static int getDefaultMaxBound() {
+	public static int getDefaultMaxIntValue() {
 		return DEFAULT_MAX_INT_VALUE;
 	}
 
@@ -287,6 +287,10 @@ public class Configuration {
 		delegates.put(target, delegate);
 	}
 
+	public static Object findDelegate(String target) {
+		return delegates.get(target);
+	}
+	
 	public static Strategy getStrategy() {
 		return strategy;
 	}
@@ -779,7 +783,7 @@ public class Configuration {
 				if (arrayType.equals("int")) {
 					return int[].class;
 				} else if (arrayType.equals("String")) {
-					return String[].class;
+					return int[].class;
 				} else {
 					return Object[].class;
 				}

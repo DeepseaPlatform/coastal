@@ -1,5 +1,7 @@
 package za.ac.sun.cs.coastal.symbolic;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -74,11 +76,11 @@ public class SymbolicState {
 		return spc;
 	}
 
-	private static void push(Expression expr) {
+	public static void push(Expression expr) {
 		frames.peek().push(expr);
 	}
 
-	private static Expression pop() {
+	public static Expression pop() {
 		return frames.peek().pop();
 	}
 
@@ -103,8 +105,8 @@ public class SymbolicState {
 		String fullFieldName = objectId + FIELD_SEPARATOR + fieldName;
 		Expression value = instanceData.get(fullFieldName);
 		if (value == null) {
-			int min = Configuration.getDefaultMinBound();
-			int max = Configuration.getDefaultMaxBound();
+			int min = Configuration.getDefaultMinIntValue();
+			int max = Configuration.getDefaultMaxIntValue();
 			value = new IntVariable(getNewVariableName(), min, max);
 			instanceData.put(fullFieldName, value);
 		}
@@ -143,6 +145,16 @@ public class SymbolicState {
 		}
 	}
 
+	public static void pushExtraConjunct(Expression extraConjunct) {
+		if (!isConstantConjunct(extraConjunct)) {
+			if (pendingExtraConjunct == null) {
+				pendingExtraConjunct = extraConjunct;
+			} else {
+				pendingExtraConjunct = new Operation(Operator.AND, extraConjunct, pendingExtraConjunct);
+			}
+		}
+	}
+
 	private static boolean methodReturn() {
 		assert symbolicMode;
 		assert !frames.isEmpty();
@@ -158,7 +170,7 @@ public class SymbolicState {
 		return ++objectIdCount;
 	}
 
-	private static String getNewVariableName() {
+	public static String getNewVariableName() {
 		return "$" + newVariableCount++;
 	}
 
@@ -168,6 +180,38 @@ public class SymbolicState {
 			lgr.trace("--> st{} locals:{}", frames.get(i).stack, frames.get(i).locals);
 		}
 		lgr.trace("--> data:{}", instanceData);
+	}
+
+	private static final Class<?>[] EMPTY_PARAMETERS = new Class<?>[0];
+
+	private static final Object[] EMPTY_ARGUMENTS = new Object[0];
+	
+	private static boolean executeDeletegate(String owner, String name, String descriptor) {
+		Object delegate = Configuration.findDelegate(owner);
+		if (delegate == null) { return false; }
+		String methodName = name + getAsciiSignature(descriptor); 
+		Method delegateMethod = null;
+		try {
+			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, EMPTY_PARAMETERS);
+		} catch (NoSuchMethodException | SecurityException e) {
+			if (dumpTrace) {
+				lgr.trace("@@@ no delegate: {}", methodName);
+			}
+			return false;
+		}
+		assert delegateMethod != null;
+		if (dumpTrace) {
+			lgr.trace("@@@ found delegate: {}", methodName);
+		}
+		try {
+			if ((boolean) delegateMethod.invoke(delegate, EMPTY_ARGUMENTS)) {
+				return true;
+			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException x) {
+			// This should never happen!
+			x.printStackTrace();
+		}
+		return false;
 	}
 
 	// ======================================================================
@@ -447,7 +491,8 @@ public class SymbolicState {
 		switch (opcode) {
 		case Opcodes.INVOKESPECIAL:
 		case Opcodes.INVOKEVIRTUAL:
-			if (!Configuration.isTarget(owner.replace('/', '.'))) {
+			String className = owner.replace('/', '.');
+			if (!Configuration.isTarget(className)) {
 				// get rid of arguments
 				int n = 1 + getArgumentCount(descriptor);
 				while (n-- > 0) {
@@ -463,18 +508,22 @@ public class SymbolicState {
 			}
 			break;
 		case Opcodes.INVOKESTATIC:
-			if (!Configuration.isTarget(owner.replace('/', '.'))) {
-				// get rid of arguments
-				int n = getArgumentCount(descriptor);
-				while (n-- > 0) {
-					pop();
-				}
-				// insert return type on stack
-				char typeCh = getReturnType(descriptor).charAt(0);
-				if ((typeCh == 'I') || (typeCh == 'Z')) {
-					push(new IntVariable(getNewVariableName(), -1000, 1000));
-				} else if ((typeCh != 'V') && (typeCh != '?')) {
-					push(Operation.ZERO);
+			className = owner.replace('/', '.');
+			if (!Configuration.isTarget(className)) {
+				if (executeDeletegate(className, name, descriptor)) {
+				} else {
+					// get rid of arguments
+					int n = getArgumentCount(descriptor);
+					while (n-- > 0) {
+						pop();
+					}
+					// insert return type on stack
+					char typeCh = getReturnType(descriptor).charAt(0);
+					if ((typeCh == 'I') || (typeCh == 'Z')) {
+						push(new IntVariable(getNewVariableName(), -1000, 1000));
+					} else if ((typeCh != 'V') && (typeCh != '?')) {
+						push(Operation.ZERO);
+					}
 				}
 			}
 			break;
@@ -711,6 +760,21 @@ public class SymbolicState {
 	//
 	// ======================================================================
 
+	private static boolean isConstantConjunct(Expression conjunct) {
+		if (conjunct instanceof Operation) {
+			Operation operation = (Operation) conjunct;
+			int n = operation.getOperatandCount();
+			for (int i = 0; i < n; i++) {
+				if (!isConstantConjunct(operation.getOperand(i))) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			return (conjunct instanceof Constant);
+		}
+	}
+
 	private static int getArgumentCount(String descriptor) {
 		int count = 0;
 		int i = 0;
@@ -751,19 +815,9 @@ public class SymbolicState {
 		return descriptor.substring(i + 1);
 	}
 
-	private static boolean isConstantConjunct(Expression conjunct) {
-		if (conjunct instanceof Operation) {
-			Operation operation = (Operation) conjunct;
-			int n = operation.getOperatandCount();
-			for (int i = 0; i < n; i++) {
-				if (!isConstantConjunct(operation.getOperand(i))) {
-					return false;
-				}
-			}
-			return true;
-		} else {
-			return (conjunct instanceof Constant);
-		}
+	public static String getAsciiSignature(String descriptor) {
+		return descriptor.replace('/', '_').replace("_", "_1").replace(";", "_2").replace("[", "_3").replace("(", "__")
+				.replace(")", "__");
 	}
 
 }
