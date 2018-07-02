@@ -1,4 +1,4 @@
-package examples.arrays;
+package examples.strings;
 
 public class Mystery {
 	
