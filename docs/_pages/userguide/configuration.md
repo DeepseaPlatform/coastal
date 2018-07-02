@@ -16,6 +16,7 @@ Remember to specify how to change logging settings
 | `coastal.strategy` | Strategy for generating new path conditions | - |
 | `coastal.triggers` | Classes to instrument | - |
 | `coastal.bounds` | Bounds on symbolic variables | - |
+| `coastal.delegates` | Delegated classes | - |
 | `coastal.echooutput` | Whether program output is displayed | `false` |
 | `coastal.limit.run` | Limit on number of runs executed | 0 |
 | `coastal.limit.time` | Limit on number of seconds allowed for runs | 0 |
@@ -91,6 +92,8 @@ The following types are supported:
 
 - `int`
 - `int[]`
+- `String`
+- `String[]`
 
 ## coastal.bounds
 
@@ -112,6 +115,20 @@ These two settings can be combined in one setting:
 
 ~~~
 coastal.bounds.X = 2..20
+~~~
+
+## coastal.delegates
+
+List of delegated classes.
+Multiple delegates are separated with a semicolon ("`;`").
+Each delegate is a pair: *T:D*, where both *T* and *D* are fully
+qualified class names.
+The former denotes a target that is delegated to the latter.
+Whenever a method *T.M* is invoked, the method *D.M* is executed on the
+symbolic state, if such a method exists. 
+ 
+~~~
+coastal.delegates = java.lang.Math:za.ac.sun.cs.coastal.models.Math
 ~~~
 
 ## coastal.echooutput
@@ -235,7 +252,8 @@ The default value is _false_.
 ## coastal.dump
 
 This settings will set all of the above `coastal.dump...` settings at once.
-Subsequent (individual) settings will override this value. 
+Subsequent (individual) settings will override this value, but this setting
+will *not* override the individual settings. 
 
 ~~~
 coastal.dump = true
