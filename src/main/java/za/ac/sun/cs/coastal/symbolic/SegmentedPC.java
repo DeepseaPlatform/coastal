@@ -1,5 +1,10 @@
 package za.ac.sun.cs.coastal.symbolic;
 
+import java.util.function.Function;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
@@ -50,16 +55,16 @@ public class SegmentedPC {
 			this.signature = ((parent == null) ? "" : parent.getSignature()) + "1";
 		}
 		if (parent == null) {
-			if ((passiveConjunct != Operation.TRUE) && (passiveConjunct != Operation.TRUE)) {
-				this.pathCondition = a; 
-			} else {
+			if ((passiveConjunct != Operation.TRUE) && (passiveConjunct != null)) {
 				this.pathCondition = new Operation(Operator.AND, a, passiveConjunct); 
+			} else {
+				this.pathCondition = a; 
 			}
 		} else {
-			if ((passiveConjunct != Operation.TRUE) && (passiveConjunct != Operation.TRUE)) {
-				this.pathCondition = new Operation(Operator.AND, a, parent.getPathCondition());
-			} else {
+			if ((passiveConjunct != Operation.TRUE) && (passiveConjunct != null)) {
 				this.pathCondition = new Operation(Operator.AND, a, new Operation(Operator.AND, passiveConjunct, parent.getPathCondition())); 
+			} else {
+				this.pathCondition = new Operation(Operator.AND, a, parent.getPathCondition());
 			}
 		}
 		this.depth = (parent == null) ? 1 : (1 + parent.getDepth());
@@ -148,4 +153,77 @@ public class SegmentedPC {
 		return stringRep0;
 	}
 
+	public static String constraintBeautify(String subject) {
+		subject = replace("[0-9]+[!=]=[a-zA-Z]+#[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
+		subject = replace("[a-zA-Z]+#[0-9]+[!=]=[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
+		return subject;
+	}
+
+	public static String modelBeautify(String subject) {
+		return replace("[a-zA-Z]+#[0-9]+=[0-9]+", m -> rewriteCharModel(m.group()), subject);
+	}
+	
+	public static String replace(String regex, Function<MatchResult, String> callback, CharSequence subject) {
+		Matcher m = Pattern.compile(regex).matcher(subject);
+		StringBuffer sb = new StringBuffer();
+		while (m.find()) {
+			m.appendReplacement(sb, callback.apply(m.toMatchResult()));
+		}
+		m.appendTail(sb);
+		return sb.toString();
+	}
+
+	public static String rewriteCharConstraint(String replace) {
+		int index = Math.max(replace.indexOf("=="), replace.indexOf("!="));
+		if (index == -1) {
+			return replace;
+		}
+		if (Character.isDigit(replace.charAt(0))) {
+			StringBuilder b = new StringBuilder();
+			appendChar(b, Integer.parseInt(replace.substring(0, index)));
+			return b.append(replace.substring(index)).toString();
+		} else {
+			StringBuilder b = new StringBuilder();
+			b.append(replace.substring(0, index + 2));
+			appendChar(b, Integer.parseInt(replace.substring(index + 2)));
+			return b.toString();
+		}
+	}
+	
+	public static String rewriteCharModel(String replace) {
+		int index = replace.indexOf('=');
+		if (index == -1) {
+			return replace;
+		}
+		StringBuilder b = new StringBuilder().append(replace.substring(0, index + 1));
+		appendChar(b, Integer.parseInt(replace.substring(index + 1)));
+		return b.toString();
+	}
+
+	public static void appendChar(StringBuilder stringBuilder, int ascii) {
+		stringBuilder.append('\'');
+		if (ascii == '\'') {
+			stringBuilder.append("\\\\'");
+		} else if (ascii == '\\') {
+			stringBuilder.append("\\\\\\\\");
+		} else if ((ascii >= ' ') && (ascii < 127)) {
+			stringBuilder.append((char) ascii);
+		} else if (ascii == 0) {
+			stringBuilder.append("\\\\0");
+		} else if (ascii == 8) {
+			stringBuilder.append("\\\\b");
+		} else if (ascii == 9) {
+			stringBuilder.append("\\\\t");
+		} else if (ascii == 10) {
+			stringBuilder.append("\\\\n");
+		} else if (ascii == 12) {
+			stringBuilder.append("\\\\f");
+		} else if (ascii == 13) {
+			stringBuilder.append("\\\\r");
+		} else {
+			stringBuilder.append("\\\\u").append(String.format("%04x", ascii));
+		}
+		stringBuilder.append('\'');
+	}
+	
 }

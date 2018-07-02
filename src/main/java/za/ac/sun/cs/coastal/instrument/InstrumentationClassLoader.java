@@ -13,9 +13,14 @@ import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 import za.ac.sun.cs.coastal.reporting.Reporters;
 
+import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 
 public class InstrumentationClassLoader extends ClassLoader implements Reporter {
+
+	private static final Logger lgr = Configuration.getLogger();
+
+	private static final boolean dumpInstrumenter = Configuration.getDumpInstrumenter();
 
 	private final List<String> classPaths = new ArrayList<>();
 
@@ -72,7 +77,11 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
 		InstrumentationAdapter ia = new InstrumentationAdapter(name, cw); 
 		cr.accept(ia, 0);
-		return cw.toByteArray();
+		byte[] out = cw.toByteArray();
+		if (dumpInstrumenter) {
+			lgr.trace("*** instrumented {}: {} -> {} bytes", name, in.length, out.length);
+		}
+		return out;
 	}
 
 	private byte[] loadFile(String filename) {

@@ -681,10 +681,6 @@ public class Configuration {
 		if (getArgs() != null) {
 			LOGGER.info("coastal.args = {}", getArgs());
 		}
-		Strategy s = getStrategy();
-		if (s != null) {
-			LOGGER.info("coastal.strategy = {}", s.getClass().getName());
-		}
 		t = triggers.size();
 		i = t;
 		for (Trigger trigger : triggers) {
@@ -703,6 +699,18 @@ public class Configuration {
 			} else {
 				LOGGER.info("coastal.bounds.{} = {}..{}", var, minBounds.get(var), maxBounds.get(var));
 			}
+		}
+		t = delegates.size();
+		i = t;
+		for (Map.Entry<String, Object> delegate : delegates.entrySet()) {
+			String pre = (i == t) ? "coastal.delegates = " : "\t";
+			String post = (i > 1) ? ";\\" : "";
+			LOGGER.info("{}{}:{}{}", pre, delegate.getKey(), delegate.getValue().getClass().getName(), post);
+			i--;
+		}
+		Strategy s = getStrategy();
+		if (s != null) {
+			LOGGER.info("coastal.strategy = {}", s.getClass().getName());
 		}
 		LOGGER.info("coastal.echooutput = {}", getEchoOutput());
 		LOGGER.info("coastal.limit.run = {}", getRunLimit());
@@ -776,19 +784,23 @@ public class Configuration {
 			return new Trigger(m, pn, pt);
 		}
 
+		// To implement a new type:
+		// (1) Add it here
+		// (2) Add it to MethodInstrumentationAdapter.visitParameter(...)
+		// (3) Add a "getConcreteXXX(...)" method to SymbolicState.java
 		private static Class<?> parseType(String type) {
 			int i = type.indexOf('[');
 			if (i > -1) {
 				String arrayType = type.substring(0, i);
 				if (arrayType.equals("int")) {
 					return int[].class;
-				} else if (arrayType.equals("String")) {
-					return int[].class;
 				} else {
 					return Object[].class;
 				}
 			} else if (type.equals("int")) {
 				return int.class;
+			} else if (type.equals("char")) {
+				return char.class;
 			} else if (type.equals("String")) {
 				return String.class;
 			} else {

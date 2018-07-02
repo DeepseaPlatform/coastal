@@ -26,21 +26,21 @@ import za.ac.sun.cs.green.expr.IntVariable;
 public class DepthFirstStrategy implements Strategy {
 
 	private static final Logger lgr = Configuration.getLogger();
-	
+
 	private static final boolean dumpTrace = Configuration.getDumpTrace();
 
 	private static final Logger greenLgr = LogManager.getLogger("GREEN");
 
 	private static final Green green = new Green("COASTAL", greenLgr);
-	
+
 	private static final Set<String> visitedModels = new HashSet<>();
-	
+
 	private static int infeasibleCount = 0;
-	
+
 	private long pathLimit = 0;
 
 	private long totalTime = 0, solverTime = 0;
-	
+
 	public DepthFirstStrategy() {
 		Reporters.register(this);
 		Properties greenProperties = new Properties();
@@ -48,18 +48,21 @@ public class DepthFirstStrategy implements Strategy {
 		greenProperties.setProperty("green.services", "model");
 		greenProperties.setProperty("green.service.model", "(bounder modeller)");
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
-		greenProperties.setProperty("green.service.model.canonizer", "za.ac.sun.cs.green.service.canonizer.ModelCanonizerService");
+		greenProperties.setProperty("green.service.model.canonizer",
+				"za.ac.sun.cs.green.service.canonizer.ModelCanonizerService");
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3JavaService");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
 		pathLimit = Configuration.getPathLimit();
-		if (pathLimit == 0) { pathLimit = Long.MIN_VALUE; }
+		if (pathLimit == 0) {
+			pathLimit = Long.MIN_VALUE;
+		}
 	}
 
 	@Override
 	public Map<String, Constant> refine() {
 		long t0 = System.currentTimeMillis();
 		SegmentedPC spc = SymbolicState.getSegmentedPathCondition();
-		lgr.info("explored <" + spc.getSignature() + "> " + spc.getPathCondition());
+		lgr.info("explored <" + spc.getSignature() + "> " + SegmentedPC.constraintBeautify(spc.getPathCondition().toString()));
 		boolean infeasible = false;
 		while (true) {
 			if (--pathLimit < 0) {
@@ -75,7 +78,7 @@ public class DepthFirstStrategy implements Strategy {
 			infeasible = false;
 			Expression pc = spc.getPathCondition();
 			String sig = spc.getSignature();
-			lgr.info("trying   <" + sig + "> " + pc);
+			lgr.info("trying   <" + sig + "> " + SegmentedPC.constraintBeautify(pc.toString()));
 			Instance instance = new Instance(green, null, pc);
 			long t1 = System.currentTimeMillis();
 			@SuppressWarnings("unchecked")
@@ -95,8 +98,9 @@ public class DepthFirstStrategy implements Strategy {
 					Constant value = new IntConstant((Integer) model.get(variable));
 					newModel.put(name, value);
 				}
-				String modelString = newModel.entrySet().stream().filter(p -> !p.getKey().startsWith("$")).collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue())).toString();
-				lgr.info("new model: {}", modelString);
+				String modelString = newModel.entrySet().stream().filter(p -> !p.getKey().startsWith("$"))
+						.collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue())).toString();
+				lgr.info("new model: {}", SegmentedPC.modelBeautify(modelString));
 				if (visitedModels.add(modelString)) {
 					totalTime += System.currentTimeMillis() - t0;
 					return newModel;
@@ -106,7 +110,6 @@ public class DepthFirstStrategy implements Strategy {
 				}
 			}
 		}
-
 	}
 
 	// ======================================================================

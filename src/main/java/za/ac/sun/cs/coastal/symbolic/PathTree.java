@@ -278,7 +278,8 @@ public class PathTree {
 		} else if (pathTree.isInfeasible) {
 			return 6 + PADDING;
 		} else {
-			int w = Math.max(MIN_WIDTH, pathTree.activeConjunct.toString().length());
+			String c = SegmentedPC.constraintBeautify(pathTree.activeConjunct.toString());
+			int w = Math.max(MIN_WIDTH, c.length());
 			return BRANCH + width(pathTree.left) + Math.max(w, BRANCH + width(pathTree.right));
 		}
 	}
@@ -301,7 +302,8 @@ public class PathTree {
 			int rx = stringFill(lines, minx + lw, y + 4, pathTree.left, depth + 1);
 			int mx = (lx + rx) / 2;
 			stringWrite(lines, mx, y, getId(pathTree) + (pathTree.isFullyExplored ? " FULL" : ""));
-			stringWrite(lines, mx, y + 1, pathTree.activeConjunct.toString());
+			String c = SegmentedPC.constraintBeautify(pathTree.activeConjunct.toString());
+			stringWrite(lines, mx, y + 1, c);
 			for (int x = lx; x <= rx; x++) { lines[y + 2][x] = '-'; }
 			lines[y + 2][mx] = '+';
 			stringWrite(lines, lx, y + 2, "+F");

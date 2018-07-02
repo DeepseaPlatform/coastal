@@ -6,10 +6,10 @@
       		<PatternLayout pattern="%-6level %msg%n"/>
   		</Console>
 		<File name="FILE" fileName="/tmp/coastal.log" append="false">
-      		<PatternLayout pattern="%highlight{%d{HH:mm:ss.SSS} %-6level %msg%n}{FATAL=black, ERROR=red, WARN=red, INFO=black, DEBUG=magenta, TRACE=blue}"/>
+      		<PatternLayout pattern="%highlight{%d{HH:mm:ss.SSS} %-6level %msg%n}{FATAL=red, ERROR=red, WARN=red, INFO=black, DEBUG=magenta, TRACE=blue}"/>
 		</File>
 		<File name="GREEN" fileName="/tmp/coastal-green.log" append="false">
-      		<PatternLayout pattern="%highlight{%d{HH:mm:ss.SSS} %-6level %msg%n}{FATAL=black, ERROR=red, WARN=red, INFO=black, DEBUG=magenta, TRACE=blue}"/>
+      		<PatternLayout pattern="%highlight{%d{HH:mm:ss.SSS} %-6level %msg%n}{FATAL=red, ERROR=red, WARN=red, INFO=black, DEBUG=magenta, TRACE=blue}"/>
 		</File>
 	</Appenders>
 	<Loggers>

@@ -101,7 +101,7 @@ public class SymbolicState {
 		instanceData.put(fullFieldName, value);
 	}
 
-	private static Expression getField(int objectId, String fieldName) {
+	public static Expression getField(int objectId, String fieldName) {
 		String fullFieldName = objectId + FIELD_SEPARATOR + fieldName;
 		Expression value = instanceData.get(fullFieldName);
 		if (value == null) {
@@ -118,12 +118,33 @@ public class SymbolicState {
 		return incrAndGetNewObjectId();
 	}
 
-	private static Expression getArrayValue(int arrayId, int index) {
+	public static Expression getArrayValue(int arrayId, int index) {
 		return getField(arrayId, "" + index);
 	}
 
 	private static void setArrayValue(int arrayId, int index, Expression value) {
 		putField(arrayId, "" + index, value);
+	}
+
+	// Strings are just objects
+	public static int createString() {
+		return incrAndGetNewObjectId();
+	}
+
+	public static Expression getStringLength(int stringId) {
+		return getField(stringId, "length");
+	}
+
+	public static void setStringLength(int stringId, Expression length) {
+		putField(stringId, "length", length);
+	}
+
+	public static Expression getStringChar(int stringId, int index) {
+		return getField(stringId, "" + index);
+	}
+
+	public static void setStringChar(int stringId, int index, Expression value) {
+		putField(stringId, "" + index, value);
 	}
 
 	private static void pushConjunct(Expression conjunct) {
@@ -185,11 +206,13 @@ public class SymbolicState {
 	private static final Class<?>[] EMPTY_PARAMETERS = new Class<?>[0];
 
 	private static final Object[] EMPTY_ARGUMENTS = new Object[0];
-	
-	private static boolean executeDeletegate(String owner, String name, String descriptor) {
+
+	private static boolean executeDelegate(String owner, String name, String descriptor) {
 		Object delegate = Configuration.findDelegate(owner);
-		if (delegate == null) { return false; }
-		String methodName = name + getAsciiSignature(descriptor); 
+		if (delegate == null) {
+			return false;
+		}
+		String methodName = name + getAsciiSignature(descriptor);
 		Method delegateMethod = null;
 		try {
 			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, EMPTY_PARAMETERS);
@@ -227,19 +250,62 @@ public class SymbolicState {
 			setLocal(address, new IntConstant(currentValue));
 			return currentValue;
 		}
-		Constant concrete = (concreteValues == null) ? null : concreteValues.get(name);
-		int value = (concrete == null) ? currentValue : ((IntConstant) concrete).getValue();
 		int min = Configuration.getMinBound(name);
 		int max = Configuration.getMaxBound(name);
 		setLocal(address, new IntVariable(name, min, max));
-		return value;
+		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
+		return (concrete == null) ? currentValue : concrete.getValue();
+	}
+
+	public static char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
+		Trigger trigger = Configuration.getTrigger(triggerIndex);
+		String name = trigger.getParamName(index);
+		if (name == null) { // not symbolic
+			setLocal(address, new IntConstant(currentValue));
+			return currentValue;
+		}
+		int min = Configuration.getMinBound(name);
+		int max = Configuration.getMaxBound(name);
+		setLocal(address, new IntVariable(name, min, max));
+		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
+		return (concrete == null) ? currentValue : (char) concrete.getValue();
+	}
+
+	public static String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
+		Trigger trigger = Configuration.getTrigger(triggerIndex);
+		String name = trigger.getParamName(index);
+		int length = currentValue.length();
+		int stringId = createString();
+		setStringLength(stringId, new IntConstant(length));
+		if (name == null) { // not symbolic
+			for (int i = 0; i < length; i++) {
+				IntConstant chValue = new IntConstant(currentValue.charAt(i));
+				setStringChar(stringId, i, chValue);
+			}
+			setLocal(address, new IntConstant(stringId));
+			return currentValue;
+		} else {
+			char[] chars = new char[length];
+			currentValue.getChars(0, length, chars, 0); // copy string into chars[]
+			for (int i = 0; i < length; i++) {
+				String entryName = name + "#" + i;
+				Constant concrete = ((name == null) || (concreteValues == null)) ? null : concreteValues.get(entryName);
+				Expression entryExpr = new IntVariable(entryName, 0, 255);
+				if ((concrete != null) && (concrete instanceof IntConstant)) {
+					chars[i] = (char) ((IntConstant) concrete).getValue();
+				}
+				setArrayValue(stringId, i, entryExpr);
+			}
+			setLocal(address, new IntConstant(stringId));
+			return new String(chars);
+		}
 	}
 
 	public static int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
 		Trigger trigger = Configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length;
-		int arrayId = incrAndGetNewObjectId();
+		int arrayId = createArray();
 		int[] value;
 		if (name == null) { // not symbolic
 			value = currentValue;
@@ -337,10 +403,10 @@ public class SymbolicState {
 			push(getArrayValue(a, i));
 			break;
 		case Opcodes.IASTORE:
-			Expression e0 = pop();
+			Expression e = pop();
 			i = ((IntConstant) pop()).getValue();
 			a = ((IntConstant) pop()).getValue();
-			setArrayValue(a, i, e0);
+			setArrayValue(a, i, e);
 			break;
 		case Opcodes.POP:
 			pop();
@@ -349,21 +415,27 @@ public class SymbolicState {
 			push(peek());
 			break;
 		case Opcodes.IADD:
-			e0 = pop();
-			push(new Operation(Operator.ADD, pop(), e0));
+			e = pop();
+			push(new Operation(Operator.ADD, pop(), e));
 			break;
 		case Opcodes.IMUL:
-			e0 = pop();
-			push(new Operation(Operator.MUL, pop(), e0));
+			e = pop();
+			push(new Operation(Operator.MUL, pop(), e));
 			break;
 		case Opcodes.ISUB:
-			e0 = pop();
-			push(new Operation(Operator.SUB, pop(), e0));
+			e = pop();
+			push(new Operation(Operator.SUB, pop(), e));
 			break;
 		case Opcodes.IRETURN:
-			e0 = pop();
+			e = pop();
 			if (methodReturn()) {
-				push(e0);
+				push(e);
+			}
+			break;
+		case Opcodes.ARETURN:
+			e = pop();
+			if (methodReturn()) {
+				push(e);
 			}
 			break;
 		case Opcodes.RETURN:
@@ -493,25 +565,26 @@ public class SymbolicState {
 		case Opcodes.INVOKEVIRTUAL:
 			String className = owner.replace('/', '.');
 			if (!Configuration.isTarget(className)) {
-				// get rid of arguments
-				int n = 1 + getArgumentCount(descriptor);
-				while (n-- > 0) {
-					pop();
-				}
-				// insert return type on stack
-				char typeCh = getReturnType(descriptor).charAt(0);
-				if ((typeCh == 'I') || (typeCh == 'Z')) {
-					push(new IntVariable(getNewVariableName(), -1000, 1000));
-				} else if ((typeCh != 'V') && (typeCh != '?')) {
-					push(Operation.ZERO);
+				if (!executeDelegate(className, name, descriptor)) {
+					// get rid of arguments
+					int n = 1 + getArgumentCount(descriptor);
+					while (n-- > 0) {
+						pop();
+					}
+					// insert return type on stack
+					char typeCh = getReturnType(descriptor).charAt(0);
+					if ((typeCh == 'I') || (typeCh == 'Z')) {
+						push(new IntVariable(getNewVariableName(), -1000, 1000));
+					} else if ((typeCh != 'V') && (typeCh != '?')) {
+						push(Operation.ZERO);
+					}
 				}
 			}
 			break;
 		case Opcodes.INVOKESTATIC:
 			className = owner.replace('/', '.');
 			if (!Configuration.isTarget(className)) {
-				if (executeDeletegate(className, name, descriptor)) {
-				} else {
+				if (!executeDelegate(className, name, descriptor)) {
 					// get rid of arguments
 					int n = getArgumentCount(descriptor);
 					while (n-- > 0) {

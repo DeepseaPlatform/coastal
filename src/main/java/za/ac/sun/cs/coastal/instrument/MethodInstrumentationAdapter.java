@@ -43,6 +43,13 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitIntInsn(Opcodes.ILOAD, address);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteInt", "(IIII)I", false);
 			mv.visitIntInsn(Opcodes.ISTORE, address);
+		} else if (type == char.class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ILOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteChar", "(IIIC)C", false);
+			mv.visitIntInsn(Opcodes.ISTORE, address);
 		} else if (type == int[].class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);
@@ -50,7 +57,13 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitIntInsn(Opcodes.ALOAD, address);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteIntArray", "(III[I)[I", false);
 			mv.visitIntInsn(Opcodes.ASTORE, address);
-// might still be needed: ALOAD, LLOAD, FLOAD, DLOAD
+		} else if (type == String.class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteString", "(IIILjava/lang/String;)Ljava/lang/String;", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
 		} else {
 			lgr.fatal("UNHANDLED PARAMETER TYPE");
 			System.exit(1);
@@ -76,27 +89,17 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			for (int i = 0; i < n; i++) {
 				visitParameter(trigger, triggerIndex, i, i + offset);
 			}
-			//--- }
 			Label end = new Label();
 			mv.visitJumpInsn(Opcodes.GOTO, end);
 			mv.visitLabel(label);
+			//--- } else {
+			//---   startMethod()
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(I)V", false);
+			//--- }
 			mv.visitLabel(end);
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-//			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
-//			mv.visitLdcInsn(triggerIndex);
-//			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(II)V", false);
-//			assert triggerIndex >= 0;
-//			int n = trigger.getParamCount();
-//			for (int i = 0; i < n; i++) {
-//				String pn = trigger.getParamName(i);
-//			}
-////			setLocal(0, new IntConstant(3));
-////			setLocal(1, new IntConstant(4));
-//			setLocal(0, new IntVariable("X", 0, 99));
-//			setLocal(1, new IntVariable("Y", 0, 99));
 		} else {
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(I)V", false);
