@@ -51,7 +51,7 @@ public class DepthFirstStrategy implements Strategy {
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		greenProperties.setProperty("green.service.model.canonizer",
 				"za.ac.sun.cs.green.service.canonizer.ModelCanonizerService");
-		/*--- BEGIN OLD ---
+		/*--- BEGIN OLD ---*
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3JavaService");
 		/*--- END OLD ---*/
 		/*--- BEGIN NEW ---*/
@@ -87,6 +87,9 @@ public class DepthFirstStrategy implements Strategy {
 			pathTreeTime += System.currentTimeMillis() - t;
 			if (spc == null) {
 				lgr.info("no further paths");
+				if (dumpTrace) {
+					lgr.info("Tree shape: {}", PathTree.getShape());
+				}
 				return null;
 			}
 			infeasible = false;
@@ -95,7 +98,7 @@ public class DepthFirstStrategy implements Strategy {
 			lgr.info("trying   <{}> {}", sig, SegmentedPC.constraintBeautify(pc.toString()));
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
-			/*--- BEGIN OLD ---
+			/*--- BEGIN OLD ---*
 			@SuppressWarnings("unchecked")
 			Map<IntVariable, Object> model = (Map<IntVariable, Object>) instance.request("model");
 			/*--- END OLD ---*/
@@ -117,7 +120,10 @@ public class DepthFirstStrategy implements Strategy {
 				Map<String, Constant> newModel = new HashMap<>();
 				for (IntVariable variable : model.keySet()) {
 					String name = variable.getName();
-					/*--- BEGIN OLD ---
+					if (name.startsWith(SymbolicState.NEW_VAR_PREFIX)) {
+						continue;
+					}
+					/*--- BEGIN OLD ---*
 					Constant value = new IntConstant((Integer) model.get(variable));
 					/*--- END OLD ---*/
 					/*--- BEGIN NEW ---*/
@@ -125,17 +131,18 @@ public class DepthFirstStrategy implements Strategy {
 					/*--- END NEW ---*/
 					newModel.put(name, value);
 				}
-				String modelString = newModel.entrySet().stream().filter(p -> !p.getKey().startsWith(SymbolicState.NEW_VAR_PREFIX))
-						.collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue())).toString();
+				String modelString = newModel.toString();
 				modelExtractionTime += System.currentTimeMillis() - t;
 				lgr.info("new model: {}", SegmentedPC.modelBeautify(modelString));
 				if (visitedModels.add(modelString)) {
 					return newModel;
 				} else {
 					lgr.info("model {} has been visited before, retrying", modelString);
+					/* OLD CODE, WAS ALMOST CERTAINLY BUGGY:
 					t = System.currentTimeMillis();
 					spc = PathTree.insertPath(spc, false);
 					pathTreeTime += System.currentTimeMillis() - t;
+					*/
 				}
 			}
 		}

@@ -9,7 +9,7 @@ public class PathTree {
 
 	// LOGGING AND DEBUGGING
 	// ---------------------
-	
+
 	private static final Logger lgr = Configuration.getLogger();
 
 	private static final boolean dumpPaths = Configuration.getDumpPaths();
@@ -20,32 +20,32 @@ public class PathTree {
 
 	// WHOLE TREE PROPERTIES
 	// ---------------------
-	
+
 	private static PathTree root = null;
 
 	private static int pathCount = 0;
-	
+
 	private static int revisitCount = 0;
-	
+
 	// INDIVIDUAL NODES
 	// ----------------
-	
+
 	private final Expression activeConjunct;
-	
+
 	private final Expression passiveConjunct;
-	
+
 	private final PathTree parent;
-	
+
 	private PathTree left = null;
 
 	private PathTree right = null;
 
 	private boolean isFullyExplored = false;
-	
+
 	private boolean isInfeasible = false;
-	
+
 	private boolean isLeaf = false;
-	
+
 	public PathTree(boolean isInfeasible, PathTree parent) {
 		this.activeConjunct = null;
 		this.passiveConjunct = null;
@@ -78,11 +78,11 @@ public class PathTree {
 	public static int getRevisitCount() {
 		return revisitCount;
 	}
-	
+
 	private boolean isComplete() {
 		return isFullyExplored || isInfeasible || isLeaf;
 	}
-	
+
 	public static SegmentedPC insertPath(SegmentedPC spc, boolean isInfeasible) {
 		SegmentedPC pc = insertPath0(spc, isInfeasible);
 		if (dumpPaths) {
@@ -92,14 +92,14 @@ public class PathTree {
 		}
 		return pc;
 	}
-	
+
 	public static SegmentedPC insertPath0(SegmentedPC spc, boolean isInfeasible) {
 		pathCount++;
 		final int depth = spc.getDepth();
 		SegmentedPC[] path = new SegmentedPC[depth];
 		int idx = depth - 1;
 		for (SegmentedPC s = spc; s != null; s = s.getParent()) {
-			path[idx--] = s; 
+			path[idx--] = s;
 		}
 		assert idx == -1;
 		PathTree pre = null;
@@ -115,7 +115,8 @@ public class PathTree {
 			SegmentedPC s = path[idx];
 			lastBranch = s.isLastConjunctFalse();
 			if (dumpPaths) {
-				lgr.debug("  cur:{} pre:{} conj:{} truth:{}", getId(cur), getId(pre), s.getActiveConjunct(), lastBranch);
+				lgr.debug("  cur:{} pre:{} conj:{} truth:{}", getId(cur), getId(pre), s.getActiveConjunct(),
+						lastBranch);
 			}
 			assert !cur.isLeaf;
 			pre = cur;
@@ -125,11 +126,9 @@ public class PathTree {
 		if ((cur != null) && cur.isLeaf && (idx == depth)) {
 			// EXPERIMENTAL DOES NOTWORK FULLY
 			/*
-			while ((pre != null) && pre.isFullyExplored) {
-				pre = pre.parent;
-			}
-			if (pre != null) { pre.isFullyExplored = true; }
-			*/
+			 * while ((pre != null) && pre.isFullyExplored) { pre = pre.parent;
+			 * } if (pre != null) { pre.isFullyExplored = true; }
+			 */
 			/* WE NEED TO DO SOMETHING HERE */
 			revisitCount++;
 		}
@@ -144,16 +143,22 @@ public class PathTree {
 			idx++;
 		}
 		// While there is more to insert, create subtree node-by-node
-		if ((idx < depth) && dumpPaths) { lgr.debug("More to insert"); }
+		if ((idx < depth) && dumpPaths) {
+			lgr.debug("More to insert");
+		}
 		while (idx < depth) {
 			SegmentedPC s = path[idx];
 			if (lastBranch) {
-				if (dumpPaths) { lgr.debug("  new right child for pre:{} conj:{}", getId(pre), s.getActiveConjunct()); }
+				if (dumpPaths) {
+					lgr.debug("  new right child for pre:{} conj:{}", getId(pre), s.getActiveConjunct());
+				}
 				assert pre.right == null;
 				pre.right = new PathTree(s, pre);
 				pre = pre.right;
 			} else {
-				if (dumpPaths) { lgr.debug("  new left child for pre:{} conj:{}", getId(pre), s.getActiveConjunct()); }
+				if (dumpPaths) {
+					lgr.debug("  new left child for pre:{} conj:{}", getId(pre), s.getActiveConjunct());
+				}
 				assert pre.left == null;
 				pre.left = new PathTree(s, pre);
 				pre = pre.left;
@@ -164,55 +169,79 @@ public class PathTree {
 		// Lastly, create the leaf
 		if (pre == null) {
 			root = new PathTree(isInfeasible, pre);
-			if (dumpPaths) { lgr.debug("Create new root {} (isInfeasible={})", getId(root), isInfeasible); }
+			if (dumpPaths) {
+				lgr.debug("Create new root {} (isInfeasible={})", getId(root), isInfeasible);
+			}
 		} else if (lastBranch) {
 			pre.right = new PathTree(isInfeasible, pre);
-			if (dumpPaths) { lgr.debug("Create right leaf {} (isInfeasible={})", getId(pre.right), isInfeasible); }
+			if (dumpPaths) {
+				lgr.debug("Create right leaf {} (isInfeasible={})", getId(pre.right), isInfeasible);
+			}
 		} else {
 			pre.left = new PathTree(isInfeasible, pre);
-			if (dumpPaths) { lgr.debug("Create left leaf {} (isInfeasible={})", getId(pre.left), isInfeasible); }
+			if (dumpPaths) {
+				lgr.debug("Create left leaf {} (isInfeasible={})", getId(pre.left), isInfeasible);
+			}
 		}
 		// Travel back up branch and fill in completed flags
-		if (dumpPaths) { lgr.debug("Travelling back up to root, propagating isFullyExplored"); }
+		if (dumpPaths) {
+			lgr.debug("Travelling back up to root, propagating isFullyExplored");
+		}
 		while (pre != null) {
 			boolean leftComplete = (pre.left != null) && pre.left.isComplete();
 			boolean rightComplete = (pre.right != null) && pre.right.isComplete();
 			if (leftComplete && rightComplete) {
-				if (dumpPaths) { lgr.debug("  Setting fully explored for {}", getId(pre)); }
+				if (dumpPaths) {
+					lgr.debug("  Setting fully explored for {}", getId(pre));
+				}
 				pre.isFullyExplored = true;
 				pre = pre.parent;
 			} else {
-				if (dumpPaths) { lgr.debug("  Stopping at {}", getId(pre)); }
+				if (dumpPaths) {
+					lgr.debug("  Stopping at {}", getId(pre));
+				}
 				pre.isFullyExplored = false;
 				break;
 			}
 		}
 		// Travel back down and find left-most unexplored path
-		if (dumpPaths) { lgr.debug("Now travelling back down to find a viable path"); }
+		if (dumpPaths) {
+			lgr.debug("Now travelling back down to find a viable path");
+		}
 		SegmentedPC newSpc = null;
 		cur = root;
 		while (true) {
 			if ((cur.left != null) && !cur.left.isComplete()) {
-				if (dumpPaths) { lgr.debug("  At {}, left is available", getId(cur)); }
+				if (dumpPaths) {
+					lgr.debug("  At {}, left is available", getId(cur));
+				}
 				newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
 				cur = cur.left;
 			} else if ((cur.right != null) && !cur.right.isComplete()) {
-				if (dumpPaths) { lgr.debug("  At {}, right is available", getId(cur)); }
+				if (dumpPaths) {
+					lgr.debug("  At {}, right is available", getId(cur));
+				}
 				newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
 				cur = cur.right;
-//			} else if (cur == root) {
-//				if (dumpPaths) { lgr.debug("  At {} (root), no more paths", getId(cur)); }
-//				return null;
+				//			} else if (cur == root) {
+				//				if (dumpPaths) { lgr.debug("  At {} (root), no more paths", getId(cur)); }
+				//				return null;
 			} else if (cur.left == null) {
-				if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur)); }
+				if (dumpPaths) {
+					lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
+				}
 				newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
 				return newSpc;
 			} else if (cur.right == null) {
-				if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur)); }
+				if (dumpPaths) {
+					lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
+				}
 				newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
 				return newSpc;
 			} else {
-				if (dumpPaths) { lgr.debug("  At #{} (dead end), no more paths", cur.id); }
+				if (dumpPaths) {
+					lgr.debug("  At #{} (dead end), no more paths", cur.id);
+				}
 				return null;
 			}
 		}
@@ -240,7 +269,7 @@ public class PathTree {
 	public static String[] stringRepr() {
 		int h = height(root) * 4 - 2;
 		int w = width(root);
-		char[][] lines = new char[h][w]; 
+		char[][] lines = new char[h][w];
 		for (int i = 0; i < h; i++) {
 			for (int j = 0; j < w; j++) {
 				lines[i][j] = ' ';
@@ -248,28 +277,34 @@ public class PathTree {
 		}
 		stringFill(lines, 0, 0, root, 0);
 		String[] finalLines = new String[h];
-		StringBuilder b = new StringBuilder(); 
+		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < h; i++) {
 			b.setLength(0);
 			int k = w - 1;
-			while ((k >= 0) && (lines[i][k] == ' ')) { k--; }
-			for (int j = 0; j <= k; j++) { b.append(lines[i][j]); }
+			while ((k >= 0) && (lines[i][k] == ' ')) {
+				k--;
+			}
+			for (int j = 0; j <= k; j++) {
+				b.append(lines[i][j]);
+			}
 			finalLines[i] = b.toString();
 		}
 		return finalLines;
 	}
 
 	private static int height(PathTree pathTree) {
-		if (pathTree == null) { return 1; }
+		if (pathTree == null) {
+			return 1;
+		}
 		int l = (pathTree.left == null) ? 0 : height(pathTree.left);
 		int r = (pathTree.right == null) ? 0 : height(pathTree.right);
 		return 1 + Math.max(l, r);
 	}
-	
+
 	private static final int PADDING = 1;
 	private static final int MIN_WIDTH = 9;
 	private static final int BRANCH = 1;
-	
+
 	private static int width(PathTree pathTree) {
 		if (pathTree == null) {
 			return 1 + PADDING;
@@ -283,7 +318,7 @@ public class PathTree {
 			return BRANCH + width(pathTree.left) + Math.max(w, BRANCH + width(pathTree.right));
 		}
 	}
-	
+
 	private static int stringFill(char[][] lines, int minx, int y, PathTree pathTree, int depth) {
 		if (pathTree == null) {
 			stringWrite(lines, minx, y, "-");
@@ -304,7 +339,9 @@ public class PathTree {
 			stringWrite(lines, mx, y, getId(pathTree) + (pathTree.isFullyExplored ? " FULL" : ""));
 			String c = SegmentedPC.constraintBeautify(pathTree.activeConjunct.toString());
 			stringWrite(lines, mx, y + 1, c);
-			for (int x = lx; x <= rx; x++) { lines[y + 2][x] = '-'; }
+			for (int x = lx; x <= rx; x++) {
+				lines[y + 2][x] = '-';
+			}
 			lines[y + 2][mx] = '+';
 			stringWrite(lines, lx, y + 2, "+F");
 			stringWrite(lines, rx - 1, y + 2, "T+");
@@ -313,10 +350,26 @@ public class PathTree {
 			return mx;
 		}
 	}
-	
+
 	private static void stringWrite(char[][] lines, int x, int y, String string) {
 		for (int i = 0; i < string.length(); i++) {
 			lines[y][x++] = string.charAt(i);
+		}
+	}
+
+	public static String getShape() {
+		return getShape(root);
+	}
+
+	private static String getShape(PathTree pathTree) {
+		if (pathTree == null) {
+			return "0";
+		} else if (pathTree.isLeaf) {
+			return "L";
+		} else if (pathTree.isInfeasible) {
+			return "I";
+		} else {
+			return "(" + getShape(pathTree.left) + getShape(pathTree.right) + ")";
 		}
 	}
 
