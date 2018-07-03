@@ -125,7 +125,7 @@ public class DepthFirstStrategy implements Strategy {
 					/*--- END NEW ---*/
 					newModel.put(name, value);
 				}
-				String modelString = newModel.entrySet().stream().filter(p -> !p.getKey().startsWith("$"))
+				String modelString = newModel.entrySet().stream().filter(p -> !p.getKey().startsWith(SymbolicState.NEW_VAR_PREFIX))
 						.collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue())).toString();
 				modelExtractionTime += System.currentTimeMillis() - t;
 				lgr.info("new model: {}", SegmentedPC.modelBeautify(modelString));

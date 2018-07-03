@@ -25,6 +25,12 @@ public class SymbolicState {
 
 	private static final String FIELD_SEPARATOR = "/";
 
+	private static final String INDEX_SEPARATOR = "_D_"; // "$"
+	
+	private static final String CHAR_SEPARATOR = "_H_"; // "#"
+	
+	public static final String NEW_VAR_PREFIX = "_D_"; // "$"
+	
 	private static final Logger lgr = Configuration.getLogger();
 
 	private static final boolean dumpTrace = Configuration.getDumpTrace();
@@ -200,7 +206,7 @@ public class SymbolicState {
 	}
 
 	public static String getNewVariableName() {
-		return "$" + newVariableCount++;
+		return NEW_VAR_PREFIX + newVariableCount++;
 	}
 
 	private static void dumpFrames() {
@@ -296,7 +302,7 @@ public class SymbolicState {
 			char[] chars = new char[length];
 			currentValue.getChars(0, length, chars, 0); // copy string into chars[]
 			for (int i = 0; i < length; i++) {
-				String entryName = name + "#" + i;
+				String entryName = name + CHAR_SEPARATOR + i;
 				Constant concrete = ((name == null) || (concreteValues == null)) ? null : concreteValues.get(entryName);
 				Expression entryExpr = new IntVariable(entryName, 0, 255);
 				if ((concrete != null) && (concrete instanceof IntConstant)) {
@@ -324,7 +330,7 @@ public class SymbolicState {
 		} else {
 			value = new int[length];
 			for (int i = 0; i < length; i++) {
-				String entryName = name + "$" + i;
+				String entryName = name + INDEX_SEPARATOR + i;
 				Constant concrete = ((name == null) || (concreteValues == null)) ? null : concreteValues.get(entryName);
 				if ((concrete != null) && (concrete instanceof IntConstant)) {
 					value[i] = ((IntConstant) concrete).getValue();
