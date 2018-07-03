@@ -184,7 +184,7 @@ public class Configuration {
 	// GETTERS AND SETTERS FOR PROPERTIES
 	//
 	// ======================================================================
-
+	
 	public static String getMain() {
 		return main;
 	}
@@ -388,7 +388,7 @@ public class Configuration {
 	private static final String DEFAULT_PROPERTY_FILE = "coastal.properties";
 
 	public static boolean processProperties(String filename) {
-		Properties properties = new Properties();
+		properties = new Properties();
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try (InputStream resourceStream = loader.getResourceAsStream(DEFAULT_PROPERTY_FILE)) {
 			if (resourceStream != null) {
@@ -532,6 +532,10 @@ public class Configuration {
 		dump();
 	}
 
+	public static Properties getProperties() {
+		return properties;
+	}
+	
 	public static boolean getBooleanProperty(Properties properties, String key, boolean defaultValue) {
 		String s = properties.getProperty(key, Boolean.toString(defaultValue)).trim();
 		try {

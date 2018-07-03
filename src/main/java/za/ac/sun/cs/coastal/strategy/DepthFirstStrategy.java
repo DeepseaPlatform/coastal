@@ -22,6 +22,7 @@ import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
+import za.ac.sun.cs.green.service.ModelCoreService;
 
 public class DepthFirstStrategy implements Strategy {
 
@@ -43,14 +44,19 @@ public class DepthFirstStrategy implements Strategy {
 
 	public DepthFirstStrategy() {
 		Reporters.register(this);
-		Properties greenProperties = new Properties();
+		Properties greenProperties = Configuration.getProperties();
 		greenProperties.setProperty("green.log.level", "ALL");
 		greenProperties.setProperty("green.services", "model");
 		greenProperties.setProperty("green.service.model", "(bounder modeller)");
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		greenProperties.setProperty("green.service.model.canonizer",
 				"za.ac.sun.cs.green.service.canonizer.ModelCanonizerService");
+		/*--- BEGIN OLD ---
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3JavaService");
+		/*--- END OLD ---*/
+		/*--- BEGIN NEW ---*/
+		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
+		/*--- END NEW ---*/
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
 		pathLimit = Configuration.getPathLimit();
 		if (pathLimit == 0) {
@@ -89,8 +95,15 @@ public class DepthFirstStrategy implements Strategy {
 			lgr.info("trying   <{}> {}", sig, SegmentedPC.constraintBeautify(pc.toString()));
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
+			/*--- BEGIN OLD ---
 			@SuppressWarnings("unchecked")
 			Map<IntVariable, Object> model = (Map<IntVariable, Object>) instance.request("model");
+			/*--- END OLD ---*/
+			/*--- BEGIN NEW ---*/
+			Instance result = (Instance) instance.request("model");
+			@SuppressWarnings("unchecked")
+			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) result.getData(ModelCoreService.MODEL_KEY);
+			/*--- END NEW ---*/
 			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				lgr.info("no model");
@@ -104,7 +117,12 @@ public class DepthFirstStrategy implements Strategy {
 				Map<String, Constant> newModel = new HashMap<>();
 				for (IntVariable variable : model.keySet()) {
 					String name = variable.getName();
+					/*--- BEGIN OLD ---
 					Constant value = new IntConstant((Integer) model.get(variable));
+					/*--- END OLD ---*/
+					/*--- BEGIN NEW ---*/
+					Constant value = model.get(variable);
+					/*--- END NEW ---*/
 					newModel.put(name, value);
 				}
 				String modelString = newModel.entrySet().stream().filter(p -> !p.getKey().startsWith("$"))
