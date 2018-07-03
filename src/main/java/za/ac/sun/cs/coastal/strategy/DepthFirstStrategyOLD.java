@@ -23,7 +23,7 @@ import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.service.ModelCoreService;
 
-public class DepthFirstStrategy implements Strategy {
+public class DepthFirstStrategyOLD implements Strategy {
 
 	private static final Logger lgr = Configuration.getLogger();
 
@@ -41,7 +41,7 @@ public class DepthFirstStrategy implements Strategy {
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
-	public DepthFirstStrategy() {
+	public DepthFirstStrategyOLD() {
 		Reporters.register(this);
 		Properties greenProperties = Configuration.getProperties();
 		greenProperties.setProperty("green.log.level", "ALL");
@@ -50,10 +50,10 @@ public class DepthFirstStrategy implements Strategy {
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		greenProperties.setProperty("green.service.model.canonizer",
 				"za.ac.sun.cs.green.service.canonizer.ModelCanonizerService");
-		/*--- BEGIN OLD ---*
+		/*--- BEGIN OLD ---*/
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3JavaService");
 		/*--- END OLD ---*/
-		/*--- BEGIN NEW ---*/
+		/*--- BEGIN NEW ---*
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
 		/*--- END NEW ---*/
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
@@ -97,11 +97,11 @@ public class DepthFirstStrategy implements Strategy {
 			lgr.info("trying   <{}> {}", sig, SegmentedPC.constraintBeautify(pc.toString()));
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
-			/*--- BEGIN OLD ---*
+			/*--- BEGIN OLD ---*/
 			@SuppressWarnings("unchecked")
 			Map<IntVariable, Object> model = (Map<IntVariable, Object>) instance.request("model");
 			/*--- END OLD ---*/
-			/*--- BEGIN NEW ---*/
+			/*--- BEGIN NEW ---*
 			Instance result = (Instance) instance.request("model");
 			@SuppressWarnings("unchecked")
 			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) result.getData(ModelCoreService.MODEL_KEY);
@@ -122,10 +122,10 @@ public class DepthFirstStrategy implements Strategy {
 					if (name.startsWith(SymbolicState.NEW_VAR_PREFIX)) {
 						continue;
 					}
-					/*--- BEGIN OLD ---*
+					/*--- BEGIN OLD ---*/
 					Constant value = new IntConstant((Integer) model.get(variable));
 					/*--- END OLD ---*/
-					/*--- BEGIN NEW ---*/
+					/*--- BEGIN NEW ---*
 					Constant value = model.get(variable);
 					/*--- END NEW ---*/
 					newModel.put(name, value);

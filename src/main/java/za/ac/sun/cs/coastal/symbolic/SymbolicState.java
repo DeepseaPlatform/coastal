@@ -29,7 +29,7 @@ public class SymbolicState {
 	
 	private static final String CHAR_SEPARATOR = "_H_"; // "#"
 	
-	public static final String NEW_VAR_PREFIX = "_D_"; // "$"
+	public static final String NEW_VAR_PREFIX = "U_D_"; // "$"
 	
 	private static final Logger lgr = Configuration.getLogger();
 
