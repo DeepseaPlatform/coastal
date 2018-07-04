@@ -13,7 +13,7 @@ public class KMP {
 
 	public static void main(String[] args) {
 		int[] haystack = { 1, 2, 3, 4 };
-		int[] needle = { 1, 2, 3 };
+		int[] needle = { 1, 2 };
 		System.out.println(search(haystack, needle));
 	}
 

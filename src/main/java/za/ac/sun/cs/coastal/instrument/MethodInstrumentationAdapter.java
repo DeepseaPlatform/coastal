@@ -71,6 +71,16 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	}
 
 	@Override
+	public void visitLineNumber(int line, Label start) {
+		if (dumpInstrumenter) {
+			lgr.trace("visitLineNumber(line:{}, label:{})", line, start);
+		}
+		mv.visitLdcInsn(line);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "reportLinenumber", "(I)V", false);
+		mv.visitLineNumber(line, start);
+	}
+	
+	@Override
 	public void visitCode() {
 		if (dumpInstrumenter) {
 			lgr.trace("visitCode()");

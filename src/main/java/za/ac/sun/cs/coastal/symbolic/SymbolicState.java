@@ -379,6 +379,15 @@ public class SymbolicState {
 			dumpFrames();
 		}
 	}
+	
+	public static void reportLinenumber(int line) {
+		if (!symbolicMode) {
+			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("### LINENUMBER {}", line);
+		}
+	}
 
 	public static void insn(int opcode) {
 		if (!symbolicMode) {
@@ -434,7 +443,7 @@ public class SymbolicState {
 			if (e instanceof IntConstant) {
 				Expression f = pop();
 				if (f instanceof IntConstant) {
-					push(new IntConstant(((IntConstant) e).getValue() + ((IntConstant) f).getValue()));
+					push(new IntConstant(((IntConstant) f).getValue() + ((IntConstant) e).getValue()));
 				} else {
 					push(new Operation(Operator.ADD, f, e));
 				}
@@ -451,7 +460,7 @@ public class SymbolicState {
 			if (e instanceof IntConstant) {
 				Expression f = pop();
 				if (f instanceof IntConstant) {
-					push(new IntConstant(((IntConstant) e).getValue() - ((IntConstant) f).getValue()));
+					push(new IntConstant(((IntConstant) f).getValue() - ((IntConstant) e).getValue()));
 				} else {
 					push(new Operation(Operator.SUB, f, e));
 				}
@@ -475,7 +484,7 @@ public class SymbolicState {
 			methodReturn();
 			break;
 		case Opcodes.ARRAYLENGTH:
-			int id = ((IntConstant) peek()).getValue();
+			int id = ((IntConstant) pop()).getValue();
 			push(getField(id, "length"));
 			break;
 		default:

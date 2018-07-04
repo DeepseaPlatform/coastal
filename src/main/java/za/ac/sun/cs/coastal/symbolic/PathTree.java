@@ -301,9 +301,9 @@ public class PathTree {
 		return 1 + Math.max(l, r);
 	}
 
-	private static final int PADDING = 1;
+	private static final int PADDING = 3;
 	private static final int MIN_WIDTH = 9;
-	private static final int BRANCH = 1;
+	private static final int BRANCH = 3;
 
 	private static int width(PathTree pathTree) {
 		if (pathTree == null) {
