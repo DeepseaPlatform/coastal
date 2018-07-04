@@ -166,16 +166,20 @@ public class SymbolicState {
 		isPreviousConjunctConstant = isConstantConjunct(conjunct);
 		isPreviousConjunctDuplicate = false;
 		if (isPreviousConjunctConstant) {
-			lgr.trace(">>> constant conjunct ignored: {}", c);
+			if (dumpTrace) {
+				lgr.trace(">>> constant conjunct ignored: {}", c);
+			}
 		} else if (conjunctSet.add(c)) {
 			spc = new SegmentedPC(spc, conjunct, pendingExtraConjunct, false);
 			pendingExtraConjunct = null;
-			lgr.trace(">>> adding conjunct: {}", c);
 			if (dumpTrace) {
+				lgr.trace(">>> adding conjunct: {}", c);
 				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 			}
 		} else {
-			lgr.trace(">>> duplicate conjunct ignored: {}", c);
+			if (dumpTrace) {
+				lgr.trace(">>> duplicate conjunct ignored: {}", c);
+			}
 			isPreviousConjunctDuplicate = true;
 		}
 	}
@@ -777,7 +781,9 @@ public class SymbolicState {
 			lgr.trace("(POST) {}", Bytecodes.toString(opcode));
 		}
 		if (!isPreviousConjunctConstant && !isPreviousConjunctDuplicate) {
-			lgr.trace(">>> previous conjunct is false");
+			if (dumpTrace) {
+				lgr.trace(">>> previous conjunct is false");
+			}
 			spc = spc.negate();
 			if (dumpTrace) {
 				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());

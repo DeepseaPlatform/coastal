@@ -21,7 +21,6 @@ import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
-import za.ac.sun.cs.green.service.ModelCoreService;
 
 public class DepthFirstStrategyOLD implements Strategy {
 

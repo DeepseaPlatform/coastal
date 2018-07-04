@@ -4,9 +4,10 @@ public class Mystery {
 	
 	public static void main(String[] args) {
 		System.out.println("start");
-		preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<a href=\">    @");
-		// preserveSomeHtmlTagsAndRemoveWhitespaces("blah");
-		//preserveSomeHtmlTagsAndRemoveWhitespaces(mqm.new SString(" <<  <a hRef=\"\">    "));
+		//preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<a href=\">    @");
+		//preserveSomeHtmlTagsAndRemoveWhitespaces("blah");
+		//preserveSomeHtmlTagsAndRemoveWhitespaces(" <<  <a hRef=\"\">    ");
+		preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<<<<<<<<<<<");
 		System.out.println ("end");
 	}
 
@@ -22,7 +23,8 @@ public class Mystery {
 				//for (int idx = 0; idx < body.length(); idx++) {
 				//	Debug.printPC("Current PC: ");
 				//}
-				throw new RuntimeException("Infinite loop");
+				// throw new RuntimeException("Infinite loop");
+				return "EXCEPTION: Infinite loop";
 			}
 			old = i;
 			if (body.charAt(i) == '<') {

@@ -56,6 +56,7 @@ public class DepthFirstStrategy implements Strategy {
 		/*--- BEGIN NEW ---*/
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
 		/*--- END NEW ---*/
+		greenProperties.setProperty("green.store", "za.ac.sun.cs.green.store.redis.RedisStore");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
 		pathLimit = Configuration.getPathLimit();
 		if (pathLimit == 0) {
