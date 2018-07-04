@@ -49,12 +49,7 @@ public class DepthFirstStrategyOLD implements Strategy {
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		greenProperties.setProperty("green.service.model.canonizer",
 				"za.ac.sun.cs.green.service.canonizer.ModelCanonizerService");
-		/*--- BEGIN OLD ---*/
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3JavaService");
-		/*--- END OLD ---*/
-		/*--- BEGIN NEW ---*
-		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
-		/*--- END NEW ---*/
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
 		pathLimit = Configuration.getPathLimit();
 		if (pathLimit == 0) {
@@ -96,15 +91,8 @@ public class DepthFirstStrategyOLD implements Strategy {
 			lgr.info("trying   <{}> {}", sig, SegmentedPC.constraintBeautify(pc.toString()));
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
-			/*--- BEGIN OLD ---*/
 			@SuppressWarnings("unchecked")
 			Map<IntVariable, Object> model = (Map<IntVariable, Object>) instance.request("model");
-			/*--- END OLD ---*/
-			/*--- BEGIN NEW ---*
-			Instance result = (Instance) instance.request("model");
-			@SuppressWarnings("unchecked")
-			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) result.getData(ModelCoreService.MODEL_KEY);
-			/*--- END NEW ---*/
 			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				lgr.info("no model");
@@ -121,12 +109,7 @@ public class DepthFirstStrategyOLD implements Strategy {
 					if (name.startsWith(SymbolicState.NEW_VAR_PREFIX)) {
 						continue;
 					}
-					/*--- BEGIN OLD ---*/
 					Constant value = new IntConstant((Integer) model.get(variable));
-					/*--- END OLD ---*/
-					/*--- BEGIN NEW ---*
-					Constant value = model.get(variable);
-					/*--- END NEW ---*/
 					newModel.put(name, value);
 				}
 				String modelString = newModel.toString();
