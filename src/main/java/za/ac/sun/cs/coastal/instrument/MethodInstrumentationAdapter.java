@@ -177,12 +177,16 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		if (dumpInstrumenter) {
 			lgr.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		}
-		mv.visitLdcInsn(opcode);
-		mv.visitLdcInsn(owner);
-		mv.visitLdcInsn(name);
-		mv.visitLdcInsn(descriptor);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn", "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
-		mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+		if (owner.equals(LIBRARY) && name.equals("stop")) {
+			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+		} else {
+			mv.visitLdcInsn(opcode);
+			mv.visitLdcInsn(owner);
+			mv.visitLdcInsn(name);
+			mv.visitLdcInsn(descriptor);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn", "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
+			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+		}
 	}
 
 	@Override

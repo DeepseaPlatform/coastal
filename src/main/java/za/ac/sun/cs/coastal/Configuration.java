@@ -179,6 +179,11 @@ public class Configuration {
 	 */
 	private static boolean echoOutput = false;
 
+	/**
+	 * Whether or not symbolic termination calls should be obeyed.
+	 */
+	private static boolean obeyStops = false;
+	
 	// ======================================================================
 	//
 	// GETTERS AND SETTERS FOR PROPERTIES
@@ -379,6 +384,14 @@ public class Configuration {
 		Configuration.echoOutput = echoOutput;
 	}
 
+	public static boolean getObeyStops() {
+		return obeyStops;
+	}
+	
+	public static void setObeyStops(boolean obeyStops) {
+		Configuration.obeyStops = obeyStops;
+	}
+	
 	// ======================================================================
 	//
 	// LOAD AND PARSE CONFIGURATION PROPERTIES
@@ -507,6 +520,9 @@ public class Configuration {
 		// Process coastal.echooutput = ...
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", getEchoOutput()));
 
+		// Process coastal.obeystops = ...
+		setObeyStops(getBooleanProperty(properties, "coastal.obeystops", getObeyStops()));
+		
 		// Process coastal.strategy = ...
 		// INITIALIZE this last because it may use other settings
 		p = properties.getProperty("coastal.strategy");
@@ -717,6 +733,7 @@ public class Configuration {
 			LOGGER.info("coastal.strategy = {}", s.getClass().getName());
 		}
 		LOGGER.info("coastal.echooutput = {}", getEchoOutput());
+		LOGGER.info("coastal.obeystops = {}", getObeyStops());
 		LOGGER.info("coastal.limit.run = {}", getRunLimit());
 		LOGGER.info("coastal.limit.time = {}", getTimeLimit());
 		LOGGER.info("coastal.limit.path = {}", getPathLimit());

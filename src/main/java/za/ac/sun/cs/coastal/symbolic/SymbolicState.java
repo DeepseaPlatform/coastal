@@ -61,6 +61,8 @@ public class SymbolicState {
 
 	private static Map<String, Constant> concreteValues = null;
 
+	private static boolean mayContinue = true;
+
 	public static void reset(Map<String, Constant> concreteValues) {
 		symbolicMode = false;
 		frames.clear();
@@ -76,6 +78,10 @@ public class SymbolicState {
 
 	public static boolean getSymbolicMode() {
 		return symbolicMode;
+	}
+
+	public static boolean mayContinue() {
+		return mayContinue;
 	}
 
 	public static SegmentedPC getSegmentedPathCondition() {
@@ -253,6 +259,27 @@ public class SymbolicState {
 			x.printStackTrace();
 		}
 		return false;
+	}
+
+	// ======================================================================
+	//
+	// SYMBOLIC INTERACTION
+	//
+	// ======================================================================
+	
+	public static void stop() {
+		if (Configuration.getObeyStops()) {
+			mayContinue = false;
+			lgr.info("!!! PROGRAM TERMINATION POINT REACHED");
+		}
+	}
+
+	public static void stop(String message) {
+		if (Configuration.getObeyStops()) {
+			mayContinue = false;
+			lgr.info("!!! PROGRAM TERMINATION POINT REACHED");
+			lgr.info("!!! {}",  message);
+		}
 	}
 
 	// ======================================================================

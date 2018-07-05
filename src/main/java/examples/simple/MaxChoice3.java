@@ -1,5 +1,7 @@
 package examples.simple;
 
+import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+
 public class MaxChoice3 {
 
 	public static void main(String[] args) {
@@ -12,6 +14,7 @@ public class MaxChoice3 {
 			if (x + y > 5) {
 				return x;
 			} else {
+				SymbolicState.stop("my message");
 				return 10;
 			}
 		} else {

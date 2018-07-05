@@ -62,7 +62,7 @@ public class Diver implements Reporter {
 			performRun();
 			time += System.currentTimeMillis() - t0;
 			concreteValues = strategy.refine();
-		} while (concreteValues != null);
+		} while ((concreteValues != null) && SymbolicState.mayContinue());
 	}
 
 	public int getRuns() {
