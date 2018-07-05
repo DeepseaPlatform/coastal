@@ -184,6 +184,11 @@ public class Configuration {
 	 */
 	private static boolean obeyStops = false;
 	
+	/**
+	 * Whether or not symbolic markers are recorded.
+	 */
+	private static boolean recordMarks = false;
+	
 	// ======================================================================
 	//
 	// GETTERS AND SETTERS FOR PROPERTIES
@@ -392,6 +397,14 @@ public class Configuration {
 		Configuration.obeyStops = obeyStops;
 	}
 	
+	public static boolean getRecordMarks() {
+		return recordMarks;
+	}
+	
+	public static void setRecordMarks(boolean recordMarks) {
+		Configuration.recordMarks = recordMarks;
+	}
+	
 	// ======================================================================
 	//
 	// LOAD AND PARSE CONFIGURATION PROPERTIES
@@ -522,6 +535,9 @@ public class Configuration {
 
 		// Process coastal.obeystops = ...
 		setObeyStops(getBooleanProperty(properties, "coastal.obeystops", getObeyStops()));
+		
+		// Process coastal.recordmarks = ...
+		setRecordMarks(getBooleanProperty(properties, "coastal.recordmarks", getRecordMarks()));
 		
 		// Process coastal.strategy = ...
 		// INITIALIZE this last because it may use other settings
@@ -734,6 +750,7 @@ public class Configuration {
 		}
 		LOGGER.info("coastal.echooutput = {}", getEchoOutput());
 		LOGGER.info("coastal.obeystops = {}", getObeyStops());
+		LOGGER.info("coastal.recordmarks = {}", getRecordMarks());
 		LOGGER.info("coastal.limit.run = {}", getRunLimit());
 		LOGGER.info("coastal.limit.time = {}", getTimeLimit());
 		LOGGER.info("coastal.limit.path = {}", getPathLimit());

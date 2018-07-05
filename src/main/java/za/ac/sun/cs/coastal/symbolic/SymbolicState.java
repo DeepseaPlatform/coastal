@@ -63,6 +63,8 @@ public class SymbolicState {
 
 	private static boolean mayContinue = true;
 
+	private static final Map<String, Integer> markers = new HashMap<>();
+
 	public static void reset(Map<String, Constant> concreteValues) {
 		symbolicMode = false;
 		frames.clear();
@@ -82,6 +84,10 @@ public class SymbolicState {
 
 	public static boolean mayContinue() {
 		return mayContinue;
+	}
+
+	public static Map<String, Integer> getMarkers() {
+		return markers;
 	}
 
 	public static SegmentedPC getSegmentedPathCondition() {
@@ -282,6 +288,24 @@ public class SymbolicState {
 		}
 	}
 
+	public static void mark(int marker) {
+		if (Configuration.getRecordMarks()) {
+			mark(Integer.toString(marker));
+		}
+	}
+
+	public static void mark(String marker) {
+		if (Configuration.getRecordMarks()) {
+			String key = marker;
+			Integer n = markers.get(key);
+			if (n == null) {
+				markers.put(key, 1);
+			} else {
+				markers.put(key, n + 1);
+			}
+		}
+	}
+	
 	// ======================================================================
 	//
 	// INSTRUCTIONS
