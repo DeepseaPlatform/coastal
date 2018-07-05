@@ -48,8 +48,6 @@ public class DepthFirstStrategy implements Strategy {
 		greenProperties.setProperty("green.services", "model");
 		greenProperties.setProperty("green.service.model", "(bounder modeller)");
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
-		greenProperties.setProperty("green.service.model.canonizer",
-				"za.ac.sun.cs.green.service.canonizer.ModelCanonizerService");
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
 		// greenProperties.setProperty("green.store", "za.ac.sun.cs.green.store.redis.RedisStore");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
