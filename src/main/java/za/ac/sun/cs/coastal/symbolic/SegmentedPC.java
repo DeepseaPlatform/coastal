@@ -154,13 +154,13 @@ public class SegmentedPC {
 	}
 
 	public static String constraintBeautify(String subject) {
-		subject = replace("[0-9]+[!=]=[a-zA-Z]+#[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
-		subject = replace("[a-zA-Z]+#[0-9]+[!=]=[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
+		subject = replace("[0-9]+[!=]=[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
+		subject = replace("[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+[!=]=[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
 		return subject;
 	}
 
 	public static String modelBeautify(String subject) {
-		return replace("[a-zA-Z]+#[0-9]+=[0-9]+", m -> rewriteCharModel(m.group()), subject);
+		return replace("[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+=[0-9]+", m -> rewriteCharModel(m.group()), subject);
 	}
 	
 	public static String replace(String regex, Function<MatchResult, String> callback, CharSequence subject) {
@@ -181,23 +181,23 @@ public class SegmentedPC {
 		if (Character.isDigit(replace.charAt(0))) {
 			StringBuilder b = new StringBuilder();
 			appendChar(b, Integer.parseInt(replace.substring(0, index)));
-			return b.append(replace.substring(index)).toString();
+			return b.append(replace.substring(index)).toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
 		} else {
 			StringBuilder b = new StringBuilder();
 			b.append(replace.substring(0, index + 2));
 			appendChar(b, Integer.parseInt(replace.substring(index + 2)));
-			return b.toString();
+			return b.toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
 		}
 	}
 	
 	public static String rewriteCharModel(String replace) {
 		int index = replace.indexOf('=');
 		if (index == -1) {
-			return replace;
+			return replace.replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
 		}
 		StringBuilder b = new StringBuilder().append(replace.substring(0, index + 1));
 		appendChar(b, Integer.parseInt(replace.substring(index + 1)));
-		return b.toString();
+		return b.toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
 	}
 
 	public static void appendChar(StringBuilder stringBuilder, int ascii) {

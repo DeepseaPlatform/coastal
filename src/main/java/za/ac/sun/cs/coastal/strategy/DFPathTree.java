@@ -1,11 +1,12 @@
-package za.ac.sun.cs.coastal.symbolic;
+package za.ac.sun.cs.coastal.strategy;
 
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.green.expr.Expression;
 
-public class PathTree {
+public class DFPathTree {
 
 	// LOGGING AND DEBUGGING
 	// ---------------------
@@ -21,7 +22,7 @@ public class PathTree {
 	// WHOLE TREE PROPERTIES
 	// ---------------------
 
-	private static PathTree root = null;
+	private static DFPathTree root = null;
 
 	private static int pathCount = 0;
 
@@ -34,11 +35,11 @@ public class PathTree {
 
 	private final Expression passiveConjunct;
 
-	private final PathTree parent;
+	private final DFPathTree parent;
 
-	private PathTree left = null;
+	private DFPathTree left = null;
 
-	private PathTree right = null;
+	private DFPathTree right = null;
 
 	private boolean isFullyExplored = false;
 
@@ -46,7 +47,7 @@ public class PathTree {
 
 	private boolean isLeaf = false;
 
-	public PathTree(boolean isInfeasible, PathTree parent) {
+	public DFPathTree(boolean isInfeasible, DFPathTree parent) {
 		this.activeConjunct = null;
 		this.passiveConjunct = null;
 		this.parent = parent;
@@ -57,13 +58,13 @@ public class PathTree {
 		}
 	}
 
-	public PathTree(SegmentedPC spc, PathTree parent) {
+	public DFPathTree(SegmentedPC spc, DFPathTree parent) {
 		this.activeConjunct = spc.getActiveConjunct();
 		this.passiveConjunct = spc.getPassiveConjunct();
 		this.parent = parent;
 	}
 
-	public static String getId(PathTree pathTree) {
+	public static String getId(DFPathTree pathTree) {
 		return (pathTree == null) ? "NUL" : ("#" + pathTree.getId());
 	}
 
@@ -86,7 +87,7 @@ public class PathTree {
 	public static SegmentedPC insertPath(SegmentedPC spc, boolean isInfeasible) {
 		SegmentedPC pc = insertPath0(spc, isInfeasible);
 		if (dumpPaths) {
-			for (String ll : PathTree.stringRepr()) {
+			for (String ll : DFPathTree.stringRepr()) {
 				lgr.debug(ll);
 			}
 		}
@@ -102,8 +103,8 @@ public class PathTree {
 			path[idx--] = s;
 		}
 		assert idx == -1;
-		PathTree pre = null;
-		PathTree cur = root;
+		DFPathTree pre = null;
+		DFPathTree cur = root;
 		idx = 0;
 		if (dumpPaths) {
 			lgr.debug("Inserting into existing paths");
@@ -138,7 +139,7 @@ public class PathTree {
 			if (dumpPaths) {
 				lgr.debug("Creating root");
 			}
-			pre = root = new PathTree(s, pre);
+			pre = root = new DFPathTree(s, pre);
 			lastBranch = s.isLastConjunctFalse();
 			idx++;
 		}
@@ -153,14 +154,14 @@ public class PathTree {
 					lgr.debug("  new right child for pre:{} conj:{}", getId(pre), s.getActiveConjunct());
 				}
 				assert pre.right == null;
-				pre.right = new PathTree(s, pre);
+				pre.right = new DFPathTree(s, pre);
 				pre = pre.right;
 			} else {
 				if (dumpPaths) {
 					lgr.debug("  new left child for pre:{} conj:{}", getId(pre), s.getActiveConjunct());
 				}
 				assert pre.left == null;
-				pre.left = new PathTree(s, pre);
+				pre.left = new DFPathTree(s, pre);
 				pre = pre.left;
 			}
 			lastBranch = s.isLastConjunctFalse();
@@ -168,17 +169,17 @@ public class PathTree {
 		}
 		// Lastly, create the leaf
 		if (pre == null) {
-			root = new PathTree(isInfeasible, pre);
+			root = new DFPathTree(isInfeasible, pre);
 			if (dumpPaths) {
 				lgr.debug("Create new root {} (isInfeasible={})", getId(root), isInfeasible);
 			}
 		} else if (lastBranch) {
-			pre.right = new PathTree(isInfeasible, pre);
+			pre.right = new DFPathTree(isInfeasible, pre);
 			if (dumpPaths) {
 				lgr.debug("Create right leaf {} (isInfeasible={})", getId(pre.right), isInfeasible);
 			}
 		} else {
-			pre.left = new PathTree(isInfeasible, pre);
+			pre.left = new DFPathTree(isInfeasible, pre);
 			if (dumpPaths) {
 				lgr.debug("Create left leaf {} (isInfeasible={})", getId(pre.left), isInfeasible);
 			}
@@ -292,7 +293,7 @@ public class PathTree {
 		return finalLines;
 	}
 
-	private static int height(PathTree pathTree) {
+	private static int height(DFPathTree pathTree) {
 		if (pathTree == null) {
 			return 1;
 		}
@@ -305,7 +306,7 @@ public class PathTree {
 	private static final int MIN_WIDTH = 9;
 	private static final int BRANCH = 3;
 
-	private static int width(PathTree pathTree) {
+	private static int width(DFPathTree pathTree) {
 		if (pathTree == null) {
 			return 1 + PADDING;
 		} else if (pathTree.isLeaf) {
@@ -319,7 +320,7 @@ public class PathTree {
 		}
 	}
 
-	private static int stringFill(char[][] lines, int minx, int y, PathTree pathTree, int depth) {
+	private static int stringFill(char[][] lines, int minx, int y, DFPathTree pathTree, int depth) {
 		if (pathTree == null) {
 			stringWrite(lines, minx, y, "-");
 			return minx;
@@ -361,7 +362,7 @@ public class PathTree {
 		return getShape(root);
 	}
 
-	private static String getShape(PathTree pathTree) {
+	private static String getShape(DFPathTree pathTree) {
 		if (pathTree == null) {
 			return "0";
 		} else if (pathTree.isLeaf) {

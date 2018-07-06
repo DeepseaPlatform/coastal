@@ -27,7 +27,7 @@ public class SymbolicState {
 
 	private static final String INDEX_SEPARATOR = "_D_"; // "$"
 	
-	private static final String CHAR_SEPARATOR = "_H_"; // "#"
+	public static final String CHAR_SEPARATOR = "_H_"; // "#"
 	
 	public static final String NEW_VAR_PREFIX = "U_D_"; // "$"
 	
@@ -37,6 +37,11 @@ public class SymbolicState {
 
 	private static final boolean dumpFrame = Configuration.getDumpFrame();
 
+	private static final long limitConjunct = (Configuration.getLimitConjuncts() == 0) ? Long.MAX_VALUE : Configuration.getLimitConjuncts();
+	
+	// if true, check for limit on conjuncts
+	private static boolean dangerFlag = false;
+	
 	private static boolean symbolicMode = false;
 
 	private static final Stack<SymbolicFrame> frames = new Stack<>();
@@ -66,6 +71,7 @@ public class SymbolicState {
 	private static final Map<String, Integer> markers = new HashMap<>();
 
 	public static void reset(Map<String, Constant> concreteValues) {
+		dangerFlag = false;
 		symbolicMode = false;
 		frames.clear();
 		objectIdCount = 0;
@@ -444,12 +450,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void insn(int opcode) {
+	public static void insn(int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{}", () -> Bytecodes.toString(opcode));
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		case Opcodes.ACONST_NULL:
@@ -551,12 +560,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void intInsn(int opcode, int operand) {
+	public static void intInsn(int opcode, int operand) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{} {}", Bytecodes.toString(opcode), operand);
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		case Opcodes.BIPUSH:
@@ -585,12 +597,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void varInsn(int opcode, int var) {
+	public static void varInsn(int opcode, int var) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{} {}", Bytecodes.toString(opcode), var);
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		case Opcodes.ALOAD:
@@ -614,12 +629,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void typeInsn(int opcode) {
+	public static void typeInsn(int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		case Opcodes.NEW:
@@ -635,12 +653,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void fieldInsn(int opcode, String owner, String name, String descriptor) {
+	public static void fieldInsn(int opcode, String owner, String name, String descriptor) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		case Opcodes.GETSTATIC:
@@ -665,12 +686,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void methodInsn(int opcode, String owner, String name, String descriptor) {
+	public static void methodInsn(int opcode, String owner, String name, String descriptor) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		case Opcodes.INVOKESPECIAL:
@@ -722,12 +746,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void invokeDynamicInsn(int opcode) {
+	public static void invokeDynamicInsn(int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		default:
@@ -740,13 +767,17 @@ public class SymbolicState {
 	}
 
 	/* Missing offset because destination not yet known. */
-	public static void jumpInsn(int opcode) {
+	public static void jumpInsn(int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{}", Bytecodes.toString(opcode));
 		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
+		}
+		dangerFlag = true;
 		switch (opcode) {
 		case Opcodes.GOTO:
 			// do nothing
@@ -824,7 +855,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void postJumpInsn(int opcode) {
+	public static void postJumpInsn(int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -836,18 +867,29 @@ public class SymbolicState {
 				lgr.trace(">>> previous conjunct is false");
 			}
 			spc = spc.negate();
+			checkLimitConjuncts();
 			if (dumpTrace) {
 				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 			}
 		}
 	}
 
-	public static void ldcInsn(int opcode, Object value) {
+	private static void checkLimitConjuncts() throws LimitConjunctException {
+		if ((spc != null) && (spc.getDepth() >= limitConjunct)) {
+			throw new LimitConjunctException();
+		}
+		dangerFlag = false;
+	}
+
+	public static void ldcInsn(int opcode, Object value) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{} {}", Bytecodes.toString(opcode), value);
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		case Opcodes.LDC:
@@ -874,13 +916,16 @@ public class SymbolicState {
 		}
 	}
 
-	public static void iincInsn(int var, int increment) {
+	public static void iincInsn(int var, int increment) throws LimitConjunctException {
 		final int opcode = 132;
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{} {}", Bytecodes.toString(opcode), increment);
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		Expression e0 = getLocal(var);
 		Expression e1 = new IntConstant(increment);
@@ -890,12 +935,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void tableSwitchInsn(int opcode) {
+	public static void tableSwitchInsn(int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		default:
@@ -907,12 +955,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void lookupSwitchInsn(int opcode) {
+	public static void lookupSwitchInsn(int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		default:
@@ -924,12 +975,15 @@ public class SymbolicState {
 		}
 	}
 
-	public static void multiANewArrayInsn(int opcode) {
+	public static void multiANewArrayInsn(int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("{}", Bytecodes.toString(opcode));
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
 		}
 		switch (opcode) {
 		default:

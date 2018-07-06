@@ -41,9 +41,9 @@ public class Diver implements Reporter {
 			System.exit(1);
 		}
 		Map<String, Constant> concreteValues = null;
-		long runLimit = Configuration.getRunLimit();
+		long runLimit = Configuration.getLimitRuns();
 		if (runLimit == 0) { runLimit = Long.MIN_VALUE; }
-		long timeLimit = Configuration.getTimeLimit();
+		long timeLimit = Configuration.getLimitTime();
 		if (timeLimit == 0) { timeLimit = Long.MAX_VALUE; }
 		long tl0 = System.currentTimeMillis();
 		do {
@@ -97,7 +97,12 @@ public class Diver implements Reporter {
 		} catch (IllegalArgumentException x) {
 			x.printStackTrace();
 		} catch (InvocationTargetException x) {
-			x.printStackTrace();
+			Throwable t = x.getCause();
+			if ((t != null) && (t instanceof LimitConjunctException)) {
+				// limit on nr of conjuncts has been reached
+			} else {
+				x.printStackTrace();
+			}
 		}
 		System.setOut(out); System.setErr(err);
 	}

@@ -1,5 +1,7 @@
 package examples.strings;
 
+import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+
 public class Mystery {
 	
 	public static void main(String[] args) {
@@ -7,8 +9,23 @@ public class Mystery {
 		//preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<a href=\">    @");
 		//preserveSomeHtmlTagsAndRemoveWhitespaces("blah");
 		//preserveSomeHtmlTagsAndRemoveWhitespaces(" <<  <a hRef=\"\">    ");
-		preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<<<<<<<<<<<");
+		//preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<<<<<<<<<<<");
+		preserveSomeHtmlTagsAndRemoveWhitespaces("01234567890123456");
+		//preserveSomeHtmlTagsAndRemoveWhitespaces("xxx<A HREF=\"xxx");
 		System.out.println ("end");
+		// {S_H_0=0, S_H_2=0, S_H_1=0, S_H_8=69, S_H_7=82, S_H_9=70, S_H_4=65, S_H_11=34, S_H_10=61, S_H_3=60, S_H_6=72, S_H_5=32}
+		// S_H_0=0
+		// S_H_1=0
+		// S_H_2=0
+		// S_H_3=60
+		// S_H_4=65
+		// S_H_5=32
+		// S_H_6=72
+		// S_H_7=82
+		// S_H_8=69
+		// S_H_9=70
+		// S_H_10=61
+		// S_H_11=34
 	}
 
 	public static String preserveSomeHtmlTagsAndRemoveWhitespaces(String body) {
@@ -24,6 +41,7 @@ public class Mystery {
 				//	Debug.printPC("Current PC: ");
 				//}
 				// throw new RuntimeException("Infinite loop");
+				SymbolicState.stop("BUG");
 				return "EXCEPTION: Infinite loop";
 			}
 			old = i;

@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.reporting.Reporters;
-import za.ac.sun.cs.coastal.symbolic.PathTree;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.Green;
@@ -51,7 +50,7 @@ public class DepthFirstStrategy implements Strategy {
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
 		// greenProperties.setProperty("green.store", "za.ac.sun.cs.green.store.redis.RedisStore");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
-		pathLimit = Configuration.getPathLimit();
+		pathLimit = Configuration.getLimitPaths();
 		if (pathLimit == 0) {
 			pathLimit = Long.MIN_VALUE;
 		}
@@ -76,12 +75,12 @@ public class DepthFirstStrategy implements Strategy {
 				return null;
 			}
 			t = System.currentTimeMillis();
-			spc = PathTree.insertPath(spc, infeasible);
+			spc = DFPathTree.insertPath(spc, infeasible);
 			pathTreeTime += System.currentTimeMillis() - t;
 			if (spc == null) {
 				lgr.info("no further paths");
 				if (dumpTrace) {
-					lgr.info("Tree shape: {}", PathTree.getShape());
+					lgr.info("Tree shape: {}", DFPathTree.getShape());
 				}
 				return null;
 			}
@@ -143,8 +142,8 @@ public class DepthFirstStrategy implements Strategy {
 
 	@Override
 	public void report(PrintWriter out) {
-		out.println("  Inserted paths: " + PathTree.getPathCount());
-		out.println("  Revisited paths: " + PathTree.getRevisitCount());
+		out.println("  Inserted paths: " + DFPathTree.getPathCount());
+		out.println("  Revisited paths: " + DFPathTree.getRevisitCount());
 		out.println("  Infeasible paths: " + infeasibleCount);
 		out.println("  Solver time: " + solverTime);
 		out.println("  Path tree time: " + pathTreeTime);

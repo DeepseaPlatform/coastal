@@ -131,18 +131,23 @@ public class Configuration {
 	/**
 	 * Cap on the number of runs executed.
 	 */
-	private static long runLimit = 0;
+	private static long limitRuns = 0;
 
 	/**
 	 * Cap on the time use.
 	 */
-	private static long timeLimit = 0;
+	private static long limitTime = 0;
 
 	/**
 	 * Cap on the number of paths to explore.
 	 */
-	private static long pathLimit = 0;
+	private static long limitPaths = 0;
 
+	/**
+	 * Limit on the number of conjuncts allowed per path condition
+	 */
+	private static long limitConjuncts = 0;
+	
 	/**
 	 * Whether or not the instrumentation trace is dumped.
 	 */
@@ -309,30 +314,38 @@ public class Configuration {
 		Configuration.strategy = strategy;
 	}
 
-	public static long getRunLimit() {
-		return runLimit;
+	public static long getLimitRuns() {
+		return limitRuns;
 	}
 
-	public static void setRunLimit(long runLimit) {
-		Configuration.runLimit = runLimit;
+	public static void setLimitRuns(long runLimit) {
+		Configuration.limitRuns = runLimit;
 	}
 
-	public static long getTimeLimit() {
-		return timeLimit;
+	public static long getLimitTime() {
+		return limitTime;
 	}
 
-	public static void setTimeLimit(long timeLimit) {
-		Configuration.timeLimit = timeLimit;
+	public static void setLimitTime(long timeLimit) {
+		Configuration.limitTime = timeLimit;
 	}
 
-	public static long getPathLimit() {
-		return pathLimit;
+	public static long getLimitPaths() {
+		return limitPaths;
 	}
 
-	public static void setPathLimit(long pathLimit) {
-		Configuration.pathLimit = pathLimit;
+	public static void setLimitPaths(long pathLimit) {
+		Configuration.limitPaths = pathLimit;
 	}
 
+	public static long getLimitConjuncts() {
+		return limitConjuncts;
+	}
+	
+	public static void setLimitConjuncts(long limitConjuncts) {
+		Configuration.limitConjuncts = limitConjuncts;
+	}
+	
 	public static boolean getDumpInstrumenter() {
 		return dumpInstrumenter;
 	}
@@ -493,14 +506,17 @@ public class Configuration {
 		}
 
 		// Process coastal.limit.run = ...
-		setRunLimit(getLongProperty(properties, "coastal.limit.run", getRunLimit()));
+		setLimitRuns(getLongProperty(properties, "coastal.limit.run", getLimitRuns()));
 
 		// Process coastal.limit.time = ...
-		setTimeLimit(getLongProperty(properties, "coastal.limit.time", getTimeLimit()));
+		setLimitTime(getLongProperty(properties, "coastal.limit.time", getLimitTime()));
 
 		// Process coastal.limit.path = ...
-		setPathLimit(getLongProperty(properties, "coastal.limit.path", getPathLimit()));
+		setLimitPaths(getLongProperty(properties, "coastal.limit.path", getLimitPaths()));
 
+		// Process coastal.limit.conjuncts = ...
+		setLimitConjuncts(getLongProperty(properties, "coastal.limit.conjuncts", getLimitConjuncts()));
+		
 		// Process coastal.dump
 		Boolean dumpAll = getBooleanProperty(properties, "coastal.dump");
 		if (dumpAll != null) {
@@ -751,9 +767,10 @@ public class Configuration {
 		LOGGER.info("coastal.echooutput = {}", getEchoOutput());
 		LOGGER.info("coastal.obeystops = {}", getObeyStops());
 		LOGGER.info("coastal.recordmarks = {}", getRecordMarks());
-		LOGGER.info("coastal.limit.run = {}", getRunLimit());
-		LOGGER.info("coastal.limit.time = {}", getTimeLimit());
-		LOGGER.info("coastal.limit.path = {}", getPathLimit());
+		LOGGER.info("coastal.limit.run = {}", getLimitRuns());
+		LOGGER.info("coastal.limit.time = {}", getLimitTime());
+		LOGGER.info("coastal.limit.path = {}", getLimitPaths());
+		LOGGER.info("coastal.limit.conjuncts = {}", getLimitConjuncts());
 		LOGGER.info("coastal.dump.config = {}", getDumpConfig());
 		LOGGER.info("coastal.dump.asm = {}", getDumpAsm());
 		LOGGER.info("coastal.dump.trace = {}", getDumpTrace());
