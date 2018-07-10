@@ -10,8 +10,8 @@ public class Mystery {
 		//preserveSomeHtmlTagsAndRemoveWhitespaces("blah");
 		//preserveSomeHtmlTagsAndRemoveWhitespaces(" <<  <a hRef=\"\">    ");
 		//preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<<<<<<<<<<<");
-		preserveSomeHtmlTagsAndRemoveWhitespaces("01234567890123");
-		//preserveSomeHtmlTagsAndRemoveWhitespaces("xxx<A HREF=\"xxx");
+		preserveSomeHtmlTagsAndRemoveWhitespaces("012345678901234567");
+		//preserveSomeHtmlTagsAndRemoveWhitespaces("   <A HREF=\"<<<<<<");
 		System.out.println ("end");
 		// {S_H_0=0, S_H_2=0, S_H_1=0, S_H_8=69, S_H_7=82, S_H_9=70, S_H_4=65, S_H_11=34, S_H_10=61, S_H_3=60, S_H_6=72, S_H_5=32}
 		// S_H_0=0
@@ -36,7 +36,7 @@ public class Mystery {
 		int old = i - 1;
 		while (i < len) {
 			//assert i >= old: "Infinite loop";
-			if (i < old) {
+			if (i <= old) {
 				//for (int idx = 0; idx < body.length(); idx++) {
 				//	Debug.printPC("Current PC: ");
 				//}
