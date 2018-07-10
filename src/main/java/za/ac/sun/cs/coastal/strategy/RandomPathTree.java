@@ -220,18 +220,18 @@ public class RandomPathTree {
 					}
 					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
 					cur = cur.left;
-				} else if ((cur.right != null) && !cur.right.isComplete()) {
-					if (dumpPaths) {
-						lgr.debug("  At {}, right is available", getId(cur));
-					}
-					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
-					cur = cur.right;
 				} else if (cur.left == null) {
 					if (dumpPaths) {
 						lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
 					}
 					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
 					return newSpc;
+				} else if ((cur.right != null) && !cur.right.isComplete()) {
+					if (dumpPaths) {
+						lgr.debug("  At {}, right is available", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
+					cur = cur.right;
 				} else if (cur.right == null) {
 					if (dumpPaths) {
 						lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
@@ -251,18 +251,18 @@ public class RandomPathTree {
 					}
 					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
 					cur = cur.right;
-				} else if ((cur.left != null) && !cur.left.isComplete()) {
-					if (dumpPaths) {
-						lgr.debug("  At {}, left is available", getId(cur));
-					}
-					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
-					cur = cur.left;
 				} else if (cur.right == null) {
 					if (dumpPaths) {
 						lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
 					}
 					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
 					return newSpc;
+				} else if ((cur.left != null) && !cur.left.isComplete()) {
+					if (dumpPaths) {
+						lgr.debug("  At {}, left is available", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
+					cur = cur.left;
 				} else if (cur.left == null) {
 					if (dumpPaths) {
 						lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
