@@ -1,10 +1,5 @@
 package za.ac.sun.cs.coastal.symbolic;
 
-import java.util.function.Function;
-import java.util.regex.MatchResult;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
