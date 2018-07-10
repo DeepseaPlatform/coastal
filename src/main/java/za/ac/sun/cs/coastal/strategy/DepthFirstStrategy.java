@@ -67,7 +67,8 @@ public class DepthFirstStrategy implements Strategy {
 	private Map<String, Constant> refine0() {
 		long t;
 		SegmentedPC spc = SymbolicState.getSegmentedPathCondition();
-		lgr.info("explored <{}> {}", spc.getSignature(), SegmentedPC.constraintBeautify(spc.getPathCondition().toString()));
+		// lgr.info("explored <{}> {}", spc.getSignature(), SegmentedPC.constraintBeautify(spc.getPathCondition().toString()));
+		lgr.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		boolean infeasible = false;
 		while (true) {
 			if (--pathLimit < 0) {
@@ -87,7 +88,8 @@ public class DepthFirstStrategy implements Strategy {
 			infeasible = false;
 			Expression pc = spc.getPathCondition();
 			String sig = spc.getSignature();
-			lgr.info("trying   <{}> {}", sig, SegmentedPC.constraintBeautify(pc.toString()));
+			// lgr.info("trying   <{}> {}", sig, SegmentedPC.constraintBeautify(pc.toString()));
+			lgr.info("trying   <{}> {}", sig, pc.toString());
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
 			Instance result = (Instance) instance.request("model");
@@ -114,7 +116,8 @@ public class DepthFirstStrategy implements Strategy {
 				}
 				String modelString = newModel.toString();
 				modelExtractionTime += System.currentTimeMillis() - t;
-				lgr.info("new model: {}", SegmentedPC.modelBeautify(modelString));
+				// lgr.info("new model: {}", SegmentedPC.modelBeautify(modelString));
+				lgr.info("new model: {}", modelString);
 				if (visitedModels.add(modelString)) {
 					return newModel;
 				} else {

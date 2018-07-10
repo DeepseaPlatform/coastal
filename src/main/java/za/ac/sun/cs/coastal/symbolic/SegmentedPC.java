@@ -153,52 +153,52 @@ public class SegmentedPC {
 		return stringRep0;
 	}
 
-	public static String constraintBeautify(String subject) {
-		subject = replace("[0-9]+[!=]=[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
-		subject = replace("[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+[!=]=[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
-		return subject;
-	}
-
-	public static String modelBeautify(String subject) {
-		return replace("[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+=[0-9]+", m -> rewriteCharModel(m.group()), subject);
-	}
-	
-	public static String replace(String regex, Function<MatchResult, String> callback, CharSequence subject) {
-		Matcher m = Pattern.compile(regex).matcher(subject);
-		StringBuffer sb = new StringBuffer();
-		while (m.find()) {
-			m.appendReplacement(sb, callback.apply(m.toMatchResult()));
-		}
-		m.appendTail(sb);
-		return sb.toString();
-	}
-
-	public static String rewriteCharConstraint(String replace) {
-		int index = Math.max(replace.indexOf("=="), replace.indexOf("!="));
-		if (index == -1) {
-			return replace;
-		}
-		if (Character.isDigit(replace.charAt(0))) {
-			StringBuilder b = new StringBuilder();
-			appendChar(b, Integer.parseInt(replace.substring(0, index)));
-			return b.append(replace.substring(index)).toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
-		} else {
-			StringBuilder b = new StringBuilder();
-			b.append(replace.substring(0, index + 2));
-			appendChar(b, Integer.parseInt(replace.substring(index + 2)));
-			return b.toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
-		}
-	}
-	
-	public static String rewriteCharModel(String replace) {
-		int index = replace.indexOf('=');
-		if (index == -1) {
-			return replace.replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
-		}
-		StringBuilder b = new StringBuilder().append(replace.substring(0, index + 1));
-		appendChar(b, Integer.parseInt(replace.substring(index + 1)));
-		return b.toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
-	}
+//	public static String constraintBeautify(String subject) {
+//		subject = replace("[0-9]+[!=]=[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
+//		subject = replace("[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+[!=]=[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
+//		return subject;
+//	}
+//
+//	public static String modelBeautify(String subject) {
+//		return replace("[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+=[0-9]+", m -> rewriteCharModel(m.group()), subject);
+//	}
+//	
+//	public static String replace(String regex, Function<MatchResult, String> callback, CharSequence subject) {
+//		Matcher m = Pattern.compile(regex).matcher(subject);
+//		StringBuffer sb = new StringBuffer();
+//		while (m.find()) {
+//			m.appendReplacement(sb, callback.apply(m.toMatchResult()));
+//		}
+//		m.appendTail(sb);
+//		return sb.toString();
+//	}
+//
+//	public static String rewriteCharConstraint(String replace) {
+//		int index = Math.max(replace.indexOf("=="), replace.indexOf("!="));
+//		if (index == -1) {
+//			return replace;
+//		}
+//		if (Character.isDigit(replace.charAt(0))) {
+//			StringBuilder b = new StringBuilder();
+//			appendChar(b, Integer.parseInt(replace.substring(0, index)));
+//			return b.append(replace.substring(index)).toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
+//		} else {
+//			StringBuilder b = new StringBuilder();
+//			b.append(replace.substring(0, index + 2));
+//			appendChar(b, Integer.parseInt(replace.substring(index + 2)));
+//			return b.toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
+//		}
+//	}
+//	
+//	public static String rewriteCharModel(String replace) {
+//		int index = replace.indexOf('=');
+//		if (index == -1) {
+//			return replace.replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
+//		}
+//		StringBuilder b = new StringBuilder().append(replace.substring(0, index + 1));
+//		appendChar(b, Integer.parseInt(replace.substring(index + 1)));
+//		return b.toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
+//	}
 
 	public static void appendChar(StringBuilder stringBuilder, int ascii) {
 		stringBuilder.append('\'');

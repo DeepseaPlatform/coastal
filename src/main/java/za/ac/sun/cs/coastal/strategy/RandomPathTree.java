@@ -6,7 +6,7 @@ import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.green.expr.Expression;
 
-public class DFPathTree {
+public class RandomPathTree {
 
 	// LOGGING AND DEBUGGING
 	// ---------------------
@@ -22,7 +22,7 @@ public class DFPathTree {
 	// WHOLE TREE PROPERTIES
 	// ---------------------
 
-	private static DFPathTree root = null;
+	private static RandomPathTree root = null;
 
 	private static int pathCount = 0;
 
@@ -35,11 +35,11 @@ public class DFPathTree {
 
 	private final Expression passiveConjunct;
 
-	private final DFPathTree parent;
+	private final RandomPathTree parent;
 
-	private DFPathTree left = null;
+	private RandomPathTree left = null;
 
-	private DFPathTree right = null;
+	private RandomPathTree right = null;
 
 	private boolean isFullyExplored = false;
 
@@ -47,7 +47,7 @@ public class DFPathTree {
 
 	private boolean isLeaf = false;
 
-	public DFPathTree(boolean isInfeasible, DFPathTree parent) {
+	public RandomPathTree(boolean isInfeasible, RandomPathTree parent) {
 		this.activeConjunct = null;
 		this.passiveConjunct = null;
 		this.parent = parent;
@@ -58,13 +58,13 @@ public class DFPathTree {
 		}
 	}
 
-	public DFPathTree(SegmentedPC spc, DFPathTree parent) {
+	public RandomPathTree(SegmentedPC spc, RandomPathTree parent) {
 		this.activeConjunct = spc.getActiveConjunct();
 		this.passiveConjunct = spc.getPassiveConjunct();
 		this.parent = parent;
 	}
 
-	public static String getId(DFPathTree pathTree) {
+	public static String getId(RandomPathTree pathTree) {
 		return (pathTree == null) ? "NUL" : ("#" + pathTree.getId());
 	}
 
@@ -87,7 +87,7 @@ public class DFPathTree {
 	public static SegmentedPC insertPath(SegmentedPC spc, boolean isInfeasible) {
 		SegmentedPC pc = insertPath0(spc, isInfeasible);
 		if (dumpPaths) {
-			for (String ll : DFPathTree.stringRepr()) {
+			for (String ll : RandomPathTree.stringRepr()) {
 				lgr.debug(ll);
 			}
 		}
@@ -103,8 +103,8 @@ public class DFPathTree {
 			path[idx--] = s;
 		}
 		assert idx == -1;
-		DFPathTree pre = null;
-		DFPathTree cur = root;
+		RandomPathTree pre = null;
+		RandomPathTree cur = root;
 		idx = 0;
 		if (dumpPaths) {
 			lgr.debug("Inserting into existing paths");
@@ -139,7 +139,7 @@ public class DFPathTree {
 			if (dumpPaths) {
 				lgr.debug("Creating root");
 			}
-			pre = root = new DFPathTree(s, pre);
+			pre = root = new RandomPathTree(s, pre);
 			lastBranch = s.isLastConjunctFalse();
 			idx++;
 		}
@@ -154,14 +154,14 @@ public class DFPathTree {
 					lgr.debug("  new right child for pre:{} conj:{}", getId(pre), s.getActiveConjunct());
 				}
 				assert pre.right == null;
-				pre.right = new DFPathTree(s, pre);
+				pre.right = new RandomPathTree(s, pre);
 				pre = pre.right;
 			} else {
 				if (dumpPaths) {
 					lgr.debug("  new left child for pre:{} conj:{}", getId(pre), s.getActiveConjunct());
 				}
 				assert pre.left == null;
-				pre.left = new DFPathTree(s, pre);
+				pre.left = new RandomPathTree(s, pre);
 				pre = pre.left;
 			}
 			lastBranch = s.isLastConjunctFalse();
@@ -169,17 +169,17 @@ public class DFPathTree {
 		}
 		// Lastly, create the leaf
 		if (pre == null) {
-			root = new DFPathTree(isInfeasible, pre);
+			root = new RandomPathTree(isInfeasible, pre);
 			if (dumpPaths) {
 				lgr.debug("Create new root {} (isInfeasible={})", getId(root), isInfeasible);
 			}
 		} else if (lastBranch) {
-			pre.right = new DFPathTree(isInfeasible, pre);
+			pre.right = new RandomPathTree(isInfeasible, pre);
 			if (dumpPaths) {
 				lgr.debug("Create right leaf {} (isInfeasible={})", getId(pre.right), isInfeasible);
 			}
 		} else {
-			pre.left = new DFPathTree(isInfeasible, pre);
+			pre.left = new RandomPathTree(isInfeasible, pre);
 			if (dumpPaths) {
 				lgr.debug("Create left leaf {} (isInfeasible={})", getId(pre.left), isInfeasible);
 			}
@@ -212,38 +212,69 @@ public class DFPathTree {
 		SegmentedPC newSpc = null;
 		cur = root;
 		while (true) {
-			if ((cur.left != null) && !cur.left.isComplete()) {
-				if (dumpPaths) {
-					lgr.debug("  At {}, left is available", getId(cur));
+			boolean leftFirst = (Math.random() < 0.5);
+			if (leftFirst) {
+				if ((cur.left != null) && !cur.left.isComplete()) {
+					if (dumpPaths) {
+						lgr.debug("  At {}, left is available", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
+					cur = cur.left;
+				} else if ((cur.right != null) && !cur.right.isComplete()) {
+					if (dumpPaths) {
+						lgr.debug("  At {}, right is available", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
+					cur = cur.right;
+				} else if (cur.left == null) {
+					if (dumpPaths) {
+						lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
+					return newSpc;
+				} else if (cur.right == null) {
+					if (dumpPaths) {
+						lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
+					return newSpc;
+				} else {
+					if (dumpPaths) {
+						lgr.debug("  At #{} (dead end), no more paths", cur.id);
+					}
+					return null;
 				}
-				newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
-				cur = cur.left;
-			} else if ((cur.right != null) && !cur.right.isComplete()) {
-				if (dumpPaths) {
-					lgr.debug("  At {}, right is available", getId(cur));
-				}
-				newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
-				cur = cur.right;
-				//			} else if (cur == root) {
-				//				if (dumpPaths) { lgr.debug("  At {} (root), no more paths", getId(cur)); }
-				//				return null;
-			} else if (cur.left == null) {
-				if (dumpPaths) {
-					lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
-				}
-				newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
-				return newSpc;
-			} else if (cur.right == null) {
-				if (dumpPaths) {
-					lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
-				}
-				newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
-				return newSpc;
 			} else {
-				if (dumpPaths) {
-					lgr.debug("  At #{} (dead end), no more paths", cur.id);
+				if ((cur.right != null) && !cur.right.isComplete()) {
+					if (dumpPaths) {
+						lgr.debug("  At {}, right is available", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
+					cur = cur.right;
+				} else if ((cur.left != null) && !cur.left.isComplete()) {
+					if (dumpPaths) {
+						lgr.debug("  At {}, left is available", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
+					cur = cur.left;
+				} else if (cur.right == null) {
+					if (dumpPaths) {
+						lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, true);
+					return newSpc;
+				} else if (cur.left == null) {
+					if (dumpPaths) {
+						lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.activeConjunct, cur.passiveConjunct, false);
+					return newSpc;
+				} else {
+					if (dumpPaths) {
+						lgr.debug("  At #{} (dead end), no more paths", cur.id);
+					}
+					return null;
 				}
-				return null;
 			}
 		}
 	}
@@ -293,7 +324,7 @@ public class DFPathTree {
 		return finalLines;
 	}
 
-	private static int height(DFPathTree pathTree) {
+	private static int height(RandomPathTree pathTree) {
 		if (pathTree == null) {
 			return 1;
 		}
@@ -306,7 +337,7 @@ public class DFPathTree {
 	private static final int MIN_WIDTH = 9;
 	private static final int BRANCH = 3;
 
-	private static int width(DFPathTree pathTree) {
+	private static int width(RandomPathTree pathTree) {
 		if (pathTree == null) {
 			return 1 + PADDING;
 		} else if (pathTree.isLeaf) {
@@ -321,7 +352,7 @@ public class DFPathTree {
 		}
 	}
 
-	private static int stringFill(char[][] lines, int minx, int y, DFPathTree pathTree, int depth) {
+	private static int stringFill(char[][] lines, int minx, int y, RandomPathTree pathTree, int depth) {
 		if (pathTree == null) {
 			stringWrite(lines, minx, y, "-");
 			return minx;
@@ -364,7 +395,7 @@ public class DFPathTree {
 		return getShape(root);
 	}
 
-	private static String getShape(DFPathTree pathTree) {
+	private static String getShape(RandomPathTree pathTree) {
 		if (pathTree == null) {
 			return "0";
 		} else if (pathTree.isLeaf) {

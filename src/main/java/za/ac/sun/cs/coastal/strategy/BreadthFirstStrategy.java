@@ -20,8 +20,9 @@ import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
+import za.ac.sun.cs.green.service.ModelCoreService;
 
-public class DepthFirstStrategyOLD implements Strategy {
+public class BreadthFirstStrategy implements Strategy {
 
 	private static final Logger lgr = Configuration.getLogger();
 
@@ -39,14 +40,15 @@ public class DepthFirstStrategyOLD implements Strategy {
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
-	public DepthFirstStrategyOLD() {
+	public BreadthFirstStrategy() {
 		Reporters.register(this);
 		Properties greenProperties = Configuration.getProperties();
 		greenProperties.setProperty("green.log.level", "ALL");
 		greenProperties.setProperty("green.services", "model");
 		greenProperties.setProperty("green.service.model", "(bounder modeller)");
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
-		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3JavaService");
+		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
+		// greenProperties.setProperty("green.store", "za.ac.sun.cs.green.store.redis.RedisStore");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
 		pathLimit = Configuration.getLimitPaths();
 		if (pathLimit == 0) {
@@ -74,12 +76,12 @@ public class DepthFirstStrategyOLD implements Strategy {
 				return null;
 			}
 			t = System.currentTimeMillis();
-			spc = DFPathTree.insertPath(spc, infeasible);
+			spc = BFPathTree.insertPath(spc, infeasible);
 			pathTreeTime += System.currentTimeMillis() - t;
 			if (spc == null) {
 				lgr.info("no further paths");
 				if (dumpTrace) {
-					lgr.info("Tree shape: {}", DFPathTree.getShape());
+					lgr.info("Tree shape: {}", BFPathTree.getShape());
 				}
 				return null;
 			}
@@ -90,8 +92,9 @@ public class DepthFirstStrategyOLD implements Strategy {
 			lgr.info("trying   <{}> {}", sig, pc.toString());
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
+			Instance result = (Instance) instance.request("model");
 			@SuppressWarnings("unchecked")
-			Map<IntVariable, Object> model = (Map<IntVariable, Object>) instance.request("model");
+			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) result.getData(ModelCoreService.MODEL_KEY);
 			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				lgr.info("no model");
@@ -108,7 +111,7 @@ public class DepthFirstStrategyOLD implements Strategy {
 					if (name.startsWith(SymbolicState.NEW_VAR_PREFIX)) {
 						continue;
 					}
-					Constant value = new IntConstant((Integer) model.get(variable));
+					Constant value = model.get(variable);
 					newModel.put(name, value);
 				}
 				String modelString = newModel.toString();
@@ -137,13 +140,13 @@ public class DepthFirstStrategyOLD implements Strategy {
 
 	@Override
 	public String getName() {
-		return "DepthFirstStrategy";
+		return "BreadthFirstStrategy";
 	}
 
 	@Override
 	public void report(PrintWriter out) {
-		out.println("  Inserted paths: " + DFPathTree.getPathCount());
-		out.println("  Revisited paths: " + DFPathTree.getRevisitCount());
+		out.println("  Inserted paths: " + BFPathTree.getPathCount());
+		out.println("  Revisited paths: " + BFPathTree.getRevisitCount());
 		out.println("  Infeasible paths: " + infeasibleCount);
 		out.println("  Solver time: " + solverTime);
 		out.println("  Path tree time: " + pathTreeTime);
