@@ -1,5 +1,7 @@
 package za.ac.sun.cs.coastal.strategy;
 
+import java.util.Random;
+
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
@@ -47,6 +49,8 @@ public class RandomPathTree {
 
 	private boolean isLeaf = false;
 
+	private static final Random rng = new Random();
+	
 	public RandomPathTree(boolean isInfeasible, RandomPathTree parent) {
 		this.activeConjunct = null;
 		this.passiveConjunct = null;
@@ -62,6 +66,10 @@ public class RandomPathTree {
 		this.activeConjunct = spc.getActiveConjunct();
 		this.passiveConjunct = spc.getPassiveConjunct();
 		this.parent = parent;
+	}
+
+	public static void setSeed(long seed) {
+		rng.setSeed(seed);
 	}
 
 	public static String getId(RandomPathTree pathTree) {
@@ -212,8 +220,7 @@ public class RandomPathTree {
 		SegmentedPC newSpc = null;
 		cur = root;
 		while (true) {
-			boolean leftFirst = (Math.random() < 0.5);
-			if (leftFirst) {
+			if (rng.nextBoolean()) {
 				if ((cur.left != null) && !cur.left.isComplete()) {
 					if (dumpPaths) {
 						lgr.debug("  At {}, left is available", getId(cur));

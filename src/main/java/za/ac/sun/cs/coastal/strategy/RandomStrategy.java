@@ -54,6 +54,7 @@ public class RandomStrategy implements Strategy {
 		if (pathLimit == 0) {
 			pathLimit = Long.MIN_VALUE;
 		}
+		RandomPathTree.setSeed(Configuration.getRandomSeed());
 	}
 	
 	@Override
