@@ -787,6 +787,7 @@ public class Configuration {
 		LOGGER.info("coastal.limit.time = {}", getLimitTime());
 		LOGGER.info("coastal.limit.path = {}", getLimitPaths());
 		LOGGER.info("coastal.limit.conjuncts = {}", getLimitConjuncts());
+		LOGGER.info("coastal.seed = {}", getRandomSeed());
 		LOGGER.info("coastal.dump.config = {}", getDumpConfig());
 		LOGGER.info("coastal.dump.asm = {}", getDumpAsm());
 		LOGGER.info("coastal.dump.trace = {}", getDumpTrace());
