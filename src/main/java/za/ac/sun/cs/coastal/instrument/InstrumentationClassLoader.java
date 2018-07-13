@@ -36,6 +36,7 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		for (String path : paths) {
 			classPaths.add(path);
 		}
+		classPaths.add(".");
 	}
 
 	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
@@ -43,26 +44,44 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		requestCount++;
 		Class<?> clas = findLoadedClass(name);
 		if (clas != null) {
+			if (dumpInstrumenter) {
+				lgr.trace("*** loading class {}, found in cache", name);
+			}
 			cachedCount++;
 			ltime += System.currentTimeMillis() - t0;
 			return clas;
 		}
 		if (Configuration.isTarget(name)) {
+			if (dumpInstrumenter) {
+				lgr.trace("*** loading class {}, identified as target", name);
+			}
 			long t1 = System.currentTimeMillis();
 			byte[] raw = instrument(name);
 			itime += System.currentTimeMillis() - t1;
 			if (raw != null) {
+				if (dumpInstrumenter) {
+					lgr.trace("*** class {} instrumented", name);
+				}
 				instrumentedCount++;
 				clas = defineClass(name, raw, 0, raw.length);
 			}
 		}
 		if (clas == null) {
+			if (dumpInstrumenter) {
+				lgr.trace("*** loading class {}, uninstrumented", name);
+			}
 			clas = findSystemClass(name);
 		}
 		if (resolve && clas != null) {
+			if (dumpInstrumenter) {
+				lgr.trace("*** resolving class {}", name);
+			}
 			resolveClass(clas);
 		}
 		if (clas == null) {
+			if (dumpInstrumenter) {
+				lgr.trace("*** class {} not found", name);
+			}
 			ltime += System.currentTimeMillis() - t0;
 			throw new ClassNotFoundException(name);
 		}
