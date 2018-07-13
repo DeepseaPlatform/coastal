@@ -35,6 +35,8 @@ public class DepthFirstStrategyOLD implements Strategy {
 
 	private static int infeasibleCount = 0;
 
+	private static final DFPathTree pathTree = new DFPathTree(); 
+
 	private long pathLimit = 0;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
@@ -74,12 +76,12 @@ public class DepthFirstStrategyOLD implements Strategy {
 				return null;
 			}
 			t = System.currentTimeMillis();
-			spc = DFPathTree.insertPath(spc, infeasible);
+			spc = pathTree.insertPath(spc, infeasible);
 			pathTreeTime += System.currentTimeMillis() - t;
 			if (spc == null) {
 				lgr.info("no further paths");
 				if (dumpTrace) {
-					lgr.info("Tree shape: {}", DFPathTree.getShape());
+					lgr.info("Tree shape: {}", pathTree.getShape());
 				}
 				return null;
 			}
@@ -131,6 +133,52 @@ public class DepthFirstStrategyOLD implements Strategy {
 
 	// ======================================================================
 	//
+	// DFPathTree
+	//
+	// ======================================================================
+
+	private static class DFPathTree extends PathTree {
+		@Override
+		public SegmentedPC findNewPath() {
+			SegmentedPC newSpc = null;
+			PathTreeNode cur = getRoot();
+			while (true) {
+				if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
+					if (dumpPaths) {
+						lgr.debug("  At {}, left is available", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+					cur = cur.getLeft();
+				} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
+					if (dumpPaths) {
+						lgr.debug("  At {}, right is available", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+					cur = cur.getRight();
+				} else if (cur.getLeft() == null) {
+					if (dumpPaths) {
+						lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+					return newSpc;
+				} else if (cur.getRight() == null) {
+					if (dumpPaths) {
+						lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
+					}
+					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+					return newSpc;
+				} else {
+					if (dumpPaths) {
+						lgr.debug("  At #{} (dead end), no more paths", getId(cur));
+					}
+					return null;
+				}
+			}
+		}		
+	}
+
+	// ======================================================================
+	//
 	// REPORTING
 	//
 	// ======================================================================
@@ -142,8 +190,8 @@ public class DepthFirstStrategyOLD implements Strategy {
 
 	@Override
 	public void report(PrintWriter out) {
-		out.println("  Inserted paths: " + DFPathTree.getPathCount());
-		out.println("  Revisited paths: " + DFPathTree.getRevisitCount());
+		out.println("  Inserted paths: " + pathTree.getPathCount());
+		out.println("  Revisited paths: " + pathTree.getRevisitCount());
 		out.println("  Infeasible paths: " + infeasibleCount);
 		out.println("  Solver time: " + solverTime);
 		out.println("  Path tree time: " + pathTreeTime);

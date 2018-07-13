@@ -3,8 +3,10 @@ package za.ac.sun.cs.coastal.strategy;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -35,6 +37,8 @@ public class BreadthFirstStrategy implements Strategy {
 	private static final Set<String> visitedModels = new HashSet<>();
 
 	private static int infeasibleCount = 0;
+
+	private static final BFPathTree pathTree = new BFPathTree(); 
 
 	private long pathLimit = 0;
 
@@ -76,12 +80,12 @@ public class BreadthFirstStrategy implements Strategy {
 				return null;
 			}
 			t = System.currentTimeMillis();
-			spc = BFPathTree.insertPath(spc, infeasible);
+			spc = pathTree.insertPath(spc, infeasible);
 			pathTreeTime += System.currentTimeMillis() - t;
 			if (spc == null) {
 				lgr.info("no further paths");
 				if (dumpTrace) {
-					lgr.info("Tree shape: {}", BFPathTree.getShape());
+					lgr.info("Tree shape: {}", pathTree.getShape());
 				}
 				return null;
 			}
@@ -134,6 +138,50 @@ public class BreadthFirstStrategy implements Strategy {
 
 	// ======================================================================
 	//
+	// BFPathTree
+	//
+	// ======================================================================
+
+	private static class BFPathTree extends PathTree {
+		@Override
+		public SegmentedPC findNewPath() {
+			Queue<SegmentedPC> workingPCs = new LinkedList<>();
+			Queue<PathTreeNode> workingSet = new LinkedList<>();
+			workingSet.add(getRoot());
+			while (!workingSet.isEmpty()) {
+				SegmentedPC parent = workingPCs.isEmpty() ? null : workingPCs.remove();
+				PathTreeNode node = workingSet.remove();
+				if (dumpPaths) {
+					lgr.debug("  Investigating node {}", getId(node));
+				}
+				if (node.getLeft() == null) {
+					if (dumpPaths) {
+						lgr.debug("  Generating negate path (L)");
+					}
+					return new SegmentedPC(parent, node.getActiveConjunct(), node.getPassiveConjunct(), false);
+				} else if (!node.getLeft().isComplete()) {
+					workingPCs.add(new SegmentedPC(parent, node.getActiveConjunct(), node.getPassiveConjunct(), false));
+					workingSet.add(node.getLeft());
+				}
+				if (node.getRight() == null) {
+					if (dumpPaths) {
+						lgr.debug("  Generating negate path (R)");
+					}
+					return new SegmentedPC(parent, node.getActiveConjunct(), node.getPassiveConjunct(), true);
+				} else if (!node.getRight().isComplete()) {
+					workingPCs.add(new SegmentedPC(parent, node.getActiveConjunct(), node.getPassiveConjunct(), true));
+					workingSet.add(node.getRight());
+				}
+			}
+			if (dumpPaths) {
+				lgr.debug("  No more paths");
+			}
+			return null;
+		}		
+	}
+
+	// ======================================================================
+	//
 	// REPORTING
 	//
 	// ======================================================================
@@ -145,8 +193,8 @@ public class BreadthFirstStrategy implements Strategy {
 
 	@Override
 	public void report(PrintWriter out) {
-		out.println("  Inserted paths: " + BFPathTree.getPathCount());
-		out.println("  Revisited paths: " + BFPathTree.getRevisitCount());
+		out.println("  Inserted paths: " + pathTree.getPathCount());
+		out.println("  Revisited paths: " + pathTree.getRevisitCount());
 		out.println("  Infeasible paths: " + infeasibleCount);
 		out.println("  Solver time: " + solverTime);
 		out.println("  Path tree time: " + pathTreeTime);

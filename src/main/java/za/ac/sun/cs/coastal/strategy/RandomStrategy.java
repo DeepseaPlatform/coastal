@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +37,8 @@ public class RandomStrategy implements Strategy {
 
 	private static int infeasibleCount = 0;
 
+	private static final RandomPathTree pathTree = new RandomPathTree();
+
 	private long pathLimit = 0;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
@@ -54,7 +57,7 @@ public class RandomStrategy implements Strategy {
 		if (pathLimit == 0) {
 			pathLimit = Long.MIN_VALUE;
 		}
-		RandomPathTree.setSeed(Configuration.getRandomSeed());
+		pathTree.setSeed(Configuration.getRandomSeed());
 	}
 	
 	@Override
@@ -77,12 +80,12 @@ public class RandomStrategy implements Strategy {
 				return null;
 			}
 			t = System.currentTimeMillis();
-			spc = RandomPathTree.insertPath(spc, infeasible);
+			spc = pathTree.insertPath(spc, infeasible);
 			pathTreeTime += System.currentTimeMillis() - t;
 			if (spc == null) {
 				lgr.info("no further paths");
 				if (dumpTrace) {
-					lgr.info("Tree shape: {}", RandomPathTree.getShape());
+					lgr.info("Tree shape: {}", pathTree.getShape());
 				}
 				return null;
 			}
@@ -130,6 +133,91 @@ public class RandomStrategy implements Strategy {
 
 	// ======================================================================
 	//
+	// RandomPathTree
+	//
+	// ======================================================================
+
+	private static class RandomPathTree extends PathTree {
+		private final Random rng = new Random();
+		
+		public void setSeed(long seed) {
+			rng.setSeed(seed);
+		}
+
+		@Override
+		public SegmentedPC findNewPath() {
+			SegmentedPC newSpc = null;
+			PathTreeNode cur = getRoot();
+			while (true) {
+				if (rng.nextBoolean()) {
+					if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
+						if (dumpPaths) {
+							lgr.debug("  At {}, left is available", getId(cur));
+						}
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+						cur = cur.getLeft();
+					} else if (cur.getLeft() == null) {
+						if (dumpPaths) {
+							lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
+						}
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+						return newSpc;
+					} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
+						if (dumpPaths) {
+							lgr.debug("  At {}, right is available", getId(cur));
+						}
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+						cur = cur.getRight();
+					} else if (cur.getRight() == null) {
+						if (dumpPaths) {
+							lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
+						}
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+						return newSpc;
+					} else {
+						if (dumpPaths) {
+							lgr.debug("  At #{} (dead end), no more paths", getId(cur));
+						}
+						return null;
+					}
+				} else {
+					if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
+						if (dumpPaths) {
+							lgr.debug("  At {}, right is available", getId(cur));
+						}
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+						cur = cur.getRight();
+					} else if (cur.getRight() == null) {
+						if (dumpPaths) {
+							lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
+						}
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+						return newSpc;
+					} else if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
+						if (dumpPaths) {
+							lgr.debug("  At {}, left is available", getId(cur));
+						}
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+						cur = cur.getLeft();
+					} else if (cur.getLeft() == null) {
+						if (dumpPaths) {
+							lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
+						}
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+						return newSpc;
+					} else {
+						if (dumpPaths) {
+							lgr.debug("  At #{} (dead end), no more paths", getId(cur));
+						}
+						return null;
+					}
+				}
+			}
+		}
+	}
+
+	// ======================================================================
+	//
 	// REPORTING
 	//
 	// ======================================================================
@@ -141,8 +229,8 @@ public class RandomStrategy implements Strategy {
 
 	@Override
 	public void report(PrintWriter out) {
-		out.println("  Inserted paths: " + RandomPathTree.getPathCount());
-		out.println("  Revisited paths: " + RandomPathTree.getRevisitCount());
+		out.println("  Inserted paths: " + pathTree.getPathCount());
+		out.println("  Revisited paths: " + pathTree.getRevisitCount());
 		out.println("  Infeasible paths: " + infeasibleCount);
 		out.println("  Solver time: " + solverTime);
 		out.println("  Path tree time: " + pathTreeTime);
