@@ -86,17 +86,24 @@ public class Diver implements Reporter {
 				System.setOut(NUL); System.setErr(NUL);
 			}
 			meth.invoke(null, new Object[] { new String[0] });
+			System.setOut(out); System.setErr(err);
 		} catch (ClassNotFoundException x) {
+			System.setOut(out); System.setErr(err);
 			x.printStackTrace();
 		} catch (NoSuchMethodException x) {
+			System.setOut(out); System.setErr(err);
 			x.printStackTrace();
 		} catch (SecurityException x) {
+			System.setOut(out); System.setErr(err);
 			x.printStackTrace();
 		} catch (IllegalAccessException x) {
+			System.setOut(out); System.setErr(err);
 			x.printStackTrace();
 		} catch (IllegalArgumentException x) {
+			System.setOut(out); System.setErr(err);
 			x.printStackTrace();
 		} catch (InvocationTargetException x) {
+			System.setOut(out); System.setErr(err);
 			Throwable t = x.getCause();
 			if ((t != null) && (t instanceof LimitConjunctException)) {
 				// limit on nr of conjuncts has been reached
@@ -104,7 +111,6 @@ public class Diver implements Reporter {
 				x.printStackTrace();
 			}
 		}
-		System.setOut(out); System.setErr(err);
 	}
 
 	// ======================================================================
