@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Type;
 
+import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 
@@ -593,6 +594,7 @@ public class Configuration {
 
 		// All done
 		LOGGER.debug("Configuration loaded");
+		notifyLoaded();
 		dump();
 	}
 
@@ -794,19 +796,33 @@ public class Configuration {
 		LOGGER.info("coastal.dump.frame = {}", getDumpFrame());
 		LOGGER.info("coastal.dump.paths = {}", getDumpPaths());
 		LOGGER.info("coastal.dump.instrumenter = {}", getDumpInstrumenter());
+		notifyDump();
 	}
 
-	// // --- DELEGATES ---
-	// int d = getNumberOfDelegateTargets(), j = d;
-	// for (String target : getDelegateTargets()) {
-	// Object delegate = findDelegate(target);
-	// String pre = (j == d) ? "deepsea.delegate = " : "\t";
-	// String post = (j > 1) ? ";\\" : "";
-	// LOGGER.log(CONF, "{}{}:{}{}", pre, target, delegate.getClass().getName(),
-	// post);
-	// j--;
-	// }
+	// ======================================================================
+	//
+	// LISTENERS
+	//
+	// ======================================================================
 
+	private static final List<ConfigurationListener> configurationListeners = new ArrayList<>();
+	
+	public static void registerListener(ConfigurationListener listener) {
+		configurationListeners.add(listener);
+	}
+
+	private static void notifyLoaded() {
+		for (ConfigurationListener listener : configurationListeners) {
+			listener.configurationLoaded(properties);
+		}
+	}
+
+	private static void notifyDump() {
+		for (ConfigurationListener listener : configurationListeners) {
+			listener.configurationDump();
+		}
+	}
+	
 	// ======================================================================
 	//
 	// TRIGGER METHODS
