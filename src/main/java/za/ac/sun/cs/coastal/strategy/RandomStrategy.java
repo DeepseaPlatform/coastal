@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.reporting.Reporters;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
@@ -23,7 +24,7 @@ import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.service.ModelCoreService;
 
-public class RandomStrategy implements Strategy {
+public class RandomStrategy implements Strategy, ConfigurationListener {
 
 	private static final Logger lgr = Configuration.getLogger();
 
@@ -39,12 +40,15 @@ public class RandomStrategy implements Strategy {
 
 	private static final RandomPathTree pathTree = new RandomPathTree();
 
+	private long randomSeed = 987654321;
+	
 	private long pathLimit = 0;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
 	public RandomStrategy() {
 		Reporters.register(this);
+		Configuration.registerListener(this);
 		Properties greenProperties = Configuration.getProperties();
 		greenProperties.setProperty("green.log.level", "ALL");
 		greenProperties.setProperty("green.services", "model");
@@ -53,11 +57,6 @@ public class RandomStrategy implements Strategy {
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
 		// greenProperties.setProperty("green.store", "za.ac.sun.cs.green.store.redis.RedisStore");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
-		pathLimit = Configuration.getLimitPaths();
-		if (pathLimit == 0) {
-			pathLimit = Long.MIN_VALUE;
-		}
-		pathTree.setSeed(Configuration.getRandomSeed());
 	}
 	
 	@Override
@@ -214,6 +213,27 @@ public class RandomStrategy implements Strategy {
 				}
 			}
 		}
+	}
+
+	// ======================================================================
+	//
+	// CONFIGURATION
+	//
+	// ======================================================================
+
+	@Override
+	public void configurationLoaded(Properties properties) {
+		randomSeed = Configuration.getLongProperty(properties, "coastal.randomStrategy.seed", randomSeed);
+		pathTree.setSeed(randomSeed);
+		pathLimit = Configuration.getLimitPaths();
+		if (pathLimit == 0) {
+			pathLimit = Long.MIN_VALUE;
+		}
+	}
+
+	@Override
+	public void configurationDump() {
+		lgr.info("coastal.randomStrategy.seed = {}", randomSeed);
 	}
 
 	// ======================================================================

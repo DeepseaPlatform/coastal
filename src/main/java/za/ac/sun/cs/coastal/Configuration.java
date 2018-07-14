@@ -195,11 +195,6 @@ public class Configuration {
 	 */
 	private static boolean recordMarks = false;
 	
-	/**
-	 * Seed for random numbers.
-	 */
-	private static long randomSeed = 987654321;
-	
 	// ======================================================================
 	//
 	// GETTERS AND SETTERS FOR PROPERTIES
@@ -424,14 +419,6 @@ public class Configuration {
 		Configuration.recordMarks = recordMarks;
 	}
 	
-	public static long getRandomSeed() {
-		return randomSeed;
-	}
-	
-	public static void setRandomSeed(long randomSeed) {
-		Configuration.randomSeed = randomSeed;
-	}
-	
 	// ======================================================================
 	//
 	// LOAD AND PARSE CONFIGURATION PROPERTIES
@@ -568,9 +555,6 @@ public class Configuration {
 		
 		// Process coastal.recordmarks = ...
 		setRecordMarks(getBooleanProperty(properties, "coastal.recordmarks", getRecordMarks()));
-		
-		// Process coastal.seed = ...
-		setRandomSeed(getLongProperty(properties, "coastal.seed", getRandomSeed()));
 		
 		// Process coastal.strategy = ...
 		// INITIALIZE this last because it may use other settings
@@ -789,7 +773,6 @@ public class Configuration {
 		LOGGER.info("coastal.limit.time = {}", getLimitTime());
 		LOGGER.info("coastal.limit.path = {}", getLimitPaths());
 		LOGGER.info("coastal.limit.conjuncts = {}", getLimitConjuncts());
-		LOGGER.info("coastal.seed = {}", getRandomSeed());
 		LOGGER.info("coastal.dump.config = {}", getDumpConfig());
 		LOGGER.info("coastal.dump.asm = {}", getDumpAsm());
 		LOGGER.info("coastal.dump.trace = {}", getDumpTrace());
