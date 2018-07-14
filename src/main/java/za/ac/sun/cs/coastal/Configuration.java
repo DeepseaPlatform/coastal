@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -427,8 +428,12 @@ public class Configuration {
 
 	private static final String DEFAULT_PROPERTY_FILE = "coastal.properties";
 
+	private static final String HOME_PROPERTY_FILE = System.getProperty("user.home") + File.separator + ".coastal" + File.separator + "coastal.properties";
+	
 	public static boolean processProperties(String filename) {
 		properties = new Properties();
+
+		/* Step 1: Load properties from RESOURCES/coastal.properties */
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try (InputStream resourceStream = loader.getResourceAsStream(DEFAULT_PROPERTY_FILE)) {
 			if (resourceStream != null) {
@@ -437,11 +442,22 @@ public class Configuration {
 		} catch (IOException x) {
 			// ignore
 		}
+
+		/* Step 2: Load properties from HOME/.coastal/coastal.properties */
+		try {
+			properties.load(new FileInputStream(HOME_PROPERTY_FILE));
+		} catch (IOException x) {
+			// ignore
+		}
+		
+		/* Step 3: Load properties from file given as argument */
 		try {
 			properties.load(new FileInputStream(filename));
 		} catch (IOException x) {
 			return false;
 		}
+		
+		/* Now process the properties */
 		processProperties(properties);
 		return true;
 	}
