@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Type;
 
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
+import za.ac.sun.cs.coastal.listener.Listener;
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 
@@ -181,6 +182,11 @@ public class Configuration {
 	private static boolean dumpConfig = false;
 
 	/**
+	 * Whether or not all "dump" settings are switched on.
+	 */
+	private static boolean dumpAll = false;
+	
+	/**
 	 * Whether or not the output of the target program should be displayed
 	 * ({@code true}) or suppressed ({@code false}).
 	 */
@@ -195,6 +201,11 @@ public class Configuration {
 	 * Whether or not symbolic markers are recorded.
 	 */
 	private static boolean recordMarks = false;
+
+	/**
+	 * List of instruction listeners to load 
+	 */
+	private static final List<Listener> listeners = new ArrayList<>();
 	
 	// ======================================================================
 	//
@@ -396,6 +407,14 @@ public class Configuration {
 		Configuration.dumpConfig = dumpConfig;
 	}
 
+	public static boolean getDumpAll() {
+		return dumpAll;
+	}
+	
+	public static void setDumpAll(boolean dumpAll) {
+		Configuration.dumpAll = dumpAll;
+	}
+	
 	public static boolean getEchoOutput() {
 		return echoOutput;
 	}
@@ -535,8 +554,8 @@ public class Configuration {
 		setLimitConjuncts(getLongProperty(properties, "coastal.limit.conjuncts", getLimitConjuncts()));
 		
 		// Process coastal.dump
-		Boolean dumpAll = getBooleanProperty(properties, "coastal.dump");
-		if (dumpAll != null) {
+		setDumpAll(getBooleanProperty(properties, "coastal.dump", getDumpAll()));
+		if (getDumpAll()) {
 			setDumpInstrumenter(dumpAll);
 			setDumpAsm(dumpAll);
 			setDumpTrace(dumpAll);
@@ -576,7 +595,12 @@ public class Configuration {
 		// INITIALIZE this last because it may use other settings
 		p = properties.getProperty("coastal.strategy");
 		if (p != null) {
-			setStrategy((Strategy) createInstance(p));
+			Object str = createInstance(p);
+			if (str instanceof Strategy) {
+				setStrategy((Strategy) str);
+			} else {
+				LOGGER.error("Class \"{}\" is not a strategy",  p);
+			}
 		}
 
 		// Process coastal.delegates = ...
@@ -588,6 +612,19 @@ public class Configuration {
 				Object to = createInstance(pair[1].trim());
 				if (to != null) {
 					addDelegate(pair[0].trim(), to);
+				}
+			}
+		}
+
+		// Process coastal.listeners = ...
+		p = properties.getProperty("coastal.listeners");
+		if (p != null) {
+			for (String t : p.trim().split(";")) {
+				Object lst = createInstance(t.trim());
+				if (lst instanceof Listener) {
+					listeners.add((Listener) lst);
+				} else {
+					LOGGER.warn("Class \"{}\" is not a listener, ignored",  t);
 				}
 			}
 		}
@@ -781,6 +818,13 @@ public class Configuration {
 		Strategy s = getStrategy();
 		if (s != null) {
 			LOGGER.info("coastal.strategy = {}", s.getClass().getName());
+		}
+		t = listeners.size();
+		i = t;
+		for (Listener listener : listeners) {
+			String pre = (i == t) ? "coastal.listeners = " : "\t";
+			String post = (i > 1) ? ";\\" : "";
+			LOGGER.info("{}{}{}", pre, listener.getClass().getName(), post);
 		}
 		LOGGER.info("coastal.echooutput = {}", getEchoOutput());
 		LOGGER.info("coastal.obeystops = {}", getObeyStops());

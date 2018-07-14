@@ -1,5 +1,8 @@
 package za.ac.sun.cs.coastal.instrument;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
@@ -17,6 +20,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private static int instructionCounter = 0;
 
+	private static int methodCounter = 0;
+	
 	private final int triggerIndex;
 
 	private final boolean isStatic;
@@ -25,6 +30,10 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	
 	private static boolean dumpInstrumenter = Configuration.getDumpInstrumenter();
 
+	private static final Map<Integer, Integer> firstInstruction = new TreeMap<>();
+
+	private static final Map<Integer, Integer> lastInstruction = new TreeMap<>();
+	
 	public MethodInstrumentationAdapter(MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.triggerIndex = triggerIndex;
@@ -32,6 +41,14 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		this.argCount = argCount;
 	}
 
+	public static Integer getFirstInstruction(int methodNumber) {
+		return firstInstruction.get(methodNumber);
+	}
+
+	public static Integer getLastInstruction(int methodNumber) {
+		return lastInstruction.get(methodNumber);
+	}
+	
 	private void visitParameter(Trigger trigger, int triggerIndex, int index, int address) {
 		String name = trigger.getParamName(index);
 		if (name == null) {
@@ -84,6 +101,15 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	}
 	
 	@Override
+	public void visitEnd() {
+		if (dumpInstrumenter) {
+			lgr.trace("visitEnd()");
+		}
+		lastInstruction.put(methodCounter, instructionCounter);
+		mv.visitEnd();
+	}
+	
+	@Override
 	public void visitCode() {
 		if (dumpInstrumenter) {
 			lgr.trace("visitCode()");
@@ -94,7 +120,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			Label label = new Label();
 			mv.visitJumpInsn(Opcodes.IFNE, label);
 			//---   triggerMethod()
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "()V", false);
+			mv.visitLdcInsn(++methodCounter);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(I)V", false);
 			//---   GENERATE PARAMETER OVERRIDES
 			Trigger trigger = Configuration.getTrigger(triggerIndex);
 			int n = trigger.getParamCount();
@@ -107,16 +134,19 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitLabel(label);
 			//--- } else {
 			//---   startMethod()
+			mv.visitLdcInsn(methodCounter);
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(I)V", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 			//--- }
 			mv.visitLabel(end);
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		} else {
+			mv.visitLdcInsn(++methodCounter);
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(I)V", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 		}
+		firstInstruction.put(methodCounter, instructionCounter + 1);
 		mv.visitCode();
 	}
 
@@ -217,8 +247,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(II)V", false);
-		mv.visitLdcInsn(instructionCounter);
 		mv.visitJumpInsn(opcode, label);
+		mv.visitLdcInsn(instructionCounter);
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "postJumpInsn", "(II)V", false);
 	}
@@ -278,6 +308,10 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitLdcInsn(197);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "multiANewArrayInsn", "(II)V", false);
 		mv.visitMultiANewArrayInsn(descriptor, numDimensions);
+	}
+
+	public static int getInstructionCount() {
+		return instructionCounter;
 	}
 
 }

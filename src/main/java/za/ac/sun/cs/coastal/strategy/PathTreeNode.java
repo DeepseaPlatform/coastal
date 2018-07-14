@@ -138,7 +138,7 @@ public class PathTreeNode {
 			int w = Math.max(MIN_WIDTH, activeConjunct.toString().length());
 			int l = (left == null) ? (1 + PADDING) : left.width();
 			int r = (right == null) ? (1 + PADDING) : right.width();
-			return BRANCH + l + Math.max(w, BRANCH + r);
+			return l + BRANCH + Math.max(w, BRANCH + r);
 		}
 	}
 
@@ -164,18 +164,19 @@ public class PathTreeNode {
 			stringWrite(lines, minx, y + 1, "INFEAS");
 			return minx;
 		} else {
-			int lw = (right == null) ? 1 : right.width();
-			int lx = minx;
-			if (right == null) {
-				stringWrite(lines, minx, y, "-");
-			} else {
-				lx = right.stringFill(lines, minx, y + 4, depth + 1);
-			}
-			int rx = minx;
+			int lx, rx;
 			if (left == null) {
-				stringWrite(lines, minx, y, "-");
+				stringWrite(lines, minx, y + 4, "-");
+				lx = minx;
 			} else {
-				rx = left.stringFill(lines, minx + lw, y + 4, depth + 1);
+				lx = left.stringFill(lines, minx, y + 4, depth + 1);
+			}
+			minx += BRANCH + ((left == null) ? (1 + PADDING) : left.width());
+			if (right == null) {
+				stringWrite(lines, minx, y + 4, "-");
+				rx = minx;
+			} else {
+				rx = right.stringFill(lines, minx, y + 4, depth + 1);
 			}
 			int mx = (lx + rx) / 2;
 			stringWrite(lines, mx, y, id + (isFullyExplored ? " FULL" : ""));
@@ -200,7 +201,7 @@ public class PathTreeNode {
 
 	private static void stringWrite(char[][] lines, int x, int y, String string) {
 		for (int i = 0; i < string.length(); i++) {
-			lines[y][x++] = string.charAt(i);
+			lines[y][x++] = string.charAt(i); 
 		}
 	}
 

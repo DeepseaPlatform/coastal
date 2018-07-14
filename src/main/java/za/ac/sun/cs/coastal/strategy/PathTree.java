@@ -24,22 +24,12 @@ public abstract class PathTree {
 	public int getPathCount() {
 		return pathCount;
 	}
-	
+
 	public int getRevisitCount() {
 		return revisitCount;
 	}
 
 	public SegmentedPC insertPath(SegmentedPC spc, boolean isInfeasible) {
-		SegmentedPC pc = insertPath0(spc, isInfeasible);
-		if (dumpPaths && (root != null)) {
-			for (String ll : stringRepr()) {
-				lgr.debug(ll);
-			}
-		}
-		return pc;
-	}
-
-	public SegmentedPC insertPath0(SegmentedPC spc, boolean isInfeasible) {
 		pathCount++;
 		final int depth = spc.getDepth();
 		SegmentedPC[] path = new SegmentedPC[depth];
@@ -50,8 +40,8 @@ public abstract class PathTree {
 		assert idx == -1;
 		PathTreeNode pre = null;
 		PathTreeNode cur = root;
-		idx = 0;
 		if (dumpPaths) {
+			lgr.debug("depth:{}", depth);
 			lgr.debug("Inserting into existing paths");
 		}
 		// First following existing tree as far as we can go
@@ -59,10 +49,10 @@ public abstract class PathTree {
 		idx = 0;
 		while ((cur != null) && (idx < depth)) {
 			SegmentedPC s = path[idx];
-			lastBranch = s.isLastConjunctFalse();
+			lastBranch = s.isLastConjunctTrue();
 			if (dumpPaths) {
-				lgr.debug("  cur:{} pre:{} conj:{} truth:{}", getId(cur), getId(pre), s.getActiveConjunct(),
-						lastBranch);
+				lgr.debug("  cur:{} pre:{} conj:{} truth:{} idx:{}", getId(cur), getId(pre), s.getActiveConjunct(),
+						lastBranch, idx);
 			}
 			assert !cur.isLeaf();
 			pre = cur;
@@ -70,6 +60,9 @@ public abstract class PathTree {
 			idx++;
 		}
 		if ((cur != null) && cur.isLeaf() && (idx == depth)) {
+			if (dumpPaths) {
+				lgr.debug("Revisit!");
+			}
 			revisitCount++;
 		}
 		// If there is more to insert but no pre-tree, init root
@@ -79,7 +72,7 @@ public abstract class PathTree {
 				lgr.debug("Creating root");
 			}
 			pre = root = new PathTreeNode(s, pre);
-			lastBranch = s.isLastConjunctFalse();
+			lastBranch = s.isLastConjunctTrue();
 			idx++;
 		}
 		// While there is more to insert, create subtree node-by-node
@@ -90,20 +83,20 @@ public abstract class PathTree {
 			SegmentedPC s = path[idx];
 			if (lastBranch) {
 				if (dumpPaths) {
-					lgr.debug("  new right child for pre:{} conj:{}", getId(pre), s.getActiveConjunct());
+					lgr.debug("  new right child for pre:{} conj:{} idx:{}", getId(pre), s.getActiveConjunct(), idx);
 				}
 				assert pre.getRight() == null;
 				pre.setRight(new PathTreeNode(s, pre));
 				pre = pre.getRight();
 			} else {
 				if (dumpPaths) {
-					lgr.debug("  new left child for pre:{} conj:{}", getId(pre), s.getActiveConjunct());
+					lgr.debug("  new left child for pre:{} conj:{} idx:{}", getId(pre), s.getActiveConjunct(), idx);
 				}
 				assert pre.getLeft() == null;
 				pre.setLeft(new PathTreeNode(s, pre));
 				pre = pre.getLeft();
 			}
-			lastBranch = s.isLastConjunctFalse();
+			lastBranch = s.isLastConjunctTrue();
 			idx++;
 		}
 		// Lastly, create the leaf
@@ -142,6 +135,11 @@ public abstract class PathTree {
 				}
 				pre.setFullyExplored(false);
 				break;
+			}
+		}
+		if (dumpPaths && (root != null)) {
+			for (String ll : stringRepr()) {
+				lgr.debug(ll);
 			}
 		}
 		// Travel back down and find left-most unexplored path

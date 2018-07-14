@@ -8,9 +8,19 @@ import za.ac.sun.cs.green.expr.Expression;
 
 public class SymbolicFrame {
 
+	protected final int methodNumber;
+
 	protected final Stack<Expression> stack = new Stack<>();
 
 	protected final Map<Integer, Expression> locals = new HashMap<>();
+
+	public SymbolicFrame(int methodNumber) {
+		this.methodNumber = methodNumber;
+	}
+
+	public int getMethodNumber() {
+		return methodNumber;
+	}
 
 	public Expression pop() {
 		return stack.pop();

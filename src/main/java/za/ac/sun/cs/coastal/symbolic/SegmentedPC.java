@@ -81,6 +81,10 @@ public class SegmentedPC {
 		return isFalse;
 	}
 
+	public boolean isLastConjunctTrue() {
+		return !isFalse;
+	}
+	
 	public Expression getPathCondition() {
 		return pathCondition;
 	}

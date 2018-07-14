@@ -73,8 +73,6 @@ public class SymbolicState {
 
 	private static final Map<String, Integer> markers = new HashMap<>();
 
-	private static final List<InstructionListener> instructionListeners = new ArrayList<>();
-
 	public static void reset(Map<String, Constant> concreteValues) {
 		dangerFlag = false;
 		symbolicMode = false;
@@ -220,11 +218,14 @@ public class SymbolicState {
 	private static boolean methodReturn() {
 		assert symbolicMode;
 		assert !frames.isEmpty();
-		frames.pop();
+		int methodNumber = frames.pop().getMethodNumber();
 		if (frames.isEmpty()) {
-			lgr.trace(">>> symbolic mode switched off");
+			if (dumpTrace) {
+				lgr.trace(">>> symbolic mode switched off");
+			}
 			symbolicMode = false;
 		}
+		notifyExitMethod(methodNumber);
 		return symbolicMode;
 	}
 
@@ -413,20 +414,21 @@ public class SymbolicState {
 		return value;
 	}
 
-	public static void triggerMethod() {
+	public static void triggerMethod(int methodNumber) {
 		if (!symbolicMode) {
 			if (dumpTrace) {
 				lgr.trace(">>> symbolic mode switched on");
 			}
 			symbolicMode = true;
-			frames.push(new SymbolicFrame());
+			frames.push(new SymbolicFrame(methodNumber));
 			if (dumpFrame) {
 				dumpFrames();
 			}
 		}
+		notifyEnterMethod(methodNumber);
 	}
 
-	public static void startMethod(int argCount) {
+	public static void startMethod(int methodNumber, int argCount) {
 		if (!symbolicMode) {
 			return;
 		}
@@ -437,13 +439,14 @@ public class SymbolicState {
 		for (int i = 0; i < argCount; i++) {
 			args.push(pop());
 		}
-		frames.push(new SymbolicFrame());
+		frames.push(new SymbolicFrame(methodNumber));
 		for (int i = 0; i < argCount; i++) {
 			setLocal(i, args.pop());
 		}
 		if (dumpFrame) {
 			dumpFrames();
 		}
+		notifyEnterMethod(methodNumber);
 	}
 	
 	public static void linenumber(int instr, int line) {
@@ -1021,6 +1024,24 @@ public class SymbolicState {
 	//
 	// ======================================================================
 
+	private static final List<InstructionListener> instructionListeners = new ArrayList<>();
+	
+	public static void registerListener(InstructionListener listener) {
+		instructionListeners.add(listener);
+	}
+
+	private static void notifyEnterMethod(int methodNumber) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.enterMethod(methodNumber);
+		}
+	}
+	
+	private static void notifyExitMethod(int methodNumber) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.exitMethod(methodNumber);
+		}
+	}
+	
 	private static void notifyLinenumber(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.linenumber(instr, opcode);
