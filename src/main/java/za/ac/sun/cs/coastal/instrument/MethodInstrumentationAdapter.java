@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal.instrument;
 
+import java.util.BitSet;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -34,6 +35,10 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private static final Map<Integer, Integer> lastInstruction = new TreeMap<>();
 	
+	private static final Map<Integer, BitSet> branchInstructions = new TreeMap<>();
+	
+	private static BitSet currentBranchInstructions;
+	
 	public MethodInstrumentationAdapter(MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.triggerIndex = triggerIndex;
@@ -48,7 +53,11 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	public static Integer getLastInstruction(int methodNumber) {
 		return lastInstruction.get(methodNumber);
 	}
-	
+
+	public static BitSet getJumpPoints(int methodNumber) {
+		return branchInstructions.get(methodNumber);
+	}
+
 	private void visitParameter(Trigger trigger, int triggerIndex, int index, int address) {
 		String name = trigger.getParamName(index);
 		if (name == null) {
@@ -106,6 +115,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			lgr.trace("visitEnd()");
 		}
 		lastInstruction.put(methodCounter, instructionCounter);
+		branchInstructions.put(methodCounter, currentBranchInstructions);
 		mv.visitEnd();
 	}
 	
@@ -147,6 +157,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 		}
 		firstInstruction.put(methodCounter, instructionCounter + 1);
+		currentBranchInstructions = new BitSet();
 		mv.visitCode();
 	}
 
@@ -251,6 +262,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitLdcInsn(instructionCounter);
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "postJumpInsn", "(II)V", false);
+		currentBranchInstructions.set(instructionCounter);
 	}
 
 	@Override
