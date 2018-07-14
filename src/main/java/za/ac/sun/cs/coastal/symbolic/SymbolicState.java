@@ -2,8 +2,10 @@ package za.ac.sun.cs.coastal.symbolic;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -14,6 +16,7 @@ import org.objectweb.asm.Opcodes;
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.Configuration.Trigger;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
+import za.ac.sun.cs.coastal.listener.InstructionListener;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
@@ -69,6 +72,8 @@ public class SymbolicState {
 	private static boolean mayContinue = true;
 
 	private static final Map<String, Integer> markers = new HashMap<>();
+
+	private static final List<InstructionListener> instructionListeners = new ArrayList<>();
 
 	public static void reset(Map<String, Constant> concreteValues) {
 		dangerFlag = false;
@@ -441,16 +446,17 @@ public class SymbolicState {
 		}
 	}
 	
-	public static void reportLinenumber(int line) {
+	public static void linenumber(int instr, int line) {
 		if (!symbolicMode) {
 			return;
 		}
 		if (dumpTrace) {
 			lgr.trace("### LINENUMBER {}", line);
 		}
+		notifyLinenumber(instr, line);
 	}
 
-	public static void insn(int opcode) throws LimitConjunctException {
+	public static void insn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -460,6 +466,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyInsn(instr, opcode);
 		switch (opcode) {
 		case Opcodes.ACONST_NULL:
 			push(Operation.ZERO);
@@ -560,7 +567,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void intInsn(int opcode, int operand) throws LimitConjunctException {
+	public static void intInsn(int instr, int opcode, int operand) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -570,6 +577,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyIntInsn(instr, opcode, operand);
 		switch (opcode) {
 		case Opcodes.BIPUSH:
 			push(new IntConstant(operand));
@@ -597,7 +605,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void varInsn(int opcode, int var) throws LimitConjunctException {
+	public static void varInsn(int instr, int opcode, int var) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -607,6 +615,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyVarInsn(instr, opcode, var);
 		switch (opcode) {
 		case Opcodes.ALOAD:
 			push(getLocal(var));
@@ -629,7 +638,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void typeInsn(int opcode) throws LimitConjunctException {
+	public static void typeInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -639,6 +648,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyTypeInsn(instr, opcode);
 		switch (opcode) {
 		case Opcodes.NEW:
 			int id = incrAndGetNewObjectId();
@@ -653,7 +663,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void fieldInsn(int opcode, String owner, String name, String descriptor) throws LimitConjunctException {
+	public static void fieldInsn(int instr, int opcode, String owner, String name, String descriptor) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -663,6 +673,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyFieldInsn(instr, opcode, owner, name, descriptor);
 		switch (opcode) {
 		case Opcodes.GETSTATIC:
 			push(Operation.ZERO);
@@ -686,7 +697,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void methodInsn(int opcode, String owner, String name, String descriptor) throws LimitConjunctException {
+	public static void methodInsn(int instr, int opcode, String owner, String name, String descriptor) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -696,6 +707,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyMethodInsn(instr, opcode, owner, name, descriptor);
 		switch (opcode) {
 		case Opcodes.INVOKESPECIAL:
 		case Opcodes.INVOKEVIRTUAL:
@@ -746,7 +758,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void invokeDynamicInsn(int opcode) throws LimitConjunctException {
+	public static void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -756,6 +768,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyInvokeDynamicInsn(instr, opcode);
 		switch (opcode) {
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
@@ -767,7 +780,7 @@ public class SymbolicState {
 	}
 
 	/* Missing offset because destination not yet known. */
-	public static void jumpInsn(int opcode) throws LimitConjunctException {
+	public static void jumpInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -777,6 +790,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyJumpInsn(instr, opcode);
 		dangerFlag = true;
 		switch (opcode) {
 		case Opcodes.GOTO:
@@ -855,7 +869,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void postJumpInsn(int opcode) throws LimitConjunctException {
+	public static void postJumpInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -866,6 +880,7 @@ public class SymbolicState {
 			if (dumpTrace) {
 				lgr.trace(">>> previous conjunct is false");
 			}
+			notifyPostJumpInsn(instr, opcode);
 			spc = spc.negate();
 			checkLimitConjuncts();
 			if (dumpTrace) {
@@ -881,7 +896,7 @@ public class SymbolicState {
 		dangerFlag = false;
 	}
 
-	public static void ldcInsn(int opcode, Object value) throws LimitConjunctException {
+	public static void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -891,6 +906,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyLdcInsn(instr, opcode, value);
 		switch (opcode) {
 		case Opcodes.LDC:
 			if (value instanceof Integer) {
@@ -916,7 +932,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void iincInsn(int var, int increment) throws LimitConjunctException {
+	public static void iincInsn(int instr, int var, int increment) throws LimitConjunctException {
 		final int opcode = 132;
 		if (!symbolicMode) {
 			return;
@@ -927,6 +943,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyIincInsn(instr, var, increment);
 		Expression e0 = getLocal(var);
 		Expression e1 = new IntConstant(increment);
 		setLocal(var, Operation.apply(Operator.ADD, e0, e1));
@@ -935,7 +952,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void tableSwitchInsn(int opcode) throws LimitConjunctException {
+	public static void tableSwitchInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -945,6 +962,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyTableSwitchInsn(instr, opcode);
 		switch (opcode) {
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
@@ -955,7 +973,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void lookupSwitchInsn(int opcode) throws LimitConjunctException {
+	public static void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -965,6 +983,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyLookupSwitchInsn(instr, opcode);
 		switch (opcode) {
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
@@ -975,7 +994,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static void multiANewArrayInsn(int opcode) throws LimitConjunctException {
+	public static void multiANewArrayInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -985,6 +1004,7 @@ public class SymbolicState {
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
+		notifyMultiANewArrayInsn(instr, opcode);
 		switch (opcode) {
 		default:
 			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
@@ -995,6 +1015,102 @@ public class SymbolicState {
 		}
 	}
 
+	// ======================================================================
+	//
+	// LISTENERS
+	//
+	// ======================================================================
+
+	private static void notifyLinenumber(int instr, int opcode) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.linenumber(instr, opcode);
+		}
+	}
+	
+	private static void notifyInsn(int instr, int opcode) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.insn(instr, opcode);
+		}
+	}
+
+	private static void notifyIntInsn(int instr, int opcode, int operand) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.intInsn(instr, opcode, operand);
+		}
+	}
+
+	private static void notifyVarInsn(int instr, int opcode, int var) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.varInsn(instr, opcode, var);
+		}
+	}
+
+	private static void notifyTypeInsn(int instr, int opcode) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.typeInsn(instr, opcode);
+		}
+	}
+
+	private static void notifyFieldInsn(int instr, int opcode, String owner, String name, String descriptor) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.fieldInsn(instr, opcode, owner, name, descriptor);
+		}
+	}
+
+	private static void notifyMethodInsn(int instr, int opcode, String owner, String name, String descriptor) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.methodInsn(instr, opcode, owner, name, descriptor);
+		}
+	}
+
+	private static void notifyInvokeDynamicInsn(int instr, int opcode) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.invokeDynamicInsn(instr, opcode);
+		}
+	}
+
+	private static void notifyJumpInsn(int instr, int opcode) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.jumpInsn(instr, opcode);
+		}
+	}
+
+	private static void notifyPostJumpInsn(int instr, int opcode) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.postJumpInsn(instr, opcode);
+		}
+	}
+
+	private static void notifyLdcInsn(int instr, int opcode, Object value) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.ldcInsn(instr, opcode, value);
+		}
+	}
+
+	private static void notifyIincInsn(int instr, int var, int increment) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.iincInsn(instr, var, increment);
+		}
+	}
+
+	private static void notifyTableSwitchInsn(int instr, int opcode) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.tableSwitchInsn(instr, opcode);
+		}
+	}
+
+	private static void notifyLookupSwitchInsn(int instr, int opcode) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.lookupSwitchInsn(instr, opcode);
+		}
+	}
+
+	private static void notifyMultiANewArrayInsn(int instr, int opcode) {
+		for (InstructionListener listener : instructionListeners) {
+			listener.multiANewArrayInsn(instr, opcode);
+		}
+	}
+	
 	// ======================================================================
 	//
 	// UTILITIES
