@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.models;
+package za.ac.sun.cs.coastal.model;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;

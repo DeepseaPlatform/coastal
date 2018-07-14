@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.models;
+package za.ac.sun.cs.coastal.model;
 
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.expr.Expression;
