@@ -145,36 +145,52 @@ public class DepthLastStrategy implements Strategy {
 		public SegmentedPC findNewPath() {
 			SegmentedPC newSpc = null;
 			PathTreeNode cur = getRoot();
+			boolean alternate = false;
 			while (true) {
-				if (cur.getRight() == null) {
-					if (dumpPaths) {
-						lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
+				if (alternate) {
+					if (cur.getRight() == null) {
+						if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur)); }
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+						return newSpc;
+					} else if (cur.getLeft() == null) {
+						if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur)); }
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+						return newSpc;
+					} else if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
+						if (dumpPaths) { lgr.debug("  At {}, left is available", getId(cur)); }
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+						cur = cur.getLeft();
+					} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
+						if (dumpPaths) { lgr.debug("  At {}, right is available", getId(cur)); }
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+						cur = cur.getRight();
+						alternate = !alternate;
+					} else {
+						if (dumpPaths) { lgr.debug("  At #{} (dead end), no more paths", getId(cur)); }
+						return null;
 					}
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-					return newSpc;
-				} else if (cur.getLeft() == null) {
-					if (dumpPaths) {
-						lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
-					}
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-					return newSpc;
-				} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
-					if (dumpPaths) {
-						lgr.debug("  At {}, right is available", getId(cur));
-					}
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-					cur = cur.getRight();
-				} else if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
-					if (dumpPaths) {
-						lgr.debug("  At {}, left is available", getId(cur));
-					}
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-					cur = cur.getLeft();
 				} else {
-					if (dumpPaths) {
-						lgr.debug("  At #{} (dead end), no more paths", getId(cur));
+					if (cur.getLeft() == null) {
+						if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur)); }
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+						return newSpc;
+					} else if (cur.getRight() == null) {
+						if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur)); }
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+						return newSpc;
+					} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
+						if (dumpPaths) { lgr.debug("  At {}, right is available", getId(cur)); }
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
+						cur = cur.getRight();
+					} else if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
+						if (dumpPaths) { lgr.debug("  At {}, left is available", getId(cur)); }
+						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
+						cur = cur.getLeft();
+						alternate = !alternate;
+					} else {
+						if (dumpPaths) { lgr.debug("  At #{} (dead end), no more paths", getId(cur)); }
+						return null;
 					}
-					return null;
 				}
 			}
 		}

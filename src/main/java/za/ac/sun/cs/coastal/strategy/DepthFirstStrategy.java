@@ -147,33 +147,23 @@ public class DepthFirstStrategy implements Strategy {
 			PathTreeNode cur = getRoot();
 			while (true) {
 				if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
-					if (dumpPaths) {
-						lgr.debug("  At {}, left is available", getId(cur));
-					}
+					if (dumpPaths) { lgr.debug("  At {}, left is available", getId(cur)); }
 					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
 					cur = cur.getLeft();
 				} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
-					if (dumpPaths) {
-						lgr.debug("  At {}, right is available", getId(cur));
-					}
+					if (dumpPaths) { lgr.debug("  At {}, right is available", getId(cur)); }
 					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
 					cur = cur.getRight();
 				} else if (cur.getLeft() == null) {
-					if (dumpPaths) {
-						lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
-					}
+					if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur)); }
 					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
 					return newSpc;
 				} else if (cur.getRight() == null) {
-					if (dumpPaths) {
-						lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
-					}
+					if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur)); }
 					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
 					return newSpc;
 				} else {
-					if (dumpPaths) {
-						lgr.debug("  At #{} (dead end), no more paths", getId(cur));
-					}
+					if (dumpPaths) { lgr.debug("  At #{} (dead end), no more paths", getId(cur)); }
 					return null;
 				}
 			}

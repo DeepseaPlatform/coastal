@@ -259,10 +259,12 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(II)V", false);
 		mv.visitJumpInsn(opcode, label);
-		mv.visitLdcInsn(instructionCounter);
-		mv.visitLdcInsn(opcode);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "postJumpInsn", "(II)V", false);
-		currentBranchInstructions.set(instructionCounter);
+		if (opcode != Opcodes.GOTO) {
+			mv.visitLdcInsn(instructionCounter);
+			mv.visitLdcInsn(opcode);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "postJumpInsn", "(II)V", false);
+			currentBranchInstructions.set(instructionCounter);
+		}
 	}
 
 	@Override
