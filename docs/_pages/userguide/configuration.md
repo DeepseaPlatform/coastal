@@ -4,9 +4,37 @@ title: Configuring a COASTAL run
 permalink: /userguide/configuration/
 ---
 
-Remember to specify how to change logging settings
+To learn how to analyze programs with COASTAL, you should read the Usage page.
+As it explains, the convention is to create a file `XYZ.properties` that instructs COASTAL how to analyze program `XYZ.java`.
+The property file is then passed as the first command-line argument to COASTAL.
 
-## Summary
+However, COASTAL also reads properties from two other locations.  In all, it checks the following files in the following order:
+
+  1. The `coastal.properties` file is loaded first (if it exists).  This file is part of the resources distributed with the project.  It allows the user to specify default values for properties so that they do not have to be repeated over and over in individual property files.
+  
+  2. Next, the `~/.coastal/coastal.properties` file is loaded (if it exists).  The "`~`" refers to the user's home directory.  On Windows, this is _**TODO**_.
+  
+  3. Lastly, the properties file specified on the command-line is loaded.
+  
+Settings in later files, and override settings in earlier files.
+Once all properties has been loaded, they are processed.
+This last point is important, because it means that if an earlier file specified `coastal.dump.X = true`,
+and a later file specified that `coastal.dump = false`, then the `coastal.dump.X` value is still true.
+The order in which the settings appear in properties file is not important;
+the `coastal.dump.X` property is processed *after* the `coastal.dump` property, which explains this behavior.
+
+## Logging
+
+Many of the properties specify which information is logged.
+COASTAL uses Apache Log4j2 for logging, and the `log4j2.xml` file controls where (and which) logging information is stored.
+The default is to write an abbreviated log to the standard output,
+and to write a detailed log to the file `/tmp/coastal.log`.
+This should be changed on Windows (because the directory is invalid),
+and may be changed on Unix or OSX, if the user desired.
+To do so, the user can create a file `./WEB-INFO/log4j2.xml` which will be loaded
+instead of the default file distributed with COASTAL.
+
+## Summary of properties
 
 | Setting | Description | Default |
 |:--------|:------------|:--------|
@@ -21,6 +49,7 @@ Remember to specify how to change logging settings
 | `coastal.limit.run` | Limit on number of runs executed | 0 |
 | `coastal.limit.time` | Limit on number of seconds allowed for runs | 0 |
 | `coastal.limit.path` | Limit on number of paths investigated | 0 |
+| `coastal.limit.conjuncts` | Limit on number of conjuncts investigated per path | 0 |
 | `coastal.dump.config` | Whether configuration settings are displayed | `false` |
 | `coastal.dump.asm` | Whether instrumented code displayed (at end) | `false` |
 | `coastal.dump.trace` | Whether instructions are displayed as executed | `false` |
@@ -46,7 +75,7 @@ This class should have a main method with the signature "`public static void mai
 Omit the "`.java`" and "`.class`" extension.
 
 ~~~
-coastal.target = examples.spf.BinTree2
+coastal.main = examples.spf.BinTree2
 ~~~
 
 ## coastal.args
@@ -134,7 +163,7 @@ coastal.delegates = java.lang.Math:za.ac.sun.cs.coastal.models.Math
 ## coastal.echooutput
 
 A boolean setting to control whether the output of the class under analysis
-is displayed (true) or suppressed (false).  This is useful is the analysis
+is displayed (true) or suppressed (false).  This is useful if the analysis
 does not behave as expected.
 
 ~~~
@@ -172,6 +201,19 @@ A value of zero means that there is no limit.
 
 ~~~
 coastal.limit.path = 200
+~~~
+
+The default value is 0.
+
+## coastal.limit.conjuncts
+
+An upper limit on the number of conjuncts that are allowed per path.
+Once the limit has been reached, no further conjuncts are recorded and
+the symbolic execution of the program is stopped.
+A value of zero means that there is no limit.
+
+~~~
+coastal.limit.conjuncts = 50
 ~~~
 
 The default value is 0.

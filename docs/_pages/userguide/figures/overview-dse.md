@@ -36,7 +36,7 @@
 	<polyline stroke-linejoin="miter" marker-end="url(#arrow)"
 		points="0,150 100,150 100,300 200,300"
 		{{ stroke-grey-05 }} stroke-width="10"/>
-	<text {{ fill-grey-05 }} {{ align-mm }} x="100" y="30">
+	<text {{ fill-grey-05 }} {{ align-mm }} x="100" y="25">
 		V1
 	</text>
 	<text {{ fill-grey-05 }} {{ left }} {{ align-lm }} x="115" y="225">

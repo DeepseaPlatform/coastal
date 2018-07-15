@@ -64,9 +64,9 @@ a PC is _satisfiable_ and, if so, can provide one or more examples of input
 values that satisfy it.  Such an example of input values is commonly called a
 **_model_**.
 
-Given a PC _P1 &and; P2 &and; P3_, the DSE engine will negate one or
+Given a PC _p1 &and; p2 &and; p3_, the DSE engine will negate one or
 more of the conjuncts.  For example, it may change the PC to
-_P1 &and; P2 &and; &not;P3_.
+_p1 &and; p2 &and; &not;p3_.
 If the new PC is satisfiable, the SMT solver will provide a model
 that, when passed to the SUT, will force it to exhibit the
 behaviour described by the modified PC.
@@ -75,27 +75,29 @@ By carefully managing the PCs, the DSE engine is able to explore the full
 behaviour of the SUT.  Of course, there are some caveats.
 <!-- fidelity -->
 If a model for a PC is fed to the SUT, the resulting PC may be
-different from the original when the input values exposes "new" behaviours.
+different from the original when the input values expose "new" behaviours.
 <!-- completeness -->
 There are also boundary condition behaviour: the SUT may not terminate. Or, the
 number of behaviours may be prohibitively large, and the DSE engine must decide
 to ignore certain behaviours.
 <!-- soundness -->
-One thing we can be sure of is that no behaviour is "unsound":  it is always
-derived from a concrete execution of the SUT based on a concrete set of input
-values.
+Lastly, there is the issue of _soundness_:  if a behaviour of the SUT is too
+complex (because it is "hidden" inside a native library), the PC may not
+accurately reflect the behaviour.  This can lead to situations where the DSE
+engine reports that a set of input values lead to an error, whereas the
+SUT behaves correctly.  Or conversely, the DSE reports
+that a set of input values elicit correct behaviour, but in reality the SUT
+fails for those inputs.
 
 The DSE engine can easily generate a set of test inputs, but it is important to
-remember that it cannot produce a complete test suite because unless it has
+remember that it cannot produce a complete test suite unless it has
 access to some form of test oracle.
 The set of behaviours can also be used to perform other kinds of analyses, such
 as coverage analysis.
 
-## DEEPSEA
+## COASTAL
 
-DEEPSEA is a DSE engine that uses the Java Debug Interface (JDI), which is part
-of the Java Platform Debugger Architecture
-([JPDA](https://docs.oracle.com/javase/8/docs/technotes/guides/jpda/index.html)).
+COASTAL is a DSE engine that uses the [ASM](https://asm.ow2.io/) Java bytecode manipulation library.
 This allows clients to launch, monitor, and control instance of
 the Java Virtual Machine (JVM).
 To investigate the SUT, a JVM instance is created and

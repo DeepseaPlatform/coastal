@@ -1,4 +1,4 @@
-<svg viewBox="0 0 2400 610">
+<svg viewBox="0 0 2400 680">
 {% include figure-inc.html %}
 
 <g
@@ -9,7 +9,7 @@
 		{{ text-size-normal }}
 >
 
-<g transform="translate(0,60)">
+<g transform="translate(0,80)">
 	<rect {{ fill-pink-02 }} x="0" y="0" width="500" height="600" rx="15" ry="15"/>
 	<text {{ fill-grey-05 }} {{ bold }} {{ large }} {{ align-mm }} x="250" y="-30">
 		DSE / symbolic
@@ -44,7 +44,7 @@
 	</text>
 </g>
 
-<g transform="translate(700,60)">
+<g transform="translate(700,80)">
 	<rect {{ fill-pink-02 }} x="0" y="0" width="500" height="600" rx="15" ry="15"/>
 	<text {{ fill-grey-05 }} {{ bold }} {{ large }} {{ align-mm }} x="250" y="-30">
 		SUT / concrete
@@ -75,7 +75,7 @@
 	</text>
 </g>
 
-<g transform="translate(600,60)">
+<g transform="translate(600,80)">
 	<line x1="200" y1="225" x2="-200" y2="225"
 			marker-end="url(#arrow)"
 			{{ stroke-grey-05 }}
