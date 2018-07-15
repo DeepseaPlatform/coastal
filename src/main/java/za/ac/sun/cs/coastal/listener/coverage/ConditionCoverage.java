@@ -5,8 +5,11 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.Logger;
+import org.objectweb.asm.Opcodes;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.instrument.MethodInstrumentationAdapter;
@@ -20,14 +23,16 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 
 	private static final Logger lgr = Configuration.getLogger();
 
-	private final Map<Integer, Long> coveredTrue = new HashMap<>();
+	private final Map<Integer, Long> reached = new HashMap<>();
 
-	private final Map<Integer, Long> coveredFalse = new HashMap<>();
+	private final Map<Integer, Long> falseTaken = new HashMap<>();
 
-	private final BitSet potentials = new BitSet();
+	private final BitSet jumpPoints = new BitSet();
 
 	private boolean dumpCoverage = false;
 
+	private boolean reportCoverage = false;
+	
 	public ConditionCoverage() {
 		Reporters.register(this);
 		Configuration.registerListener(this);
@@ -36,9 +41,9 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 
 	@Override
 	public void enterMethod(int methodNumber) {
-		BitSet newPotentials = MethodInstrumentationAdapter.getJumpPoints(methodNumber);
-		if (newPotentials != null) {
-			potentials.or(newPotentials);
+		BitSet newJumpPoints = MethodInstrumentationAdapter.getJumpPoints(methodNumber);
+		if (newJumpPoints != null) {
+			jumpPoints.or(newJumpPoints);
 		}
 	}
 
@@ -89,14 +94,12 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 
 	@Override
 	public void jumpInsn(int instr, int opcode) {
-		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+		if (opcode != Opcodes.GOTO) {
+			if (dumpCoverage) {
+				lgr.trace("+++ {}", instr);
+			}
+			incrementMap(reached, instr);
 		}
-		Long n = coveredTrue.get(instr);
-		if (n == null) {
-			n = 0L;
-		}
-		coveredTrue.put(instr, n + 1);
 	}
 
 	@Override
@@ -104,12 +107,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 		if (dumpCoverage) {
 			lgr.trace("+++F {}", instr);
 		}
-		Long n = coveredFalse.get(instr);
-		if (n == null) {
-			n = 0L;
-		}
-		coveredFalse.put(instr, n + 1);
-		coveredTrue.put(instr, coveredTrue.get(instr) - 1);
+		incrementMap(falseTaken, instr);
 	}
 
 	@Override
@@ -137,6 +135,15 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 		// ignore
 	}
 
+	private void incrementMap(Map<Integer, Long> map, int key) {
+		Long l = map.get(key);
+		if (l == null) {
+			map.put(key, 1L);
+		} else {
+			map.put(key, l + 1);
+		}
+	}
+
 	// ======================================================================
 	//
 	// CONFIGURATION
@@ -145,13 +152,15 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 
 	@Override
 	public void configurationLoaded(Properties properties) {
-		boolean dc = Configuration.getBooleanProperty(properties, "coastal.dump.coverage", dumpCoverage);
+		boolean dc = Configuration.getBooleanProperty(properties, "coastal.coverage.dump", dumpCoverage);
 		dumpCoverage = dc || Configuration.getDumpAll();
+		reportCoverage = Configuration.getBooleanProperty(properties, "coastal.coverage.report", reportCoverage);
 	}
 
 	@Override
 	public void configurationDump() {
-		lgr.info("coastal.dump.coverage = {}", dumpCoverage);
+		lgr.info("coastal.coverage.dump = {}", dumpCoverage);
+		lgr.info("coastal.coverage.report = {}", reportCoverage);
 	}
 
 	// ======================================================================
@@ -167,42 +176,75 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 
 	@Override
 	public void report(PrintWriter out) {
-		BitSet trueSet = new BitSet();
-		for (int i : coveredTrue.keySet()) {
-			if (coveredTrue.get(i) > 0) {
-				trueSet.set(i);
+		long unknownJumpPoints = 0;
+		long onlyFalseCount = 0;
+		long onlyTrueCount = 0;
+		long neitherCount = 0;
+		long bothCount = 0;
+		BitSet reachedSet = mapKeysToBitSet(reached);
+		BitSet falseSet = mapKeysToBitSet(falseTaken);
+		BitSet allKeys = new BitSet();
+		allKeys.or(reachedSet);
+		allKeys.or(falseSet);
+		allKeys.or(jumpPoints);
+		for (int k = allKeys.nextSetBit(0); k >= 0; k = allKeys.nextSetBit(k + 1)) {
+			long r = getValue(reached, k);
+			long f = getValue(falseTaken, k);
+			if (jumpPoints.get(k)) {
+				if (r == 0) {
+					assert f == 0;
+					neitherCount++;
+				} else if (f == 0) {
+					onlyTrueCount++;
+				} if (f == r) {
+					onlyFalseCount++;
+				} else {
+					bothCount++;
+				}
+			} else {
+				unknownJumpPoints++;
 			}
 		}
-		BitSet falseSet = new BitSet();
-		for (int i : coveredFalse.keySet()) {
-			if (coveredFalse.get(i) > 0) {
-				falseSet.set(i);
+		int totalCount = jumpPoints.cardinality();
+		out.printf("  Both:       %6d of %6d instructions == %6.2f%%\n", bothCount, totalCount, bothCount * 100.0 / totalCount);
+		out.printf("  Neither:    %6d of %6d instructions == %6.2f%%\n", neitherCount, totalCount, neitherCount * 100.0 / totalCount);
+		out.printf("  Only true:  %6d of %6d instructions == %6.2f%%\n", onlyTrueCount, totalCount, onlyTrueCount * 100.0 / totalCount);
+		out.printf("  Only false: %6d of %6d instructions == %6.2f%%\n", onlyFalseCount, totalCount, onlyFalseCount * 100.0 / totalCount);
+		if (unknownJumpPoints > 0) {
+			out.printf("  Unknown decisions: %d\n", unknownJumpPoints);
+		}
+		if (reportCoverage) {
+			SortedSet<Integer> keys = new TreeSet<>(reached.keySet());
+			keys.addAll(falseTaken.keySet());
+			for (int i : keys) {
+				Long d = reached.get(i);
+				if (d == null) {
+					d = 0L;
+				}
+				Long f = falseTaken.get(i);
+				if (f == null) {
+					f = 0L;
+				}
+				out.printf("  Decision #%04d reached %6d times, false taken %6d times\n", i, d, f);
 			}
 		}
-		trueSet.and(potentials);
-		falseSet.and(potentials);
-		BitSet x = new BitSet();
-		x.or(trueSet);
-		x.or(falseSet);
-		int bothCount = x.cardinality();
-		x.clear();
-		x.or(potentials);
-		x.andNot(trueSet);
-		x.andNot(falseSet);
-		int neitherCount = x.cardinality();
-		x.clear();
-		x.or(trueSet);
-		x.andNot(falseSet);
-		int onlyTrueCount = x.cardinality();
-		x.clear();
-		x.or(falseSet);
-		x.andNot(trueSet);
-		int onlyFalseCount = x.cardinality();
-		int totalCount = potentials.cardinality();
-		out.printf("  Both:       %d of %d instructions == %.2f%%\n", bothCount, totalCount, bothCount * 100.0 / totalCount);
-		out.printf("  Neither:    %d of %d instructions == %.2f%%\n", neitherCount, totalCount, neitherCount * 100.0 / totalCount);
-		out.printf("  Only true:  %d of %d instructions == %.2f%%\n", onlyTrueCount, totalCount, onlyTrueCount * 100.0 / totalCount);
-		out.printf("  Only false: %d of %d instructions == %.2f%%\n", onlyFalseCount, totalCount, onlyFalseCount * 100.0 / totalCount);
+	}
+	
+	private long getValue(Map<Integer, Long> map, int key) {
+		Long l = map.get(key);
+		if (l == null) {
+			return 0L;
+		} else {
+			return l;
+		}
+	}
+
+	private BitSet mapKeysToBitSet(Map<Integer, Long> map) {
+		BitSet bs = new BitSet();
+		for (int key : map.keySet()) {
+			bs.set(key);
+		}
+		return bs;
 	}
 
 }
