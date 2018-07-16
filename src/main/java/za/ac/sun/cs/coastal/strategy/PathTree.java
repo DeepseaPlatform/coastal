@@ -31,6 +31,9 @@ public abstract class PathTree {
 
 	public SegmentedPC insertPath(SegmentedPC spc, boolean isInfeasible) {
 		pathCount++;
+		/*
+		 * Step 1: Deconstruct the path condition.
+		 */
 		final int depth = spc.getDepth();
 		SegmentedPC[] path = new SegmentedPC[depth];
 		int idx = depth - 1;
@@ -38,133 +41,99 @@ public abstract class PathTree {
 			path[idx--] = s;
 		}
 		assert idx == -1;
-		PathTreeNode pre = null;
-		PathTreeNode cur = root;
 		if (dumpPaths) {
 			lgr.debug("depth:{}", depth);
-			lgr.debug("Inserting into existing paths");
 		}
-		// First following existing tree as far as we can go
-		boolean lastBranch = false;
-		idx = 0;
-		while ((cur != null) && (idx < depth)) {
-			SegmentedPC s = path[idx];
-			lastBranch = s.isLastConjunctTrue();
-			if (dumpPaths) {
-				lgr.debug("  cur:{} pre:{} conj:{} truth:{} idx:{}", getId(cur), getId(pre), s.getActiveConjunct(),
-						lastBranch, idx);
-			}
-			assert !cur.isLeaf();
-			pre = cur;
-			cur = lastBranch ? cur.getRight() : cur.getLeft();
-			idx++;
-		}
-		if ((cur != null) && cur.isLeaf() && (idx == depth)) {
-			if (dumpPaths) {
-				lgr.debug("Revisit!");
-			}
-			revisitCount++;
-		}
-		// If there is more to insert but no pre-tree, init root
-		if ((idx < depth) && (pre == null)) {
-			SegmentedPC s = path[idx];
-			if (dumpPaths) {
-				lgr.debug("Creating root");
-			}
-			pre = root = new PathTreeNode(s, pre);
-			lastBranch = s.isLastConjunctTrue();
-			idx++;
-		}
-		// While there is more to insert, create subtree node-by-node
-		if ((idx < depth) && dumpPaths) {
-			lgr.debug("More to insert");
-		}
-		while (idx < depth) {
-			SegmentedPC s = path[idx];
-			if (lastBranch) {
-				if (dumpPaths) {
-					lgr.debug("  new right child for pre:{} conj:{} idx:{}", getId(pre), s.getActiveConjunct(), idx);
-				}
-				assert pre.getRight() == null;
-				pre.setRight(new PathTreeNode(s, pre));
-				pre = pre.getRight();
-			} else {
-				if (dumpPaths) {
-					lgr.debug("  new left child for pre:{} conj:{} idx:{}", getId(pre), s.getActiveConjunct(), idx);
-				}
-				assert pre.getLeft() == null;
-				pre.setLeft(new PathTreeNode(s, pre));
-				pre = pre.getLeft();
-			}
-			lastBranch = s.isLastConjunctTrue();
-			idx++;
-		}
-		// Lastly, create the leaf
-		if (pre == null) {
-			root = new PathTreeNode(isInfeasible, pre);
-			if (dumpPaths) {
-				lgr.debug("Create new root {} (isInfeasible={})", getId(root), isInfeasible);
-			}
-		} else if (lastBranch) {
-			pre.setRight(new PathTreeNode(isInfeasible, pre));
-			if (dumpPaths) {
-				lgr.debug("Create right leaf {} (isInfeasible={})", getId(pre.getRight()), isInfeasible);
-			}
-		} else {
-			pre.setLeft(new PathTreeNode(isInfeasible, pre));
-			if (dumpPaths) {
-				lgr.debug("Create left leaf {} (isInfeasible={})", getId(pre.getLeft()), isInfeasible);
-			}
-		}
-		// Travel back up branch and fill in completed flags
-		if (dumpPaths) {
-			lgr.debug("Travelling back up to root, propagating isFullyExplored");
-		}
-		while (pre != null) {
-			boolean leftComplete = (pre.getLeft() != null) && pre.getLeft().isComplete();
-			boolean rightComplete = (pre.getRight() != null) && pre.getRight().isComplete();
-			if (leftComplete && rightComplete) {
-				if (dumpPaths) {
-					lgr.debug("  Setting fully explored for {}", getId(pre));
-				}
-				pre.setFullyExplored(true);
-				pre = pre.getParent();
-			} else {
-				if (dumpPaths) {
-					lgr.debug("  Stopping at {}", getId(pre));
-				}
-				pre.setFullyExplored(false);
-				break;
-			}
-		}
+		/*
+		 * Step 2: Add the new path (spc) to the path tree
+		 */
+		root = insert(root, path, 0, depth, isInfeasible);
+		//		/// 
+		//		if ((cur != null) && cur.isLeaf() && (idx == depth)) {
+		//			if (dumpPaths) {
+		//				lgr.debug("Revisit!");
+		//			}
+		//			revisitCount++;
+		//		}
+		/*
+		 * Step 3: Dump the tree if required
+		 */
 		if (dumpPaths && (root != null)) {
 			for (String ll : stringRepr()) {
 				lgr.debug(ll);
 			}
 		}
-		// Travel back down and find left-most unexplored path
-		if (dumpPaths) {
-			lgr.debug("Now travelling back down to find a viable path");
-		}
+		/*
+		 * Step 4: Return a new path through the tree
+		 */
 		return findNewPath();
+	}
+
+	private PathTreeNode insert(PathTreeNode node, SegmentedPC[] path, int cur, int depth, boolean isInfeasible) {
+		/*
+		 * Step 1: create node if necessary
+		 */
+		if (node == null) {
+			node = PathTreeNode.createNode(path[cur], path[cur].getNrOfOutcomes());
+		}
+		/*
+		 * Step 2: find the child and check that it checks out
+		 */
+		int i = path[cur].getOutcomeIndex();
+		/*
+		 * Step 3: insert the rest of the path
+		 */
+		if (cur + 1 < depth) {
+			node.setChild(i, insert(node.getChild(i), path, cur + 1, depth, isInfeasible));
+		} else if (isInfeasible) {
+			node.setChild(i, PathTreeNode.createInfeasible());
+		} else {
+			node.setChild(i, PathTreeNode.createLeaf());
+		}
+		/*
+		 * Step 4: check if this node is now fully explored
+		 */
+		if (!node.isFullyExplored()) {
+			int n = node.getChildCount();
+			boolean full = true;
+			for (i = 0; i < n; i++) {
+				PathTreeNode x = node.getChild(i);
+				if ((x == null) || !x.isComplete()) {
+					full = false;
+					break;
+				}
+			}
+			if (full) {
+				node.setFullyExplored();
+			}
+		}
+		/*
+		 * Step 5: return this node
+		 */
+		return node;
 	}
 
 	public abstract SegmentedPC findNewPath();
 
-	public static String getId(PathTreeNode node) {
-		return (node == null) ? "NUL" : ("#" + node.getId());
-	}
-
 	public String[] stringRepr() {
 		int h = root.height() * 4 - 2;
 		int w = root.width();
+		/*
+		 * Step 1: create and clear the character array 
+		 */
 		char[][] lines = new char[h][w];
 		for (int i = 0; i < h; i++) {
 			for (int j = 0; j < w; j++) {
 				lines[i][j] = ' ';
 			}
 		}
-		root.stringFill(lines, 0, 0, 0);
+		/*
+		 * Step 2: draw the path tree
+		 */
+		root.stringFill(lines, 0, 0);
+		/*
+		 * Step 3: convert the character array to strings
+		 */
 		String[] finalLines = new String[h];
 		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < h; i++) {

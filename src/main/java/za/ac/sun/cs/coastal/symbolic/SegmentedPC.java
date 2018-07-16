@@ -4,64 +4,19 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
 
-/**
- * Class to store a path condition as a linked list of triples.
- * 
- * Each triple contains (1) an active conjunct that represents a branch
- * condition, (2) a passive conjunct that represents additional constraints on
- * the variables, and (3) a signal that indicates whether the branch was taken
- * ("<code>0</code>") or not ("<code>1</code>").
- *
- * For efficiency, this data structure also stores (1) the accumulated path
- * condition which is the conjunction of all path condition conjuncts of this
- * instance and its parent instances, and (2) the signature which is the
- * concatenation of this instance's signal and those of all its parents.
- */
-public class SegmentedPC {
+public abstract class SegmentedPC {
 
 	private final SegmentedPC parent;
 
-	private final Expression activeConjunct;
-
 	private final Expression passiveConjunct;
-
-	private final boolean isFalse;
-
-	private final Expression pathCondition;
-
-	private final String signature;
 
 	private final int depth;
 
-	private String stringRep = null, stringRep0 = null;
+	private Expression pathCondition = null;
 
-	public SegmentedPC(SegmentedPC parent, Expression activeConjunct, Expression passiveConjunct, boolean isFalse) {
-		assert activeConjunct != null;
-		assert activeConjunct != Operation.TRUE;
+	public SegmentedPC(SegmentedPC parent, Expression passiveConjunct) {
 		this.parent = parent;
-		this.activeConjunct = activeConjunct;
 		this.passiveConjunct = passiveConjunct;
-		this.isFalse = isFalse;
-		Expression a = activeConjunct;
-		if (isFalse) {
-			this.signature = ((parent == null) ? "" : parent.getSignature()) + "0";
-			a = negate(a);
-		} else {
-			this.signature = ((parent == null) ? "" : parent.getSignature()) + "1";
-		}
-		if (parent == null) {
-			if ((passiveConjunct != Operation.TRUE) && (passiveConjunct != null)) {
-				this.pathCondition = new Operation(Operator.AND, a, passiveConjunct); 
-			} else {
-				this.pathCondition = a; 
-			}
-		} else {
-			if ((passiveConjunct != Operation.TRUE) && (passiveConjunct != null)) {
-				this.pathCondition = new Operation(Operator.AND, a, new Operation(Operator.AND, passiveConjunct, parent.getPathCondition())); 
-			} else {
-				this.pathCondition = new Operation(Operator.AND, a, parent.getPathCondition());
-			}
-		}
 		this.depth = (parent == null) ? 1 : (1 + parent.getDepth());
 	}
 
@@ -69,39 +24,55 @@ public class SegmentedPC {
 		return parent;
 	}
 
-	public Expression getActiveConjunct() {
-		return activeConjunct;
-	}
-
 	public Expression getPassiveConjunct() {
 		return passiveConjunct;
-	}
-
-	public boolean isLastConjunctFalse() {
-		return isFalse;
-	}
-
-	public boolean isLastConjunctTrue() {
-		return !isFalse;
-	}
-	
-	public Expression getPathCondition() {
-		return pathCondition;
-	}
-	
-	public String getSignature() {
-		return signature;
 	}
 
 	public int getDepth() {
 		return depth;
 	}
-	
-	public SegmentedPC negate() {
-		return new SegmentedPC(parent, activeConjunct, passiveConjunct, !isFalse);
+
+	public Expression getPathCondition() {
+		if (pathCondition == null) {
+			SegmentedPC p = getParent();
+			if (p != null) {
+				Expression ppc = p.getPathCondition();
+				if (ppc != null) {
+					pathCondition = ppc;
+				}
+			}
+			Expression psc = getPassiveConjunct();
+			if (psc != null) {
+				if (pathCondition != null) {
+					pathCondition = new Operation(Operator.AND, psc, pathCondition);
+				} else {
+					pathCondition = psc;
+				}
+			}
+			if (pathCondition == null) {
+				pathCondition = getActiveConjunct();
+			} else {
+				pathCondition = new Operation(Operator.AND, getActiveConjunct(), pathCondition);
+			}
+		}
+		return pathCondition;
 	}
 
-	public static Expression negate(Expression expression) {
+	public abstract Expression getExpression();
+
+	public abstract Expression getActiveConjunct();
+
+	public abstract String getSignature();
+
+	public abstract int getNrOfOutcomes();
+
+	public abstract int getOutcomeIndex();
+
+	public abstract String getOutcome(int index);
+
+	public abstract SegmentedPC getChild(int index, SegmentedPC parent);
+
+	protected static Expression negate(Expression expression) {
 		if (expression instanceof Operation) {
 			Operation operation = (Operation) expression;
 			switch (operation.getOperator()) {
@@ -119,6 +90,14 @@ public class SegmentedPC {
 				return new Operation(Operator.LE, operation.getOperand(0), operation.getOperand(1));
 			case GE:
 				return new Operation(Operator.LT, operation.getOperand(0), operation.getOperand(1));
+			case AND:
+				Expression e0 = negate(operation.getOperand(0));
+				Expression e1 = negate(operation.getOperand(1));
+				return new Operation(Operator.OR, e0, e1);
+			case OR:
+				e0 = negate(operation.getOperand(0));
+				e1 = negate(operation.getOperand(1));
+				return new Operation(Operator.AND, e0, e1);
 			default:
 				break;
 			}
@@ -126,103 +105,16 @@ public class SegmentedPC {
 		return new Operation(Operator.NOT, expression);
 	}
 
+	private String stringRep = null;
+
 	@Override
 	public String toString() {
 		if (stringRep == null) {
-			StringBuilder sb = new StringBuilder();
-			sb.append(toString0());
-			stringRep = sb.toString();
+			stringRep = toString0();
 		}
 		return stringRep;
 	}
 
-	public String toString0() {
-		if (stringRep0 == null) {
-			StringBuilder sb = new StringBuilder();
-			sb.append(isLastConjunctFalse() ? "FALSE" : "TRUE ");
-			sb.append("  ").append(String.format("%-30s", getActiveConjunct().toString()));
-			Expression e = getPassiveConjunct();
-			sb.append("  ").append(String.format("%s", ((e == null) ? "NULL" : e.toString())));
-			SegmentedPC p = getParent();
-			if (p != null) {
-				sb.append('\n').append(p.toString0());
-			}
-			stringRep0 = sb.toString();
-		}
-		return stringRep0;
-	}
+	public abstract String toString0();
 
-//	public static String constraintBeautify(String subject) {
-//		subject = replace("[0-9]+[!=]=[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
-//		subject = replace("[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+[!=]=[0-9]+", m -> rewriteCharConstraint(m.group()), subject);
-//		return subject;
-//	}
-//
-//	public static String modelBeautify(String subject) {
-//		return replace("[a-zA-Z]+" + SymbolicState.CHAR_SEPARATOR + "[0-9]+=[0-9]+", m -> rewriteCharModel(m.group()), subject);
-//	}
-//	
-//	public static String replace(String regex, Function<MatchResult, String> callback, CharSequence subject) {
-//		Matcher m = Pattern.compile(regex).matcher(subject);
-//		StringBuffer sb = new StringBuffer();
-//		while (m.find()) {
-//			m.appendReplacement(sb, callback.apply(m.toMatchResult()));
-//		}
-//		m.appendTail(sb);
-//		return sb.toString();
-//	}
-//
-//	public static String rewriteCharConstraint(String replace) {
-//		int index = Math.max(replace.indexOf("=="), replace.indexOf("!="));
-//		if (index == -1) {
-//			return replace;
-//		}
-//		if (Character.isDigit(replace.charAt(0))) {
-//			StringBuilder b = new StringBuilder();
-//			appendChar(b, Integer.parseInt(replace.substring(0, index)));
-//			return b.append(replace.substring(index)).toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
-//		} else {
-//			StringBuilder b = new StringBuilder();
-//			b.append(replace.substring(0, index + 2));
-//			appendChar(b, Integer.parseInt(replace.substring(index + 2)));
-//			return b.toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
-//		}
-//	}
-//	
-//	public static String rewriteCharModel(String replace) {
-//		int index = replace.indexOf('=');
-//		if (index == -1) {
-//			return replace.replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
-//		}
-//		StringBuilder b = new StringBuilder().append(replace.substring(0, index + 1));
-//		appendChar(b, Integer.parseInt(replace.substring(index + 1)));
-//		return b.toString().replaceAll(SymbolicState.CHAR_SEPARATOR, "#");
-//	}
-
-	public static void appendChar(StringBuilder stringBuilder, int ascii) {
-		stringBuilder.append('\'');
-		if (ascii == '\'') {
-			stringBuilder.append("\\\\'");
-		} else if (ascii == '\\') {
-			stringBuilder.append("\\\\\\\\");
-		} else if ((ascii >= ' ') && (ascii < 127)) {
-			stringBuilder.append((char) ascii);
-		} else if (ascii == 0) {
-			stringBuilder.append("\\\\0");
-		} else if (ascii == 8) {
-			stringBuilder.append("\\\\b");
-		} else if (ascii == 9) {
-			stringBuilder.append("\\\\t");
-		} else if (ascii == 10) {
-			stringBuilder.append("\\\\n");
-		} else if (ascii == 12) {
-			stringBuilder.append("\\\\f");
-		} else if (ascii == 13) {
-			stringBuilder.append("\\\\r");
-		} else {
-			stringBuilder.append("\\\\u").append(String.format("%04x", ascii));
-		}
-		stringBuilder.append('\'');
-	}
-	
 }

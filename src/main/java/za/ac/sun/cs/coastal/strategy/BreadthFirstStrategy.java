@@ -151,23 +151,17 @@ public class BreadthFirstStrategy implements Strategy {
 			while (!workingSet.isEmpty()) {
 				SegmentedPC parent = workingPCs.isEmpty() ? null : workingPCs.remove();
 				PathTreeNode node = workingSet.remove();
-				if (dumpPaths) { lgr.debug("  Investigating node {}", getId(node)); }
-				if (node.getLeft() == null) {
-					if (dumpPaths) { lgr.debug("  Generating negate path (L)"); }
-					return new SegmentedPC(parent, node.getActiveConjunct(), node.getPassiveConjunct(), true);
-				} else if (!node.getLeft().isComplete()) {
-					workingPCs.add(new SegmentedPC(parent, node.getActiveConjunct(), node.getPassiveConjunct(), true));
-					workingSet.add(node.getLeft());
-				}
-				if (node.getRight() == null) {
-					if (dumpPaths) { lgr.debug("  Generating negate path (R)"); }
-					return new SegmentedPC(parent, node.getActiveConjunct(), node.getPassiveConjunct(), false);
-				} else if (!node.getRight().isComplete()) {
-					workingPCs.add(new SegmentedPC(parent, node.getActiveConjunct(), node.getPassiveConjunct(), false));
-					workingSet.add(node.getRight());
+				int n = node.getChildCount();
+				for (int i = 0; i < n; i++) {
+					PathTreeNode ch = node.getChild(i);
+					if (ch == null) {
+						return node.getPcForChild(i, parent);
+					} else if (!ch.isComplete()) {
+						workingPCs.add(node.getPcForChild(i, parent));
+						workingSet.add(ch);
+					}
 				}
 			}
-			if (dumpPaths) { lgr.debug("  No more paths"); }
 			return null;
 		}		
 	}

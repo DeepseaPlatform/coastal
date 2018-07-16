@@ -22,7 +22,7 @@ import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.service.ModelCoreService;
 
-public class DepthLastStrategy implements Strategy {
+public class AlternatingStrategy implements Strategy {
 
 	private static final Logger lgr = Configuration.getLogger();
 
@@ -36,13 +36,13 @@ public class DepthLastStrategy implements Strategy {
 
 	private static int infeasibleCount = 0;
 
-	private static final DLPathTree pathTree = new DLPathTree(); 
+	private static final AltPathTree pathTree = new AltPathTree(); 
 
 	private long pathLimit = 0;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
-	public DepthLastStrategy() {
+	public AlternatingStrategy() {
 		Reporters.register(this);
 		Properties greenProperties = Configuration.getProperties();
 		greenProperties.setProperty("green.log.level", "ALL");
@@ -140,58 +140,32 @@ public class DepthLastStrategy implements Strategy {
 	//
 	// ======================================================================
 
-	private static class DLPathTree extends PathTree {
+	private static class AltPathTree extends PathTree {
+		private int counter = 0;
+
 		@Override
 		public SegmentedPC findNewPath() {
-			SegmentedPC newSpc = null;
+			SegmentedPC pc = null;
 			PathTreeNode cur = getRoot();
-			boolean alternate = false;
-			while (true) {
-				if (alternate) {
-					if (cur.getRight() == null) {
-						if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur)); }
-						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-						return newSpc;
-					} else if (cur.getLeft() == null) {
-						if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur)); }
-						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-						return newSpc;
-					} else if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
-						if (dumpPaths) { lgr.debug("  At {}, left is available", getId(cur)); }
-						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-						cur = cur.getLeft();
-					} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
-						if (dumpPaths) { lgr.debug("  At {}, right is available", getId(cur)); }
-						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-						cur = cur.getRight();
-						alternate = !alternate;
-					} else {
-						if (dumpPaths) { lgr.debug("  At #{} (dead end), no more paths", getId(cur)); }
-						return null;
-					}
-				} else {
-					if (cur.getLeft() == null) {
-						if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur)); }
-						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-						return newSpc;
-					} else if (cur.getRight() == null) {
-						if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur)); }
-						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-						return newSpc;
-					} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
-						if (dumpPaths) { lgr.debug("  At {}, right is available", getId(cur)); }
-						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-						cur = cur.getRight();
-					} else if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
-						if (dumpPaths) { lgr.debug("  At {}, left is available", getId(cur)); }
-						newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-						cur = cur.getLeft();
-						alternate = !alternate;
-					} else {
-						if (dumpPaths) { lgr.debug("  At #{} (dead end), no more paths", getId(cur)); }
-						return null;
+			outer: while (true) {
+				int n = cur.getChildCount();
+				for (int j = 0; j < n; j++) {
+					int i = (j + counter++) % n;
+					PathTreeNode ch = cur.getChild(i);
+					if ((ch != null) && !ch.isComplete()) {
+						pc = cur.getPcForChild(i, pc);
+						cur = ch;
+						continue outer;
 					}
 				}
+				for (int j = 0; j < n; j++) {
+					int i = (j + counter++) % n;
+					PathTreeNode ch = cur.getChild(i);
+					if (ch == null) {
+						return cur.getPcForChild(i, pc);
+					}
+				}
+				return null;
 			}
 		}
 	}

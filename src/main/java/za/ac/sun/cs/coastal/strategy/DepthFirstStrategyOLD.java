@@ -140,39 +140,25 @@ public class DepthFirstStrategyOLD implements Strategy {
 	private static class DFPathTree extends PathTree {
 		@Override
 		public SegmentedPC findNewPath() {
-			SegmentedPC newSpc = null;
+			SegmentedPC pc = null;
 			PathTreeNode cur = getRoot();
-			while (true) {
-				if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
-					if (dumpPaths) {
-						lgr.debug("  At {}, left is available", getId(cur));
+			outer: while (true) {
+				int n = cur.getChildCount();
+				for (int i = 0; i < n; i++) {
+					PathTreeNode ch = cur.getChild(i);
+					if ((ch != null) && !ch.isComplete()) {
+						pc = cur.getPcForChild(i, pc);
+						cur = ch;
+						continue outer;
 					}
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-					cur = cur.getLeft();
-				} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
-					if (dumpPaths) {
-						lgr.debug("  At {}, right is available", getId(cur));
-					}
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-					cur = cur.getRight();
-				} else if (cur.getLeft() == null) {
-					if (dumpPaths) {
-						lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur));
-					}
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-					return newSpc;
-				} else if (cur.getRight() == null) {
-					if (dumpPaths) {
-						lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur));
-					}
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-					return newSpc;
-				} else {
-					if (dumpPaths) {
-						lgr.debug("  At #{} (dead end), no more paths", getId(cur));
-					}
-					return null;
 				}
+				for (int i = 0; i < n; i++) {
+					PathTreeNode ch = cur.getChild(i);
+					if (ch == null) {
+						return cur.getPcForChild(i, pc);
+					}
+				}
+				return null;
 			}
 		}		
 	}

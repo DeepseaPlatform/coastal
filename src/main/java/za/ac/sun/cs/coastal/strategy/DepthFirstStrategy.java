@@ -20,7 +20,6 @@ import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
-import za.ac.sun.cs.green.service.ModelCoreService;
 
 public class DepthFirstStrategy implements Strategy {
 
@@ -49,7 +48,12 @@ public class DepthFirstStrategy implements Strategy {
 		greenProperties.setProperty("green.services", "model");
 		greenProperties.setProperty("green.service.model", "(bounder modeller)");
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
+		/*--- WORKING ---*
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelCoreZ3Service");
+		/*--- END WORKING ---*/
+		/*--- EXPERIMENTAL ---*/
+		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3Service");
+		/*--- END EXPERIMENTAL ---*/
 		// greenProperties.setProperty("green.store", "za.ac.sun.cs.green.store.redis.RedisStore");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
 		pathLimit = Configuration.getLimitPaths();
@@ -94,9 +98,15 @@ public class DepthFirstStrategy implements Strategy {
 			lgr.info("trying   <{}> {}", sig, pc.toString());
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
+			/*--- WORKING ---*
 			Instance result = (Instance) instance.request("model");
 			@SuppressWarnings("unchecked")
 			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) result.getData(ModelCoreService.MODEL_KEY);
+			/*--- END WORKING ---*/
+			/*--- EXPERIMENTAL ---*/
+			@SuppressWarnings("unchecked")
+			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model"); 
+			/*--- END EXPERIMENTAL ---*/
 			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				lgr.info("no model");
@@ -143,31 +153,27 @@ public class DepthFirstStrategy implements Strategy {
 	private static class DFPathTree extends PathTree {
 		@Override
 		public SegmentedPC findNewPath() {
-			SegmentedPC newSpc = null;
+			SegmentedPC pc = null;
 			PathTreeNode cur = getRoot();
-			while (true) {
-				if ((cur.getLeft() != null) && !cur.getLeft().isComplete()) {
-					if (dumpPaths) { lgr.debug("  At {}, left is available", getId(cur)); }
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-					cur = cur.getLeft();
-				} else if ((cur.getRight() != null) && !cur.getRight().isComplete()) {
-					if (dumpPaths) { lgr.debug("  At {}, right is available", getId(cur)); }
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-					cur = cur.getRight();
-				} else if (cur.getLeft() == null) {
-					if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (L)", getId(cur)); }
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), true);
-					return newSpc;
-				} else if (cur.getRight() == null) {
-					if (dumpPaths) { lgr.debug("  At {} (dead end), generating negate path (R)", getId(cur)); }
-					newSpc = new SegmentedPC(newSpc, cur.getActiveConjunct(), cur.getPassiveConjunct(), false);
-					return newSpc;
-				} else {
-					if (dumpPaths) { lgr.debug("  At #{} (dead end), no more paths", getId(cur)); }
-					return null;
+			outer: while (true) {
+				int n = cur.getChildCount();
+				for (int i = 0; i < n; i++) {
+					PathTreeNode ch = cur.getChild(i);
+					if ((ch != null) && !ch.isComplete()) {
+						pc = cur.getPcForChild(i, pc);
+						cur = ch;
+						continue outer;
+					}
 				}
+				for (int i = 0; i < n; i++) {
+					PathTreeNode ch = cur.getChild(i);
+					if (ch == null) {
+						return cur.getPcForChild(i, pc);
+					}
+				}
+				return null;
 			}
-		}		
+		}
 	}
 
 	// ======================================================================

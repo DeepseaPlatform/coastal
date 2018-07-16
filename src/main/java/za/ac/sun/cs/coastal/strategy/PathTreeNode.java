@@ -1,208 +1,203 @@
 package za.ac.sun.cs.coastal.strategy;
 
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
-import za.ac.sun.cs.green.expr.Expression;
 
 public class PathTreeNode {
 
-	private static final int PADDING = 3;
-	private static final int MIN_WIDTH = 9;
-	private static final int BRANCH = 3;
+	private static final int SPACING = 3;
 
-	private static int pathTreeCounter = 0;
+	private static int pathTreeNodeCounter = 0;
 
-	private final int id = ++pathTreeCounter;
+	private final int id = ++pathTreeNodeCounter;
 
-	private final Expression activeConjunct;
+	private final SegmentedPC pc;
 
-	private final Expression passiveConjunct;
+	private final PathTreeNode[] children;
 
-	private final PathTreeNode parent;
+	private final boolean leaf;
+	
+	private final boolean infeasible;
+	
+	private boolean fullyExplored = false;
 
-	private PathTreeNode left = null;
-
-	private PathTreeNode right = null;
-
-	private boolean isFullyExplored = false;
-
-	private boolean isInfeasible = false;
-
-	private boolean isLeaf = false;
-
-	public PathTreeNode(boolean isInfeasible, PathTreeNode parent) {
-		this.activeConjunct = null;
-		this.passiveConjunct = null;
-		this.parent = parent;
-		if (isInfeasible) {
-			this.isInfeasible = true;
-		} else {
-			this.isLeaf = true;
-		}
+	private PathTreeNode(SegmentedPC pc, int nrOfChildren, boolean isLeaf, boolean isInfeasible) {
+		this.pc = pc;
+		this.children = new PathTreeNode[nrOfChildren];
+		this.leaf = isLeaf;
+		this.infeasible = isInfeasible;
 	}
 
-	public PathTreeNode(SegmentedPC spc, PathTreeNode parent) {
-		this.activeConjunct = spc.getActiveConjunct();
-		this.passiveConjunct = spc.getPassiveConjunct();
-		this.parent = parent;
+	public static PathTreeNode createNode(SegmentedPC pc, int nrOfChildren) {
+		return new PathTreeNode(pc, nrOfChildren, false, false);
 	}
 
-	public int getId() {
-		return id;
+	public static PathTreeNode createInfeasible() {
+		return new PathTreeNode(null, 0, false, true);
 	}
 	
-	public Expression getActiveConjunct() {
-		return activeConjunct;
+	public static PathTreeNode createLeaf() {
+		return new PathTreeNode(null, 0, true, false);
 	}
 
-	public Expression getPassiveConjunct() {
-		return passiveConjunct;
+	public SegmentedPC getPc() {
+		return pc;
 	}
 
-	public PathTreeNode getParent() {
-		return parent;
-	}
-	
-	public PathTreeNode getLeft() {
-		return left;
+	public int getChildCount() {
+		return children.length;
 	}
 
-	public void setLeft(PathTreeNode left) {
-		this.left = left;
-	}
-	
-	public PathTreeNode getRight() {
-		return right;
+	public PathTreeNode getChild(int index) {
+		return children[index];
 	}
 
-	public void setRight(PathTreeNode right) {
-		this.right = right;
-	}
-	
-	public boolean isFullyExplored() {
-		return isFullyExplored;
-	}
-
-	public void setFullyExplored() {
-		setFullyExplored(true);
-	}
-
-	public void setFullyExplored(boolean isFullyExplored) {
-		this.isFullyExplored = isFullyExplored;
-	}
-
-	public boolean isInfeasible() {
-		return isInfeasible;
+	public void setChild(int index, PathTreeNode node) {
+		children[index] = node;
 	}
 
 	public boolean isLeaf() {
-		return isLeaf;
+		return leaf;
+	}
+	
+	public boolean isInfeasible() {
+		return infeasible;
+	}
+	
+	public boolean isFullyExplored() {
+		return fullyExplored;
+	}
+
+	public void setFullyExplored() {
+		fullyExplored = true;
 	}
 
 	public boolean isComplete() {
-		return isFullyExplored || isInfeasible || isLeaf;
+		return isFullyExplored() || isLeaf() || isInfeasible();
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder b = new StringBuilder();
-		b.append(id);
-		b.append("[isFullyExplored=").append(isFullyExplored);
-		b.append(" isInfeasible=").append(isInfeasible);
-		b.append(" isLeaf=").append(isLeaf);
-		b.append(" L=").append((left == null) ? "NUL" : ("#" + left.id));
-		b.append(" R=").append((right == null) ? "NUL" : ("#" + right.id));
-		if (activeConjunct != null) {
-			b.append(" aConj=").append(activeConjunct.toString());
-		}
-		if (passiveConjunct != null) {
-			b.append(" pConj=").append(passiveConjunct.toString());
-		}
-		b.append(']');
-		return b.toString();
+	public SegmentedPC getPcForChild(int i, SegmentedPC parent) {
+		return getPc().getChild(i, parent);
 	}
 
 	public int height() {
-		int l = (left == null) ? 0 : left.height();
-		int r = (right == null) ? 0 : right.height();
-		return 1 + Math.max(l, r);
+		if (isLeaf()) {
+			return 1;
+		} else if (isInfeasible()) {
+			return 1;
+		} else {
+			PathTreeNode ch = getChild(0);
+			int m = (ch == null) ? 0 : ch.height();
+			for (int i = 1; i < getChildCount(); i++) {
+				ch = getChild(i);
+				m = Math.max(m, (ch == null) ? 0 : ch.height());
+			}
+			return 1 + m;
+		}
 	}
 
 	public int width() {
-		if (isLeaf) {
-			return 4 + PADDING;
-		} else if (isInfeasible) {
-			return 6 + PADDING;
+		if (isLeaf()) {
+			return 4;
+		} else if (isInfeasible()) {
+			return 6;
 		} else {
-			// String c = SegmentedPC.constraintBeautify(pactiveConjunct.toString());
-			// int w = Math.max(MIN_WIDTH, c.length());
-			int w = Math.max(MIN_WIDTH, activeConjunct.toString().length());
-			int l = (left == null) ? (1 + PADDING) : left.width();
-			int r = (right == null) ? (1 + PADDING) : right.width();
-			return l + BRANCH + Math.max(w, BRANCH + r);
+			PathTreeNode ch = getChild(0);
+			int m = (ch == null) ? 1 : ch.width();
+			for (int i = 1; i < getChildCount(); i++) {
+				ch = getChild(i);
+				m += SPACING + ((ch == null) ? 1 : ch.width());
+			}
+			return 1 + m;
 		}
 	}
 
-	public String getShape() {
-		if (isLeaf) {
-			return "L";
-		} else if (isInfeasible) {
-			return "I";
+	public int stringFill(char[][] lines, int x, int y) {
+		if (isLeaf()) {
+			stringWrite(lines, x, y, "#" + id);
+			stringWrite(lines, x, y + 1, "LEAF");
+			return x;
+		} else if (isInfeasible()) {
+			stringWrite(lines, x, y, "#" + id);
+			stringWrite(lines, x, y + 1, "INFEAS");
+			return x;
 		} else {
-			String l = (left == null) ? "0" : left.getShape();
-			String r = (right == null) ? "0" : right.getShape();
-			return "(" + l + r + ")";
-		}
-	}
-
-	public int stringFill(char[][] lines, int minx, int y, int depth) {
-		if (isLeaf) {
-			stringWrite(lines, minx, y, id);
-			stringWrite(lines, minx, y + 1, "LEAF");
-			return minx;
-		} else if (isInfeasible) {
-			stringWrite(lines, minx, y, id);
-			stringWrite(lines, minx, y + 1, "INFEAS");
-			return minx;
-		} else {
-			int lx, rx;
-			if (left == null) {
-				stringWrite(lines, minx, y + 4, "-");
-				lx = minx;
+			int firstx, lastx;
+			PathTreeNode ch = getChild(0);
+			if (ch == null) {
+				stringWrite(lines, x, y + 4, "-");
+				firstx = x;
+				x += 1;
 			} else {
-				lx = left.stringFill(lines, minx, y + 4, depth + 1);
+				firstx = ch.stringFill(lines, x, y + 4);
+				x += ch.width();
 			}
-			minx += BRANCH + ((left == null) ? (1 + PADDING) : left.width());
-			if (right == null) {
-				stringWrite(lines, minx, y + 4, "-");
-				rx = minx;
-			} else {
-				rx = right.stringFill(lines, minx, y + 4, depth + 1);
+			lastx = firstx;
+			stringWrite(lines, lastx, y + 2, getPc().getOutcome(0));
+			lines[y + 3][lastx] = '|';
+			int k = getChildCount();
+			for (int i = 1; i < k; i++) {
+				x += SPACING;
+				ch = getChild(i);
+				int d = 0;
+				String z = getPc().getOutcome(i);
+				if (i < k - 1) {
+					d = z.length() - 1;
+				}
+				if (ch == null) {
+					stringWrite(lines, x, y + 4, "-");
+					lastx = x;
+					x += 1;
+				} else {
+					lastx = ch.stringFill(lines, x, y + 4);
+					x += ch.width();
+				}
+				stringWrite(lines, lastx - d, y + 2, z);
+				lines[y + 3][lastx] = '|';
 			}
-			int mx = (lx + rx) / 2;
-			stringWrite(lines, mx, y, id + (isFullyExplored ? " FULL" : ""));
-			// String c = SegmentedPC.constraintBeautify(pathTree.activeConjunct.toString());
-			// stringWrite(lines, mx, y + 1, c);
-			stringWrite(lines, mx, y + 1, activeConjunct.toString());
-			for (int x = lx; x <= rx; x++) {
-				lines[y + 2][x] = '-';
+			int cx = (firstx + lastx) / 2, mx = cx;
+			String n = "#" + Integer.toString(id);
+			String e = getPc().getExpression().toString();
+			mx -= Math.max(e.length(), n.length()) / 2;
+			stringWrite(lines, mx, y, n);
+			stringWrite(lines, mx, y + 1, e);
+			for (x = firstx; x <= lastx; x++) {
+				if (lines[y + 2][x] == ' ') {
+					lines[y + 2][x] = '-';
+				}
 			}
-			lines[y + 2][mx] = '+';
-			stringWrite(lines, lx, y + 2, "+F");
-			stringWrite(lines, rx - 1, y + 2, "T+");
-			lines[y + 3][lx] = '|';
-			lines[y + 3][rx] = '|';
+			if (lines[y + 2][cx] == '-') {
+				lines[y + 2][cx] = '+';
+			}
 			return mx;
 		}
 	}
-	
-	private static void stringWrite(char[][] lines, int x, int y, int number) {
-		stringWrite(lines, x, y, Integer.toString(number));
-	}
+
+//	private static void stringWrite(char[][] lines, int x, int y, int number) {
+//		stringWrite(lines, x, y, Integer.toString(number));
+//	}
 
 	private static void stringWrite(char[][] lines, int x, int y, String string) {
 		for (int i = 0; i < string.length(); i++) {
 			lines[y][x++] = string.charAt(i); 
 		}
+	}
+
+	public String getShape() {
+		StringBuilder b = new StringBuilder();
+		if (isLeaf()) {
+			b.append('L');
+		} else if (isInfeasible()) {
+			b.append('I');
+		} else {
+			b.append('(');
+			int n = getChildCount();
+			for (int i = 0; i < n; i++) {
+				PathTreeNode node = getChild(i);
+				b.append((node == null) ? '0' : node.getShape());
+			}
+			b.append(')');
+		}
+		return b.toString();
 	}
 
 }

@@ -29,22 +29,23 @@ public class SymbolicState {
 	private static final String FIELD_SEPARATOR = "/";
 
 	private static final String INDEX_SEPARATOR = "_D_"; // "$"
-	
+
 	public static final String CHAR_SEPARATOR = "_H_"; // "#"
-	
+
 	public static final String NEW_VAR_PREFIX = "U_D_"; // "$"
-	
+
 	private static final Logger lgr = Configuration.getLogger();
 
 	private static final boolean dumpTrace = Configuration.getDumpTrace();
 
 	private static final boolean dumpFrame = Configuration.getDumpFrame();
 
-	private static final long limitConjunct = (Configuration.getLimitConjuncts() == 0) ? Long.MAX_VALUE : Configuration.getLimitConjuncts();
-	
+	private static final long limitConjunct = (Configuration.getLimitConjuncts() == 0) ? Long.MAX_VALUE
+			: Configuration.getLimitConjuncts();
+
 	// if true, check for limit on conjuncts
 	private static boolean dangerFlag = false;
-	
+
 	private static boolean symbolicMode = false;
 
 	private static final Stack<SymbolicFrame> frames = new Stack<>();
@@ -61,9 +62,9 @@ public class SymbolicState {
 
 	private static Expression pendingExtraConjunct = null;
 
-	private static boolean isPreviousConjunctConstant = false;
+	private static boolean isPreviousConstant = false;
 
-	private static boolean isPreviousConjunctDuplicate = false;
+	private static boolean isPreviousDuplicate = false;
 
 	private static final Set<String> conjunctSet = new HashSet<>();
 
@@ -72,6 +73,8 @@ public class SymbolicState {
 	private static boolean mayContinue = true;
 
 	private static final Map<String, Integer> markers = new HashMap<>();
+
+	private static final Stack<Expression> pendingSwitch = new Stack<>();
 
 	public static void reset(Map<String, Constant> concreteValues) {
 		dangerFlag = false;
@@ -148,11 +151,11 @@ public class SymbolicState {
 	public static int getArrayLength(int arrayId) {
 		return ((IntConstant) getField(arrayId, "length")).getValue();
 	}
-	
+
 	public static void setArrayLength(int arrayId, int length) {
 		putField(arrayId, "length", new IntConstant(length));
 	}
-	
+
 	public static Expression getArrayValue(int arrayId, int index) {
 		return getField(arrayId, "" + index);
 	}
@@ -184,14 +187,18 @@ public class SymbolicState {
 
 	private static void pushConjunct(Expression conjunct) {
 		String c = conjunct.toString();
-		isPreviousConjunctConstant = isConstantConjunct(conjunct);
-		isPreviousConjunctDuplicate = false;
-		if (isPreviousConjunctConstant) {
+		/*
+		 * Set "isPreviousConstant" and "isPreviousDuplicate" so that if we
+		 * encounter the corresponding else, we know to ignore it.
+		 */
+		isPreviousConstant = isConstant(conjunct);
+		isPreviousDuplicate = false;
+		if (isPreviousConstant) {
 			if (dumpTrace) {
 				lgr.trace(">>> constant conjunct ignored: {}", c);
 			}
 		} else if (conjunctSet.add(c)) {
-			spc = new SegmentedPC(spc, conjunct, pendingExtraConjunct, false);
+			spc = new SegmentedPCIf(spc, conjunct, pendingExtraConjunct, true);
 			pendingExtraConjunct = null;
 			if (dumpTrace) {
 				lgr.trace(">>> adding conjunct: {}", c);
@@ -201,12 +208,40 @@ public class SymbolicState {
 			if (dumpTrace) {
 				lgr.trace(">>> duplicate conjunct ignored: {}", c);
 			}
-			isPreviousConjunctDuplicate = true;
+			isPreviousDuplicate = true;
+		}
+	}
+
+	private static void pushConjunct(Expression expression, int min, int max, int cur) {
+		Operation conjunct;
+		if (cur < min) {
+			Operation lo = new Operation(Operator.LT, expression, new IntConstant(min));
+			Operation hi = new Operation(Operator.GT, expression, new IntConstant(max));
+			conjunct = new Operation(Operator.OR, lo, hi);
+		} else {
+			conjunct = new Operation(Operator.EQ, expression, new IntConstant(cur));
+		}
+		String c = conjunct.toString();
+		if (isConstant(conjunct)) {
+			if (dumpTrace) {
+				lgr.trace(">>> constant (switch) conjunct ignored: {}", c);
+			}
+		} else if (conjunctSet.add(c)) {
+			spc = new SegmentedPCSwitch(spc, expression, pendingExtraConjunct, min, max, cur);
+			pendingExtraConjunct = null;
+			if (dumpTrace) {
+				lgr.trace(">>> adding (switch) conjunct: {}", c);
+				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+			}
+		} else {
+			if (dumpTrace) {
+				lgr.trace(">>> duplicate (switch) conjunct ignored: {}", c);
+			}
 		}
 	}
 
 	public static void pushExtraConjunct(Expression extraConjunct) {
-		if (!isConstantConjunct(extraConjunct)) {
+		if (!isConstant(extraConjunct)) {
 			if (pendingExtraConjunct == null) {
 				pendingExtraConjunct = extraConjunct;
 			} else {
@@ -284,7 +319,7 @@ public class SymbolicState {
 	// SYMBOLIC INTERACTION
 	//
 	// ======================================================================
-	
+
 	public static void stop() {
 		if (Configuration.getObeyStops()) {
 			mayContinue = false;
@@ -296,7 +331,7 @@ public class SymbolicState {
 		if (Configuration.getObeyStops()) {
 			mayContinue = false;
 			lgr.info("!!! PROGRAM TERMINATION POINT REACHED");
-			lgr.info("!!! {}",  message);
+			lgr.info("!!! {}", message);
 		}
 	}
 
@@ -317,7 +352,7 @@ public class SymbolicState {
 			}
 		}
 	}
-	
+
 	// ======================================================================
 	//
 	// INSTRUCTIONS
@@ -448,7 +483,7 @@ public class SymbolicState {
 		}
 		notifyEnterMethod(methodNumber);
 	}
-	
+
 	public static void linenumber(int instr, int line) {
 		if (!symbolicMode) {
 			return;
@@ -666,7 +701,8 @@ public class SymbolicState {
 		}
 	}
 
-	public static void fieldInsn(int instr, int opcode, String owner, String name, String descriptor) throws LimitConjunctException {
+	public static void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
+			throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -700,7 +736,8 @@ public class SymbolicState {
 		}
 	}
 
-	public static void methodInsn(int instr, int opcode, String owner, String name, String descriptor) throws LimitConjunctException {
+	public static void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
+			throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -879,12 +916,13 @@ public class SymbolicState {
 		if (dumpTrace) {
 			lgr.trace("(POST) {}", Bytecodes.toString(opcode));
 		}
-		if (!isPreviousConjunctConstant && !isPreviousConjunctDuplicate) {
+		if (!isPreviousConstant && !isPreviousDuplicate) {
 			if (dumpTrace) {
 				lgr.trace(">>> previous conjunct is false");
 			}
 			notifyPostJumpInsn(instr, opcode);
-			spc = spc.negate();
+			assert spc instanceof SegmentedPCIf;
+			spc = ((SegmentedPCIf) spc).negate();
 			checkLimitConjuncts();
 			if (dumpTrace) {
 				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());
@@ -966,10 +1004,24 @@ public class SymbolicState {
 			checkLimitConjuncts();
 		}
 		notifyTableSwitchInsn(instr, opcode);
-		switch (opcode) {
-		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
-			System.exit(1);
+		pendingSwitch.push(pop());
+		if (dumpFrame) {
+			dumpFrames();
+		}
+	}
+
+	public static void tableCaseInsn(int min, int max, int value) throws LimitConjunctException {
+		if (!symbolicMode) {
+			return;
+		}
+		if (dumpTrace) {
+			lgr.trace("CASE FOR {}", Bytecodes.toString(Opcodes.TABLESWITCH));
+		}
+		if (dangerFlag) {
+			checkLimitConjuncts();
+		}
+		if (!pendingSwitch.isEmpty()) {
+			pushConjunct(pendingSwitch.pop(), min, max, value);
 		}
 		if (dumpFrame) {
 			dumpFrames();
@@ -1025,7 +1077,7 @@ public class SymbolicState {
 	// ======================================================================
 
 	private static final List<InstructionListener> instructionListeners = new ArrayList<>();
-	
+
 	public static void registerListener(InstructionListener listener) {
 		instructionListeners.add(listener);
 	}
@@ -1035,19 +1087,19 @@ public class SymbolicState {
 			listener.enterMethod(methodNumber);
 		}
 	}
-	
+
 	private static void notifyExitMethod(int methodNumber) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.exitMethod(methodNumber);
 		}
 	}
-	
+
 	private static void notifyLinenumber(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.linenumber(instr, opcode);
 		}
 	}
-	
+
 	private static void notifyInsn(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.insn(instr, opcode);
@@ -1131,19 +1183,19 @@ public class SymbolicState {
 			listener.multiANewArrayInsn(instr, opcode);
 		}
 	}
-	
+
 	// ======================================================================
 	//
 	// UTILITIES
 	//
 	// ======================================================================
 
-	private static boolean isConstantConjunct(Expression conjunct) {
+	private static boolean isConstant(Expression conjunct) {
 		if (conjunct instanceof Operation) {
 			Operation operation = (Operation) conjunct;
 			int n = operation.getOperatandCount();
 			for (int i = 0; i < n; i++) {
-				if (!isConstantConjunct(operation.getOperand(i))) {
+				if (!isConstant(operation.getOperand(i))) {
 					return false;
 				}
 			}

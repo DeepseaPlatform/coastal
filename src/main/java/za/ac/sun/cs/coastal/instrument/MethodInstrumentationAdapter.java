@@ -1,7 +1,9 @@
 package za.ac.sun.cs.coastal.instrument;
 
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.TreeMap;
 
 import org.apache.logging.log4j.Logger;
@@ -36,7 +38,14 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	private static final Map<Integer, Integer> lastInstruction = new TreeMap<>();
 	
 	private static final Map<Integer, BitSet> branchInstructions = new TreeMap<>();
+
+	private static final Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
 	
+	private static final class Tuple {
+		final int min, max, cur;
+		public Tuple(int min, int max, int cur) { this.min = min; this.max = max; this.cur = cur; }
+	}
+
 	private static BitSet currentBranchInstructions;
 	
 	public MethodInstrumentationAdapter(MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
@@ -299,7 +308,37 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(170);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableSwitchInsn", "(II)V", false);
+		assert labels.length == (max - min + 1);
+		for (int value = min; value <= max; value++) {
+			Stack<Tuple> pending = caseLabels.get(labels[value - min]);
+			if (pending == null) {
+				pending = new Stack<>();
+				caseLabels.put(labels[value - min], pending);
+			}
+			pending.push(new Tuple(min, max, value));
+		}
+		Stack<Tuple> pending = caseLabels.get(dflt);
+		if (pending == null) {
+			pending = new Stack<>();
+			caseLabels.put(dflt, pending);
+		}
+		pending.push(new Tuple(min, max, min - 1));
 		mv.visitTableSwitchInsn(min, max, dflt, labels);
+	}
+
+	@Override
+	public void visitLabel(Label label) {
+		mv.visitLabel(label);
+		Stack<Tuple> pending = caseLabels.get(label);
+		if (pending != null) {
+			while (!pending.isEmpty()) {
+				Tuple t = pending.pop();
+				mv.visitLdcInsn(t.min);
+				mv.visitLdcInsn(t.max);
+				mv.visitLdcInsn(t.cur);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableCaseInsn", "(III)V", false);
+			}
+		}
 	}
 
 	@Override
