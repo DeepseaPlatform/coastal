@@ -18,8 +18,10 @@ public class COASTAL {
 	private static final Logger lgr = Configuration.getLogger();
 
 	public static void main(String[] args) {
+		String version = new Version().read();
+
 		// Display banner to start with
-		new Banner('~').println("COASTAL version " + Configuration.VERSION).display(lgr, Level.INFO);
+		new Banner('~').println("COASTAL version " + version).display(lgr, Level.INFO);
 		new CoastReporter();
 
 		// Load and check configuration

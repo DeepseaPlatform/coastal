@@ -28,34 +28,6 @@ public class Configuration {
 
 	// ======================================================================
 	//
-	// VERSION
-	//
-	// Reads version from "app.properties" file.  This gives "unspecified"
-	// in Eclipse, but works when built with gradle & return the git version.
-	//
-	// ======================================================================
-
-	public static final String VERSION;
-
-	static {
-		String version = "unspecified";
-		String resourceName = "app.properties";
-		Properties props = new Properties();
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
-			props.load(resourceStream);
-			String v = props.getProperty("version");
-			if ((v != null) && (v.charAt(0) != '%')) {
-				version = v;
-			}
-		} catch (IOException x) {
-			// ignore
-		}
-		VERSION = version;
-	}
-
-	// ======================================================================
-	//
 	// LOGGING
 	//
 	// ======================================================================
