@@ -11,27 +11,31 @@ import org.objectweb.asm.ClassWriter;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.reporting.ReporterManager;
 
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 
 public class InstrumentationClassLoader extends ClassLoader implements Reporter {
 
-	private static final Logger lgr = Configuration.getLogger();
+	private final Configuration configuration;
 
-	private static final boolean dumpInstrumenter = Configuration.getDumpInstrumenter();
+	private final Logger log;
+
+	private final boolean dumpInstrumenter;
 
 	private final List<String> classPaths = new ArrayList<>();
 
-	private int requestCount = 0, cachedCount = 0, instrumentedCount = 0;
+	private static int requestCount = 0, cachedCount = 0, instrumentedCount = 0;
+	
+	private static long ltime = 0, itime = 0;
 	
 	private int preInstrumentedSize = 0, postInstrumentedSize = 0;
-
-	private long ltime = 0, itime = 0;
 	
-	public InstrumentationClassLoader(String classPath) {
-		ReporterManager.register(this);
+	public InstrumentationClassLoader(Configuration configuration, String classPath) {
+		this.configuration = configuration;
+		this.log = configuration.getLog();
+		this.dumpInstrumenter = configuration.getDumpInstrumenter();
+		configuration.getReporterManager().register(this);
 		String paths[] = classPath.split(File.pathSeparator);
 		for (String path : paths) {
 			classPaths.add(path);
@@ -45,22 +49,22 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		Class<?> clas = findLoadedClass(name);
 		if (clas != null) {
 			if (dumpInstrumenter) {
-				lgr.trace("*** loading class {}, found in cache", name);
+				log.trace("*** loading class {}, found in cache", name);
 			}
 			cachedCount++;
 			ltime += System.currentTimeMillis() - t0;
 			return clas;
 		}
-		if (Configuration.isTarget(name)) {
+		if (configuration.isTarget(name)) {
 			if (dumpInstrumenter) {
-				lgr.trace("*** loading class {}, identified as target", name);
+				log.trace("*** loading class {}, identified as target", name);
 			}
 			long t1 = System.currentTimeMillis();
 			byte[] raw = instrument(name);
 			itime += System.currentTimeMillis() - t1;
 			if (raw != null) {
 				if (dumpInstrumenter) {
-					lgr.trace("*** class {} instrumented", name);
+					log.trace("*** class {} instrumented", name);
 				}
 				instrumentedCount++;
 				clas = defineClass(name, raw, 0, raw.length);
@@ -68,19 +72,19 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		}
 		if (clas == null) {
 			if (dumpInstrumenter) {
-				lgr.trace("*** loading class {}, uninstrumented", name);
+				log.trace("*** loading class {}, uninstrumented", name);
 			}
 			clas = findSystemClass(name);
 		}
 		if (resolve && clas != null) {
 			if (dumpInstrumenter) {
-				lgr.trace("*** resolving class {}", name);
+				log.trace("*** resolving class {}", name);
 			}
 			resolveClass(clas);
 		}
 		if (clas == null) {
 			if (dumpInstrumenter) {
-				lgr.trace("*** class {} not found", name);
+				log.trace("*** class {} not found", name);
 			}
 			ltime += System.currentTimeMillis() - t0;
 			throw new ClassNotFoundException(name);
@@ -102,7 +106,7 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		preInstrumentedSize += in.length;
 		postInstrumentedSize += out.length;
 		if (dumpInstrumenter) {
-			lgr.trace("*** instrumented {}: {} -> {} bytes", name, in.length, out.length);
+			log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, out.length);
 		}
 		return out;
 	}

@@ -34,7 +34,7 @@ public class Diver implements Reporter {
 		this.log = configuration.getLog();
 		configuration.getReporterManager().register(this);
 		String cp = System.getProperty("java.class.path");
-		instrumentationClassLoader = new InstrumentationClassLoader(cp);
+		instrumentationClassLoader = new InstrumentationClassLoader(configuration, cp);
 	}
 
 	public void dive() {
