@@ -14,7 +14,7 @@ import org.objectweb.asm.util.TraceMethodVisitor;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.reporting.Reporters;
+import za.ac.sun.cs.coastal.reporting.ReporterManager;
 
 public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 
@@ -28,7 +28,7 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 		super(Opcodes.ASM6, cv);
 		this.name = name;
 		if (Configuration.getDumpAsm()) {
-			Reporters.register(this);
+			ReporterManager.register(this);
 		}
 	}
 

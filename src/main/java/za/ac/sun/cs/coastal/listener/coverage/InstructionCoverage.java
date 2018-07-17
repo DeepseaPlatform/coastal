@@ -11,12 +11,11 @@ import za.ac.sun.cs.coastal.instrument.MethodInstrumentationAdapter;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.reporting.Reporters;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class InstructionCoverage implements InstructionListener, Reporter, ConfigurationListener {
 
-	private static final Logger lgr = Configuration.getLogger();
+	private Logger log;
 
 	private final BitSet covered = new BitSet();
 
@@ -25,9 +24,21 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	private boolean dumpCoverage = false;
 
 	public InstructionCoverage() {
-		Reporters.register(this);
-		Configuration.registerListener(this);
+		// We expect configurationLoaded(...) to be called shortly.
+		// This will initialize this instance.
+	}
+
+	@Override
+	public void configurationLoaded(Configuration configuration) {
 		SymbolicState.registerListener(this);
+		log = configuration.getLog();
+		configuration.getReporterManager().register(this);
+		dumpCoverage = configuration.getBooleanProperty("coastal.dump.coverage", dumpCoverage);
+	}
+
+	@Override
+	public void collectProperties(Properties properties) {
+		properties.setProperty("coastal.dump.coverage", Boolean.toString(dumpCoverage));
 	}
 
 	@Override
@@ -54,7 +65,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void insn(int instr, int opcode) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -62,7 +73,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void intInsn(int instr, int opcode, int operand) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -70,7 +81,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void varInsn(int instr, int opcode, int var) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -78,7 +89,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void typeInsn(int instr, int opcode) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -86,7 +97,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -94,7 +105,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void methodInsn(int instr, int opcode, String owner, String name, String descriptor) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -102,7 +113,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void invokeDynamicInsn(int instr, int opcode) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -110,7 +121,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void jumpInsn(int instr, int opcode) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -123,7 +134,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void ldcInsn(int instr, int opcode, Object value) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -131,7 +142,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void iincInsn(int instr, int var, int increment) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -139,7 +150,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void tableSwitchInsn(int instr, int opcode) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -147,7 +158,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void lookupSwitchInsn(int instr, int opcode) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
 	}
@@ -155,26 +166,9 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	@Override
 	public void multiANewArrayInsn(int instr, int opcode) {
 		if (dumpCoverage) {
-			lgr.trace("+++ {}", instr);
+			log.trace("+++ {}", instr);
 		}
 		covered.set(instr);
-	}
-
-	// ======================================================================
-	//
-	// CONFIGURATION
-	//
-	// ======================================================================
-
-	@Override
-	public void configurationLoaded(Properties properties) {
-		boolean dc = Configuration.getBooleanProperty(properties, "coastal.dump.coverage", dumpCoverage);
-		dumpCoverage = dc || Configuration.getDumpAll();
-	}
-
-	@Override
-	public void configurationDump() {
-		lgr.info("coastal.dump.coverage = {}", dumpCoverage);
 	}
 
 	// ======================================================================

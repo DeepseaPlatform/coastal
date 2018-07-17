@@ -5,75 +5,99 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.reporting.Reporters;
+import za.ac.sun.cs.coastal.reporting.ReporterManager;
 import za.ac.sun.cs.coastal.symbolic.Diver;
 
-public class COASTAL {
+public class COASTAL implements Reporter {
 
-	private static final Logger lgr = Configuration.getLogger();
+	private static final DateFormat dateFormat = new SimpleDateFormat("EEE d MMM yyyy HH:mm:ss");
+
+	private final Configuration configuration;
+	
+	private final ReporterManager reporterManager;
+	
+	private Calendar started, stopped;
 
 	public static void main(String[] args) {
-		String version = new Version().read();
-
-		// Display banner to start with
-		new Banner('~').println("COASTAL version " + version).display(lgr, Level.INFO);
-		new CoastReporter();
-
-		// Load and check configuration
+		final Logger log = LogManager.getLogger("COASTAL");
+		final String version = new Version().read();
+		final ReporterManager reporterManager = new ReporterManager();
+		final ConfigurationBuilder b = new ConfigurationBuilder(log, version, reporterManager);
+		new Banner('~').println("COASTAL version " + version).display(log);
+		
 		if (args.length < 1) {
-			new Banner('@').println("COASTAL PROBLEM\nMISSING PROPERTIES FILE\n")
-					.println("USAGE: coastal <properties file>").display(lgr, Level.INFO);
+			Banner bn = new Banner('@');
+			bn.println("MISSING PROPERTIES FILE\n");
+			bn.println("USAGE: coastal <properties file>");
+			bn.display(log);
 			return;
 		}
-		if (!Configuration.processProperties(args[0])) {
-			new Banner('@').println("COASTAL PROBLEM\n").println("COULD NOT READ PROPERTIES FILE \"" + args[0] + "\"")
-					.display(lgr, Level.INFO);
+		if (!b.read(args[0])) {
+			Banner bn = new Banner('@');
+			bn.println("COASTAL PROBLEM\n");
+			bn.println("COULD NOT READ PROPERTIES FILE \"" + args[0] + "\"");
+			bn.display(log);
 			return;
 		}
-		if (Configuration.getMain() == null) {
-			new Banner('@').println("SUSPICIOUS PROPERTIES FILE\n")
-					.println("ARE YOU SURE THAT THE ARGUMENT IS A .properties FILE?").display(lgr, Level.INFO);
+		if (!b.isMainSet()) {
+			Banner bn = new Banner('@');
+			bn.println("SUSPICIOUS PROPERTIES FILE\n");
+			bn.println("ARE YOU SURE THAT THE ARGUMENT IS A .properties FILE?");
+			bn.display(log);
 			return;
 		}
 
-		// Configuration has now been loaded and seems OK
-		Diver d = new Diver();
-		d.dive();
-		Reporters.report();
-		if (d.getRuns() < 2) {
-			new Banner('@').println("ONLY A SINGLE RUN EXECUTED\n")
-					.println("CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE").display(lgr, Level.INFO);
-		}
-		new Banner('~').println("COASTAL DONE").display(lgr, Level.INFO);
+		new COASTAL(b.construct()).start(false);
+		new Banner('~').println("COASTAL DONE").display(log);
 	}
 
-	private static class CoastReporter implements Reporter {
-		private static final DateFormat dateFormat = new SimpleDateFormat("EEE d MMM yyyy HH:mm:ss");
-		private Calendar started = Calendar.getInstance(), stopped;
-		private long startTime = System.currentTimeMillis();
+	public COASTAL(Configuration configuration) {
+		this.configuration = configuration;
+		this.reporterManager = configuration.getReporterManager();
+		this.reporterManager.register(this);
+	}
 
-		public CoastReporter() {
-			Reporters.register(this);
+	public void start() {
+		start(true);
+	}
+
+	private void start(boolean showBanner) {
+		started = Calendar.getInstance();
+		final String version = configuration.getVersion();
+		final Logger log = configuration.getLog();
+		if (showBanner) {
+			new Banner('~').println("COASTAL version " + version).display(log);
 		}
-
-		@Override
-		public String getName() {
-			return "COASTAL";
+		Diver d = new Diver(configuration);
+		d.dive();
+		reporterManager.report();
+		if (d.getRuns() < 2) {
+			Banner bn = new Banner('@');
+			bn.println("ONLY A SINGLE RUN EXECUTED\n");
+			bn.println("CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE");
+			bn.display(log);
 		}
-
-		@Override
-		public void report(PrintWriter out) {
-			stopped = Calendar.getInstance();
-			out.println("  Started: " + dateFormat.format(started.getTime()));
-			out.println("  Stopped: " + dateFormat.format(stopped.getTime()));
-			out.println("  Overall time: " + (System.currentTimeMillis() - startTime));
+		if (showBanner) {
+			new Banner('~').println("COASTAL DONE").display(log);
 		}
+	}
 
+	@Override
+	public String getName() {
+		return "COASTAL";
+	}
+
+	@Override
+	public void report(PrintWriter out) {
+		stopped = Calendar.getInstance();
+		out.println("  Started: " + dateFormat.format(started.getTime()));
+		out.println("  Stopped: " + dateFormat.format(stopped.getTime()));
+		out.println("  Overall time: " + (stopped.getTimeInMillis() - started.getTimeInMillis()));
 	}
 
 }

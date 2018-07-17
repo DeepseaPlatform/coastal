@@ -14,13 +14,14 @@ import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassLoader;
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.reporting.Reporters;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.green.expr.Constant;
 
 public class Diver implements Reporter {
 
-	private static final Logger lgr = Configuration.getLogger();
+	private final Configuration configuration;
+
+	private final Logger log;
 
 	private int runs = 0;
 
@@ -28,35 +29,37 @@ public class Diver implements Reporter {
 	
 	private final InstrumentationClassLoader instrumentationClassLoader;
 
-	public Diver() {
-		Reporters.register(this);
+	public Diver(Configuration configuration) {
+		this.configuration = configuration;
+		this.log = configuration.getLog();
+		configuration.getReporterManager().register(this);
 		String cp = System.getProperty("java.class.path");
 		instrumentationClassLoader = new InstrumentationClassLoader(cp);
 	}
 
 	public void dive() {
-		Strategy strategy = Configuration.getStrategy();
+		Strategy strategy = configuration.getStrategy();
 		if (strategy == null) {
-			lgr.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
+			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
 			System.exit(1);
 		}
 		Map<String, Constant> concreteValues = null;
-		long runLimit = Configuration.getLimitRuns();
+		long runLimit = configuration.getLimitRuns();
 		if (runLimit == 0) { runLimit = Long.MIN_VALUE; }
-		long timeLimit = Configuration.getLimitTime();
+		long timeLimit = configuration.getLimitTime();
 		if (timeLimit == 0) { timeLimit = Long.MAX_VALUE; }
 		long tl0 = System.currentTimeMillis();
 		do {
 			if ((System.currentTimeMillis() - tl0) / 1000 > timeLimit) {
-				lgr.warn("time limit reached");
+				log.warn("time limit reached");
 				return;
 			}
 			if (--runLimit < 0) {
-				lgr.warn("run limit reached");
+				log.warn("run limit reached");
 				return;
 			}
 			runs++;
-			lgr.info(Banner.getBannerLine("starting dive " + runs, '-'));
+			log.info(Banner.getBannerLine("starting dive " + runs, '-'));
 			long t0 = System.currentTimeMillis();
 			SymbolicState.reset(concreteValues);
 			performRun();
@@ -79,10 +82,10 @@ public class Diver implements Reporter {
 	private void performRun() {
 		PrintStream out = System.out, err = System.err;
 		try {
-			Class<?> clas = instrumentationClassLoader.loadClass(Configuration.getMain());
+			Class<?> clas = instrumentationClassLoader.loadClass(configuration.getMain());
 			Method meth = clas.getMethod("main", String[].class);
 			// Redirect System.out/System.err
-			if (!Configuration.getEchoOutput()) {
+			if (!configuration.getEchoOutput()) {
 				System.setOut(NUL); System.setErr(NUL);
 			}
 			meth.invoke(null, new Object[] { new String[0] });

@@ -11,7 +11,7 @@ import org.objectweb.asm.ClassWriter;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.reporting.Reporters;
+import za.ac.sun.cs.coastal.reporting.ReporterManager;
 
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
@@ -31,7 +31,7 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 	private long ltime = 0, itime = 0;
 	
 	public InstrumentationClassLoader(String classPath) {
-		Reporters.register(this);
+		ReporterManager.register(this);
 		String paths[] = classPath.split(File.pathSeparator);
 		for (String path : paths) {
 			classPaths.add(path);

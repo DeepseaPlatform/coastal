@@ -16,12 +16,11 @@ import za.ac.sun.cs.coastal.instrument.MethodInstrumentationAdapter;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.reporting.Reporters;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class ConditionCoverage implements InstructionListener, Reporter, ConfigurationListener {
 
-	private static final Logger lgr = Configuration.getLogger();
+	private Logger log;
 
 	private final Map<Integer, Long> reached = new HashMap<>();
 
@@ -34,9 +33,23 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	private boolean reportCoverage = false;
 	
 	public ConditionCoverage() {
-		Reporters.register(this);
-		Configuration.registerListener(this);
+		// We expect configurationLoaded(...) to be called shortly.
+		// This will initialize this instance.
+	}
+
+	@Override
+	public void configurationLoaded(Configuration configuration) {
 		SymbolicState.registerListener(this);
+		log = configuration.getLog();
+		configuration.getReporterManager().register(this);
+		dumpCoverage = configuration.getBooleanProperty("coastal.coverage.dump", dumpCoverage);
+		reportCoverage = configuration.getBooleanProperty("coastal.coverage.report", reportCoverage);
+	}
+
+	@Override
+	public void collectProperties(Properties properties) {
+		properties.setProperty("coastal.coverage.dump", Boolean.toString(dumpCoverage));
+		properties.setProperty("coastal.coverage.report", Boolean.toString(reportCoverage));
 	}
 
 	@Override
@@ -96,7 +109,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	public void jumpInsn(int instr, int opcode) {
 		if (opcode != Opcodes.GOTO) {
 			if (dumpCoverage) {
-				lgr.trace("+++ {}", instr);
+				log.trace("+++ {}", instr);
 			}
 			incrementMap(reached, instr);
 		}
@@ -105,7 +118,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	@Override
 	public void postJumpInsn(int instr, int opcode) {
 		if (dumpCoverage) {
-			lgr.trace("+++F {}", instr);
+			log.trace("+++F {}", instr);
 		}
 		incrementMap(falseTaken, instr);
 	}
@@ -142,25 +155,6 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 		} else {
 			map.put(key, l + 1);
 		}
-	}
-
-	// ======================================================================
-	//
-	// CONFIGURATION
-	//
-	// ======================================================================
-
-	@Override
-	public void configurationLoaded(Properties properties) {
-		boolean dc = Configuration.getBooleanProperty(properties, "coastal.coverage.dump", dumpCoverage);
-		dumpCoverage = dc || Configuration.getDumpAll();
-		reportCoverage = Configuration.getBooleanProperty(properties, "coastal.coverage.report", reportCoverage);
-	}
-
-	@Override
-	public void configurationDump() {
-		lgr.info("coastal.coverage.dump = {}", dumpCoverage);
-		lgr.info("coastal.coverage.report = {}", reportCoverage);
 	}
 
 	// ======================================================================

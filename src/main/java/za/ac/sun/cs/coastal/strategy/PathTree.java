@@ -7,15 +7,20 @@ import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
 public abstract class PathTree {
 
-	protected final Logger lgr = Configuration.getLogger();
+	protected final Logger log;
 
-	protected final boolean dumpPaths = Configuration.getDumpPaths();
+	protected final boolean dumpPaths;
 
 	private PathTreeNode root = null;
 
 	private int pathCount = 0;
 
 	private int revisitCount = 0;
+
+	public PathTree(Configuration configuration) {
+		log = configuration.getLog();
+		dumpPaths = configuration.getDumpPaths();
+	}
 
 	public PathTreeNode getRoot() {
 		return root;
@@ -42,7 +47,7 @@ public abstract class PathTree {
 		}
 		assert idx == -1;
 		if (dumpPaths) {
-			lgr.debug("depth:{}", depth);
+			log.debug("depth:{}", depth);
 		}
 		/*
 		 * Step 2: Add the new path (spc) to the path tree
@@ -60,7 +65,7 @@ public abstract class PathTree {
 		 */
 		if (dumpPaths && (root != null)) {
 			for (String ll : stringRepr()) {
-				lgr.debug(ll);
+				log.debug(ll);
 			}
 		}
 		/*

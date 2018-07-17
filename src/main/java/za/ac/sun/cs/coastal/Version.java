@@ -31,18 +31,18 @@ public class Version {
 		return DEFAULT_VERSION;
 	}
 
-	protected String read(InputStream inStream) {
-		Properties props = new Properties();
+	protected String read(InputStream inputStream) {
+		Properties properties = new Properties();
 		try {
-			props.load(inStream);
+			properties.load(inputStream);
 		} catch (IOException x) {
 			// ignore
 		}
-		return read(props);
+		return read(properties);
 	}
 
-	protected String read(Properties props) {
-		String v = props.getProperty("version");
+	protected String read(Properties properties) {
+		String v = properties.getProperty("version");
 		if ((v != null) && (v.charAt(0) != '%')) {
 			return v;
 		}

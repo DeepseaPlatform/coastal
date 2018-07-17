@@ -133,16 +133,16 @@ public class Banner {
 	 * @param level
 	 *            log level for the banner
 	 */
-	public void display(Logger lgr, Level level) {
-		lgr.log(level, borderLine);
-		lgr.log(level, borderLine);
-		lgr.log(level, borderEmpty);
+	public void display(Logger lgr) {
+		lgr.log(Level.INFO, borderLine);
+		lgr.log(Level.INFO, borderLine);
+		lgr.log(Level.INFO, borderEmpty);
 		for (String line : bannerWriter.toString().split(LS)) {
-			lgr.log(level, line);
+			lgr.log(Level.INFO, line);
 		}
-		lgr.log(level, borderEmpty);
-		lgr.log(level, borderLine);
-		lgr.log(level, borderLine);
+		lgr.log(Level.INFO, borderEmpty);
+		lgr.log(Level.INFO, borderLine);
+		lgr.log(Level.INFO, borderLine);
 	}
 
 	/**
