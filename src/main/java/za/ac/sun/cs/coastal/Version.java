@@ -22,7 +22,9 @@ public class Version {
 	protected String read(String resourceName) {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
-			return read(resourceStream);
+			if (resourceStream != null) {
+				return read(resourceStream);
+			}
 		} catch (IOException x) {
 			// ignore
 		}
