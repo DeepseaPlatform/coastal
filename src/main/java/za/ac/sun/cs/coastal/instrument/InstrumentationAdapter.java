@@ -14,9 +14,12 @@ import org.objectweb.asm.util.TraceMethodVisitor;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.reporting.ReporterManager;
 
 public class InstrumentationAdapter extends ClassVisitor implements Reporter {
+
+	private final Configuration configuration;
+
+	private final boolean dumpAsm;
 
 	private final String name;
 
@@ -24,21 +27,23 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 
 	private final PrintWriter pwriter = new PrintWriter(swriter);
 
-	public InstrumentationAdapter(String name, ClassVisitor cv) {
+	public InstrumentationAdapter(Configuration configuration, String name, ClassVisitor cv) {
 		super(Opcodes.ASM6, cv);
+		this.configuration = configuration;
+		this.dumpAsm = configuration.getDumpAsm();
 		this.name = name;
-		if (Configuration.getDumpAsm()) {
-			ReporterManager.register(this);
+		if (dumpAsm) {
+			configuration.getReporterManager().register(this);
 		}
 	}
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		int triggerIndex = Configuration.isTrigger(this.name + "." + name, desc);
+		int triggerIndex = configuration.isTrigger(this.name + "." + name, desc);
 		boolean isStatic = (access & Opcodes.ACC_STATIC) > 0;
 		int argCount = countArguments(desc);
 		MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
-		if ((mv != null) && Configuration.getDumpAsm()) {
+		if ((mv != null) && dumpAsm) {
 			Printer p = new Textifier(Opcodes.ASM6) {
 				@Override
 				public void visitCode() {
@@ -53,7 +58,7 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 			mv = new TraceMethodVisitor(mv, p);
 		}
 		if (mv != null) {
-			mv = new MethodInstrumentationAdapter(mv, triggerIndex, isStatic, argCount);
+			mv = new MethodInstrumentationAdapter(configuration, mv, triggerIndex, isStatic, argCount);
 		}
 		return mv;
 	}

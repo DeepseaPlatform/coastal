@@ -100,7 +100,7 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		}
 		ClassReader cr = new ClassReader(in);
 		ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
-		InstrumentationAdapter ia = new InstrumentationAdapter(name, cw); 
+		InstrumentationAdapter ia = new InstrumentationAdapter(configuration, name, cw); 
 		cr.accept(ia, 0);
 		byte[] out = cw.toByteArray();
 		preInstrumentedSize += in.length;

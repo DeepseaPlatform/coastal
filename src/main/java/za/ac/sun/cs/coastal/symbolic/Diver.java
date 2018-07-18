@@ -33,6 +33,7 @@ public class Diver implements Reporter {
 		this.configuration = configuration;
 		this.log = configuration.getLog();
 		configuration.getReporterManager().register(this);
+		SymbolicState.initialize(configuration);
 		String cp = System.getProperty("java.class.path");
 		instrumentationClassLoader = new InstrumentationClassLoader(configuration, cp);
 	}

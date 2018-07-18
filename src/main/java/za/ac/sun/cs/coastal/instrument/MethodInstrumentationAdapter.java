@@ -17,7 +17,11 @@ import za.ac.sun.cs.coastal.Configuration.Trigger;
 
 public class MethodInstrumentationAdapter extends MethodVisitor {
 
-	private static final Logger lgr = Configuration.getLogger();
+	private final Configuration configuration;
+
+	private final Logger log;
+	
+	private final boolean dumpInstrumenter;
 	
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicState";
 
@@ -31,8 +35,6 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	
 	private final int argCount;
 	
-	private static boolean dumpInstrumenter = Configuration.getDumpInstrumenter();
-
 	private static final Map<Integer, Integer> firstInstruction = new TreeMap<>();
 
 	private static final Map<Integer, Integer> lastInstruction = new TreeMap<>();
@@ -48,8 +50,11 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private static BitSet currentBranchInstructions;
 	
-	public MethodInstrumentationAdapter(MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
+	public MethodInstrumentationAdapter(Configuration configuration, MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
+		this.configuration = configuration;
+		this.log = configuration.getLog();
+		this.dumpInstrumenter = configuration.getDumpInstrumenter();
 		this.triggerIndex = triggerIndex;
 		this.isStatic = isStatic;
 		this.argCount = argCount;
@@ -102,7 +107,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteString", "(IIILjava/lang/String;)Ljava/lang/String;", false);
 			mv.visitIntInsn(Opcodes.ASTORE, address);
 		} else {
-			lgr.fatal("UNHANDLED PARAMETER TYPE");
+			log.fatal("UNHANDLED PARAMETER TYPE");
 			System.exit(1);
 		}
 	}
@@ -110,7 +115,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitLineNumber(int line, Label start) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitLineNumber(line:{}, label:{})", line, start);
+			log.trace("visitLineNumber(line:{}, label:{})", line, start);
 		}
 		mv.visitLdcInsn(instructionCounter);
 		mv.visitLdcInsn(line);
@@ -121,7 +126,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitEnd() {
 		if (dumpInstrumenter) {
-			lgr.trace("visitEnd()");
+			log.trace("visitEnd()");
 		}
 		lastInstruction.put(methodCounter, instructionCounter);
 		branchInstructions.put(methodCounter, currentBranchInstructions);
@@ -131,7 +136,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitCode() {
 		if (dumpInstrumenter) {
-			lgr.trace("visitCode()");
+			log.trace("visitCode()");
 		}
 		if (triggerIndex >= 0) {
 			//--- IF (symbolicMode) {
@@ -142,7 +147,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitLdcInsn(++methodCounter);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(I)V", false);
 			//---   GENERATE PARAMETER OVERRIDES
-			Trigger trigger = Configuration.getTrigger(triggerIndex);
+			Trigger trigger = configuration.getTrigger(triggerIndex);
 			int n = trigger.getParamCount();
 			int offset = (isStatic ? 0 : 1);
 			for (int i = 0; i < n; i++) {
@@ -173,7 +178,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitInsn(int opcode) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitInsn(opcode:{})", opcode);
+			log.trace("visitInsn(opcode:{})", opcode);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
@@ -184,7 +189,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitIntInsn(int opcode, int operand) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitIntInsn(opcode:{}, operand:{})", opcode, operand);
+			log.trace("visitIntInsn(opcode:{}, operand:{})", opcode, operand);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
@@ -196,7 +201,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitVarInsn(int opcode, int var) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitVarInsn(opcode:{}, var:{})", opcode, var);
+			log.trace("visitVarInsn(opcode:{}, var:{})", opcode, var);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
@@ -208,7 +213,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitTypeInsn(opcode:{}, type:{})", opcode, type);
+			log.trace("visitTypeInsn(opcode:{}, type:{})", opcode, type);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
@@ -219,7 +224,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitFieldInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
+			log.trace("visitFieldInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
@@ -233,7 +238,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
+			log.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		}
 		if (owner.equals(LIBRARY) && name.equals("stop")) {
 			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
@@ -251,7 +256,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitInvokeDynamicInsn(name:{})", name);
+			log.trace("visitInvokeDynamicInsn(name:{})", name);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(186);
@@ -262,7 +267,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitJumpInsn(opcode:{}, label:{})", opcode, label);
+			log.trace("visitJumpInsn(opcode:{}, label:{})", opcode, label);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
@@ -279,7 +284,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitLdcInsn(Object value) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitLdcInsn(value:{})", value);
+			log.trace("visitLdcInsn(value:{})", value);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(18);
@@ -291,7 +296,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitIincInsn(int var, int increment) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitJumpInsn(var:{}, increment:{})", var, increment);
+			log.trace("visitJumpInsn(var:{}, increment:{})", var, increment);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(var);
@@ -303,7 +308,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitTableSwitchInsn(min:{}, max:{}, dflt:{})", min, max, dflt);
+			log.trace("visitTableSwitchInsn(min:{}, max:{}, dflt:{})", min, max, dflt);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(170);
@@ -344,7 +349,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitLookupSwitchInsn(dflt:{})", dflt);
+			log.trace("visitLookupSwitchInsn(dflt:{})", dflt);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(171);
@@ -355,7 +360,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
 		if (dumpInstrumenter) {
-			lgr.trace("visitMultiANewArrayInsn(numDimensions:{})", numDimensions);
+			log.trace("visitMultiANewArrayInsn(numDimensions:{})", numDimensions);
 		}
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(197);

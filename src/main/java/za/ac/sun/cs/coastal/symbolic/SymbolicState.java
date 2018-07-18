@@ -34,14 +34,15 @@ public class SymbolicState {
 
 	public static final String NEW_VAR_PREFIX = "U_D_"; // "$"
 
-	private static final Logger lgr = Configuration.getLogger();
+	private static Configuration configuration;
+	
+	private static Logger log;
 
-	private static final boolean dumpTrace = Configuration.getDumpTrace();
+	private static boolean dumpTrace;
 
-	private static final boolean dumpFrame = Configuration.getDumpFrame();
+	private static boolean dumpFrame;
 
-	private static final long limitConjunct = (Configuration.getLimitConjuncts() == 0) ? Long.MAX_VALUE
-			: Configuration.getLimitConjuncts();
+	private static long limitConjuncts;
 
 	// if true, check for limit on conjuncts
 	private static boolean dangerFlag = false;
@@ -75,6 +76,17 @@ public class SymbolicState {
 	private static final Map<String, Integer> markers = new HashMap<>();
 
 	private static final Stack<Expression> pendingSwitch = new Stack<>();
+
+	public static void initialize(Configuration configuration) {
+		SymbolicState.configuration = configuration;
+		log = configuration.getLog();
+		dumpTrace = configuration.getDumpTrace();
+		dumpFrame = configuration.getDumpFrame();
+		limitConjuncts = configuration.getLimitConjuncts();
+		if (limitConjuncts == 0) {
+			limitConjuncts = Long.MAX_VALUE;
+		}
+	}
 
 	public static void reset(Map<String, Constant> concreteValues) {
 		dangerFlag = false;
@@ -135,8 +147,8 @@ public class SymbolicState {
 		String fullFieldName = objectId + FIELD_SEPARATOR + fieldName;
 		Expression value = instanceData.get(fullFieldName);
 		if (value == null) {
-			int min = Configuration.getDefaultMinIntValue();
-			int max = Configuration.getDefaultMaxIntValue();
+			int min = configuration.getDefaultMinIntValue();
+			int max = configuration.getDefaultMaxIntValue();
 			value = new IntVariable(getNewVariableName(), min, max);
 			instanceData.put(fullFieldName, value);
 		}
@@ -195,18 +207,18 @@ public class SymbolicState {
 		isPreviousDuplicate = false;
 		if (isPreviousConstant) {
 			if (dumpTrace) {
-				lgr.trace(">>> constant conjunct ignored: {}", c);
+				log.trace(">>> constant conjunct ignored: {}", c);
 			}
 		} else if (conjunctSet.add(c)) {
 			spc = new SegmentedPCIf(spc, conjunct, pendingExtraConjunct, true);
 			pendingExtraConjunct = null;
 			if (dumpTrace) {
-				lgr.trace(">>> adding conjunct: {}", c);
-				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+				log.trace(">>> adding conjunct: {}", c);
+				log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 			}
 		} else {
 			if (dumpTrace) {
-				lgr.trace(">>> duplicate conjunct ignored: {}", c);
+				log.trace(">>> duplicate conjunct ignored: {}", c);
 			}
 			isPreviousDuplicate = true;
 		}
@@ -224,18 +236,18 @@ public class SymbolicState {
 		String c = conjunct.toString();
 		if (isConstant(conjunct)) {
 			if (dumpTrace) {
-				lgr.trace(">>> constant (switch) conjunct ignored: {}", c);
+				log.trace(">>> constant (switch) conjunct ignored: {}", c);
 			}
 		} else if (conjunctSet.add(c)) {
 			spc = new SegmentedPCSwitch(spc, expression, pendingExtraConjunct, min, max, cur);
 			pendingExtraConjunct = null;
 			if (dumpTrace) {
-				lgr.trace(">>> adding (switch) conjunct: {}", c);
-				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+				log.trace(">>> adding (switch) conjunct: {}", c);
+				log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 			}
 		} else {
 			if (dumpTrace) {
-				lgr.trace(">>> duplicate (switch) conjunct ignored: {}", c);
+				log.trace(">>> duplicate (switch) conjunct ignored: {}", c);
 			}
 		}
 	}
@@ -256,7 +268,7 @@ public class SymbolicState {
 		int methodNumber = frames.pop().getMethodNumber();
 		if (frames.isEmpty()) {
 			if (dumpTrace) {
-				lgr.trace(">>> symbolic mode switched off");
+				log.trace(">>> symbolic mode switched off");
 			}
 			symbolicMode = false;
 		}
@@ -275,9 +287,9 @@ public class SymbolicState {
 	private static void dumpFrames() {
 		int n = frames.size();
 		for (int i = n - 1; i >= 0; i--) {
-			lgr.trace("--> st{} locals:{}", frames.get(i).stack, frames.get(i).locals);
+			log.trace("--> st{} locals:{}", frames.get(i).stack, frames.get(i).locals);
 		}
-		lgr.trace("--> data:{}", instanceData);
+		log.trace("--> data:{}", instanceData);
 	}
 
 	private static final Class<?>[] EMPTY_PARAMETERS = new Class<?>[0];
@@ -285,7 +297,7 @@ public class SymbolicState {
 	private static final Object[] EMPTY_ARGUMENTS = new Object[0];
 
 	private static boolean executeDelegate(String owner, String name, String descriptor) {
-		Object delegate = Configuration.findDelegate(owner);
+		Object delegate = configuration.findDelegate(owner);
 		if (delegate == null) {
 			return false;
 		}
@@ -295,13 +307,13 @@ public class SymbolicState {
 			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, EMPTY_PARAMETERS);
 		} catch (NoSuchMethodException | SecurityException e) {
 			if (dumpTrace) {
-				lgr.trace("@@@ no delegate: {}", methodName);
+				log.trace("@@@ no delegate: {}", methodName);
 			}
 			return false;
 		}
 		assert delegateMethod != null;
 		if (dumpTrace) {
-			lgr.trace("@@@ found delegate: {}", methodName);
+			log.trace("@@@ found delegate: {}", methodName);
 		}
 		try {
 			if ((boolean) delegateMethod.invoke(delegate, EMPTY_ARGUMENTS)) {
@@ -321,28 +333,28 @@ public class SymbolicState {
 	// ======================================================================
 
 	public static void stop() {
-		if (Configuration.getObeyStops()) {
+		if (configuration.getObeyStops()) {
 			mayContinue = false;
-			lgr.info("!!! PROGRAM TERMINATION POINT REACHED");
+			log.info("!!! PROGRAM TERMINATION POINT REACHED");
 		}
 	}
 
 	public static void stop(String message) {
-		if (Configuration.getObeyStops()) {
+		if (configuration.getObeyStops()) {
 			mayContinue = false;
-			lgr.info("!!! PROGRAM TERMINATION POINT REACHED");
-			lgr.info("!!! {}", message);
+			log.info("!!! PROGRAM TERMINATION POINT REACHED");
+			log.info("!!! {}", message);
 		}
 	}
 
 	public static void mark(int marker) {
-		if (Configuration.getRecordMarks()) {
+		if (configuration.getRecordMarks()) {
 			mark(Integer.toString(marker));
 		}
 	}
 
 	public static void mark(String marker) {
-		if (Configuration.getRecordMarks()) {
+		if (configuration.getRecordMarks()) {
 			String key = marker;
 			Integer n = markers.get(key);
 			if (n == null) {
@@ -360,35 +372,35 @@ public class SymbolicState {
 	// ======================================================================
 
 	public static int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
-		Trigger trigger = Configuration.getTrigger(triggerIndex);
+		Trigger trigger = configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
 			setLocal(address, new IntConstant(currentValue));
 			return currentValue;
 		}
-		int min = Configuration.getMinBound(name);
-		int max = Configuration.getMaxBound(name);
+		int min = configuration.getMinBound(name);
+		int max = configuration.getMaxBound(name);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : concrete.getValue();
 	}
 
 	public static char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
-		Trigger trigger = Configuration.getTrigger(triggerIndex);
+		Trigger trigger = configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
 			setLocal(address, new IntConstant(currentValue));
 			return currentValue;
 		}
-		int min = Configuration.getMinBound(name);
-		int max = Configuration.getMaxBound(name);
+		int min = configuration.getMinBound(name);
+		int max = configuration.getMaxBound(name);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : (char) concrete.getValue();
 	}
 
 	public static String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
-		Trigger trigger = Configuration.getTrigger(triggerIndex);
+		Trigger trigger = configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length();
 		int stringId = createString();
@@ -418,7 +430,7 @@ public class SymbolicState {
 	}
 
 	public static int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
-		Trigger trigger = Configuration.getTrigger(triggerIndex);
+		Trigger trigger = configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length;
 		int arrayId = createArray();
@@ -439,8 +451,8 @@ public class SymbolicState {
 				} else {
 					value[i] = currentValue[i];
 				}
-				int min = Configuration.getMinBound(entryName, name);
-				int max = Configuration.getMaxBound(entryName, name);
+				int min = configuration.getMinBound(entryName, name);
+				int max = configuration.getMaxBound(entryName, name);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}
@@ -452,7 +464,7 @@ public class SymbolicState {
 	public static void triggerMethod(int methodNumber) {
 		if (!symbolicMode) {
 			if (dumpTrace) {
-				lgr.trace(">>> symbolic mode switched on");
+				log.trace(">>> symbolic mode switched on");
 			}
 			symbolicMode = true;
 			frames.push(new SymbolicFrame(methodNumber));
@@ -468,7 +480,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace(">>> transferring arguments");
+			log.trace(">>> transferring arguments");
 		}
 		assert args.isEmpty();
 		for (int i = 0; i < argCount; i++) {
@@ -489,7 +501,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("### LINENUMBER {}", line);
+			log.trace("### LINENUMBER {}", line);
 		}
 		notifyLinenumber(instr, line);
 	}
@@ -499,7 +511,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{}", () -> Bytecodes.toString(opcode));
+			log.trace("{}", () -> Bytecodes.toString(opcode));
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -597,7 +609,7 @@ public class SymbolicState {
 			push(getField(id, "length"));
 			break;
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		if (dumpFrame) {
@@ -610,7 +622,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{} {}", Bytecodes.toString(opcode), operand);
+			log.trace("{} {}", Bytecodes.toString(opcode), operand);
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -635,7 +647,7 @@ public class SymbolicState {
 			push(new IntConstant(id));
 			break;
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", Bytecodes.toString(opcode), operand, opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", Bytecodes.toString(opcode), operand, opcode);
 			System.exit(1);
 		}
 		if (dumpFrame) {
@@ -648,7 +660,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{} {}", Bytecodes.toString(opcode), var);
+			log.trace("{} {}", Bytecodes.toString(opcode), var);
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -668,7 +680,7 @@ public class SymbolicState {
 			setLocal(var, pop());
 			break;
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		if (dumpFrame) {
@@ -681,7 +693,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{}", Bytecodes.toString(opcode));
+			log.trace("{}", Bytecodes.toString(opcode));
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -693,7 +705,7 @@ public class SymbolicState {
 			push(new IntConstant(id));
 			break;
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		if (dumpFrame) {
@@ -707,7 +719,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
+			log.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -727,7 +739,7 @@ public class SymbolicState {
 			putField(id, name, e);
 			break;
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", Bytecodes.toString(opcode), owner, name,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", Bytecodes.toString(opcode), owner, name,
 					descriptor, opcode);
 			System.exit(1);
 		}
@@ -742,7 +754,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
+			log.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -752,7 +764,7 @@ public class SymbolicState {
 		case Opcodes.INVOKESPECIAL:
 		case Opcodes.INVOKEVIRTUAL:
 			String className = owner.replace('/', '.');
-			if (!Configuration.isTarget(className)) {
+			if (!configuration.isTarget(className)) {
 				if (!executeDelegate(className, name, descriptor)) {
 					// get rid of arguments
 					int n = 1 + getArgumentCount(descriptor);
@@ -771,7 +783,7 @@ public class SymbolicState {
 			break;
 		case Opcodes.INVOKESTATIC:
 			className = owner.replace('/', '.');
-			if (!Configuration.isTarget(className)) {
+			if (!configuration.isTarget(className)) {
 				if (!executeDelegate(className, name, descriptor)) {
 					// get rid of arguments
 					int n = getArgumentCount(descriptor);
@@ -789,7 +801,7 @@ public class SymbolicState {
 			}
 			break;
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", Bytecodes.toString(opcode), owner, name,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} {} {} {} (opcode: {})", Bytecodes.toString(opcode), owner, name,
 					descriptor, opcode);
 			System.exit(1);
 		}
@@ -803,7 +815,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{}", Bytecodes.toString(opcode));
+			log.trace("{}", Bytecodes.toString(opcode));
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -811,7 +823,7 @@ public class SymbolicState {
 		notifyInvokeDynamicInsn(instr, opcode);
 		switch (opcode) {
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		if (dumpFrame) {
@@ -825,7 +837,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{}", Bytecodes.toString(opcode));
+			log.trace("{}", Bytecodes.toString(opcode));
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -901,7 +913,7 @@ public class SymbolicState {
 			pushConjunct(new Operation(Operator.NE, e, Operation.ZERO));
 			break;
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		if (dumpFrame) {
@@ -914,24 +926,24 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("(POST) {}", Bytecodes.toString(opcode));
+			log.trace("(POST) {}", Bytecodes.toString(opcode));
 		}
 		if (!isPreviousConstant && !isPreviousDuplicate) {
 			if (dumpTrace) {
-				lgr.trace(">>> previous conjunct is false");
+				log.trace(">>> previous conjunct is false");
 			}
 			notifyPostJumpInsn(instr, opcode);
 			assert spc instanceof SegmentedPCIf;
 			spc = ((SegmentedPCIf) spc).negate();
 			checkLimitConjuncts();
 			if (dumpTrace) {
-				lgr.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+				log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 			}
 		}
 	}
 
 	private static void checkLimitConjuncts() throws LimitConjunctException {
-		if ((spc != null) && (spc.getDepth() >= limitConjunct)) {
+		if ((spc != null) && (spc.getDepth() >= limitConjuncts)) {
 			throw new LimitConjunctException();
 		}
 		dangerFlag = false;
@@ -942,7 +954,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{} {}", Bytecodes.toString(opcode), value);
+			log.trace("{} {}", Bytecodes.toString(opcode), value);
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -965,7 +977,7 @@ public class SymbolicState {
 			}
 			break;
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		if (dumpFrame) {
@@ -979,7 +991,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{} {}", Bytecodes.toString(opcode), increment);
+			log.trace("{} {}", Bytecodes.toString(opcode), increment);
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -998,7 +1010,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{}", Bytecodes.toString(opcode));
+			log.trace("{}", Bytecodes.toString(opcode));
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -1015,7 +1027,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("CASE FOR {}", Bytecodes.toString(Opcodes.TABLESWITCH));
+			log.trace("CASE FOR {}", Bytecodes.toString(Opcodes.TABLESWITCH));
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -1033,7 +1045,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{}", Bytecodes.toString(opcode));
+			log.trace("{}", Bytecodes.toString(opcode));
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -1041,7 +1053,7 @@ public class SymbolicState {
 		notifyLookupSwitchInsn(instr, opcode);
 		switch (opcode) {
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		if (dumpFrame) {
@@ -1054,7 +1066,7 @@ public class SymbolicState {
 			return;
 		}
 		if (dumpTrace) {
-			lgr.trace("{}", Bytecodes.toString(opcode));
+			log.trace("{}", Bytecodes.toString(opcode));
 		}
 		if (dangerFlag) {
 			checkLimitConjuncts();
@@ -1062,7 +1074,7 @@ public class SymbolicState {
 		notifyMultiANewArrayInsn(instr, opcode);
 		switch (opcode) {
 		default:
-			lgr.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		if (dumpFrame) {
