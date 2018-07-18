@@ -26,7 +26,7 @@ public class Diver implements Reporter {
 	private int runs = 0;
 
 	private long time = 0;
-	
+
 	private final InstrumentationClassLoader instrumentationClassLoader;
 
 	public Diver(Configuration configuration) {
@@ -46,9 +46,13 @@ public class Diver implements Reporter {
 		}
 		Map<String, Constant> concreteValues = null;
 		long runLimit = configuration.getLimitRuns();
-		if (runLimit == 0) { runLimit = Long.MIN_VALUE; }
+		if (runLimit == 0) {
+			runLimit = Long.MIN_VALUE;
+		}
 		long timeLimit = configuration.getLimitTime();
-		if (timeLimit == 0) { timeLimit = Long.MAX_VALUE; }
+		if (timeLimit == 0) {
+			timeLimit = Long.MAX_VALUE;
+		}
 		long tl0 = System.currentTimeMillis();
 		do {
 			if ((System.currentTimeMillis() - tl0) / 1000 > timeLimit) {
@@ -72,7 +76,7 @@ public class Diver implements Reporter {
 	public int getRuns() {
 		return runs;
 	}
-	
+
 	private static final PrintStream NUL = new PrintStream(new OutputStream() {
 		@Override
 		public void write(int b) throws IOException {
@@ -87,32 +91,39 @@ public class Diver implements Reporter {
 			Method meth = clas.getMethod("main", String[].class);
 			// Redirect System.out/System.err
 			if (!configuration.getEchoOutput()) {
-				System.setOut(NUL); System.setErr(NUL);
+				System.setOut(NUL);
+				System.setErr(NUL);
 			}
 			meth.invoke(null, new Object[] { new String[0] });
-			System.setOut(out); System.setErr(err);
+			System.setOut(out);
+			System.setErr(err);
 		} catch (ClassNotFoundException x) {
-			System.setOut(out); System.setErr(err);
+			System.setOut(out);
+			System.setErr(err);
 			x.printStackTrace();
 		} catch (NoSuchMethodException x) {
-			System.setOut(out); System.setErr(err);
+			System.setOut(out);
+			System.setErr(err);
 			x.printStackTrace();
 		} catch (SecurityException x) {
-			System.setOut(out); System.setErr(err);
+			System.setOut(out);
+			System.setErr(err);
 			x.printStackTrace();
 		} catch (IllegalAccessException x) {
-			System.setOut(out); System.setErr(err);
+			System.setOut(out);
+			System.setErr(err);
 			x.printStackTrace();
 		} catch (IllegalArgumentException x) {
-			System.setOut(out); System.setErr(err);
+			System.setOut(out);
+			System.setErr(err);
 			x.printStackTrace();
 		} catch (InvocationTargetException x) {
-			System.setOut(out); System.setErr(err);
+			System.setOut(out);
+			System.setErr(err);
 			Throwable t = x.getCause();
-			if ((t != null) && (t instanceof LimitConjunctException)) {
-				// limit on nr of conjuncts has been reached
-			} else {
+			if ((t == null) || !(t instanceof LimitConjunctException)) {
 				x.printStackTrace();
+			// else: limit on nr of conjuncts has been reached
 			}
 		}
 	}

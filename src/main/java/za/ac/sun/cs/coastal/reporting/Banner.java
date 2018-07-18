@@ -64,7 +64,7 @@ public class Banner {
 
 	/**
 	 * Constructs the banner. The only task to initialize the border lines.
-	 * 
+	 *
 	 * @param borderChar
 	 *            the character used to construct the banner
 	 */
@@ -105,7 +105,7 @@ public class Banner {
 
 	/**
 	 * Adds a message to the banner.
-	 * 
+	 *
 	 * @param message
 	 *            banner content
 	 * @return the banner instance
@@ -127,7 +127,7 @@ public class Banner {
 
 	/**
 	 * Displays the banner to the given log with the given level.
-	 * 
+	 *
 	 * @param lgr
 	 *            destination log for the banner
 	 * @param level
@@ -147,7 +147,7 @@ public class Banner {
 
 	/**
 	 * Displays the banner to the given writer.
-	 * 
+	 *
 	 * @param out
 	 *            destination for the banner
 	 */
@@ -161,7 +161,7 @@ public class Banner {
 
 	/**
 	 * Displays the banner to the given stream.
-	 * 
+	 *
 	 * @param out
 	 *            destination for the banner
 	 */
@@ -175,7 +175,7 @@ public class Banner {
 
 	/**
 	 * Displays a one-line banner with an arbitrary string.
-	 * 
+	 *
 	 * @param string
 	 *            the string to place in the banner
 	 * @param bannerChar
@@ -200,10 +200,10 @@ public class Banner {
 		}
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Displays a one-line banner with the name of a reporter.
-	 * 
+	 *
 	 * @param reporter
 	 *            the reporter to produce the banner for
 	 * @param bannerChar

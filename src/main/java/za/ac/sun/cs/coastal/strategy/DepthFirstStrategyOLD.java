@@ -33,7 +33,7 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 
 	private int infeasibleCount = 0;
 
-	private DFPathTree pathTree; 
+	private DFPathTree pathTree;
 
 	private long pathLimit = 0;
 
@@ -43,7 +43,7 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
 	}
-	
+
 	@Override
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
@@ -107,7 +107,7 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
 			@SuppressWarnings("unchecked")
-			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model"); 
+			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model");
 			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				log.info("no model");
@@ -135,11 +135,12 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 					return newModel;
 				} else {
 					log.info("model {} has been visited before, retrying", modelString);
-					/* OLD CODE, WAS ALMOST CERTAINLY BUGGY:
-					t = System.currentTimeMillis();
-					spc = PathTree.insertPath(spc, false);
-					pathTreeTime += System.currentTimeMillis() - t;
-					*/
+					/*
+					 * OLD CODE, WAS ALMOST CERTAINLY BUGGY: t =
+					 * System.currentTimeMillis(); spc =
+					 * PathTree.insertPath(spc, false); pathTreeTime +=
+					 * System.currentTimeMillis() - t;
+					 */
 				}
 			}
 		}
@@ -152,8 +153,8 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 	// ======================================================================
 
 	private static class DFPathTree extends PathTree {
-		
-		public DFPathTree(Configuration configuration) {
+
+		DFPathTree(Configuration configuration) {
 			super(configuration);
 		}
 
@@ -179,7 +180,7 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 				}
 				return null;
 			}
-		}		
+		}
 
 	}
 

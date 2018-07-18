@@ -35,7 +35,7 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 
 	private int infeasibleCount = 0;
 
-	private BFPathTree pathTree; 
+	private BFPathTree pathTree;
 
 	private long pathLimit = 0;
 
@@ -45,7 +45,7 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
 	}
-	
+
 	@Override
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
@@ -66,7 +66,7 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3Service");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
 	}
-	
+
 	@Override
 	public void collectProperties(Properties properties) {
 		// do nothing
@@ -109,7 +109,7 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
 			@SuppressWarnings("unchecked")
-			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model"); 
+			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model");
 			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				log.info("no model");
@@ -149,8 +149,8 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 	// ======================================================================
 
 	private static class BFPathTree extends PathTree {
-		
-		public BFPathTree(Configuration configuration) {
+
+		BFPathTree(Configuration configuration) {
 			super(configuration);
 		}
 
@@ -174,7 +174,7 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 				}
 			}
 			return null;
-		}		
+		}
 
 	}
 

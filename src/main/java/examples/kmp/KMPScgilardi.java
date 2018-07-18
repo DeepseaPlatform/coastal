@@ -1,10 +1,10 @@
 package examples.kmp;
 
 // https://github.com/scgilardi/kmp-search/blob/master/java/src/kmp_search/Context.jav
-public class KMP_Scgilardi {
+public class KMPScgilardi {
 
 	public static int search(int[] haystack, int[] needle) {
-		int[] T = computeTable(needle);
+		int[] table = computeTable(needle);
 		int hl = haystack.length;
 		int nl = needle.length;
 		int i = 0;
@@ -12,11 +12,11 @@ public class KMP_Scgilardi {
 		for (; i < hl && j < nl; ++i, ++j) {
 			int b = haystack[i];
 			while (j != -1 && needle[j] != b) {
-				j = T[j];
+				j = table[j];
 			}
 		}
 		if (j == nl) {
-			j = T[j];
+			j = table[j];
 			return i - nl;
 		} else {
 			return -1;

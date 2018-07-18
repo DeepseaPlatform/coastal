@@ -26,17 +26,17 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 	private final List<String> classPaths = new ArrayList<>();
 
 	private static int requestCount = 0, cachedCount = 0, instrumentedCount = 0;
-	
+
 	private static long ltime = 0, itime = 0;
-	
+
 	private int preInstrumentedSize = 0, postInstrumentedSize = 0;
-	
+
 	public InstrumentationClassLoader(Configuration configuration, String classPath) {
 		this.configuration = configuration;
 		this.log = configuration.getLog();
 		this.dumpInstrumenter = configuration.getDumpInstrumenter();
 		configuration.getReporterManager().register(this);
-		String paths[] = classPath.split(File.pathSeparator);
+		String[] paths = classPath.split(File.pathSeparator);
 		for (String path : paths) {
 			classPaths.add(path);
 		}
@@ -100,7 +100,7 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		}
 		ClassReader cr = new ClassReader(in);
 		ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
-		InstrumentationAdapter ia = new InstrumentationAdapter(configuration, name, cw); 
+		InstrumentationAdapter ia = new InstrumentationAdapter(configuration, name, cw);
 		cr.accept(ia, 0);
 		byte[] out = cw.toByteArray();
 		preInstrumentedSize += in.length;

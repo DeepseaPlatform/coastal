@@ -33,7 +33,7 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 
 	private int infeasibleCount = 0;
 
-	private DFPathTree pathTree; 
+	private DFPathTree pathTree;
 
 	private long pathLimit = 0;
 
@@ -43,7 +43,7 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
 	}
-	
+
 	@Override
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
@@ -53,7 +53,7 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 		if (pathLimit == 0) {
 			pathLimit = Long.MIN_VALUE;
 		}
-		pathTree = new DFPathTree(configuration); 
+		pathTree = new DFPathTree(configuration);
 		// Set up green
 		green = new Green("COASTAL", LogManager.getLogger("GREEN"));
 		Properties greenProperties = configuration.getOriginalProperties();
@@ -107,7 +107,7 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
 			@SuppressWarnings("unchecked")
-			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model"); 
+			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model");
 			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				log.info("no model");
@@ -148,7 +148,7 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 
 	private static class DFPathTree extends PathTree {
 
-		public DFPathTree(Configuration configuration) {
+		DFPathTree(Configuration configuration) {
 			super(configuration);
 		}
 

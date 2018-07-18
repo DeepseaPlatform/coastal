@@ -21,7 +21,7 @@ public class MinMaxSorting0 {
 			}
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		long t0 = System.currentTimeMillis();
 		int[] a = new int[N];

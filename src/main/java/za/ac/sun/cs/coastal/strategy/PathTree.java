@@ -53,7 +53,6 @@ public abstract class PathTree {
 		 * Step 2: Add the new path (spc) to the path tree
 		 */
 		root = insert(root, path, 0, depth, isInfeasible);
-		//		/// 
 		//		if ((cur != null) && cur.isLeaf() && (idx == depth)) {
 		//			if (dumpPaths) {
 		//				lgr.debug("Revisit!");
@@ -124,7 +123,7 @@ public abstract class PathTree {
 		int h = root.height() * 4 - 2;
 		int w = root.width();
 		/*
-		 * Step 1: create and clear the character array 
+		 * Step 1: create and clear the character array
 		 */
 		char[][] lines = new char[h][w];
 		for (int i = 0; i < h; i++) {

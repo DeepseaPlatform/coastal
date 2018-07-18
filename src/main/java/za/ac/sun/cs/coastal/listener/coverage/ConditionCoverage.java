@@ -31,7 +31,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	private boolean dumpCoverage = false;
 
 	private boolean reportCoverage = false;
-	
+
 	public ConditionCoverage() {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
@@ -190,7 +190,8 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 					neitherCount++;
 				} else if (f == 0) {
 					onlyTrueCount++;
-				} if (f == r) {
+				}
+				if (f == r) {
 					onlyFalseCount++;
 				} else {
 					bothCount++;
@@ -200,10 +201,14 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 			}
 		}
 		int totalCount = jumpPoints.cardinality();
-		out.printf("  Both:       %6d of %6d instructions == %6.2f%%\n", bothCount, totalCount, bothCount * 100.0 / totalCount);
-		out.printf("  Neither:    %6d of %6d instructions == %6.2f%%\n", neitherCount, totalCount, neitherCount * 100.0 / totalCount);
-		out.printf("  Only true:  %6d of %6d instructions == %6.2f%%\n", onlyTrueCount, totalCount, onlyTrueCount * 100.0 / totalCount);
-		out.printf("  Only false: %6d of %6d instructions == %6.2f%%\n", onlyFalseCount, totalCount, onlyFalseCount * 100.0 / totalCount);
+		out.printf("  Both:       %6d of %6d instructions == %6.2f%%\n", bothCount, totalCount,
+				bothCount * 100.0 / totalCount);
+		out.printf("  Neither:    %6d of %6d instructions == %6.2f%%\n", neitherCount, totalCount,
+				neitherCount * 100.0 / totalCount);
+		out.printf("  Only true:  %6d of %6d instructions == %6.2f%%\n", onlyTrueCount, totalCount,
+				onlyTrueCount * 100.0 / totalCount);
+		out.printf("  Only false: %6d of %6d instructions == %6.2f%%\n", onlyFalseCount, totalCount,
+				onlyFalseCount * 100.0 / totalCount);
 		if (unknownJumpPoints > 0) {
 			out.printf("  Unknown decisions: %d\n", unknownJumpPoints);
 		}
@@ -223,7 +228,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 			}
 		}
 	}
-	
+
 	private long getValue(Map<Integer, Long> map, int key) {
 		Long l = map.get(key);
 		if (l == null) {

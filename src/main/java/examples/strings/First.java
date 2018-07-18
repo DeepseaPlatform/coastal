@@ -11,13 +11,12 @@ public class First {
 				System.out.println("No match (A)");
 				return 1;
 			}
-		}
-		else {
+		} else {
 			System.out.println("No match (B)");
 			return 2;
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		test("hell");
 	}

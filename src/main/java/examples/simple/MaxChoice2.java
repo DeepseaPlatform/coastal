@@ -24,7 +24,7 @@ public class MaxChoice2 {
 	}
 
 	private static class Maxer {
-		
+
 		private static int max(int x, int y) {
 			if (x + 1 > y + 2) {
 				return x - 1;
@@ -32,7 +32,7 @@ public class MaxChoice2 {
 				return y;
 			}
 		}
-		
+
 	}
 
 }

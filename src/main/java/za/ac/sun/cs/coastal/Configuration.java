@@ -68,14 +68,15 @@ public class Configuration {
 	//
 	// ======================================================================
 
-	public Configuration(final String version, final Logger log, final ReporterManager reporterManager, final String main, final String args,
-			final List<String> targets, final List<Trigger> triggers, final Map<String, Integer> minBounds,
-			final Map<String, Integer> maxBounds, final Map<String, Object> delegates, final Strategy strategy,
-			final long limitRuns, final long limitTime, final long limitPaths, final long limitConjuncts,
-			final boolean echoOutput, final boolean obeyStops, final boolean recordMarks,
-			final boolean dumpInstrumenter, final boolean dumpAsm, final boolean dumpTrace, final boolean dumpFrame,
-			final boolean dumpPaths, final boolean dumpConfig, final boolean dumpAll, final List<Listener> listeners,
-			final List<ConfigurationListener> configurationListeners, final Properties originalProperties) {
+	public Configuration(final String version, final Logger log, final ReporterManager reporterManager,
+			final String main, final String args, final List<String> targets, final List<Trigger> triggers,
+			final Map<String, Integer> minBounds, final Map<String, Integer> maxBounds,
+			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
+			final long limitPaths, final long limitConjuncts, final boolean echoOutput, final boolean obeyStops,
+			final boolean recordMarks, final boolean dumpInstrumenter, final boolean dumpAsm, final boolean dumpTrace,
+			final boolean dumpFrame, final boolean dumpPaths, final boolean dumpConfig, final boolean dumpAll,
+			final List<Listener> listeners, final List<ConfigurationListener> configurationListeners,
+			final Properties originalProperties) {
 		this.version = version;
 		this.log = log;
 		this.reporterManager = reporterManager;
@@ -129,7 +130,7 @@ public class Configuration {
 	public ReporterManager getReporterManager() {
 		return reporterManager;
 	}
-	
+
 	public String getMain() {
 		return main;
 	}
@@ -400,8 +401,10 @@ public class Configuration {
 					if (c != -1) {
 						pn[i] = p.substring(0, c).trim();
 						if (names.contains(pn[i])) {
-							new Banner('@').println("COASTAL PROBLEM\n")
-									.println("IGNORED TRIGGER WITH DUPLICATES \"" + desc + "\"").display(System.out);
+							Banner bn = new Banner('@');
+							bn.println("COASTAL PROBLEM\n");
+							bn.println("IGNORED TRIGGER WITH DUPLICATES \"" + desc + "\"");
+							bn.display(System.out);
 							return null;
 						}
 						names.add(pn[i]);
@@ -413,8 +416,10 @@ public class Configuration {
 				pt = new Class<?>[0];
 			}
 			if (names.size() == 0) {
-				new Banner('@').println("COASTAL PROBLEM\n").println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"")
-						.display(System.out);
+				Banner bn = new Banner('@');
+				bn.println("COASTAL PROBLEM\n");
+				bn.println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"");
+				bn.display(System.out);
 				return null;
 			}
 			return new Trigger(m, pn, pt);
@@ -504,10 +509,10 @@ public class Configuration {
 						sb.append("string");
 					} else if (paramTypes[i] == int[].class) {
 						sb.append("int[]");
-					} // int[5]? int[4]?...
-					else {
+					} else {
 						sb.append('*');
 					}
+					// MISSING: check for overridden length arrays int[5]? int[4]?...
 				}
 				stringRepr = sb.append(')').toString();
 			}

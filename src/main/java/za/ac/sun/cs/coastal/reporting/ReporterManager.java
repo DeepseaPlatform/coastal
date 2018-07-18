@@ -14,7 +14,7 @@ import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 public class ReporterManager implements ConfigurationListener {
 
 	private Logger log = null;
-	
+
 	private final List<Reporter> reporters = new LinkedList<>();
 
 	public ReporterManager() {
@@ -42,18 +42,18 @@ public class ReporterManager implements ConfigurationListener {
 		}
 	}
 
-    private final String LS = System.getProperty("line.separator");
+	private static final String LS = System.getProperty("line.separator");
 
-    private void report(Reporter reporter) {
-    	if (log != null) {
-    		log.info(Banner.getBannerLine(reporter, '='));
-    		final StringWriter reportWriter = new StringWriter();
-    		reporter.report(new PrintWriter(reportWriter));
-    		String[] reportLines = reportWriter.toString().split(LS);
-    		for (String line : reportLines) {
-    			log.info(line);
-    		}
-    	}
+	private void report(Reporter reporter) {
+		if (log != null) {
+			log.info(Banner.getBannerLine(reporter, '='));
+			final StringWriter reportWriter = new StringWriter();
+			reporter.report(new PrintWriter(reportWriter));
+			String[] reportLines = reportWriter.toString().split(LS);
+			for (String line : reportLines) {
+				log.info(line);
+			}
+		}
 	}
 
 }

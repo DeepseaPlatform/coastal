@@ -5,7 +5,7 @@ public interface InstructionListener extends Listener {
 	void enterMethod(int methodNumber);
 
 	void exitMethod(int methodNumber);
-	
+
 	void linenumber(int instr, int opcode);
 
 	void insn(int instr, int opcode);

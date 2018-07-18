@@ -31,7 +31,7 @@ public class String {
 		Expression guard = Operation.apply(Operator.AND, Operation.apply(Operator.GE, index, Operation.ZERO),
 				Operation.apply(Operator.LT, index, new IntConstant(thisLength)));
 		if (index instanceof IntConstant) {
-			SymbolicState.push(SymbolicState.getStringChar(thisAddress, ((IntConstant) index).getValue())); 
+			SymbolicState.push(SymbolicState.getStringChar(thisAddress, ((IntConstant) index).getValue()));
 		} else {
 			Expression var = new IntVariable(SymbolicState.getNewVariableName(), 0, 1);
 			for (int i = 0; i < thisLength; i++) {

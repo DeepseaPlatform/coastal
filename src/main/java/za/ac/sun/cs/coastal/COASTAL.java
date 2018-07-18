@@ -15,7 +15,7 @@ import za.ac.sun.cs.coastal.symbolic.Diver;
 
 public class COASTAL implements Reporter {
 
-	private static final DateFormat dateFormat = new SimpleDateFormat("EEE d MMM yyyy HH:mm:ss");
+	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("EEE d MMM yyyy HH:mm:ss");
 
 	private final Configuration configuration;
 	
@@ -29,7 +29,7 @@ public class COASTAL implements Reporter {
 		final ReporterManager reporterManager = new ReporterManager();
 		final ConfigurationBuilder b = new ConfigurationBuilder(log, version, reporterManager);
 		new Banner('~').println("COASTAL version " + version).display(log);
-		
+
 		if (args.length < 1) {
 			Banner bn = new Banner('@');
 			bn.println("MISSING PROPERTIES FILE\n");
@@ -95,8 +95,8 @@ public class COASTAL implements Reporter {
 	@Override
 	public void report(PrintWriter out) {
 		stopped = Calendar.getInstance();
-		out.println("  Started: " + dateFormat.format(started.getTime()));
-		out.println("  Stopped: " + dateFormat.format(stopped.getTime()));
+		out.println("  Started: " + DATE_FORMAT.format(started.getTime()));
+		out.println("  Stopped: " + DATE_FORMAT.format(stopped.getTime()));
 		out.println("  Overall time: " + (stopped.getTimeInMillis() - started.getTimeInMillis()));
 	}
 

@@ -12,7 +12,7 @@ public class Mystery {
 		//preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<<<<<<<<<<<");
 		preserveSomeHtmlTagsAndRemoveWhitespaces("012345678901234567");
 		//preserveSomeHtmlTagsAndRemoveWhitespaces("   <A HREF=\"<<<<<<");
-		System.out.println ("end");
+		System.out.println("end");
 		// {S_H_0=0, S_H_2=0, S_H_1=0, S_H_8=69, S_H_7=82, S_H_9=70, S_H_4=65, S_H_11=34, S_H_10=61, S_H_3=60, S_H_6=72, S_H_5=32}
 		// S_H_0=0
 		// S_H_1=0
@@ -29,8 +29,9 @@ public class Mystery {
 	}
 
 	public static String preserveSomeHtmlTagsAndRemoveWhitespaces(String body) {
-		if (body == null)
+		if (body == null) {
 			return body;
+		}
 		int len = body.length();
 		int i = 0;
 		int old = i - 1;
@@ -46,7 +47,8 @@ public class Mystery {
 			}
 			old = i;
 			if (body.charAt(i) == '<') {
-				if (i + 14 < len &&
+				if (i + 14 < len
+				&&
 				(body.charAt(i + 8) == '\"')
 				&&
 				(body.charAt(i + 7) == '=')
@@ -67,15 +69,14 @@ public class Mystery {
 					int idx2 = body.indexOf("'", idx);
 					int idxStart = body.indexOf(">", idx2);
 					int idxEnd = body.indexOf("</a>", idxStart);
-					if (idxEnd == -1)
+					if (idxEnd == -1) {
 						idxEnd = body.indexOf("</A>", idxStart);
+					}
 					i = idxEnd + 4;
 					continue;
 				}
 			}
 			i++;
-			
-
 		}
 		return body;
 	}

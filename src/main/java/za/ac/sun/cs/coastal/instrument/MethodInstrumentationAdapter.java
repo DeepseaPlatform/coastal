@@ -20,37 +20,43 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	private final Configuration configuration;
 
 	private final Logger log;
-	
+
 	private final boolean dumpInstrumenter;
-	
+
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicState";
 
 	private static int instructionCounter = 0;
 
 	private static int methodCounter = 0;
-	
+
 	private final int triggerIndex;
 
 	private final boolean isStatic;
-	
+
 	private final int argCount;
-	
-	private static final Map<Integer, Integer> firstInstruction = new TreeMap<>();
 
-	private static final Map<Integer, Integer> lastInstruction = new TreeMap<>();
-	
-	private static final Map<Integer, BitSet> branchInstructions = new TreeMap<>();
+	private static Map<Integer, Integer> firstInstruction = new TreeMap<>();
 
-	private static final Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
-	
+	private static Map<Integer, Integer> lastInstruction = new TreeMap<>();
+
+	private static Map<Integer, BitSet> branchInstructions = new TreeMap<>();
+
+	private static Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
+
 	private static final class Tuple {
 		final int min, max, cur;
-		public Tuple(int min, int max, int cur) { this.min = min; this.max = max; this.cur = cur; }
+
+		Tuple(int min, int max, int cur) {
+			this.min = min;
+			this.max = max;
+			this.cur = cur;
+		}
 	}
 
 	private static BitSet currentBranchInstructions;
-	
-	public MethodInstrumentationAdapter(Configuration configuration, MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
+
+	public MethodInstrumentationAdapter(Configuration configuration, MethodVisitor cv, int triggerIndex,
+			boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.configuration = configuration;
 		this.log = configuration.getLog();
@@ -104,7 +110,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitLdcInsn(index);
 			mv.visitLdcInsn(address);
 			mv.visitIntInsn(Opcodes.ALOAD, address);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteString", "(IIILjava/lang/String;)Ljava/lang/String;", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteString",
+					"(IIILjava/lang/String;)Ljava/lang/String;", false);
 			mv.visitIntInsn(Opcodes.ASTORE, address);
 		} else {
 			log.fatal("UNHANDLED PARAMETER TYPE");
@@ -122,7 +129,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(II)V", false);
 		mv.visitLineNumber(line, start);
 	}
-	
+
 	@Override
 	public void visitEnd() {
 		if (dumpInstrumenter) {
@@ -132,7 +139,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		branchInstructions.put(methodCounter, currentBranchInstructions);
 		mv.visitEnd();
 	}
-	
+
 	@Override
 	public void visitCode() {
 		if (dumpInstrumenter) {
@@ -231,7 +238,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitLdcInsn(owner);
 		mv.visitLdcInsn(name);
 		mv.visitLdcInsn(descriptor);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "fieldInsn", "(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "fieldInsn",
+				"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 		mv.visitFieldInsn(opcode, owner, name, descriptor);
 	}
 
@@ -248,13 +256,15 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitLdcInsn(owner);
 			mv.visitLdcInsn(name);
 			mv.visitLdcInsn(descriptor);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn", "(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn",
+					"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 		}
 	}
 
 	@Override
-	public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
+	public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle,
+			Object... bootstrapMethodArguments) {
 		if (dumpInstrumenter) {
 			log.trace("visitInvokeDynamicInsn(name:{})", name);
 		}

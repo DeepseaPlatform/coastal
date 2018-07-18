@@ -73,7 +73,7 @@ public class SegmentedPCSwitch extends SegmentedPC {
 			return "DF";
 		}
 	}
-	
+
 	@Override
 	public SegmentedPC getChild(int index, SegmentedPC parent) {
 		if (min + index == cur) {

@@ -7,6 +7,6 @@ import za.ac.sun.cs.green.expr.Constant;
 
 public interface Strategy extends Reporter {
 
-	public Map<String, Constant> refine();
+	Map<String, Constant> refine();
 
 }

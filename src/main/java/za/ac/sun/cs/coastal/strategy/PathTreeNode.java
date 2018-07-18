@@ -2,7 +2,7 @@ package za.ac.sun.cs.coastal.strategy;
 
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
-public class PathTreeNode {
+public final class PathTreeNode {
 
 	private static final int SPACING = 3;
 
@@ -15,9 +15,9 @@ public class PathTreeNode {
 	private final PathTreeNode[] children;
 
 	private final boolean leaf;
-	
+
 	private final boolean infeasible;
-	
+
 	private boolean fullyExplored = false;
 
 	private PathTreeNode(SegmentedPC pc, int nrOfChildren, boolean isLeaf, boolean isInfeasible) {
@@ -34,7 +34,7 @@ public class PathTreeNode {
 	public static PathTreeNode createInfeasible() {
 		return new PathTreeNode(null, 0, false, true);
 	}
-	
+
 	public static PathTreeNode createLeaf() {
 		return new PathTreeNode(null, 0, true, false);
 	}
@@ -58,11 +58,11 @@ public class PathTreeNode {
 	public boolean isLeaf() {
 		return leaf;
 	}
-	
+
 	public boolean isInfeasible() {
 		return infeasible;
 	}
-	
+
 	public boolean isFullyExplored() {
 		return fullyExplored;
 	}
@@ -172,13 +172,13 @@ public class PathTreeNode {
 		}
 	}
 
-//	private static void stringWrite(char[][] lines, int x, int y, int number) {
-//		stringWrite(lines, x, y, Integer.toString(number));
-//	}
+	//	private static void stringWrite(char[][] lines, int x, int y, int number) {
+	//		stringWrite(lines, x, y, Integer.toString(number));
+	//	}
 
 	private static void stringWrite(char[][] lines, int x, int y, String string) {
 		for (int i = 0; i < string.length(); i++) {
-			lines[y][x++] = string.charAt(i); 
+			lines[y][x++] = string.charAt(i);
 		}
 	}
 

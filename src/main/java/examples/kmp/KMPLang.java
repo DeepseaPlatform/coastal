@@ -1,15 +1,15 @@
 package examples.kmp;
 
 // http://www.inf.fh-flensburg.de/lang/algorithmen/pattern/kmpen.htm
-public class KMP_Lang {
+public class KMPLang {
 
 	public static int search(int[] haystack, int[] needle) {
 		int nl = needle.length;
-		int[] T = computeTable(needle);
+		int[] table = computeTable(needle);
 		int i = 0, j = 0;
 		while (i < nl) {
 			while (j >= 0 && haystack[i] != needle[j]) {
-				j = T[j];
+				j = table[j];
 			}
 			i++;
 			j++;

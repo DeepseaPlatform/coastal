@@ -1,17 +1,17 @@
 package examples.kmp;
 
 // https://www.fmi.uni-sofia.bg/fmi/logic/vboutchkova/sources/KMPMatch_java.html
-public class KMP_Vboutchkova {
+public class KMPVboutchkova {
 
 	public static int search(int[] haystack, int[] needle) {
-		int[] T = computeTable(needle);
+		int[] table = computeTable(needle);
 		int j = 0;
 		if (haystack.length == 0) {
 			return -1;
 		}
 		for (int i = 0; i < haystack.length; i++) {
 			while (j > 0 && needle[j] != haystack[i]) {
-				j = T[j - 1];
+				j = table[j - 1];
 			}
 			if (needle[j] == haystack[i]) {
 				j++;

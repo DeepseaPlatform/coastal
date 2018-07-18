@@ -11,7 +11,7 @@ public class MinMaxSorting {
 			return y;
 		}
 	}
-	
+
 	public static int maxOf(int x, int y) {
 		if (x > y) {
 			return x;
@@ -19,7 +19,7 @@ public class MinMaxSorting {
 			return y;
 		}
 	}
-	
+
 	public static void sort(int[] arr) {
 		boolean sorted = false;
 		while (!sorted) {
@@ -37,7 +37,7 @@ public class MinMaxSorting {
 			}
 		}
 	}
-	
+
 	public static void main(String[] args) {
 		long t0 = System.currentTimeMillis();
 		int[] a = new int[N];

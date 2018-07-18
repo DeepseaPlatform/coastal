@@ -1,10 +1,10 @@
 package examples.kmp;
 
 // http://www.sanfoundry.com/java-program-knuth-morris-pratt-algorithm/
-public class KMP_Sanfoundry {
+public class KMPSanfoundry {
 
 	public static int search(int[] haystack, int[] needle) {
-		int[] T = computeTable(needle);
+		int[] table = computeTable(needle);
 		int i = 0, j = 0;
 		int hl = haystack.length;
 		int nl = needle.length;
@@ -15,7 +15,7 @@ public class KMP_Sanfoundry {
 			} else if (j == 0) {
 				i++;
 			} else {
-				j = T[j - 1] + 1;
+				j = table[j - 1] + 1;
 			}
 		}
 		return ((j == nl) ? (i - nl) : -1);

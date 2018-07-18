@@ -1,3 +1,4 @@
+// CHECKSTYLE:OFF
 package examples.jcute;
 
 /*
@@ -11,15 +12,12 @@ package examples.jcute;
 //Written by Francois Rivest, 1997
 //E-Mail: frives@po-box.mcgill.ca
 
-
 //==============================================================================
-// Binary Search Tree class      
+// Binary Search Tree class
 //
 //==============================================================================
 
-
-public class BSTree
-{
+public class BSTree {
 	int m_Key;
 	BSTree m_Parent;
 	BSTree m_LeftChild;
@@ -29,8 +27,7 @@ public class BSTree
 	boolean m_this;
 
 	//Constructs a node
-	public BSTree(int nKey)
-	{
+	public BSTree(int nKey) {
 		m_Key = nKey;
 		m_Parent = null;
 		m_LeftChild = null;
@@ -41,88 +38,75 @@ public class BSTree
 	}
 
 	//Returns the current node value
-	public int Key()
-	{
+	public int Key() {
 		return m_Key;
 	}
 
 	//Returns the root of the tree
-	public BSTree Root()
-	{
-		if (m_Parent == null) return this;
-		else return m_Parent.Root();
+	public BSTree Root() {
+		if (m_Parent == null)
+			return this;
+		else
+			return m_Parent.Root();
 	}
 
 	//Inserts a node in the tree
-	public void Insert(int nKey) 
-	{
-		if (nKey < m_Key) 
-		{
+	public void Insert(int nKey) {
+		if (nKey < m_Key) {
 			m_Left = true;
-			if (m_LeftChild == null) 
-			{
+			if (m_LeftChild == null) {
 				m_LeftChild = new BSTree(nKey);
-				m_LeftChild.m_Parent = this;	
+				m_LeftChild.m_Parent = this;
 				m_LeftChild.m_this = true;
-			} 
-			else 
-			{
+			} else {
 				m_LeftChild.Insert(nKey);
 			}
-		} 
-		else 
-		{
+		} else {
 			m_Right = true;
-			if (m_RightChild == null) 
-			{
+			if (m_RightChild == null) {
 				m_RightChild = new BSTree(nKey);
 				m_RightChild.m_Parent = this;
 				m_RightChild.m_this = true;
-			}
-			else 
-			{
+			} else {
 				m_RightChild.Insert(nKey);
 			}
 		}
 	}
 
 	//Deletes a node q in from the tree
-	public BSTree Delete(BSTree q)
-	{
+	public BSTree Delete(BSTree q) {
 		int Count = 2, x;
-		if (q.m_LeftChild == null) Count--;
-		if (q.m_RightChild == null) Count--;
+		if (q.m_LeftChild == null)
+			Count--;
+		if (q.m_RightChild == null)
+			Count--;
 
 		if (Count == 0) {
-			if (q == this) return (new BSTree(0));
-			if (q.m_Parent.m_LeftChild == q) q.m_Parent.m_LeftChild = null;
-			else q.m_Parent.m_RightChild = null;
+			if (q == this)
+				return (new BSTree(0));
+			if (q.m_Parent.m_LeftChild == q)
+				q.m_Parent.m_LeftChild = null;
+			else
+				q.m_Parent.m_RightChild = null;
 		} else if (Count == 1) {
-			if (q.m_LeftChild != null)
-			{
+			if (q.m_LeftChild != null) {
 				q.m_LeftChild.m_Parent = q.m_Parent;
 				q.m_LeftChild.m_this = true;
-				if (q == this) return q.m_LeftChild;
-				if (q.m_Parent.m_LeftChild == q)
-				{
-					q.m_Parent.m_LeftChild = q.m_LeftChild; 
-				}
-				else
-				{
+				if (q == this)
+					return q.m_LeftChild;
+				if (q.m_Parent.m_LeftChild == q) {
+					q.m_Parent.m_LeftChild = q.m_LeftChild;
+				} else {
 					q.m_Parent.m_RightChild = q.m_LeftChild;
 				}
-			}
-			else
-			{
+			} else {
 				q.m_RightChild.m_Parent = q.m_Parent;
 				q.m_RightChild.m_this = true;
-				if (q == this) return q.m_RightChild;
-				if (q.m_Parent.m_LeftChild == q)
-				{
-					q.m_Parent.m_LeftChild = q.m_RightChild; 
-				}
-				else
-				{
+				if (q == this)
+					return q.m_RightChild;
+				if (q.m_Parent.m_LeftChild == q) {
+					q.m_Parent.m_LeftChild = q.m_RightChild;
+				} else {
 					q.m_Parent.m_RightChild = q.m_RightChild;
 				}
 			}
@@ -137,149 +121,140 @@ public class BSTree
 	}
 
 	//Finds a node from the tree
-	public BSTree Search(int nKey)
-	{
-		if (nKey == m_Key) 
-		{
+	public BSTree Search(int nKey) {
+		if (nKey == m_Key) {
 			m_this = true;
 			return this;
-		}
-		else if (nKey < m_Key) 
-		{
+		} else if (nKey < m_Key) {
 			m_Left = true;
-			if (m_LeftChild != null) return m_LeftChild.Search(nKey);
-			else return null;
-		}
-		else 
-		{
+			if (m_LeftChild != null)
+				return m_LeftChild.Search(nKey);
+			else
+				return null;
+		} else {
 			m_Right = true;
-			if (m_RightChild != null) return m_RightChild.Search(nKey);
-			else return null;
+			if (m_RightChild != null)
+				return m_RightChild.Search(nKey);
+			else
+				return null;
 		}
 	}
 
 	//Returns the minimal node of the tree
-	public BSTree Min()
-	{
-		if (m_LeftChild == null) 
-		{
+	public BSTree Min() {
+		if (m_LeftChild == null) {
 			m_this = true;
 			return this;
-		}
-		else 
-		{
+		} else {
 			m_Left = true;
 			return m_LeftChild.Min();
 		}
 	}
 
 	//Returns the maximal node of the tree
-	public BSTree Max()
-	{
-		if (m_RightChild == null) 
-		{
+	public BSTree Max() {
+		if (m_RightChild == null) {
 			m_this = true;
 			return this;
-		}
-		else 
-		{
+		} else {
 			m_Right = true;
 			return m_RightChild.Max();
 		}
 	}
 
 	//Cleans the path
-	public void Clean()
-	{
+	public void Clean() {
 		m_Left = false;
 		m_Right = false;
 		m_this = false;
-		if (m_LeftChild != null) m_LeftChild.Clean();
-		if (m_RightChild != null) m_RightChild.Clean();
+		if (m_LeftChild != null)
+			m_LeftChild.Clean();
+		if (m_RightChild != null)
+			m_RightChild.Clean();
 	}
 
 	public static void main(String[] args) {
 		execute(0, new int[] { 0, 0, 0, 0 }, new int[] { 0, 0, 0, 0 });
 	}
-	
-	public static void execute(int init, int[] op, int[] val) {
-        BSTree b1 = new BSTree(init);
-        for(int i=0;i<op.length;i++){
-        	if (op[i] == 0) {
-        		b1.Insert(val[i]);
-        	} else if (op[i] == 1) {
-        		b1.Search(val[i]);
-        	} else if (op[i] == 2) {
-        		b1.Delete(new BSTree(val[i]));
-        	} else if (op[i] == 3) {
-        		b1.Root();
-        	} else if (op[i] == 4) {
-        		b1.Clean();
-        	} else if (op[i] == 5) {
-        		b1.Min();
-        	} else {
-        		b1.Max();
-        	}
-        }
-    }
 
-//	public static void execute(int init, int[] op, int[] val) {
-//		BSTree b1 = new BSTree(init);
-//		for(int i=0;i<op.length;i++){
-//			switch(op[i]){
-//			case 0:
-//				b1.Insert(val[i]);
-//				break;
-//			case 1:
-//				b1.Search(val[i]);
-//				break;
-//			case 2:
-//				b1.Delete(new BSTree(val[i]));
-//				break;
-//			case 3:
-//				b1.Root();
-//				break;
-//			case 4:
-//				b1.Clean();
-//				break;
-//			case 5:
-//				b1.Min();
-//				break;
-//			default:
-//				b1.Max();
-//				break;
-//			}
-//		}
-//	}
-	
-//    public static void main(String[] args) {
-//        BSTree b1 = new BSTree(Cute.input.Integer());
-//        for(int i=0;i<4;i++){
-//            switch(Cute.input.Integer()){
-//                case 0:
-//                    b1.Insert(Cute.input.Integer());
-//                    break;
-//                case 1:
-//                    b1.Search(Cute.input.Integer());
-//                    break;
-//                case 2:
-//                    b1.Delete((BSTree)Cute.input.Object("tests.BSTree"));
-//                    break;
-//                case 3:
-//                    b1.Root();
-//                    break;
-//                case 4:
-//                    b1.Clean();
-//                    break;
-//                case 5:
-//                    b1.Min();
-//                    break;
-//                default:
-//                    b1.Max();
-//                    break;
-//            }
-//        }
-//    }
+	public static void execute(int init, int[] op, int[] val) {
+		BSTree b1 = new BSTree(init);
+		for (int i = 0; i < op.length; i++) {
+			if (op[i] == 0) {
+				b1.Insert(val[i]);
+			} else if (op[i] == 1) {
+				b1.Search(val[i]);
+			} else if (op[i] == 2) {
+				b1.Delete(new BSTree(val[i]));
+			} else if (op[i] == 3) {
+				b1.Root();
+			} else if (op[i] == 4) {
+				b1.Clean();
+			} else if (op[i] == 5) {
+				b1.Min();
+			} else {
+				b1.Max();
+			}
+		}
+	}
+
+	//	public static void execute(int init, int[] op, int[] val) {
+	//		BSTree b1 = new BSTree(init);
+	//		for(int i=0;i<op.length;i++){
+	//			switch(op[i]){
+	//			case 0:
+	//				b1.Insert(val[i]);
+	//				break;
+	//			case 1:
+	//				b1.Search(val[i]);
+	//				break;
+	//			case 2:
+	//				b1.Delete(new BSTree(val[i]));
+	//				break;
+	//			case 3:
+	//				b1.Root();
+	//				break;
+	//			case 4:
+	//				b1.Clean();
+	//				break;
+	//			case 5:
+	//				b1.Min();
+	//				break;
+	//			default:
+	//				b1.Max();
+	//				break;
+	//			}
+	//		}
+	//	}
+
+	//    public static void main(String[] args) {
+	//        BSTree b1 = new BSTree(Cute.input.Integer());
+	//        for(int i=0;i<4;i++){
+	//            switch(Cute.input.Integer()){
+	//                case 0:
+	//                    b1.Insert(Cute.input.Integer());
+	//                    break;
+	//                case 1:
+	//                    b1.Search(Cute.input.Integer());
+	//                    break;
+	//                case 2:
+	//                    b1.Delete((BSTree)Cute.input.Object("tests.BSTree"));
+	//                    break;
+	//                case 3:
+	//                    b1.Root();
+	//                    break;
+	//                case 4:
+	//                    b1.Clean();
+	//                    break;
+	//                case 5:
+	//                    b1.Min();
+	//                    break;
+	//                default:
+	//                    b1.Max();
+	//                    break;
+	//            }
+	//        }
+	//    }
 }
 
 //@The following comments are auto-generated to save options for testing the current file

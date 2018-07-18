@@ -20,7 +20,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	private final BitSet covered = new BitSet();
 
 	private final BitSet potentials = new BitSet();
-	
+
 	private boolean dumpCoverage = false;
 
 	public InstructionCoverage() {
@@ -56,7 +56,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	public void exitMethod(int methodNumber) {
 		// ignore
 	}
-	
+
 	@Override
 	public void linenumber(int instr, int opcode) {
 		// ignore

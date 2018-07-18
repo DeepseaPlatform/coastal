@@ -37,7 +37,7 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 	private RandomPathTree pathTree;
 
 	private long randomSeed = 987654321;
-	
+
 	private long pathLimit = 0;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
@@ -46,7 +46,7 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
 	}
-	
+
 	@Override
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
@@ -112,7 +112,7 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
 			@SuppressWarnings("unchecked")
-			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model"); 
+			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model");
 			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				log.info("no model");
@@ -154,11 +154,11 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 	private static class RandomPathTree extends PathTree {
 
 		private final Random rng = new Random();
-		
-		public RandomPathTree(Configuration configuration) {
+
+		RandomPathTree(Configuration configuration) {
 			super(configuration);
 		}
-		
+
 		public void setSeed(long seed) {
 			rng.setSeed(seed);
 		}

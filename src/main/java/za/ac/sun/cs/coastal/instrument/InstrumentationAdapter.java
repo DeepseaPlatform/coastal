@@ -63,15 +63,15 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 		return mv;
 	}
 
-	private static final Pattern allParamsPattern = Pattern.compile("(\\(.*?\\))");
-	private static final Pattern paramsPattern = Pattern.compile("(\\[?)(C|Z|S|I|J|F|D|(:?L[^;]+;))");
+	private static final Pattern ALL_PARAMS_PATTERN = Pattern.compile("(\\(.*?\\))");
+	private static final Pattern PARAMS_PATTERN = Pattern.compile("(\\[?)(C|Z|S|I|J|F|D|(:?L[^;]+;))");
 
 	private static int countArguments(String desc) {
-		Matcher m0 = allParamsPattern.matcher(desc);
+		Matcher m0 = ALL_PARAMS_PATTERN.matcher(desc);
 		if (!m0.find()) {
 			return 0;
 		}
-		Matcher m1 = paramsPattern.matcher(m0.group(1));
+		Matcher m1 = PARAMS_PATTERN.matcher(m0.group(1));
 		int count = 0;
 		while (m1.find()) {
 			count++;

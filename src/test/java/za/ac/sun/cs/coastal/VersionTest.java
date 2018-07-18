@@ -1,6 +1,6 @@
 package za.ac.sun.cs.coastal;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

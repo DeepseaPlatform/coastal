@@ -1,7 +1,7 @@
 package examples.kmp;
 
 // https://gist.github.com/shoenig/1430733
-public class KMP_Schoenig {
+public class KMPSchoenig {
 
 	public static int search(int[] haystack, int[] needle) {
 		if (needle.length == 0) {
@@ -12,7 +12,7 @@ public class KMP_Schoenig {
 		}
 		int m = 0; // index of beg. of current match in haystack
 		int i = 0; // pos. of cur value in needle
-		int[] T = computeTable(needle);
+		int[] table = computeTable(needle);
 		while (m + i < haystack.length) {
 			if (needle[i] == haystack[m + i]) {
 				if (i == needle.length - 1) {
@@ -20,9 +20,9 @@ public class KMP_Schoenig {
 				}
 				i += 1;
 			} else {
-				m = m + i - T[i];
-				if (T[i] > -1) {
-					i = T[i];
+				m = m + i - table[i];
+				if (table[i] > -1) {
+					i = table[i];
 				} else {
 					i = 0;
 				}

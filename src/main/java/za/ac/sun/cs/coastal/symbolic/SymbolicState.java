@@ -35,7 +35,7 @@ public class SymbolicState {
 	public static final String NEW_VAR_PREFIX = "U_D_"; // "$"
 
 	private static Configuration configuration;
-	
+
 	private static Logger log;
 
 	private static boolean dumpTrace;
@@ -49,15 +49,15 @@ public class SymbolicState {
 
 	private static boolean symbolicMode = false;
 
-	private static final Stack<SymbolicFrame> frames = new Stack<>();
+	private static Stack<SymbolicFrame> frames = new Stack<>();
 
 	private static int objectIdCount = 0;
 
 	private static int newVariableCount = 0;
 
-	private static final Map<String, Expression> instanceData = new HashMap<>();
+	private static Map<String, Expression> instanceData = new HashMap<>();
 
-	private static final Stack<Expression> args = new Stack<>();
+	private static Stack<Expression> args = new Stack<>();
 
 	private static SegmentedPC spc = null;
 
@@ -67,15 +67,15 @@ public class SymbolicState {
 
 	private static boolean isPreviousDuplicate = false;
 
-	private static final Set<String> conjunctSet = new HashSet<>();
+	private static Set<String> conjunctSet = new HashSet<>();
 
 	private static Map<String, Constant> concreteValues = null;
 
 	private static boolean mayContinue = true;
 
-	private static final Map<String, Integer> markers = new HashMap<>();
+	private static Map<String, Integer> markers = new HashMap<>();
 
-	private static final Stack<Expression> pendingSwitch = new Stack<>();
+	private static Stack<Expression> pendingSwitch = new Stack<>();
 
 	public static void initialize(Configuration configuration) {
 		SymbolicState.configuration = configuration;
@@ -1088,7 +1088,7 @@ public class SymbolicState {
 	//
 	// ======================================================================
 
-	private static final List<InstructionListener> instructionListeners = new ArrayList<>();
+	private static List<InstructionListener> instructionListeners = new ArrayList<>();
 
 	public static void registerListener(InstructionListener listener) {
 		instructionListeners.add(listener);
@@ -1227,8 +1227,6 @@ public class SymbolicState {
 			char ch = descriptor.charAt(i++);
 			if (ch == ')') {
 				return count;
-			} else if (ch == '[') {
-				// we can just ignore this
 			} else if ((ch == 'B') || (ch == 'C') || (ch == 'D') || (ch == 'F') || (ch == 'I') || (ch == 'J')
 					|| (ch == 'S') || (ch == 'Z')) {
 				count++;
@@ -1239,7 +1237,7 @@ public class SymbolicState {
 				}
 				i++;
 				count++;
-			} else {
+			} else if (ch != '[') {
 				return 0; // unknown character in signature 
 			}
 		}
