@@ -1,0 +1,50 @@
+INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INFO   ~~~~                                                              ~~~~
+INFO   ~~~~  COASTAL version coastal-test                                ~~~~
+INFO   ~~~~                                                              ~~~~
+INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INFO   ----  starting dive 1  -----------------------------------------------
+INFO   explored <1> X>=5
+INFO   trying   <0> X<5
+INFO   no model
+INFO   no further paths
+INFO   ====  Instrumentation  ===============================================
+INFO     Class load requests: 
+INFO     Cache hits: 
+INFO     Classes instrumented: 
+INFO     Pre-instrumented size: 
+INFO     Post-instrumented size: 
+INFO     Load time: 
+INFO     Instrumentation time: 
+INFO   ====  Dive  ==========================================================
+INFO     Runs: 1
+INFO     Overall dive time: 
+INFO   ====  COASTAL  =======================================================
+INFO     Started: 
+INFO     Stopped: T
+INFO     Overall time: 
+INFO   ====  DepthFirstStrategy  ============================================
+INFO     Inserted paths: 2
+INFO     Revisited paths: 0
+INFO     Infeasible paths: 1
+INFO     Solver time: 
+INFO     Path tree time: 
+INFO     Model extraction time: 
+INFO     Overall strategy time: 
+INFO   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+INFO   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+INFO   @@@@                                                              @@@@
+INFO   @@@@  ONLY A SINGLE RUN EXECUTED                                  @@@@
+INFO   @@@@  CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE   @@@@
+INFO   @@@@                                                              @@@@
+INFO   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+INFO   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INFO   ~~~~                                                              ~~~~
+INFO   ~~~~  COASTAL DONE                                                ~~~~
+INFO   ~~~~                                                              ~~~~
+INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

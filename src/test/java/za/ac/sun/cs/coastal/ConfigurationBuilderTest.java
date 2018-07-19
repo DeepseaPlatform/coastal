@@ -15,7 +15,7 @@ public class ConfigurationBuilderTest {
 	@Test
 	public void testMainNotSet() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		final String version = "test";
+		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
 		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertFalse(cb.isMainSet());
@@ -24,7 +24,7 @@ public class ConfigurationBuilderTest {
 	@Test
 	public void testMainSet() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		final String version = "test";
+		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
 		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		ConfigurationBuilder cb0 = cb.setMain("main");
@@ -35,7 +35,7 @@ public class ConfigurationBuilderTest {
 	@Test
 	public void testStringProperties() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		final String version = "test";
+		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
 		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertEquals(cb, cb.setArgs("args"));
@@ -48,7 +48,7 @@ public class ConfigurationBuilderTest {
 	@Test
 	public void testBooleanProperties() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		final String version = "test";
+		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
 		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertEquals(cb, cb.setDumpAll(true));
@@ -77,7 +77,7 @@ public class ConfigurationBuilderTest {
 	@Test
 	public void testLongProperties() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		final String version = "test";
+		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
 		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertEquals(cb, cb.setLimitConjuncts(123));
