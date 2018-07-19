@@ -81,6 +81,9 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 	private Map<String, Constant> refine0() {
 		long t;
 		SegmentedPC spc = SymbolicState.getSegmentedPathCondition();
+		if (spc == null) {
+			return null;
+		}
 		// lgr.info("explored <{}> {}", spc.getSignature(), SegmentedPC.constraintBeautify(spc.getPathCondition().toString()));
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		boolean infeasible = false;
