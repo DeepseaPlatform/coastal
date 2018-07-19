@@ -232,7 +232,7 @@ public class ConfigurationBuilder {
 	}
 
 	public boolean readFromResource(String resourceName) {
-		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
 			if (resourceStream != null) {
 				return readFromStream(resourceStream);
