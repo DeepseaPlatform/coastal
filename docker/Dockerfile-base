@@ -1,0 +1,36 @@
+FROM ubuntu:bionic
+
+RUN apt-get update -y \
+&& apt-get upgrade -y \
+&& apt-get install -y apt-utils wget g++ make m4 git python \
+&& apt-get install -y openjdk-8-jdk
+
+RUN wget https://www.math.ucdavis.edu/~latte/software/packages/latte_current/latte-integrale-1.7.3b.tar.gz \
+&&  tar xzf latte-integrale-1.7.3b.tar.gz \
+&&  cd latte-integrale-1.7.3b \
+&&  ./configure --prefix=/usr/local \
+&&  make \
+&&  make check \
+&&  make install \
+&&  make installcheck
+
+RUN wget http://barvinok.gforge.inria.fr/barvinok-0.41.tar.gz \
+&&  tar xzf barvinok-0.41.tar.gz \
+&&  cd barvinok-0.41 \
+&&  ./configure --prefix=/usr/local --with-gmp-prefix=/usr/local --without-pic --with-gnu-ld --disable-gold --enable-shared=no \
+&&  make \
+&&  make check \
+&&  make install
+
+RUN git clone https://github.com/Z3Prover/z3.git \
+&&  cd z3 \
+&&  python scripts/mk_make.py --java --prefix=/usr/local \
+&&  cd build \
+&&  make \
+&&  make test \
+&&  make install
+
+RUN rm -rf latte* barvinok* z3*
+
+CMD [ "/bin/bash" ]
+
