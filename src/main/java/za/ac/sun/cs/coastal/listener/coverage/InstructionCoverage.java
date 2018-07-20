@@ -183,11 +183,11 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	}
 
 	@Override
-	public void report(PrintWriter out) {
+	public void report(PrintWriter info, PrintWriter trace) {
 		int coveredCount = covered.cardinality();
 		int coveredTotal = potentials.cardinality();
 		double percentage = coveredCount * 100.0 / coveredTotal;
-		out.printf("  Covered %d of %d instructions == %.2f%%\n", coveredCount, coveredTotal, percentage);
+		info.printf("  Covered %d of %d instructions == %.2f%%\n", coveredCount, coveredTotal, percentage);
 	}
 
 }

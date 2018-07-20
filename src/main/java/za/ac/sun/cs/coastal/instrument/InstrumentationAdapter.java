@@ -91,8 +91,8 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 	}
 
 	@Override
-	public void report(PrintWriter out) {
-		out.print(swriter.toString());
+	public void report(PrintWriter info, PrintWriter trace) {
+		trace.print(swriter.toString());
 	}
 
 }

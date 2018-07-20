@@ -140,16 +140,16 @@ public class Diver implements Reporter {
 	}
 
 	@Override
-	public void report(PrintWriter out) {
+	public void report(PrintWriter info, PrintWriter trace) {
 		Map<String, Integer> markers = SymbolicState.getMarkers();
 		if (markers.size() > 0) {
-			out.println("  === MARKERS ===");
+			info.println("  === MARKERS ===");
 			for (Map.Entry<String, Integer> entry : markers.entrySet()) {
-				out.printf("    %-10s %6d\n", entry.getKey(), entry.getValue());
+				info.printf("    %-10s %6d\n", entry.getKey(), entry.getValue());
 			}
 		}
-		out.println("  Runs: " + runs);
-		out.println("  Overall dive time: " + time);
+		info.println("  Runs: " + runs);
+		info.println("  Overall dive time: " + time);
 	}
 
 }

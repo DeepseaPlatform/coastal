@@ -190,14 +190,14 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 	}
 
 	@Override
-	public void report(PrintWriter out) {
-		out.println("  Inserted paths: " + pathTree.getPathCount());
-		out.println("  Revisited paths: " + pathTree.getRevisitCount());
-		out.println("  Infeasible paths: " + infeasibleCount);
-		out.println("  Solver time: " + solverTime);
-		out.println("  Path tree time: " + pathTreeTime);
-		out.println("  Model extraction time: " + modelExtractionTime);
-		out.println("  Overall strategy time: " + totalTime);
+	public void report(PrintWriter info, PrintWriter trace) {
+		info.println("  Inserted paths: " + pathTree.getPathCount());
+		info.println("  Revisited paths: " + pathTree.getRevisitCount());
+		info.println("  Infeasible paths: " + infeasibleCount);
+		info.println("  Solver time: " + solverTime);
+		info.println("  Path tree time: " + pathTreeTime);
+		info.println("  Model extraction time: " + modelExtractionTime);
+		info.println("  Overall strategy time: " + totalTime);
 	}
 
 }

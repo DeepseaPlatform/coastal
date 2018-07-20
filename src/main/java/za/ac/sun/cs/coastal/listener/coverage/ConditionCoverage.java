@@ -169,7 +169,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	}
 
 	@Override
-	public void report(PrintWriter out) {
+	public void report(PrintWriter info, PrintWriter trace) {
 		long unknownJumpPoints = 0;
 		long onlyFalseCount = 0;
 		long onlyTrueCount = 0;
@@ -201,16 +201,16 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 			}
 		}
 		int totalCount = jumpPoints.cardinality();
-		out.printf("  Both:       %6d of %6d instructions == %6.2f%%\n", bothCount, totalCount,
+		info.printf("  Both:       %6d of %6d instructions == %6.2f%%\n", bothCount, totalCount,
 				bothCount * 100.0 / totalCount);
-		out.printf("  Neither:    %6d of %6d instructions == %6.2f%%\n", neitherCount, totalCount,
+		info.printf("  Neither:    %6d of %6d instructions == %6.2f%%\n", neitherCount, totalCount,
 				neitherCount * 100.0 / totalCount);
-		out.printf("  Only true:  %6d of %6d instructions == %6.2f%%\n", onlyTrueCount, totalCount,
+		info.printf("  Only true:  %6d of %6d instructions == %6.2f%%\n", onlyTrueCount, totalCount,
 				onlyTrueCount * 100.0 / totalCount);
-		out.printf("  Only false: %6d of %6d instructions == %6.2f%%\n", onlyFalseCount, totalCount,
+		info.printf("  Only false: %6d of %6d instructions == %6.2f%%\n", onlyFalseCount, totalCount,
 				onlyFalseCount * 100.0 / totalCount);
 		if (unknownJumpPoints > 0) {
-			out.printf("  Unknown decisions: %d\n", unknownJumpPoints);
+			info.printf("  Unknown decisions: %d\n", unknownJumpPoints);
 		}
 		if (reportCoverage) {
 			SortedSet<Integer> keys = new TreeSet<>(reached.keySet());
@@ -224,7 +224,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 				if (f == null) {
 					f = 0L;
 				}
-				out.printf("  Decision #%04d reached %6d times, false taken %6d times\n", i, d, f);
+				trace.printf("  Decision #%04d reached %6d times, false taken %6d times\n", i, d, f);
 			}
 		}
 	}

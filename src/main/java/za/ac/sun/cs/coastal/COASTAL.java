@@ -93,11 +93,11 @@ public class COASTAL implements Reporter {
 	}
 
 	@Override
-	public void report(PrintWriter out) {
+	public void report(PrintWriter info, PrintWriter trace) {
 		stopped = Calendar.getInstance();
-		out.println("  Started: " + DATE_FORMAT.format(started.getTime()));
-		out.println("  Stopped: " + DATE_FORMAT.format(stopped.getTime()));
-		out.println("  Overall time: " + (stopped.getTimeInMillis() - started.getTimeInMillis()));
+		info.println("  Started: " + DATE_FORMAT.format(started.getTime()));
+		info.println("  Stopped: " + DATE_FORMAT.format(stopped.getTime()));
+		info.println("  Overall time: " + (stopped.getTimeInMillis() - started.getTimeInMillis()));
 	}
 
 }

@@ -147,14 +147,14 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 	}
 
 	@Override
-	public void report(PrintWriter out) {
-		out.println("  Class load requests: " + requestCount);
-		out.println("  Cache hits: " + cachedCount);
-		out.println("  Classes instrumented: " + instrumentedCount);
-		out.println("  Pre-instrumented size: " + preInstrumentedSize);
-		out.println("  Post-instrumented size: " + postInstrumentedSize);
-		out.println("  Load time: " + ltime);
-		out.println("  Instrumentation time: " + itime);
+	public void report(PrintWriter info, PrintWriter trace) {
+		info.println("  Class load requests: " + requestCount);
+		info.println("  Cache hits: " + cachedCount);
+		info.println("  Classes instrumented: " + instrumentedCount);
+		info.println("  Pre-instrumented size: " + preInstrumentedSize);
+		info.println("  Post-instrumented size: " + postInstrumentedSize);
+		info.println("  Load time: " + ltime);
+		info.println("  Instrumentation time: " + itime);
 	}
 
 }

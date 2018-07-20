@@ -47,11 +47,22 @@ public class ReporterManager implements ConfigurationListener {
 	private void report(Reporter reporter) {
 		if (log != null) {
 			log.info(Banner.getBannerLine(reporter, '='));
-			final StringWriter reportWriter = new StringWriter();
-			reporter.report(new PrintWriter(reportWriter));
-			String[] reportLines = reportWriter.toString().split(LS);
-			for (String line : reportLines) {
-				log.info(line);
+			final StringWriter infoWriter = new StringWriter();
+			final StringWriter traceWriter = new StringWriter();
+			reporter.report(new PrintWriter(infoWriter), new PrintWriter(traceWriter));
+			String report = infoWriter.toString();
+			if (report.length() > 0) {
+				String[] reportLines = report.split(LS);
+				for (String line : reportLines) {
+					log.info(line);
+				}
+			}
+			report = traceWriter.toString();
+			if (report.length() > 0) {
+				String[] reportLines = report.split(LS);
+				for (String line : reportLines) {
+					log.trace(line);
+				}
 			}
 		}
 	}
