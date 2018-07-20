@@ -194,6 +194,12 @@ public class ConfigurationBuilder {
 
 	public ConfigurationBuilder setDumpAll(boolean dumpAll) {
 		this.dumpAll = dumpAll;
+		setDumpInstrumenter(dumpAll);
+		setDumpAsm(dumpAll);
+		setDumpTrace(dumpAll);
+		setDumpFrame(dumpAll);
+		setDumpPaths(dumpAll);
+		setDumpConfig(dumpAll);
 		return this;
 	}
 
