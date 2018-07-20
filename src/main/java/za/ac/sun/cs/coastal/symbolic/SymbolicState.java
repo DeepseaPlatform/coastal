@@ -139,12 +139,20 @@ public class SymbolicState {
 	}
 
 	private static void putField(int objectId, String fieldName, Expression value) {
-		String fullFieldName = objectId + FIELD_SEPARATOR + fieldName;
-		instanceData.put(fullFieldName, value);
+		putField(Integer.toString(objectId), fieldName, value);
 	}
 
+	private static void putField(String objectName, String fieldName, Expression value) {
+		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
+		instanceData.put(fullFieldName, value);
+	}
+	
 	public static Expression getField(int objectId, String fieldName) {
-		String fullFieldName = objectId + FIELD_SEPARATOR + fieldName;
+		return getField(Integer.toString(objectId), fieldName);
+	}
+
+	public static Expression getField(String objectName, String fieldName) {
+		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
 		Expression value = instanceData.get(fullFieldName);
 		if (value == null) {
 			int min = configuration.getDefaultMinIntValue();
@@ -154,7 +162,7 @@ public class SymbolicState {
 		}
 		return value;
 	}
-
+	
 	// Arrays are just objects
 	public static int createArray() {
 		return incrAndGetNewObjectId();
@@ -727,14 +735,18 @@ public class SymbolicState {
 		notifyFieldInsn(instr, opcode, owner, name, descriptor);
 		switch (opcode) {
 		case Opcodes.GETSTATIC:
-			push(Operation.ZERO);
+			push(getField(owner, name));
+			break;
+		case Opcodes.PUTSTATIC:
+			Expression e = pop();
+			putField(owner, name, e);
 			break;
 		case Opcodes.GETFIELD:
 			int id = ((IntConstant) pop()).getValue();
 			push(getField(id, name));
 			break;
 		case Opcodes.PUTFIELD:
-			Expression e = pop();
+			e = pop();
 			id = ((IntConstant) pop()).getValue();
 			putField(id, name, e);
 			break;
