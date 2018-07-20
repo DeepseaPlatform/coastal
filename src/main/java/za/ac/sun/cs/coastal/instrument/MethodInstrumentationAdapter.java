@@ -23,6 +23,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private final boolean dumpInstrumenter;
 
+	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
+	
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicState";
 
 	private static int instructionCounter = 0;
@@ -248,8 +250,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		if (dumpInstrumenter) {
 			log.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		}
-		if (owner.equals(LIBRARY) && name.equals("stop")) {
-			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+		if (owner.equals(SYMBOLIC)) {
+			mv.visitMethodInsn(opcode, LIBRARY, name, descriptor, isInterface);
 		} else {
 			mv.visitLdcInsn(++instructionCounter);
 			mv.visitLdcInsn(opcode);
