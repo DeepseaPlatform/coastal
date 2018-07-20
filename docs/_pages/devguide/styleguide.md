@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Java style guide
-permalink: /devguide/styleguide
+permalink: /devguide/styleguide/
 ---
 
 The intention of this guide is to provide a set of conventions that encourage good code.
@@ -466,7 +466,7 @@ grouped in the same way, in a section below traditional imports.
 #### No wildcard imports
 Wildcard imports make the source of an imported class less clear.  They also tend to hide a high
 class [fan-out](http://en.wikipedia.org/wiki/Coupling_(computer_programming)#Module_coupling).<br />
-*See also [texas imports](#stay-out-of-texas)*
+*See also [texas imports](#stay-out-of-texas-http-en-wikipedia-org-wiki-texas-sized)*
 
     :::java
     // Bad.
@@ -1153,7 +1153,7 @@ The Law of Demeter is most obviously violated by breaking the
 there are other code structures that lead to violations of the spirit of the law.
 
 #### In classes
-Take what you need, nothing more.  This often relates to [texas constructors](#stay-out-of-texas)
+Take what you need, nothing more.  This often relates to [texas constructors](#stay-out-of-texas-http-en-wikipedia-org-wiki-texas-sized)
 but it can also hide in constructors or methods that take few parameters.  The key idea is
 to defer assembly to the layers of the code that know enough to assemble and instead just
 take the minimal interface you need to get your work done.

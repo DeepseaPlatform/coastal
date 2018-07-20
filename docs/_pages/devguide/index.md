@@ -7,7 +7,7 @@ permalink: /devguide/
 This is the developer's guide.  It should include:
 
 - architecture of COASTAL
-- design decisions
+- [Design decisions]({{ "/devguide/design" | relative_url }})
 - limitations
 
 ## Support
@@ -17,9 +17,8 @@ This is the developer's guide.  It should include:
 
 ## Contributing to COASTAL
 
-- [How to contribute to the project](/devguide/contribute)
-- [The code of conduct](/devguide/codeofconduct)
-- [Our style guide](/devguide/styleguide)
-- [Write good commit messages](/devguide/commitmsgs)
-- [List of contributors](/devguide/contributors)
-
+- [How to contribute to the project]({{ "/devguide/contribute" | relative_url }})
+- [The code of conduct]({{ "/devguide/codeofconduct" | relative_url }})
+- [Our style guide]({{ "/devguide/styleguide" | relative_url }})
+- [Write good commit messages]({{ "/devguide/commitmsgs" | relative_url }})
+- [List of contributors]({{ "/devguide/contributors" | relative_url }})
