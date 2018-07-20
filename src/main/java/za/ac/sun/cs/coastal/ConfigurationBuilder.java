@@ -8,15 +8,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.message.FormattedMessage;
-import org.apache.logging.log4j.message.Message;
 
 import za.ac.sun.cs.coastal.Configuration.Trigger;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
@@ -67,7 +63,6 @@ public class ConfigurationBuilder {
 	public ConfigurationBuilder(final Logger log, final String version, final ReporterManager reporterManager) {
 		assert log != null;
 		this.log = log;
-		processPendingLogMessages();
 		assert version != null;
 		this.version = version;
 		assert reporterManager != null;
@@ -299,7 +294,7 @@ public class ConfigurationBuilder {
 						setMinBound(var, Integer.parseInt(bounds[0].trim()));
 						setMaxBound(var, Integer.parseInt(bounds[1].trim()));
 					} catch (NumberFormatException x) {
-						report(new FormattedMessage("BOUNDS IN \"{}\" IS MALFORMED AND IGNORED", k));
+						log.warn("BOUNDS IN \"{}\" IS MALFORMED AND IGNORED", k);
 					}
 				}
 			}
@@ -324,7 +319,7 @@ public class ConfigurationBuilder {
 			if (str instanceof Strategy) {
 				setStrategy((Strategy) str);
 			} else {
-				report(new FormattedMessage("CLASS \"{}\" IS NOT A STRATEGY, IGNORED", p));
+				log.warn("CLASS \"{}\" IS NOT A STRATEGY, IGNORED", p);
 			}
 		}
 		p = properties.getProperty("coastal.delegates");
@@ -345,35 +340,11 @@ public class ConfigurationBuilder {
 				if (lst instanceof Listener) {
 					addListener((Listener) lst);
 				} else {
-					report(new FormattedMessage("CLASS \"{}\" IS NOT A LISTENER, IGNORED", t));
+					log.warn("CLASS \"{}\" IS NOT A LISTENER, IGNORED", t);
 				}
 			}
 		}
 		return true;
-	}
-
-	// ======================================================================
-	//
-	// PRE-LOGGING
-	//
-	// ======================================================================
-
-	private final Queue<Message> pendingLogMessages = new LinkedList<>();
-
-	private void report(Message message) {
-		if (log != null) {
-			log.warn(message);
-		} else {
-			pendingLogMessages.add(message);
-		}
-	}
-
-	private void processPendingLogMessages() {
-		if (log != null) {
-			while (!pendingLogMessages.isEmpty()) {
-				log.warn(pendingLogMessages.poll());
-			}
-		}
 	}
 
 	// ======================================================================
@@ -412,18 +383,18 @@ public class ConfigurationBuilder {
 				}
 				return instance;
 			} catch (NoSuchMethodException x) {
-				report(new FormattedMessage("CONSTRUCTOR NOT FOUND: " + objectName, x));
+				log.info("CONSTRUCTOR NOT FOUND: " + objectName, x);
 			}
 		} catch (SecurityException x) {
-			report(new FormattedMessage("CONSTRUCTOR SECURITY ERROR: " + objectName, x));
+			log.warn("CONSTRUCTOR SECURITY ERROR: " + objectName, x);
 		} catch (IllegalArgumentException x) {
-			report(new FormattedMessage("CONSTRUCTOR ARGUMENT ERROR: " + objectName, x));
+			log.warn("CONSTRUCTOR ARGUMENT ERROR: " + objectName, x);
 		} catch (InstantiationException x) {
-			report(new FormattedMessage("CONSTRUCTOR INSTANTIATION ERROR: " + objectName, x));
+			log.warn("CONSTRUCTOR INSTANTIATION ERROR: " + objectName, x);
 		} catch (IllegalAccessException x) {
-			report(new FormattedMessage("CONSTRUCTOR ACCESS ERROR: " + objectName, x));
+			log.warn("CONSTRUCTOR ACCESS ERROR: " + objectName, x);
 		} catch (InvocationTargetException x) {
-			report(new FormattedMessage("CONSTRUCTOR INVOCATION ERROR: " + objectName, x));
+			log.warn("CONSTRUCTOR INVOCATION ERROR: " + objectName, x);
 		}
 		return null;
 	}
@@ -435,9 +406,9 @@ public class ConfigurationBuilder {
 				ClassLoader cl = ConfigurationBuilder.class.getClassLoader();
 				clas = cl.loadClass(className);
 			} catch (ClassNotFoundException x) {
-				report(new FormattedMessage("CLASS NOT FOUND: " + className, x));
+				log.warn("CLASS NOT FOUND: " + className, x);
 			} catch (ExceptionInInitializerError x) {
-				report(new FormattedMessage("CLASS NOT FOUND: " + className, x));
+				log.warn("CLASS NOT FOUND: " + className, x);
 			}
 		}
 		return clas;
