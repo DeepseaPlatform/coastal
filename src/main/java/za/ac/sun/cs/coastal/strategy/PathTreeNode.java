@@ -107,7 +107,8 @@ public final class PathTreeNode {
 				ch = getChild(i);
 				m += SPACING + ((ch == null) ? 1 : ch.width());
 			}
-			return 1 + m;
+			String e = getPc().getExpression().toString();
+			return 1 + Math.max(m, 2 * e.length());
 		}
 	}
 
@@ -157,7 +158,7 @@ public final class PathTreeNode {
 			int cx = (firstx + lastx) / 2, mx = cx;
 			String n = "#" + Integer.toString(id);
 			String e = getPc().getExpression().toString();
-			mx -= Math.max(e.length(), n.length()) / 2;
+			mx -= Math.min(mx, Math.max(e.length(), n.length()) / 2);
 			stringWrite(lines, mx, y, n);
 			stringWrite(lines, mx, y + 1, e);
 			for (x = firstx; x <= lastx; x++) {
