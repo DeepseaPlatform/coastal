@@ -7,7 +7,6 @@ INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 TRACE  coastal.dump = false
 TRACE  coastal.dump.asm = false
-TRACE  coastal.dump.frame = false
 TRACE  coastal.dump.instrumenter = false
 TRACE  coastal.dump.paths = false
 TRACE  coastal.echooutput = false
@@ -23,19 +22,34 @@ TRACE  coastal.targets = tests.simple
 TRACE  coastal.triggers = tests.simple.Choice01.run(X: int)
 INFO   ----  starting dive 1  -----------------------------------------------
 TRACE  >>> symbolic mode switched on
+TRACE  --> st[] locals:{}
+TRACE  --> data:{}
 TRACE  ### LINENUMBER 11
 TRACE  ILOAD 0
+TRACE  --> st[X] locals:{0=X}
+TRACE  --> data:{}
 TRACE  ICONST_5
+TRACE  --> st[X, 5] locals:{0=X}
+TRACE  --> data:{}
 TRACE  IF_ICMPGE
 TRACE  >>> adding conjunct: X>=5
 TRACE  >>> spc is now: X>=5
+TRACE  --> st[] locals:{0=X}
+TRACE  --> data:{}
 TRACE  ### LINENUMBER 14
 TRACE  GETSTATIC java/lang/System out Ljava/io/PrintStream;
+TRACE  --> st[U_D_0] locals:{0=X}
+TRACE  --> data:{java/lang/System/out=U_D_0}
 TRACE  LDC >=5
+TRACE  --> st[U_D_0, 1] locals:{0=X}
+TRACE  --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 TRACE  INVOKEVIRTUAL java/io/PrintStream println (Ljava/lang/String;)V
+TRACE  --> st[] locals:{0=X}
+TRACE  --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 TRACE  ### LINENUMBER 16
 TRACE  RETURN
 TRACE  >>> symbolic mode switched off
+TRACE  --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 INFO   explored <1> X>=5
 INFO   trying   <0> X<5
 INFO   no model

@@ -52,7 +52,6 @@ public class Configuration {
 	private final boolean recordMarks; // are symbolic markers are recorded
 	private final boolean dumpInstrumenter; // dump instrumentation info?
 	private final boolean dumpAsm; // dump instrumented code at end?
-	private final boolean dumpFrame; // dump symbolic frames?
 	private final boolean dumpPaths; // dump path tree after each dive?
 	private final boolean dumpAll; // dump everything?
 	private final List<Listener> listeners; // listeners for various events
@@ -73,7 +72,7 @@ public class Configuration {
 			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
 			final long limitPaths, final long limitConjuncts, final boolean echoOutput, final boolean obeyStops,
 			final boolean recordMarks, final boolean dumpInstrumenter, final boolean dumpAsm,
-			final boolean dumpFrame, final boolean dumpPaths, final boolean dumpAll,
+			final boolean dumpPaths, final boolean dumpAll,
 			final List<Listener> listeners, final List<ConfigurationListener> configurationListeners,
 			final Properties originalProperties) {
 		this.version = version;
@@ -96,7 +95,6 @@ public class Configuration {
 		this.recordMarks = recordMarks;
 		this.dumpInstrumenter = dumpInstrumenter;
 		this.dumpAsm = dumpAsm;
-		this.dumpFrame = dumpFrame;
 		this.dumpPaths = dumpPaths;
 		this.dumpAll = dumpAll;
 		this.listeners = new ArrayList<>(listeners);
@@ -244,10 +242,6 @@ public class Configuration {
 		return dumpAsm;
 	}
 
-	public boolean getDumpFrame() {
-		return dumpFrame;
-	}
-
 	public boolean getDumpPaths() {
 		return dumpPaths;
 	}
@@ -338,7 +332,6 @@ public class Configuration {
 		properties.put("coastal.recordmarks", recordMarks);
 		properties.put("coastal.dump.instrumenter", dumpInstrumenter);
 		properties.put("coastal.dump.asm", dumpAsm);
-		properties.put("coastal.dump.frame", dumpFrame);
 		properties.put("coastal.dump.paths", dumpPaths);
 		properties.put("coastal.dump", dumpAll);
 		if (!listeners.isEmpty()) {

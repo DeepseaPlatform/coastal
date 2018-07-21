@@ -7,7 +7,6 @@ INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 TRACE  coastal.dump = false
 TRACE  coastal.dump.asm = false
-TRACE  coastal.dump.frame = false
 TRACE  coastal.dump.instrumenter = false
 TRACE  coastal.dump.paths = false
 TRACE  coastal.echooutput = false
@@ -23,13 +22,22 @@ TRACE  coastal.targets = tests.simple
 TRACE  coastal.triggers = tests.simple.Straight01.run(X: int)
 INFO   ----  starting dive 1  -----------------------------------------------
 TRACE  >>> symbolic mode switched on
+TRACE  --> st[] locals:{}
+TRACE  --> data:{}
 TRACE  ### LINENUMBER 11
 TRACE  GETSTATIC java/lang/System out Ljava/io/PrintStream;
+TRACE  --> st[U_D_1] locals:{0=X}
+TRACE  --> data:{java/lang/System/out=U_D_1}
 TRACE  ILOAD 0
+TRACE  --> st[U_D_1, X] locals:{0=X}
+TRACE  --> data:{java/lang/System/out=U_D_1}
 TRACE  INVOKEVIRTUAL java/io/PrintStream println (I)V
+TRACE  --> st[] locals:{0=X}
+TRACE  --> data:{java/lang/System/out=U_D_1}
 TRACE  ### LINENUMBER 12
 TRACE  RETURN
 TRACE  >>> symbolic mode switched off
+TRACE  --> data:{java/lang/System/out=U_D_1}
 INFO   ====  Instrumentation  ===============================================
 INFO     Class load requests: 
 INFO     Cache hits: 

@@ -38,8 +38,6 @@ public class SymbolicState {
 
 	private static Logger log;
 
-	private static boolean dumpFrame;
-
 	private static long limitConjuncts;
 
 	// if true, check for limit on conjuncts
@@ -78,7 +76,6 @@ public class SymbolicState {
 	public static void initialize(Configuration configuration) {
 		SymbolicState.configuration = configuration;
 		log = configuration.getLog();
-		dumpFrame = configuration.getDumpFrame();
 		limitConjuncts = configuration.getLimitConjuncts();
 		if (limitConjuncts == 0) {
 			limitConjuncts = Long.MAX_VALUE;
@@ -453,9 +450,7 @@ public class SymbolicState {
 			log.trace(">>> symbolic mode switched on");
 			symbolicMode = true;
 			frames.push(new SymbolicFrame(methodNumber));
-			if (dumpFrame) {
-				dumpFrames();
-			}
+			dumpFrames();
 		}
 		notifyEnterMethod(methodNumber);
 	}
@@ -473,9 +468,7 @@ public class SymbolicState {
 		for (int i = 0; i < argCount; i++) {
 			setLocal(i, args.pop());
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 		notifyEnterMethod(methodNumber);
 	}
 
@@ -591,9 +584,7 @@ public class SymbolicState {
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void intInsn(int instr, int opcode, int operand) throws LimitConjunctException {
@@ -627,9 +618,7 @@ public class SymbolicState {
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} {} (opcode: {})", Bytecodes.toString(opcode), operand, opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void varInsn(int instr, int opcode, int var) throws LimitConjunctException {
@@ -658,9 +647,7 @@ public class SymbolicState {
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void typeInsn(int instr, int opcode) throws LimitConjunctException {
@@ -681,9 +668,7 @@ public class SymbolicState {
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
@@ -718,9 +703,7 @@ public class SymbolicState {
 					descriptor, opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
@@ -778,9 +761,7 @@ public class SymbolicState {
 					descriptor, opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
@@ -797,9 +778,7 @@ public class SymbolicState {
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	/* Missing offset because destination not yet known. */
@@ -885,9 +864,7 @@ public class SymbolicState {
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void postJumpInsn(int instr, int opcode) throws LimitConjunctException {
@@ -941,9 +918,7 @@ public class SymbolicState {
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void iincInsn(int instr, int var, int increment) throws LimitConjunctException {
@@ -959,9 +934,7 @@ public class SymbolicState {
 		Expression e0 = getLocal(var);
 		Expression e1 = new IntConstant(increment);
 		setLocal(var, Operation.apply(Operator.ADD, e0, e1));
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void tableSwitchInsn(int instr, int opcode) throws LimitConjunctException {
@@ -974,9 +947,7 @@ public class SymbolicState {
 		}
 		notifyTableSwitchInsn(instr, opcode);
 		pendingSwitch.push(pop());
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void tableCaseInsn(int min, int max, int value) throws LimitConjunctException {
@@ -990,9 +961,7 @@ public class SymbolicState {
 		if (!pendingSwitch.isEmpty()) {
 			pushConjunct(pendingSwitch.pop(), min, max, value);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException {
@@ -1009,9 +978,7 @@ public class SymbolicState {
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	public static void multiANewArrayInsn(int instr, int opcode) throws LimitConjunctException {
@@ -1028,9 +995,7 @@ public class SymbolicState {
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
-		if (dumpFrame) {
-			dumpFrames();
-		}
+		dumpFrames();
 	}
 
 	// ======================================================================
