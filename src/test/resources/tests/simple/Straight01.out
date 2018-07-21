@@ -5,6 +5,23 @@ INFO   ~~~~  COASTAL version coastal-test                                ~~~~
 INFO   ~~~~                                                              ~~~~
 INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TRACE  coastal.dump = false
+TRACE  coastal.dump.asm = false
+TRACE  coastal.dump.frame = false
+TRACE  coastal.dump.instrumenter = false
+TRACE  coastal.dump.paths = false
+TRACE  coastal.dump.trace = false
+TRACE  coastal.echooutput = false
+TRACE  coastal.limit.conjuncts = 0
+TRACE  coastal.limit.paths = 0
+TRACE  coastal.limit.runs = 0
+TRACE  coastal.limit.time = 0
+TRACE  coastal.main = tests.simple.Straight01
+TRACE  coastal.obeystops = false
+TRACE  coastal.recordmarks = false
+TRACE  coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
+TRACE  coastal.targets = tests.simple
+TRACE  coastal.triggers = tests.simple.Straight01.run(X: int)
 INFO   ----  starting dive 1  -----------------------------------------------
 INFO   ====  Instrumentation  ===============================================
 INFO     Class load requests: 

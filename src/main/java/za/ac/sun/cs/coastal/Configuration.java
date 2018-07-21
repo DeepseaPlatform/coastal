@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -54,7 +55,6 @@ public class Configuration {
 	private final boolean dumpTrace; // dump instructions when executed?
 	private final boolean dumpFrame; // dump symbolic frames?
 	private final boolean dumpPaths; // dump path tree after each dive?
-	private final boolean dumpConfig; // dump configuration before runs?
 	private final boolean dumpAll; // dump everything?
 	private final List<Listener> listeners; // listeners for various events
 	private final Properties originalProperties; // original properties
@@ -74,7 +74,7 @@ public class Configuration {
 			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
 			final long limitPaths, final long limitConjuncts, final boolean echoOutput, final boolean obeyStops,
 			final boolean recordMarks, final boolean dumpInstrumenter, final boolean dumpAsm, final boolean dumpTrace,
-			final boolean dumpFrame, final boolean dumpPaths, final boolean dumpConfig, final boolean dumpAll,
+			final boolean dumpFrame, final boolean dumpPaths, final boolean dumpAll,
 			final List<Listener> listeners, final List<ConfigurationListener> configurationListeners,
 			final Properties originalProperties) {
 		this.version = version;
@@ -100,7 +100,6 @@ public class Configuration {
 		this.dumpTrace = dumpTrace;
 		this.dumpFrame = dumpFrame;
 		this.dumpPaths = dumpPaths;
-		this.dumpConfig = dumpConfig;
 		this.dumpAll = dumpAll;
 		this.listeners = new ArrayList<>(listeners);
 		this.originalProperties = new Properties(originalProperties);
@@ -259,10 +258,6 @@ public class Configuration {
 		return dumpPaths;
 	}
 
-	public boolean getDumpConfig() {
-		return dumpConfig;
-	}
-
 	public boolean getDumpAll() {
 		return dumpAll;
 	}
@@ -352,7 +347,6 @@ public class Configuration {
 		properties.put("coastal.dump.trace", dumpTrace);
 		properties.put("coastal.dump.frame", dumpFrame);
 		properties.put("coastal.dump.paths", dumpPaths);
-		properties.put("coastal.dump.config", dumpConfig);
 		properties.put("coastal.dump", dumpAll);
 		if (!listeners.isEmpty()) {
 			String l = listeners.stream().map(x -> x.getClass().getName()).collect(Collectors.joining(";"));
@@ -370,6 +364,17 @@ public class Configuration {
 
 	public Properties toProperties() {
 		return properties;
+	}
+
+	public void dump() {
+		Properties properties = toProperties();
+		SortedSet<String> keys = new TreeSet<>();
+		for (Object key : properties.keySet()) {
+			keys.add((String) key);
+		}
+		for (Object key : keys) {
+			log.trace("{} = {}", key, properties.get(key));
+		}
 	}
 
 	// ======================================================================

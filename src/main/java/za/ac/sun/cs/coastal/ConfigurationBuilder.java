@@ -55,7 +55,6 @@ public class ConfigurationBuilder {
 	private boolean dumpTrace = false; // dump instructions when executed?
 	private boolean dumpFrame = false; // dump symbolic frames?
 	private boolean dumpPaths = false; // dump path tree after each dive?
-	private boolean dumpConfig = false; // dump configuration before runs?
 	private boolean dumpAll = false; // dump everything?
 	private final List<Listener> listeners = new ArrayList<>(); // listeners for various events
 	private final Properties originalProperties = new Properties(); // non-coastal properties
@@ -182,11 +181,6 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
-	public ConfigurationBuilder setDumpConfig(boolean dumpConfig) {
-		this.dumpConfig = dumpConfig;
-		return this;
-	}
-
 	public ConfigurationBuilder setDumpAll(boolean dumpAll) {
 		this.dumpAll = dumpAll;
 		setDumpInstrumenter(dumpAll);
@@ -194,7 +188,6 @@ public class ConfigurationBuilder {
 		setDumpTrace(dumpAll);
 		setDumpFrame(dumpAll);
 		setDumpPaths(dumpAll);
-		setDumpConfig(dumpAll);
 		return this;
 	}
 
@@ -208,7 +201,7 @@ public class ConfigurationBuilder {
 	public Configuration construct() {
 		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds, delegates, strategy,
 				limitRuns, limitTime, limitPaths, limitConjuncts, echoOutput, obeyStops, recordMarks, dumpInstrumenter,
-				dumpAsm, dumpTrace, dumpFrame, dumpPaths, dumpConfig, dumpAll, listeners, configurationListeners,
+				dumpAsm, dumpTrace, dumpFrame, dumpPaths, dumpAll, listeners, configurationListeners,
 				originalProperties);
 	}
 
@@ -309,7 +302,6 @@ public class ConfigurationBuilder {
 		setDumpTrace(getBooleanProperty(properties, "coastal.dump.trace", dumpTrace));
 		setDumpFrame(getBooleanProperty(properties, "coastal.dump.frame", dumpFrame));
 		setDumpPaths(getBooleanProperty(properties, "coastal.dump.paths", dumpPaths));
-		setDumpConfig(getBooleanProperty(properties, "coastal.dump.config", dumpConfig));
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", echoOutput));
 		setObeyStops(getBooleanProperty(properties, "coastal.obeystops", obeyStops));
 		setRecordMarks(getBooleanProperty(properties, "coastal.recordmarks", recordMarks));

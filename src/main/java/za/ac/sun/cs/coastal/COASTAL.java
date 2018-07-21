@@ -73,6 +73,7 @@ public class COASTAL implements Reporter {
 		if (showBanner) {
 			new Banner('~').println("COASTAL version " + version).display(log);
 		}
+		configuration.dump();
 		Diver d = new Diver(configuration);
 		d.dive();
 		reporterManager.report();
