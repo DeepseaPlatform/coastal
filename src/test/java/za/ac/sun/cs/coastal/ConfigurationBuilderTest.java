@@ -56,7 +56,6 @@ public class ConfigurationBuilderTest {
 		assertEquals(cb, cb.setDumpFrame(true));
 		assertEquals(cb, cb.setDumpInstrumenter(true));
 		assertEquals(cb, cb.setDumpPaths(true));
-		assertEquals(cb, cb.setDumpTrace(true));
 		assertEquals(cb, cb.setEchoOutput(true));
 		assertEquals(cb, cb.setObeyStops(true));
 		assertEquals(cb, cb.setRecordMarks(true));
@@ -66,7 +65,6 @@ public class ConfigurationBuilderTest {
 		assertTrue(c.getDumpFrame());
 		assertTrue(c.getDumpInstrumenter());
 		assertTrue(c.getDumpPaths());
-		assertTrue(c.getDumpTrace());
 		assertTrue(c.getEchoOutput());
 		assertTrue(c.getObeyStops());
 		assertTrue(c.getRecordMarks());

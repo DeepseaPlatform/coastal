@@ -51,7 +51,6 @@ instead of the default file distributed with COASTAL.
 | `coastal.limit.path` | Limit on number of paths investigated | 0 |
 | `coastal.limit.conjuncts` | Limit on number of conjuncts investigated per path | 0 |
 | `coastal.dump.asm` | Whether instrumented code displayed (at end) | `false` |
-| `coastal.dump.trace` | Whether instructions are displayed as executed | `false` |
 | `coastal.dump.frame` | Whether stack/locals are displayed after every instruction | `false` |
 | `coastal.dump.paths` | Whether path tree construction information is logged | `false` |
 | `coastal.dump.instrumenter` | Whether code instrumenter produces debugging | `false` |
@@ -227,18 +226,6 @@ This is mainly for debugging purposes and users should not need to use this.
 
 ~~~
 coastal.dump.asm = false
-~~~
-
-The default value is _false_.
-
-## coastal.dump.trace
-
-A boolean setting to control whether the instructions should be dumped to
-the log as they are executed.
-This is mainly for debugging purposes and users should not need to use this.
-
-~~~
-coastal.dump.trace = false
 ~~~
 
 The default value is _false_.

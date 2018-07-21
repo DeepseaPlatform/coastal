@@ -38,8 +38,6 @@ public class SymbolicState {
 
 	private static Logger log;
 
-	private static boolean dumpTrace;
-
 	private static boolean dumpFrame;
 
 	private static long limitConjuncts;
@@ -80,7 +78,6 @@ public class SymbolicState {
 	public static void initialize(Configuration configuration) {
 		SymbolicState.configuration = configuration;
 		log = configuration.getLog();
-		dumpTrace = configuration.getDumpTrace();
 		dumpFrame = configuration.getDumpFrame();
 		limitConjuncts = configuration.getLimitConjuncts();
 		if (limitConjuncts == 0) {
@@ -214,20 +211,14 @@ public class SymbolicState {
 		isPreviousConstant = isConstant(conjunct);
 		isPreviousDuplicate = false;
 		if (isPreviousConstant) {
-			if (dumpTrace) {
-				log.trace(">>> constant conjunct ignored: {}", c);
-			}
+			log.trace(">>> constant conjunct ignored: {}", c);
 		} else if (conjunctSet.add(c)) {
 			spc = new SegmentedPCIf(spc, conjunct, pendingExtraConjunct, true);
 			pendingExtraConjunct = null;
-			if (dumpTrace) {
-				log.trace(">>> adding conjunct: {}", c);
-				log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
-			}
+			log.trace(">>> adding conjunct: {}", c);
+			log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 		} else {
-			if (dumpTrace) {
-				log.trace(">>> duplicate conjunct ignored: {}", c);
-			}
+			log.trace(">>> duplicate conjunct ignored: {}", c);
 			isPreviousDuplicate = true;
 		}
 	}
@@ -243,20 +234,14 @@ public class SymbolicState {
 		}
 		String c = conjunct.toString();
 		if (isConstant(conjunct)) {
-			if (dumpTrace) {
-				log.trace(">>> constant (switch) conjunct ignored: {}", c);
-			}
+			log.trace(">>> constant (switch) conjunct ignored: {}", c);
 		} else if (conjunctSet.add(c)) {
 			spc = new SegmentedPCSwitch(spc, expression, pendingExtraConjunct, min, max, cur);
 			pendingExtraConjunct = null;
-			if (dumpTrace) {
-				log.trace(">>> adding (switch) conjunct: {}", c);
-				log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
-			}
+			log.trace(">>> adding (switch) conjunct: {}", c);
+			log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 		} else {
-			if (dumpTrace) {
-				log.trace(">>> duplicate (switch) conjunct ignored: {}", c);
-			}
+			log.trace(">>> duplicate (switch) conjunct ignored: {}", c);
 		}
 	}
 
@@ -275,9 +260,7 @@ public class SymbolicState {
 		assert !frames.isEmpty();
 		int methodNumber = frames.pop().getMethodNumber();
 		if (frames.isEmpty()) {
-			if (dumpTrace) {
-				log.trace(">>> symbolic mode switched off");
-			}
+			log.trace(">>> symbolic mode switched off");
 			symbolicMode = false;
 		}
 		notifyExitMethod(methodNumber);
@@ -314,15 +297,11 @@ public class SymbolicState {
 		try {
 			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, EMPTY_PARAMETERS);
 		} catch (NoSuchMethodException | SecurityException e) {
-			if (dumpTrace) {
-				log.trace("@@@ no delegate: {}", methodName);
-			}
+			log.trace("@@@ no delegate: {}", methodName);
 			return false;
 		}
 		assert delegateMethod != null;
-		if (dumpTrace) {
-			log.trace("@@@ found delegate: {}", methodName);
-		}
+		log.trace("@@@ found delegate: {}", methodName);
 		try {
 			if ((boolean) delegateMethod.invoke(delegate, EMPTY_ARGUMENTS)) {
 				return true;
@@ -471,9 +450,7 @@ public class SymbolicState {
 
 	public static void triggerMethod(int methodNumber) {
 		if (!symbolicMode) {
-			if (dumpTrace) {
-				log.trace(">>> symbolic mode switched on");
-			}
+			log.trace(">>> symbolic mode switched on");
 			symbolicMode = true;
 			frames.push(new SymbolicFrame(methodNumber));
 			if (dumpFrame) {
@@ -487,9 +464,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace(">>> transferring arguments");
-		}
+		log.trace(">>> transferring arguments");
 		assert args.isEmpty();
 		for (int i = 0; i < argCount; i++) {
 			args.push(pop());
@@ -508,9 +483,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("### LINENUMBER {}", line);
-		}
+		log.trace("### LINENUMBER {}", line);
 		notifyLinenumber(instr, line);
 	}
 
@@ -518,9 +491,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{}", () -> Bytecodes.toString(opcode));
-		}
+		log.trace("{}", () -> Bytecodes.toString(opcode));
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -629,9 +600,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{} {}", Bytecodes.toString(opcode), operand);
-		}
+		log.trace("{} {}", Bytecodes.toString(opcode), operand);
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -667,9 +636,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{} {}", Bytecodes.toString(opcode), var);
-		}
+		log.trace("{} {}", Bytecodes.toString(opcode), var);
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -700,9 +667,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{}", Bytecodes.toString(opcode));
-		}
+		log.trace("{}", Bytecodes.toString(opcode));
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -726,9 +691,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
-		}
+		log.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -765,9 +728,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
-		}
+		log.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -826,9 +787,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{}", Bytecodes.toString(opcode));
-		}
+		log.trace("{}", Bytecodes.toString(opcode));
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -848,9 +807,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{}", Bytecodes.toString(opcode));
-		}
+		log.trace("{}", Bytecodes.toString(opcode));
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -937,20 +894,14 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("(POST) {}", Bytecodes.toString(opcode));
-		}
+		log.trace("(POST) {}", Bytecodes.toString(opcode));
 		if (!isPreviousConstant && !isPreviousDuplicate) {
-			if (dumpTrace) {
-				log.trace(">>> previous conjunct is false");
-			}
+			log.trace(">>> previous conjunct is false");
 			notifyPostJumpInsn(instr, opcode);
 			assert spc instanceof SegmentedPCIf;
 			spc = ((SegmentedPCIf) spc).negate();
 			checkLimitConjuncts();
-			if (dumpTrace) {
-				log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
-			}
+			log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 		}
 	}
 
@@ -965,9 +916,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{} {}", Bytecodes.toString(opcode), value);
-		}
+		log.trace("{} {}", Bytecodes.toString(opcode), value);
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -1002,9 +951,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{} {}", Bytecodes.toString(opcode), increment);
-		}
+		log.trace("{} {}", Bytecodes.toString(opcode), increment);
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -1021,9 +968,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{}", Bytecodes.toString(opcode));
-		}
+		log.trace("{}", Bytecodes.toString(opcode));
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -1038,9 +983,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("CASE FOR {}", Bytecodes.toString(Opcodes.TABLESWITCH));
-		}
+		log.trace("CASE FOR {}", Bytecodes.toString(Opcodes.TABLESWITCH));
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -1056,9 +999,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{}", Bytecodes.toString(opcode));
-		}
+		log.trace("{}", Bytecodes.toString(opcode));
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}
@@ -1077,9 +1018,7 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		if (dumpTrace) {
-			log.trace("{}", Bytecodes.toString(opcode));
-		}
+		log.trace("{}", Bytecodes.toString(opcode));
 		if (dangerFlag) {
 			checkLimitConjuncts();
 		}

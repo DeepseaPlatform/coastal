@@ -52,7 +52,6 @@ public class ConfigurationBuilder {
 	private boolean recordMarks = false; // are symbolic markers are recorded
 	private boolean dumpInstrumenter = false; // dump instrumentation info?
 	private boolean dumpAsm = false; // dump instrumented code at end?
-	private boolean dumpTrace = false; // dump instructions when executed?
 	private boolean dumpFrame = false; // dump symbolic frames?
 	private boolean dumpPaths = false; // dump path tree after each dive?
 	private boolean dumpAll = false; // dump everything?
@@ -166,11 +165,6 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
-	public ConfigurationBuilder setDumpTrace(boolean dumpTrace) {
-		this.dumpTrace = dumpTrace;
-		return this;
-	}
-
 	public ConfigurationBuilder setDumpFrame(boolean dumpFrame) {
 		this.dumpFrame = dumpFrame;
 		return this;
@@ -185,7 +179,6 @@ public class ConfigurationBuilder {
 		this.dumpAll = dumpAll;
 		setDumpInstrumenter(dumpAll);
 		setDumpAsm(dumpAll);
-		setDumpTrace(dumpAll);
 		setDumpFrame(dumpAll);
 		setDumpPaths(dumpAll);
 		return this;
@@ -201,7 +194,7 @@ public class ConfigurationBuilder {
 	public Configuration construct() {
 		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds, delegates, strategy,
 				limitRuns, limitTime, limitPaths, limitConjuncts, echoOutput, obeyStops, recordMarks, dumpInstrumenter,
-				dumpAsm, dumpTrace, dumpFrame, dumpPaths, dumpAll, listeners, configurationListeners,
+				dumpAsm, dumpFrame, dumpPaths, dumpAll, listeners, configurationListeners,
 				originalProperties);
 	}
 
@@ -299,7 +292,6 @@ public class ConfigurationBuilder {
 		setDumpAll(getBooleanProperty(properties, "coastal.dump", dumpAll));
 		setDumpInstrumenter(getBooleanProperty(properties, "coastal.dump.instrumenter", dumpInstrumenter));
 		setDumpAsm(getBooleanProperty(properties, "coastal.dump.asm", dumpAsm));
-		setDumpTrace(getBooleanProperty(properties, "coastal.dump.trace", dumpTrace));
 		setDumpFrame(getBooleanProperty(properties, "coastal.dump.frame", dumpFrame));
 		setDumpPaths(getBooleanProperty(properties, "coastal.dump.paths", dumpPaths));
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", echoOutput));

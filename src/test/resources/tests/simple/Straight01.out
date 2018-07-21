@@ -10,7 +10,6 @@ TRACE  coastal.dump.asm = false
 TRACE  coastal.dump.frame = false
 TRACE  coastal.dump.instrumenter = false
 TRACE  coastal.dump.paths = false
-TRACE  coastal.dump.trace = false
 TRACE  coastal.echooutput = false
 TRACE  coastal.limit.conjuncts = 0
 TRACE  coastal.limit.paths = 0
@@ -23,6 +22,14 @@ TRACE  coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
 TRACE  coastal.targets = tests.simple
 TRACE  coastal.triggers = tests.simple.Straight01.run(X: int)
 INFO   ----  starting dive 1  -----------------------------------------------
+TRACE  >>> symbolic mode switched on
+TRACE  ### LINENUMBER 11
+TRACE  GETSTATIC java/lang/System out Ljava/io/PrintStream;
+TRACE  ILOAD 0
+TRACE  INVOKEVIRTUAL java/io/PrintStream println (I)V
+TRACE  ### LINENUMBER 12
+TRACE  RETURN
+TRACE  >>> symbolic mode switched off
 INFO   ====  Instrumentation  ===============================================
 INFO     Class load requests: 
 INFO     Cache hits: 

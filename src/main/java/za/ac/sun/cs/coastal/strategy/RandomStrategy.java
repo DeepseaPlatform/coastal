@@ -26,8 +26,6 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 
 	private Logger log;
 
-	private boolean dumpTrace;
-
 	private Green green;
 
 	private final Set<String> visitedModels = new HashSet<>();
@@ -51,7 +49,6 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
-		dumpTrace = configuration.getDumpTrace();
 		randomSeed = configuration.getLongProperty("coastal.randomStrategy.seed", randomSeed);
 		pathTree.setSeed(randomSeed);
 		pathLimit = configuration.getLimitPaths();
@@ -98,9 +95,7 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 			pathTreeTime += System.currentTimeMillis() - t;
 			if (spc == null) {
 				log.info("no further paths");
-				if (dumpTrace) {
-					log.trace("Tree shape: {}", pathTree.getShape());
-				}
+				log.trace("Tree shape: {}", pathTree.getShape());
 				return null;
 			}
 			infeasible = false;
@@ -114,9 +109,7 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 			solverTime += System.currentTimeMillis() - t;
 			if (model == null) {
 				log.info("no model");
-				if (dumpTrace) {
-					log.trace("(The spc is {})", spc.getPathCondition().toString());
-				}
+				log.trace("(The spc is {})", spc.getPathCondition().toString());
 				infeasible = true;
 				infeasibleCount++;
 			} else {
