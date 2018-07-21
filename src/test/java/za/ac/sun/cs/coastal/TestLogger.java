@@ -10,7 +10,7 @@ import org.apache.logging.log4j.spi.AbstractLogger;
 
 public class TestLogger extends AbstractLogger {
 
-	private static final boolean OUTPUT = true;
+	private static final boolean OUTPUT = false;
 
 	private static final long serialVersionUID = -2826725115616515320L;
 
