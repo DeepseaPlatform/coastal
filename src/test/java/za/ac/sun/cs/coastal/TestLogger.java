@@ -16,6 +16,7 @@ public class TestLogger extends AbstractLogger {
 
 	private final ByteArrayOutputStream log = new ByteArrayOutputStream();
 	private final PrintStream logOut = new PrintStream(log);
+	private final PrintStream sysOut = System.out;
 
 	@Override
 	public boolean isEnabled(Level level, Marker marker, Message message, Throwable t) {
@@ -107,7 +108,7 @@ public class TestLogger extends AbstractLogger {
 	public void logMessage(String fqcn, Level level, Marker marker, Message message, Throwable t) {
 		logOut.printf("%-6s %s\n", level.toString(), message.getFormattedMessage());
 		if (OUTPUT) {
-			System.out.printf("%-6s %s\n", level.toString(), message.getFormattedMessage());
+			sysOut.printf("%-6s %s\n", level.toString(), message.getFormattedMessage());
 		}
 	}
 
