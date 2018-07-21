@@ -52,7 +52,6 @@ instead of the default file distributed with COASTAL.
 | `coastal.limit.conjuncts` | Limit on number of conjuncts investigated per path | 0 |
 | `coastal.dump.asm` | Whether instrumented code displayed (at end) | `false` |
 | `coastal.dump.paths` | Whether path tree construction information is logged | `false` |
-| `coastal.dump.instrumenter` | Whether code instrumenter produces debugging | `false` |
 | `coastal.dump` | Set all dump settings | - |
 
 ## coastal.targets
@@ -239,18 +238,6 @@ This is mainly for debugging purposes and users should not need to use this.
 
 ~~~
 coastal.dump.paths = false
-~~~
-
-The default value is _false_.
-
-## coastal.dump.instrumenter
-
-A boolean setting to control whether the instrumenting method calls should
-be dumped to the log as they are executed.
-This is mainly for debugging purposes and users should not need to use this.
-
-~~~
-coastal.dump.instrumenter = false
 ~~~
 
 The default value is _false_.

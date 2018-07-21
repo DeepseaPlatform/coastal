@@ -21,8 +21,6 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private final Logger log;
 
-	private final boolean dumpInstrumenter;
-
 	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
 	
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicState";
@@ -62,7 +60,6 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		super(Opcodes.ASM6, cv);
 		this.configuration = configuration;
 		this.log = configuration.getLog();
-		this.dumpInstrumenter = configuration.getDumpInstrumenter();
 		this.triggerIndex = triggerIndex;
 		this.isStatic = isStatic;
 		this.argCount = argCount;
@@ -123,9 +120,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitLineNumber(int line, Label start) {
-		if (dumpInstrumenter) {
-			log.trace("visitLineNumber(line:{}, label:{})", line, start);
-		}
+		log.trace("visitLineNumber(line:{}, label:{})", line, start);
 		mv.visitLdcInsn(instructionCounter);
 		mv.visitLdcInsn(line);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(II)V", false);
@@ -134,9 +129,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitEnd() {
-		if (dumpInstrumenter) {
-			log.trace("visitEnd()");
-		}
+		log.trace("visitEnd()");
 		lastInstruction.put(methodCounter, instructionCounter);
 		branchInstructions.put(methodCounter, currentBranchInstructions);
 		mv.visitEnd();
@@ -144,9 +137,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitCode() {
-		if (dumpInstrumenter) {
-			log.trace("visitCode()");
-		}
+		log.trace("visitCode()");
 		if (triggerIndex >= 0) {
 			//--- IF (symbolicMode) {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getSymbolicMode", "()Z", false);
@@ -186,9 +177,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitInsn(int opcode) {
-		if (dumpInstrumenter) {
-			log.trace("visitInsn(opcode:{})", opcode);
-		}
+		log.trace("visitInsn(opcode:{})", opcode);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(II)V", false);
@@ -197,9 +186,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitIntInsn(int opcode, int operand) {
-		if (dumpInstrumenter) {
-			log.trace("visitIntInsn(opcode:{}, operand:{})", opcode, operand);
-		}
+		log.trace("visitIntInsn(opcode:{}, operand:{})", opcode, operand);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(operand);
@@ -209,9 +196,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitVarInsn(int opcode, int var) {
-		if (dumpInstrumenter) {
-			log.trace("visitVarInsn(opcode:{}, var:{})", opcode, var);
-		}
+		log.trace("visitVarInsn(opcode:{}, var:{})", opcode, var);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(var);
@@ -221,9 +206,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
-		if (dumpInstrumenter) {
-			log.trace("visitTypeInsn(opcode:{}, type:{})", opcode, type);
-		}
+		log.trace("visitTypeInsn(opcode:{}, type:{})", opcode, type);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "typeInsn", "(II)V", false);
@@ -232,9 +215,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-		if (dumpInstrumenter) {
-			log.trace("visitFieldInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
-		}
+		log.trace("visitFieldInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(owner);
@@ -247,9 +228,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-		if (dumpInstrumenter) {
-			log.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
-		}
+		log.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		if (owner.equals(SYMBOLIC)) {
 			mv.visitMethodInsn(opcode, LIBRARY, name, descriptor, isInterface);
 		} else {
@@ -267,9 +246,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle,
 			Object... bootstrapMethodArguments) {
-		if (dumpInstrumenter) {
-			log.trace("visitInvokeDynamicInsn(name:{})", name);
-		}
+		log.trace("visitInvokeDynamicInsn(name:{})", name);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(186);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "invokeDynamicInsn", "(II)V", false);
@@ -278,9 +255,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
-		if (dumpInstrumenter) {
-			log.trace("visitJumpInsn(opcode:{}, label:{})", opcode, label);
-		}
+		log.trace("visitJumpInsn(opcode:{}, label:{})", opcode, label);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(II)V", false);
@@ -295,9 +270,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitLdcInsn(Object value) {
-		if (dumpInstrumenter) {
-			log.trace("visitLdcInsn(value:{})", value);
-		}
+		log.trace("visitLdcInsn(value:{})", value);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(18);
 		mv.visitLdcInsn(value);
@@ -307,9 +280,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitIincInsn(int var, int increment) {
-		if (dumpInstrumenter) {
-			log.trace("visitJumpInsn(var:{}, increment:{})", var, increment);
-		}
+		log.trace("visitJumpInsn(var:{}, increment:{})", var, increment);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(var);
 		mv.visitLdcInsn(increment);
@@ -319,9 +290,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-		if (dumpInstrumenter) {
-			log.trace("visitTableSwitchInsn(min:{}, max:{}, dflt:{})", min, max, dflt);
-		}
+		log.trace("visitTableSwitchInsn(min:{}, max:{}, dflt:{})", min, max, dflt);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(170);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableSwitchInsn", "(II)V", false);
@@ -360,9 +329,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-		if (dumpInstrumenter) {
-			log.trace("visitLookupSwitchInsn(dflt:{})", dflt);
-		}
+		log.trace("visitLookupSwitchInsn(dflt:{})", dflt);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(171);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "lookupSwitchInsn", "(II)V", false);
@@ -371,9 +338,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
-		if (dumpInstrumenter) {
-			log.trace("visitMultiANewArrayInsn(numDimensions:{})", numDimensions);
-		}
+		log.trace("visitMultiANewArrayInsn(numDimensions:{})", numDimensions);
 		mv.visitLdcInsn(++instructionCounter);
 		mv.visitLdcInsn(197);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "multiANewArrayInsn", "(II)V", false);

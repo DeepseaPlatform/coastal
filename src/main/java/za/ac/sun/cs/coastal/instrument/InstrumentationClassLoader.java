@@ -21,8 +21,6 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 
 	private final Logger log;
 
-	private final boolean dumpInstrumenter;
-
 	private final List<String> classPaths = new ArrayList<>();
 
 	private static int requestCount = 0, cachedCount = 0, instrumentedCount = 0;
@@ -34,7 +32,6 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 	public InstrumentationClassLoader(Configuration configuration, String classPath) {
 		this.configuration = configuration;
 		this.log = configuration.getLog();
-		this.dumpInstrumenter = configuration.getDumpInstrumenter();
 		configuration.getReporterManager().register(this);
 		String[] paths = classPath.split(File.pathSeparator);
 		for (String path : paths) {
@@ -48,44 +45,32 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		requestCount++;
 		Class<?> clas = findLoadedClass(name);
 		if (clas != null) {
-			if (dumpInstrumenter) {
-				log.trace("*** loading class {}, found in cache", name);
-			}
+			log.trace("*** loading class {}, found in cache", name);
 			cachedCount++;
 			ltime += System.currentTimeMillis() - t0;
 			return clas;
 		}
 		if (configuration.isTarget(name)) {
-			if (dumpInstrumenter) {
-				log.trace("*** loading class {}, identified as target", name);
-			}
+			log.trace("*** loading class {}, identified as target", name);
 			long t1 = System.currentTimeMillis();
 			byte[] raw = instrument(name);
 			itime += System.currentTimeMillis() - t1;
 			if (raw != null) {
-				if (dumpInstrumenter) {
-					log.trace("*** class {} instrumented", name);
-				}
+				log.trace("*** class {} instrumented", name);
 				instrumentedCount++;
 				clas = defineClass(name, raw, 0, raw.length);
 			}
 		}
 		if (clas == null) {
-			if (dumpInstrumenter) {
-				log.trace("*** loading class {}, uninstrumented", name);
-			}
+			log.trace("*** loading class {}, uninstrumented", name);
 			clas = findSystemClass(name);
 		}
 		if (resolve && clas != null) {
-			if (dumpInstrumenter) {
-				log.trace("*** resolving class {}", name);
-			}
+			log.trace("*** resolving class {}", name);
 			resolveClass(clas);
 		}
 		if (clas == null) {
-			if (dumpInstrumenter) {
-				log.trace("*** class {} not found", name);
-			}
+			log.trace("*** class {} not found", name);
 			ltime += System.currentTimeMillis() - t0;
 			throw new ClassNotFoundException(name);
 		}
@@ -105,9 +90,7 @@ public class InstrumentationClassLoader extends ClassLoader implements Reporter 
 		byte[] out = cw.toByteArray();
 		preInstrumentedSize += in.length;
 		postInstrumentedSize += out.length;
-		if (dumpInstrumenter) {
-			log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, out.length);
-		}
+		log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, out.length);
 		return out;
 	}
 

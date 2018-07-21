@@ -7,7 +7,6 @@ INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 TRACE  coastal.dump = false
 TRACE  coastal.dump.asm = false
-TRACE  coastal.dump.instrumenter = false
 TRACE  coastal.dump.paths = false
 TRACE  coastal.echooutput = false
 TRACE  coastal.limit.conjuncts = 0
@@ -21,6 +20,46 @@ TRACE  coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
 TRACE  coastal.targets = tests.simple
 TRACE  coastal.triggers = tests.simple.Choice01.run(X: int)
 INFO   ----  starting dive 1  -----------------------------------------------
+TRACE  *** loading class tests.simple.Choice01, identified as target
+TRACE  visitCode()
+TRACE  visitLineNumber(line:3, label:L
+TRACE  visitVarInsn(opcode:25, var:0)
+TRACE  visitMethodInsn(opcode:183, owner:java/lang/Object, name:<init>)
+TRACE  visitInsn(opcode:177)
+TRACE  visitEnd()
+TRACE  visitCode()
+TRACE  visitLineNumber(line:6, label:L
+TRACE  visitIntInsn(opcode:16, operand:10)
+TRACE  visitMethodInsn(opcode:184, owner:tests/simple/Choice01, name:run)
+TRACE  visitLineNumber(line:7, label:L
+TRACE  visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
+TRACE  visitLdcInsn(value:done)
+TRACE  visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
+TRACE  visitLineNumber(line:8, label:L
+TRACE  visitInsn(opcode:177)
+TRACE  visitEnd()
+TRACE  visitCode()
+TRACE  visitLineNumber(line:11, label:L
+TRACE  visitVarInsn(opcode:21, var:0)
+TRACE  visitInsn(opcode:8)
+TRACE  visitJumpInsn(opcode:162, label:L
+TRACE  visitLineNumber(line:12, label:L
+TRACE  visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
+TRACE  visitLdcInsn(value:<5)
+TRACE  visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
+TRACE  visitJumpInsn(opcode:167, label:L
+TRACE  visitLineNumber(line:14, label:L
+TRACE  visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
+TRACE  visitLdcInsn(value:>=5)
+TRACE  visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
+TRACE  visitLineNumber(line:16, label:L
+TRACE  visitInsn(opcode:177)
+TRACE  visitEnd()
+TRACE  *** instrumented tests.simple.Choice01: 
+TRACE  *** class tests.simple.Choice01 instrumented
+TRACE  *** loading class java.lang.Object, uninstrumented
+TRACE  *** loading class java.lang.String, uninstrumented
+TRACE  *** loading class za.ac.sun.cs.coastal.symbolic.SymbolicState, uninstrumented
 TRACE  >>> symbolic mode switched on
 TRACE  --> st[] locals:{}
 TRACE  --> data:{}
@@ -40,12 +79,14 @@ TRACE  ### LINENUMBER 14
 TRACE  GETSTATIC java/lang/System out Ljava/io/PrintStream;
 TRACE  --> st[U_D_0] locals:{0=X}
 TRACE  --> data:{java/lang/System/out=U_D_0}
+TRACE  *** loading class java.lang.System, uninstrumented
 TRACE  LDC >=5
 TRACE  --> st[U_D_0, 1] locals:{0=X}
 TRACE  --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 TRACE  INVOKEVIRTUAL java/io/PrintStream println (Ljava/lang/String;)V
 TRACE  --> st[] locals:{0=X}
 TRACE  --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
+TRACE  *** loading class java.io.PrintStream, uninstrumented
 TRACE  ### LINENUMBER 16
 TRACE  RETURN
 TRACE  >>> symbolic mode switched off

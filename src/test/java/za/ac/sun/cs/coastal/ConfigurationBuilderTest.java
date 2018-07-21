@@ -53,7 +53,6 @@ public class ConfigurationBuilderTest {
 		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertEquals(cb, cb.setDumpAll(true));
 		assertEquals(cb, cb.setDumpAsm(true));
-		assertEquals(cb, cb.setDumpInstrumenter(true));
 		assertEquals(cb, cb.setDumpPaths(true));
 		assertEquals(cb, cb.setEchoOutput(true));
 		assertEquals(cb, cb.setObeyStops(true));
@@ -61,7 +60,6 @@ public class ConfigurationBuilderTest {
 		Configuration c = cb.construct();
 		assertTrue(c.getDumpAll());
 		assertTrue(c.getDumpAsm());
-		assertTrue(c.getDumpInstrumenter());
 		assertTrue(c.getDumpPaths());
 		assertTrue(c.getEchoOutput());
 		assertTrue(c.getObeyStops());
