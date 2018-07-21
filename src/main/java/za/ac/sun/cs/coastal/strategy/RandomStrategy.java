@@ -86,7 +86,6 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 	private Map<String, Constant> refine0() {
 		long t;
 		SegmentedPC spc = SymbolicState.getSegmentedPathCondition();
-		// lgr.info("explored <{}> {}", spc.getSignature(), SegmentedPC.constraintBeautify(spc.getPathCondition().toString()));
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		boolean infeasible = false;
 		while (true) {
@@ -100,14 +99,13 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 			if (spc == null) {
 				log.info("no further paths");
 				if (dumpTrace) {
-					log.info("Tree shape: {}", pathTree.getShape());
+					log.trace("Tree shape: {}", pathTree.getShape());
 				}
 				return null;
 			}
 			infeasible = false;
 			Expression pc = spc.getPathCondition();
 			String sig = spc.getSignature();
-			// lgr.info("trying   <{}> {}", sig, SegmentedPC.constraintBeautify(pc.toString()));
 			log.info("trying   <{}> {}", sig, pc.toString());
 			Instance instance = new Instance(green, null, pc);
 			t = System.currentTimeMillis();
@@ -117,7 +115,7 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 			if (model == null) {
 				log.info("no model");
 				if (dumpTrace) {
-					log.info("(The spc is {})", spc.getPathCondition().toString());
+					log.trace("(The spc is {})", spc.getPathCondition().toString());
 				}
 				infeasible = true;
 				infeasibleCount++;
@@ -134,7 +132,6 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 				}
 				String modelString = newModel.toString();
 				modelExtractionTime += System.currentTimeMillis() - t;
-				// lgr.info("new model: {}", SegmentedPC.modelBeautify(modelString));
 				log.info("new model: {}", modelString);
 				if (visitedModels.add(modelString)) {
 					return newModel;

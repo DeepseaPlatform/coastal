@@ -47,7 +47,7 @@ public abstract class PathTree {
 		}
 		assert idx == -1;
 		if (dumpPaths) {
-			log.debug("depth:{}", depth);
+			log.trace("depth:{}", depth);
 		}
 		/*
 		 * Step 2: Add the new path (spc) to the path tree
@@ -64,7 +64,7 @@ public abstract class PathTree {
 		 */
 		if (dumpPaths && (root != null)) {
 			for (String ll : stringRepr()) {
-				log.debug(ll);
+				log.trace(ll);
 			}
 		}
 		/*
