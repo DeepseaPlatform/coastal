@@ -50,7 +50,6 @@ instead of the default file distributed with COASTAL.
 | `coastal.limit.time` | Limit on number of seconds allowed for runs | 0 |
 | `coastal.limit.path` | Limit on number of paths investigated | 0 |
 | `coastal.limit.conjuncts` | Limit on number of conjuncts investigated per path | 0 |
-| `coastal.dump.config` | Whether configuration settings are displayed | `false` |
 | `coastal.dump.asm` | Whether instrumented code displayed (at end) | `false` |
 | `coastal.dump.trace` | Whether instructions are displayed as executed | `false` |
 | `coastal.dump.frame` | Whether stack/locals are displayed after every instruction | `false` |
@@ -217,15 +216,6 @@ coastal.limit.conjuncts = 50
 ~~~
 
 The default value is 0.
-
-## coastal.dump.config
-
-A boolean setting to control whether the tool configuration should be
-dumped to the log.
-
-~~~
-coastal.dump.config = true
-~~~
 
 The default value is _false_.
 
