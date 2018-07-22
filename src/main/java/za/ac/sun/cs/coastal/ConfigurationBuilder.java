@@ -48,7 +48,7 @@ public class ConfigurationBuilder {
 	private long limitPaths = 0; // cap on the number of paths to explore
 	private long limitConjuncts = 0; // cap on the number of conjuncts per path condition
 	private boolean echoOutput = false; // is main program output displayed
-	private boolean obeyStops = false; // are symbolic termination calls obeyed
+	private boolean drawPaths = false; // display path trees in detailed log
 	private final List<Listener> listeners = new ArrayList<>(); // listeners for various events
 	private final Properties originalProperties = new Properties(); // non-coastal properties
 
@@ -139,11 +139,11 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
-	public ConfigurationBuilder setObeyStops(boolean obeyStops) {
-		this.obeyStops = obeyStops;
+	public ConfigurationBuilder setDrawPaths(boolean drawPaths) {
+		this.drawPaths = drawPaths;
 		return this;
 	}
-
+	
 	public ConfigurationBuilder addListener(Listener listener) {
 		if (listener != null) {
 			listeners.add(listener);
@@ -153,7 +153,7 @@ public class ConfigurationBuilder {
 
 	public Configuration construct() {
 		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds,
-				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, echoOutput, obeyStops, listeners,
+				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, echoOutput, drawPaths, listeners,
 				configurationListeners, originalProperties);
 	}
 
@@ -249,7 +249,7 @@ public class ConfigurationBuilder {
 		setLimitPaths(getLongProperty(properties, "coastal.limit.paths", limitPaths));
 		setLimitConjuncts(getLongProperty(properties, "coastal.limit.conjuncts", limitConjuncts));
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", echoOutput));
-		setObeyStops(getBooleanProperty(properties, "coastal.obeystops", obeyStops));
+		setDrawPaths(getBooleanProperty(properties, "coastal.drawPaths", drawPaths));
 		p = properties.getProperty("coastal.strategy");
 		if (p != null) {
 			Object str = createInstance(p);

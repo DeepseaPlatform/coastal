@@ -8,4 +8,8 @@ public interface MarkerListener extends Listener {
 
 	void mark(SymbolicState symbolicState, String marker);
 	
+	void stop(SymbolicState symbolicState);
+
+	void stop(SymbolicState symbolicState, String message);
+	
 }

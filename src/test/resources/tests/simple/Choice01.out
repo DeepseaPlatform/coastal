@@ -5,13 +5,13 @@
 ~~~~                                                              ~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+coastal.drawpaths = false
 coastal.echooutput = false
 coastal.limit.conjuncts = 0
 coastal.limit.paths = 0
 coastal.limit.runs = 0
 coastal.limit.time = 0
 coastal.main = tests.simple.Choice01
-coastal.obeystops = false
 coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
 coastal.targets = tests.simple
 coastal.triggers = tests.simple.Choice01.run(X: int)
@@ -89,22 +89,10 @@ RETURN
 --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 explored <1> X>=5
 depth:1
-#1
-X>=5
-F-+-T
-|   |
--   #2
-    LEAF
 trying   <0> X<5
 no model
 (The spc is X<5)
 depth:1
-  #1
-  X>=5
-F---+----T
-|        |
-#3       #2
-INFEAS   LEAF
 no further paths
 Tree shape: (IL)
 ====  tests.simple.Choice01  =========================================

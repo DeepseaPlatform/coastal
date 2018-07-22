@@ -5,13 +5,13 @@
 ~~~~                                                              ~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+coastal.drawpaths = false
 coastal.echooutput = false
 coastal.limit.conjuncts = 0
 coastal.limit.paths = 0
 coastal.limit.runs = 0
 coastal.limit.time = 0
 coastal.main = tests.simple.Straight01
-coastal.obeystops = false
 coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
 coastal.targets = tests.simple
 coastal.triggers = tests.simple.Straight01.run(X: int)

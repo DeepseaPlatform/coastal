@@ -9,6 +9,8 @@ public abstract class PathTree {
 
 	protected final Logger log;
 
+	private final boolean drawPaths; 
+
 	private PathTreeNode root = null;
 
 	private int pathCount = 0;
@@ -17,6 +19,7 @@ public abstract class PathTree {
 
 	public PathTree(Configuration configuration) {
 		log = configuration.getLog();
+		drawPaths = configuration.getDrawPaths();
 	}
 
 	public PathTreeNode getRoot() {
@@ -51,7 +54,7 @@ public abstract class PathTree {
 		/*
 		 * Step 3: Dump the tree if required
 		 */
-		if (root != null) {
+		if (drawPaths && (root != null)) {
 			for (String ll : stringRepr()) {
 				log.trace(ll);
 			}

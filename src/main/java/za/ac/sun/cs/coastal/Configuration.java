@@ -48,7 +48,7 @@ public class Configuration {
 	private final long limitPaths; // cap on the number of paths to explore
 	private final long limitConjuncts; // cap on the number of conjuncts per path condition
 	private final boolean echoOutput; // is main program output displayed
-	private final boolean obeyStops; // are symbolic termination calls obeyed
+	private final boolean drawPaths; // is main program output displayed
 	private final List<Listener> listeners; // listeners for various events
 	private final Properties originalProperties; // original properties
 
@@ -65,9 +65,9 @@ public class Configuration {
 			final String main, final String args, final List<String> targets, final List<Trigger> triggers,
 			final Map<String, Integer> minBounds, final Map<String, Integer> maxBounds,
 			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
-			final long limitPaths, final long limitConjuncts, final boolean echoOutput, final boolean obeyStops,
-			final List<Listener> listeners,
-			final List<ConfigurationListener> configurationListeners, final Properties originalProperties) {
+			final long limitPaths, final long limitConjuncts, final boolean echoOutput, final boolean drawPaths,
+			final List<Listener> listeners, final List<ConfigurationListener> configurationListeners,
+			final Properties originalProperties) {
 		this.version = version;
 		this.log = log;
 		this.reporterManager = reporterManager;
@@ -84,7 +84,7 @@ public class Configuration {
 		this.limitPaths = limitPaths;
 		this.limitConjuncts = limitConjuncts;
 		this.echoOutput = echoOutput;
-		this.obeyStops = obeyStops;
+		this.drawPaths = drawPaths;
 		this.listeners = new ArrayList<>(listeners);
 		this.originalProperties = new Properties(originalProperties);
 
@@ -214,8 +214,8 @@ public class Configuration {
 		return echoOutput;
 	}
 
-	public boolean getObeyStops() {
-		return obeyStops;
+	public boolean getDrawPaths() {
+		return drawPaths;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -307,7 +307,7 @@ public class Configuration {
 		properties.put("coastal.limit.paths", limitPaths);
 		properties.put("coastal.limit.conjuncts", limitConjuncts);
 		properties.put("coastal.echooutput", echoOutput);
-		properties.put("coastal.obeystops", obeyStops);
+		properties.put("coastal.drawpaths", drawPaths);
 		if (!listeners.isEmpty()) {
 			String l = listeners.stream().map(x -> x.getClass().getName()).collect(Collectors.joining(";"));
 			properties.put("coastal.triggers", l);

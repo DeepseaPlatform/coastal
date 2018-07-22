@@ -42,6 +42,7 @@ instead of the default file distributed with COASTAL.
 | `coastal.bounds` | Bounds on symbolic variables | - |
 | `coastal.delegates` | Delegated classes | - |
 | `coastal.echooutput` | Whether program output is displayed | `false` |
+| `coastal.drawpaths` | Whether path trees are displayed in detailed log | `false` |
 | `coastal.limit.run` | Limit on number of runs executed | 0 |
 | `coastal.limit.time` | Limit on number of seconds allowed for runs | 0 |
 | `coastal.limit.path` | Limit on number of paths investigated | 0 |
@@ -162,6 +163,18 @@ coastal.echooutput = true
 The default value is _false_.
 Values that count as _true_ are: "`true`", "`yes`", "`on`", and "`1`".
 Case is ignored.  All other values count as _false_.
+
+## coastal.drawpaths
+
+A boolean setting to control whether the tree of explored paths is displayed
+after each path insertion.  This is only output to the detailed log, but for
+large trees it is time consuming and slows down the exploration.
+
+~~~
+coastal.drawpths = true
+~~~
+
+The default value is _false_.
 
 ## coastal.limit.run
 

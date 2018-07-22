@@ -94,6 +94,10 @@ public class SymbolicState {
 		return mayContinue;
 	}
 
+	public void discontinue() {
+		mayContinue = false;
+	}
+
 	public SegmentedPC getSegmentedPathCondition() {
 		return spc;
 	}
@@ -303,17 +307,14 @@ public class SymbolicState {
 	// ======================================================================
 
 	public void stop() {
-		if (configuration.getObeyStops()) {
-			mayContinue = false;
-			log.info("!!! PROGRAM TERMINATION POINT REACHED");
+		for (MarkerListener listener : markerListeners) {
+			listener.stop(this);
 		}
 	}
 
 	public void stop(String message) {
-		if (configuration.getObeyStops()) {
-			mayContinue = false;
-			log.info("!!! PROGRAM TERMINATION POINT REACHED");
-			log.info("!!! {}", message);
+		for (MarkerListener listener : markerListeners) {
+			listener.stop(this, message);
 		}
 	}
 

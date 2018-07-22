@@ -52,6 +52,16 @@ public class MarkerCoverage implements MarkerListener, Reporter, ConfigurationLi
 		}
 	}
 
+	@Override
+	public void stop(SymbolicState symbolicState) {
+		// do nothing
+	}
+	
+	@Override
+	public void stop(SymbolicState symbolicState, String message) {
+		// do nothing
+	}
+	
 	// ======================================================================
 	//
 	// REPORTING

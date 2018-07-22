@@ -52,10 +52,8 @@ public class ConfigurationBuilderTest {
 		final ReporterManager reporterManager = new ReporterManager();
 		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertEquals(cb, cb.setEchoOutput(true));
-		assertEquals(cb, cb.setObeyStops(true));
 		Configuration c = cb.construct();
 		assertTrue(c.getEchoOutput());
-		assertTrue(c.getObeyStops());
 	}
 	
 	@Test
