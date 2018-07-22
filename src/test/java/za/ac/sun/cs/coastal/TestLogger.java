@@ -106,9 +106,9 @@ public class TestLogger extends AbstractLogger {
 
 	@Override
 	public void logMessage(String fqcn, Level level, Marker marker, Message message, Throwable t) {
-		logOut.printf("%-6s %s\n", level.toString(), message.getFormattedMessage());
+		logOut.printf("%s\n", message.getFormattedMessage());
 		if (OUTPUT) {
-			sysOut.printf("%-6s %s\n", level.toString(), message.getFormattedMessage());
+			sysOut.printf("%s\n", message.getFormattedMessage());
 		}
 	}
 

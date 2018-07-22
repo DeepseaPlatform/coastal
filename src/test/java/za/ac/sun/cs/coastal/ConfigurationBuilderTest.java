@@ -52,14 +52,12 @@ public class ConfigurationBuilderTest {
 		final ReporterManager reporterManager = new ReporterManager();
 		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertEquals(cb, cb.setDumpAll(true));
-		assertEquals(cb, cb.setDumpAsm(true));
 		assertEquals(cb, cb.setDumpPaths(true));
 		assertEquals(cb, cb.setEchoOutput(true));
 		assertEquals(cb, cb.setObeyStops(true));
 		assertEquals(cb, cb.setRecordMarks(true));
 		Configuration c = cb.construct();
 		assertTrue(c.getDumpAll());
-		assertTrue(c.getDumpAsm());
 		assertTrue(c.getDumpPaths());
 		assertTrue(c.getEchoOutput());
 		assertTrue(c.getObeyStops());

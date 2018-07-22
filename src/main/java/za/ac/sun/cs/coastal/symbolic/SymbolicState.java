@@ -34,54 +34,54 @@ public class SymbolicState {
 
 	public static final String NEW_VAR_PREFIX = "U_D_"; // "$"
 
-	private static Configuration configuration;
+	private final Configuration configuration;
 
-	private static Logger log;
+	private final Logger log;
 
-	private static long limitConjuncts;
+	private final long limitConjuncts;
 
 	// if true, check for limit on conjuncts
 	private static boolean dangerFlag = false;
 
-	private static boolean symbolicMode = false;
+	private boolean symbolicMode = false;
 
-	private static Stack<SymbolicFrame> frames = new Stack<>();
+	private Stack<SymbolicFrame> frames = new Stack<>();
 
-	private static int objectIdCount = 0;
+	private int objectIdCount = 0;
 
-	private static int newVariableCount = 0;
+	private int newVariableCount = 0;
 
-	private static Map<String, Expression> instanceData = new HashMap<>();
+	private Map<String, Expression> instanceData = new HashMap<>();
 
-	private static Stack<Expression> args = new Stack<>();
+	private Stack<Expression> args = new Stack<>();
 
-	private static SegmentedPC spc = null;
+	private SegmentedPC spc = null;
 
-	private static Expression pendingExtraConjunct = null;
+	private Expression pendingExtraConjunct = null;
 
-	private static boolean isPreviousConstant = false;
+	private boolean isPreviousConstant = false;
 
-	private static boolean isPreviousDuplicate = false;
+	private boolean isPreviousDuplicate = false;
 
-	private static Set<String> conjunctSet = new HashSet<>();
+	private Set<String> conjunctSet = new HashSet<>();
 
-	private static Map<String, Constant> concreteValues = null;
+	private final Map<String, Constant> concreteValues;
 
-	private static boolean mayContinue = true;
+	private boolean mayContinue = true;
 
-	private static Map<String, Integer> markers = new HashMap<>();
+	private Map<String, Integer> markers = new HashMap<>();
 
-	private static Stack<Expression> pendingSwitch = new Stack<>();
+	private Stack<Expression> pendingSwitch = new Stack<>();
 
-	public static void initialize(Configuration configuration) {
-		SymbolicState.configuration = configuration;
-		log = configuration.getLog();
-		limitConjuncts = configuration.getLimitConjuncts();
-		if (limitConjuncts == 0) {
-			limitConjuncts = Long.MAX_VALUE;
-		}
+	public SymbolicState(Configuration configuration, Map<String, Constant> concreteValues) {
+		this.configuration = configuration;
+		this.log = configuration.getLog();
+		long lc = configuration.getLimitConjuncts();
+		this.limitConjuncts = (lc == 0) ? Long.MAX_VALUE : lc;
+		this.concreteValues = concreteValues;
 	}
 
+	/*
 	public static void reset(Map<String, Constant> concreteValues) {
 		dangerFlag = false;
 		symbolicMode = false;
@@ -95,57 +95,58 @@ public class SymbolicState {
 		conjunctSet.clear();
 		SymbolicState.concreteValues = concreteValues;
 	}
+	*/
 
-	public static boolean getSymbolicMode() {
+	public boolean getSymbolicMode() {
 		return symbolicMode;
 	}
 
-	public static boolean mayContinue() {
+	public boolean mayContinue() {
 		return mayContinue;
 	}
 
-	public static Map<String, Integer> getMarkers() {
+	public Map<String, Integer> getMarkers() {
 		return markers;
 	}
 
-	public static SegmentedPC getSegmentedPathCondition() {
+	public SegmentedPC getSegmentedPathCondition() {
 		return spc;
 	}
 
-	public static void push(Expression expr) {
+	public void push(Expression expr) {
 		frames.peek().push(expr);
 	}
 
-	public static Expression pop() {
+	public Expression pop() {
 		return frames.peek().pop();
 	}
 
-	private static Expression peek() {
+	private Expression peek() {
 		return frames.peek().peek();
 	}
 
-	private static Expression getLocal(int index) {
+	private Expression getLocal(int index) {
 		return frames.peek().getLocal(index);
 	}
 
-	private static void setLocal(int index, Expression value) {
+	private void setLocal(int index, Expression value) {
 		frames.peek().setLocal(index, value);
 	}
 
-	private static void putField(int objectId, String fieldName, Expression value) {
+	private void putField(int objectId, String fieldName, Expression value) {
 		putField(Integer.toString(objectId), fieldName, value);
 	}
 
-	private static void putField(String objectName, String fieldName, Expression value) {
+	private void putField(String objectName, String fieldName, Expression value) {
 		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
 		instanceData.put(fullFieldName, value);
 	}
 	
-	public static Expression getField(int objectId, String fieldName) {
+	private Expression getField(int objectId, String fieldName) {
 		return getField(Integer.toString(objectId), fieldName);
 	}
 
-	public static Expression getField(String objectName, String fieldName) {
+	private Expression getField(String objectName, String fieldName) {
 		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
 		Expression value = instanceData.get(fullFieldName);
 		if (value == null) {
@@ -158,48 +159,48 @@ public class SymbolicState {
 	}
 	
 	// Arrays are just objects
-	public static int createArray() {
+	private int createArray() {
 		return incrAndGetNewObjectId();
 	}
 
-	public static int getArrayLength(int arrayId) {
-		return ((IntConstant) getField(arrayId, "length")).getValue();
-	}
+//	private int getArrayLength(int arrayId) {
+//		return ((IntConstant) getField(arrayId, "length")).getValue();
+//	}
 
-	public static void setArrayLength(int arrayId, int length) {
+	private void setArrayLength(int arrayId, int length) {
 		putField(arrayId, "length", new IntConstant(length));
 	}
 
-	public static Expression getArrayValue(int arrayId, int index) {
+	private Expression getArrayValue(int arrayId, int index) {
 		return getField(arrayId, "" + index);
 	}
 
-	private static void setArrayValue(int arrayId, int index, Expression value) {
+	private void setArrayValue(int arrayId, int index, Expression value) {
 		putField(arrayId, "" + index, value);
 	}
 
 	// Strings are just objects
-	public static int createString() {
+	private int createString() {
 		return incrAndGetNewObjectId();
 	}
 
-	public static Expression getStringLength(int stringId) {
+	public Expression getStringLength(int stringId) {
 		return getField(stringId, "length");
 	}
 
-	public static void setStringLength(int stringId, Expression length) {
+	private void setStringLength(int stringId, Expression length) {
 		putField(stringId, "length", length);
 	}
 
-	public static Expression getStringChar(int stringId, int index) {
+	public Expression getStringChar(int stringId, int index) {
 		return getField(stringId, "" + index);
 	}
 
-	public static void setStringChar(int stringId, int index, Expression value) {
+	private void setStringChar(int stringId, int index, Expression value) {
 		putField(stringId, "" + index, value);
 	}
 
-	private static void pushConjunct(Expression conjunct) {
+	private void pushConjunct(Expression conjunct) {
 		String c = conjunct.toString();
 		/*
 		 * Set "isPreviousConstant" and "isPreviousDuplicate" so that if we
@@ -220,7 +221,7 @@ public class SymbolicState {
 		}
 	}
 
-	private static void pushConjunct(Expression expression, int min, int max, int cur) {
+	private void pushConjunct(Expression expression, int min, int max, int cur) {
 		Operation conjunct;
 		if (cur < min) {
 			Operation lo = new Operation(Operator.LT, expression, new IntConstant(min));
@@ -241,8 +242,8 @@ public class SymbolicState {
 			log.trace(">>> duplicate (switch) conjunct ignored: {}", c);
 		}
 	}
-
-	public static void pushExtraConjunct(Expression extraConjunct) {
+	
+	public void pushExtraConjunct(Expression extraConjunct) {
 		if (!isConstant(extraConjunct)) {
 			if (pendingExtraConjunct == null) {
 				pendingExtraConjunct = extraConjunct;
@@ -252,7 +253,7 @@ public class SymbolicState {
 		}
 	}
 
-	private static boolean methodReturn() {
+	private boolean methodReturn() {
 		assert symbolicMode;
 		assert !frames.isEmpty();
 		int methodNumber = frames.pop().getMethodNumber();
@@ -264,15 +265,15 @@ public class SymbolicState {
 		return symbolicMode;
 	}
 
-	private static int incrAndGetNewObjectId() {
+	private int incrAndGetNewObjectId() {
 		return ++objectIdCount;
 	}
 
-	public static String getNewVariableName() {
+	public String getNewVariableName() {
 		return NEW_VAR_PREFIX + newVariableCount++;
 	}
 
-	private static void dumpFrames() {
+	private void dumpFrames() {
 		int n = frames.size();
 		for (int i = n - 1; i >= 0; i--) {
 			log.trace("--> st{} locals:{}", frames.get(i).stack, frames.get(i).locals);
@@ -284,7 +285,7 @@ public class SymbolicState {
 
 	private static final Object[] EMPTY_ARGUMENTS = new Object[0];
 
-	private static boolean executeDelegate(String owner, String name, String descriptor) {
+	private boolean executeDelegate(String owner, String name, String descriptor) {
 		Object delegate = configuration.findDelegate(owner);
 		if (delegate == null) {
 			return false;
@@ -316,14 +317,14 @@ public class SymbolicState {
 	//
 	// ======================================================================
 
-	public static void stop() {
+	public void stop() {
 		if (configuration.getObeyStops()) {
 			mayContinue = false;
 			log.info("!!! PROGRAM TERMINATION POINT REACHED");
 		}
 	}
 
-	public static void stop(String message) {
+	public void stop(String message) {
 		if (configuration.getObeyStops()) {
 			mayContinue = false;
 			log.info("!!! PROGRAM TERMINATION POINT REACHED");
@@ -331,13 +332,13 @@ public class SymbolicState {
 		}
 	}
 
-	public static void mark(int marker) {
+	public void mark(int marker) {
 		if (configuration.getRecordMarks()) {
 			mark(Integer.toString(marker));
 		}
 	}
 
-	public static void mark(String marker) {
+	public void mark(String marker) {
 		if (configuration.getRecordMarks()) {
 			String key = marker;
 			Integer n = markers.get(key);
@@ -355,7 +356,7 @@ public class SymbolicState {
 	//
 	// ======================================================================
 
-	public static int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
+	public int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
 		Trigger trigger = configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
@@ -369,7 +370,7 @@ public class SymbolicState {
 		return (concrete == null) ? currentValue : concrete.getValue();
 	}
 
-	public static char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
+	public char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
 		Trigger trigger = configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
@@ -383,7 +384,7 @@ public class SymbolicState {
 		return (concrete == null) ? currentValue : (char) concrete.getValue();
 	}
 
-	public static String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
+	public String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
 		Trigger trigger = configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length();
@@ -413,7 +414,7 @@ public class SymbolicState {
 		}
 	}
 
-	public static int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
+	public int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
 		Trigger trigger = configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length;
@@ -445,7 +446,7 @@ public class SymbolicState {
 		return value;
 	}
 
-	public static void triggerMethod(int methodNumber) {
+	public void triggerMethod(int methodNumber) {
 		if (!symbolicMode) {
 			log.trace(">>> symbolic mode switched on");
 			symbolicMode = true;
@@ -455,7 +456,7 @@ public class SymbolicState {
 		notifyEnterMethod(methodNumber);
 	}
 
-	public static void startMethod(int methodNumber, int argCount) {
+	public void startMethod(int methodNumber, int argCount) {
 		if (!symbolicMode) {
 			return;
 		}
@@ -472,7 +473,7 @@ public class SymbolicState {
 		notifyEnterMethod(methodNumber);
 	}
 
-	public static void linenumber(int instr, int line) {
+	public void linenumber(int instr, int line) {
 		if (!symbolicMode) {
 			return;
 		}
@@ -480,7 +481,7 @@ public class SymbolicState {
 		notifyLinenumber(instr, line);
 	}
 
-	public static void insn(int instr, int opcode) throws LimitConjunctException {
+	public void insn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -587,7 +588,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void intInsn(int instr, int opcode, int operand) throws LimitConjunctException {
+	public void intInsn(int instr, int opcode, int operand) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -621,7 +622,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void varInsn(int instr, int opcode, int var) throws LimitConjunctException {
+	public void varInsn(int instr, int opcode, int var) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -650,7 +651,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void typeInsn(int instr, int opcode) throws LimitConjunctException {
+	public void typeInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -671,7 +672,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
+	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
 			throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -706,7 +707,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
+	public void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
 			throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -764,7 +765,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
+	public void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -782,7 +783,7 @@ public class SymbolicState {
 	}
 
 	/* Missing offset because destination not yet known. */
-	public static void jumpInsn(int instr, int opcode) throws LimitConjunctException {
+	public void jumpInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -867,7 +868,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void postJumpInsn(int instr, int opcode) throws LimitConjunctException {
+	public void postJumpInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -882,14 +883,14 @@ public class SymbolicState {
 		}
 	}
 
-	private static void checkLimitConjuncts() throws LimitConjunctException {
+	private void checkLimitConjuncts() throws LimitConjunctException {
 		if ((spc != null) && (spc.getDepth() >= limitConjuncts)) {
 			throw new LimitConjunctException();
 		}
 		dangerFlag = false;
 	}
 
-	public static void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException {
+	public void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -921,7 +922,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void iincInsn(int instr, int var, int increment) throws LimitConjunctException {
+	public void iincInsn(int instr, int var, int increment) throws LimitConjunctException {
 		final int opcode = 132;
 		if (!symbolicMode) {
 			return;
@@ -937,7 +938,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void tableSwitchInsn(int instr, int opcode) throws LimitConjunctException {
+	public void tableSwitchInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -950,7 +951,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void tableCaseInsn(int min, int max, int value) throws LimitConjunctException {
+	public void tableCaseInsn(int min, int max, int value) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -964,7 +965,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException {
+	public void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -981,7 +982,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
-	public static void multiANewArrayInsn(int instr, int opcode) throws LimitConjunctException {
+	public void multiANewArrayInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1006,9 +1007,9 @@ public class SymbolicState {
 
 	private static List<InstructionListener> instructionListeners = new ArrayList<>();
 
-	public static void registerListener(InstructionListener listener) {
-		instructionListeners.add(listener);
-	}
+//	private void registerListener(InstructionListener listener) {
+//		instructionListeners.add(listener);
+//	}
 
 	private static void notifyEnterMethod(int methodNumber) {
 		for (InstructionListener listener : instructionListeners) {
@@ -1171,7 +1172,7 @@ public class SymbolicState {
 		return descriptor.substring(i + 1);
 	}
 
-	public static String getAsciiSignature(String descriptor) {
+	private String getAsciiSignature(String descriptor) {
 		return descriptor.replace('/', '_').replace("_", "_1").replace(";", "_2").replace("[", "_3").replace("(", "__")
 				.replace(")", "__");
 	}

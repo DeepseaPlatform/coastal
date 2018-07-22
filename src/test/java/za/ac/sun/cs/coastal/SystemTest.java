@@ -32,11 +32,32 @@ public class SystemTest {
 		}
 		String[] expected = expectedOutput.split("\n");
 		String[] actual = log.toString().split("\n");
-		int n = expected.length; 
-		assertEquals(n, actual.length);
-		for (int i = 0; i < n; i++) {
-			String prefix = actual[i].substring(0, expected[i].length());
-			assertEquals(expected[i], prefix);
+		int n = expected.length, i = 0; 
+		int m = actual.length, j = 0;
+		while ((i < n) && (j < m)) {
+			boolean mustMatch = true;
+			String exp = expected[i].trim();
+			String act = actual[j].trim();
+			if (exp.charAt(0) == '?') {
+				mustMatch = false;
+				exp = expected[i].substring(1).trim();
+			}
+			if (act.startsWith(exp)) {
+				i++;
+				j++;
+			} else if (!mustMatch) {
+				i++;
+			} else if (exp.length() < act.length()) {
+				act = actual[j].substring(0, exp.length());
+				assertEquals(exp, act);
+			} else {
+				assertEquals(exp, act);
+			}
+		}
+		if (n > m) {
+			assertEquals(expected[m], "");
+		} else if (m > n) {
+			assertEquals("", actual[n]);
 		}
 	}
 

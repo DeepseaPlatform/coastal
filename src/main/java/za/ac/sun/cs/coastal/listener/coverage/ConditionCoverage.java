@@ -12,15 +12,24 @@ import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 
 import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.instrument.MethodInstrumentationAdapter;
+import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class ConditionCoverage implements InstructionListener, Reporter, ConfigurationListener {
 
+	//********************************************************************************
+	//********************************************************************************
+	//
+	// BROKEN
+	//
+	//********************************************************************************
+	//********************************************************************************
+
 	private Logger log;
+
+	private InstrumentationClassManager classManager = null;
 
 	private final Map<Integer, Long> reached = new HashMap<>();
 
@@ -39,7 +48,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 
 	@Override
 	public void configurationLoaded(Configuration configuration) {
-		SymbolicState.registerListener(this);
+		// SymbolicState.registerListener(this);
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
 		dumpCoverage = configuration.getBooleanProperty("coastal.coverage.dump", dumpCoverage);
@@ -53,8 +62,13 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	}
 
 	@Override
+	public void changeInstrumentationManager(InstrumentationClassManager classManager) {
+		this.classManager = classManager;
+	}
+
+	@Override
 	public void enterMethod(int methodNumber) {
-		BitSet newJumpPoints = MethodInstrumentationAdapter.getJumpPoints(methodNumber);
+		BitSet newJumpPoints = classManager.getJumpPoints(methodNumber);
 		if (newJumpPoints != null) {
 			jumpPoints.or(newJumpPoints);
 		}

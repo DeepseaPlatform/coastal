@@ -1,137 +1,331 @@
-INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-INFO   ~~~~                                                              ~~~~
-INFO   ~~~~  COASTAL version coastal-test                                ~~~~
-INFO   ~~~~                                                              ~~~~
-INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-TRACE  coastal.dump = false
-TRACE  coastal.dump.asm = false
-TRACE  coastal.dump.paths = false
-TRACE  coastal.echooutput = false
-TRACE  coastal.limit.conjuncts = 0
-TRACE  coastal.limit.paths = 0
-TRACE  coastal.limit.runs = 0
-TRACE  coastal.limit.time = 0
-TRACE  coastal.main = tests.simple.Choice01
-TRACE  coastal.obeystops = false
-TRACE  coastal.recordmarks = false
-TRACE  coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
-TRACE  coastal.targets = tests.simple
-TRACE  coastal.triggers = tests.simple.Choice01.run(X: int)
-INFO   ----  starting dive 1  -----------------------------------------------
-TRACE  *** loading class tests.simple.Choice01, identified as target
-TRACE  visitCode()
-TRACE  visitLineNumber(line:3, label:L
-TRACE  visitVarInsn(opcode:25, var:0)
-TRACE  visitMethodInsn(opcode:183, owner:java/lang/Object, name:<init>)
-TRACE  visitInsn(opcode:177)
-TRACE  visitEnd()
-TRACE  visitCode()
-TRACE  visitLineNumber(line:6, label:L
-TRACE  visitIntInsn(opcode:16, operand:10)
-TRACE  visitMethodInsn(opcode:184, owner:tests/simple/Choice01, name:run)
-TRACE  visitLineNumber(line:7, label:L
-TRACE  visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
-TRACE  visitLdcInsn(value:done)
-TRACE  visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
-TRACE  visitLineNumber(line:8, label:L
-TRACE  visitInsn(opcode:177)
-TRACE  visitEnd()
-TRACE  visitCode()
-TRACE  visitLineNumber(line:11, label:L
-TRACE  visitVarInsn(opcode:21, var:0)
-TRACE  visitInsn(opcode:8)
-TRACE  visitJumpInsn(opcode:162, label:L
-TRACE  visitLineNumber(line:12, label:L
-TRACE  visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
-TRACE  visitLdcInsn(value:<5)
-TRACE  visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
-TRACE  visitJumpInsn(opcode:167, label:L
-TRACE  visitLineNumber(line:14, label:L
-TRACE  visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
-TRACE  visitLdcInsn(value:>=5)
-TRACE  visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
-TRACE  visitLineNumber(line:16, label:L
-TRACE  visitInsn(opcode:177)
-TRACE  visitEnd()
-TRACE  *** instrumented tests.simple.Choice01: 
-TRACE  *** class tests.simple.Choice01 instrumented
-TRACE  *** loading class java.lang.Object, uninstrumented
-TRACE  *** loading class java.lang.String, uninstrumented
-TRACE  *** loading class za.ac.sun.cs.coastal.symbolic.SymbolicState, uninstrumented
-TRACE  >>> symbolic mode switched on
-TRACE  --> st[] locals:{}
-TRACE  --> data:{}
-TRACE  ### LINENUMBER 11
-TRACE  ILOAD 0
-TRACE  --> st[X] locals:{0=X}
-TRACE  --> data:{}
-TRACE  ICONST_5
-TRACE  --> st[X, 5] locals:{0=X}
-TRACE  --> data:{}
-TRACE  IF_ICMPGE
-TRACE  >>> adding conjunct: X>=5
-TRACE  >>> spc is now: X>=5
-TRACE  --> st[] locals:{0=X}
-TRACE  --> data:{}
-TRACE  ### LINENUMBER 14
-TRACE  GETSTATIC java/lang/System out Ljava/io/PrintStream;
-TRACE  --> st[U_D_0] locals:{0=X}
-TRACE  --> data:{java/lang/System/out=U_D_0}
-TRACE  *** loading class java.lang.System, uninstrumented
-TRACE  LDC >=5
-TRACE  --> st[U_D_0, 1] locals:{0=X}
-TRACE  --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
-TRACE  INVOKEVIRTUAL java/io/PrintStream println (Ljava/lang/String;)V
-TRACE  --> st[] locals:{0=X}
-TRACE  --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
-TRACE  *** loading class java.io.PrintStream, uninstrumented
-TRACE  ### LINENUMBER 16
-TRACE  RETURN
-TRACE  >>> symbolic mode switched off
-TRACE  --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
-INFO   explored <1> X>=5
-INFO   trying   <0> X<5
-INFO   no model
-TRACE  (The spc is X<5)
-INFO   no further paths
-TRACE  Tree shape: (IL)
-INFO   ====  Instrumentation  ===============================================
-INFO     Class load requests: 
-INFO     Cache hits: 
-INFO     Classes instrumented: 
-INFO     Pre-instrumented size: 
-INFO     Post-instrumented size: 
-INFO     Load time: 
-INFO     Instrumentation time: 
-INFO   ====  Dive  ==========================================================
-INFO     Runs: 1
-INFO     Overall dive time: 
-INFO   ====  COASTAL  =======================================================
-INFO     Started: 
-INFO     Stopped: 
-INFO     Overall time: 
-INFO   ====  DepthFirstStrategy  ============================================
-INFO     Inserted paths: 2
-INFO     Revisited paths: 0
-INFO     Infeasible paths: 1
-INFO     Solver time: 
-INFO     Path tree time: 
-INFO     Model extraction time: 
-INFO     Overall strategy time: 
-INFO   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-INFO   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-INFO   @@@@                                                              @@@@
-INFO   @@@@  ONLY A SINGLE RUN EXECUTED                                  @@@@
-INFO   @@@@  CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE   @@@@
-INFO   @@@@                                                              @@@@
-INFO   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-INFO   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-INFO   ~~~~                                                              ~~~~
-INFO   ~~~~  COASTAL DONE                                                ~~~~
-INFO   ~~~~                                                              ~~~~
-INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-INFO   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~                                                              ~~~~
+~~~~  COASTAL version coastal-test                                ~~~~
+~~~~                                                              ~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+coastal.dump = false
+coastal.dump.paths = false
+coastal.echooutput = false
+coastal.limit.conjuncts = 0
+coastal.limit.paths = 0
+coastal.limit.runs = 0
+coastal.limit.time = 0
+coastal.main = tests.simple.Choice01
+coastal.obeystops = false
+coastal.recordmarks = false
+coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
+coastal.targets = tests.simple
+coastal.triggers = tests.simple.Choice01.run(X: int)
+----  starting dive 1  -----------------------------------------------
+*** loading class tests.simple.Choice01, identified as target
+visitCode()
+visitLineNumber(line:3, label:L
+visitVarInsn(opcode:25, var:0)
+visitMethodInsn(opcode:183, owner:java/lang/Object, name:<init>)
+visitInsn(opcode:177)
+visitEnd()
+visitCode()
+visitLineNumber(line:6, label:L
+visitIntInsn(opcode:16, operand:10)
+visitMethodInsn(opcode:184, owner:tests/simple/Choice01, name:run)
+visitLineNumber(line:7, label:L
+visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
+visitLdcInsn(value:done)
+visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
+visitLineNumber(line:8, label:L
+visitInsn(opcode:177)
+visitEnd()
+visitCode()
+visitLineNumber(line:11, label:L
+visitVarInsn(opcode:21, var:0)
+visitInsn(opcode:8)
+visitJumpInsn(opcode:162, label:L
+visitLineNumber(line:12, label:L
+visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
+visitLdcInsn(value:<5)
+visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
+visitJumpInsn(opcode:167, label:L
+visitLineNumber(line:14, label:L
+visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
+visitLdcInsn(value:>=5)
+visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
+visitLineNumber(line:16, label:L
+visitInsn(opcode:177)
+visitEnd()
+*** instrumented tests.simple.Choice01: 
+*** class tests.simple.Choice01 instrumented
+*** loading class java.lang.Object, uninstrumented
+*** loading class java.lang.String, uninstrumented
+*** loading class za.ac.sun.cs.coastal.symbolic.SymbolicVM, uninstrumented
+>>> symbolic mode switched on
+--> st[] locals:{}
+--> data:{}
+### LINENUMBER 11
+ILOAD 0
+--> st[X] locals:{0=X}
+--> data:{}
+ICONST_5
+--> st[X, 5] locals:{0=X}
+--> data:{}
+IF_ICMPGE
+>>> adding conjunct: X>=5
+>>> spc is now: X>=5
+--> st[] locals:{0=X}
+--> data:{}
+### LINENUMBER 14
+GETSTATIC java/lang/System out Ljava/io/PrintStream;
+--> st[U_D_0] locals:{0=X}
+--> data:{java/lang/System/out=U_D_0}
+*** loading class java.lang.System, uninstrumented
+LDC >=5
+--> st[U_D_0, 1] locals:{0=X}
+--> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
+INVOKEVIRTUAL java/io/PrintStream println (Ljava/lang/String;)V
+--> st[] locals:{0=X}
+--> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
+*** loading class java.io.PrintStream, uninstrumented
+### LINENUMBER 16
+RETURN
+>>> symbolic mode switched off
+--> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
+explored <1> X>=5
+trying   <0> X<5
+no model
+(The spc is X<5)
+no further paths
+Tree shape: (IL)
+====  tests.simple.Choice01  =========================================
+------ <init> ------
+    LDC 1
+    LDC 1
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.startMethod (II)V
+   L0
+    LDC 0
+    LDC 3
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.linenumber (II)V
+    LINENUMBER 3 L0
+    LDC 1
+    LDC 25
+    LDC 0
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.varInsn (III)V
+    ALOAD 0
+    LDC 2
+    LDC 183
+    LDC "java/lang/Object"
+    LDC "<init>"
+    LDC "()V"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.methodInsn (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    LDC 3
+    LDC 177
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.insn (II)V
+    RETURN
+   L1
+    LOCALVARIABLE this Ltests/simple/Choice01; L0 L1 0
+    MAXSTACK = 1
+    MAXLOCALS = 1
+------ main ------
+    LDC 2
+    LDC 1
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.startMethod (II)V
+   L0
+    LDC 3
+    LDC 6
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.linenumber (II)V
+    LINENUMBER 6 L0
+    LDC 4
+    LDC 16
+    LDC 10
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.intInsn (III)V
+    BIPUSH 10
+    LDC 5
+    LDC 184
+    LDC "tests/simple/Choice01"
+    LDC "run"
+    LDC "(I)V"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.methodInsn (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    INVOKESTATIC tests/simple/Choice01.run (I)V
+   L1
+    LDC 5
+    LDC 7
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.linenumber (II)V
+    LINENUMBER 7 L1
+    LDC 6
+    LDC 178
+    LDC "java/lang/System"
+    LDC "out"
+    LDC "Ljava/io/PrintStream;"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.fieldInsn (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    LDC 7
+    LDC 18
+    LDC "done"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.ldcInsn (IILjava/lang/Object;)V
+    LDC "done"
+    LDC 8
+    LDC 182
+    LDC "java/io/PrintStream"
+    LDC "println"
+    LDC "(Ljava/lang/String;)V"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.methodInsn (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
+   L2
+    LDC 8
+    LDC 8
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.linenumber (II)V
+    LINENUMBER 8 L2
+    LDC 9
+    LDC 177
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.insn (II)V
+    RETURN
+   L3
+    LOCALVARIABLE args [Ljava/lang/String; L0 L3 0
+    MAXSTACK = 2
+    MAXLOCALS = 1
+------ run ------
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.getSymbolicMode ()Z
+    IFNE L0
+    LDC 3
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.triggerMethod (I)V
+    LDC 0
+    LDC 0
+    LDC 0
+    ILOAD 0
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.getConcreteInt (IIII)I
+    ISTORE 0
+    GOTO L1
+   L0
+    LDC 3
+   FRAME SAME
+    LDC 1
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.startMethod (II)V
+   L1
+   FRAME SAME
+   L2
+    LDC 9
+    LDC 11
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.linenumber (II)V
+    LINENUMBER 11 L2
+    LDC 10
+    LDC 21
+    LDC 0
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.varInsn (III)V
+    ILOAD 0
+    LDC 11
+    LDC 8
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.insn (II)V
+    ICONST_5
+    LDC 12
+    LDC 162
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.jumpInsn (II)V
+    IF_ICMPGE L3
+    LDC 12
+    LDC 162
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.postJumpInsn (II)V
+   L4
+    LDC 12
+    LDC 12
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.linenumber (II)V
+    LINENUMBER 12 L4
+    LDC 13
+    LDC 178
+    LDC "java/lang/System"
+    LDC "out"
+    LDC "Ljava/io/PrintStream;"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.fieldInsn (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    LDC 14
+    LDC 18
+    LDC "<5"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.ldcInsn (IILjava/lang/Object;)V
+    LDC "<5"
+    LDC 15
+    LDC 182
+    LDC "java/io/PrintStream"
+    LDC "println"
+    LDC "(Ljava/lang/String;)V"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.methodInsn (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
+    LDC 16
+    LDC 167
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.jumpInsn (II)V
+    GOTO L5
+   L3
+    LDC 16
+    LDC 14
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.linenumber (II)V
+    LINENUMBER 14 L3
+   FRAME SAME
+    LDC 17
+    LDC 178
+    LDC "java/lang/System"
+    LDC "out"
+    LDC "Ljava/io/PrintStream;"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.fieldInsn (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    LDC 18
+    LDC 18
+    LDC ">=5"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.ldcInsn (IILjava/lang/Object;)V
+    LDC ">=5"
+    LDC 19
+    LDC 182
+    LDC "java/io/PrintStream"
+    LDC "println"
+    LDC "(Ljava/lang/String;)V"
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.methodInsn (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/String;)V
+   L5
+    LDC 19
+    LDC 16
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.linenumber (II)V
+    LINENUMBER 16 L5
+   FRAME SAME
+    LDC 20
+    LDC 177
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.insn (II)V
+    RETURN
+   L6
+    LOCALVARIABLE x I L2 L6 0
+    MAXSTACK = 2
+    MAXLOCALS = 1
+====  Instrumentation  ===============================================
+  Class load requests: 6
+  Cache hits: 0
+  Classes instrumented: 1
+  Pre-instrumented size: 
+  Post-instrumented size: 
+  Load time: 
+  Instrumentation time: 
+====  Dive  ==========================================================
+  Runs: 1
+  Overall dive time: 
+====  COASTAL  =======================================================
+  Started: 
+  Stopped: 
+  Overall time: 
+====  DepthFirstStrategy  ============================================
+  Inserted paths: 2
+  Revisited paths: 0
+  Infeasible paths: 1
+  Solver time: 
+  Path tree time: 
+  Model extraction time: 
+  Overall strategy time: 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@                                                              @@@@
+@@@@  ONLY A SINGLE RUN EXECUTED                                  @@@@
+@@@@  CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE   @@@@
+@@@@                                                              @@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~                                                              ~~~~
+~~~~  COASTAL DONE                                                ~~~~
+~~~~                                                              ~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

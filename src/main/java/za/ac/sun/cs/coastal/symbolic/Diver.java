@@ -11,7 +11,7 @@ import java.util.Map;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.instrument.InstrumentationClassLoader;
+import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 import za.ac.sun.cs.coastal.strategy.Strategy;
@@ -27,15 +27,14 @@ public class Diver implements Reporter {
 
 	private long time = 0;
 
-	private final InstrumentationClassLoader instrumentationClassLoader;
-
+	private final InstrumentationClassManager classManager;
+	
 	public Diver(Configuration configuration) {
 		this.configuration = configuration;
 		this.log = configuration.getLog();
 		configuration.getReporterManager().register(this);
-		SymbolicState.initialize(configuration);
 		String cp = System.getProperty("java.class.path");
-		instrumentationClassLoader = new InstrumentationClassLoader(configuration, cp);
+		classManager = new InstrumentationClassManager(configuration, cp);
 	}
 
 	public void dive() {
@@ -66,11 +65,15 @@ public class Diver implements Reporter {
 			runs++;
 			log.info(Banner.getBannerLine("starting dive " + runs, '-'));
 			long t0 = System.currentTimeMillis();
-			SymbolicState.reset(concreteValues);
+			SymbolicState symbolicState = new SymbolicState(configuration, concreteValues);
+			SymbolicVM.setState(symbolicState);
 			performRun();
 			time += System.currentTimeMillis() - t0;
-			concreteValues = strategy.refine();
-		} while ((concreteValues != null) && SymbolicState.mayContinue());
+			concreteValues = strategy.refine(symbolicState);
+			if (!symbolicState.mayContinue()) {
+				break;
+			}
+		} while (concreteValues != null);
 	}
 
 	public int getRuns() {
@@ -85,9 +88,10 @@ public class Diver implements Reporter {
 	});
 
 	private void performRun() {
+		ClassLoader classLoader = classManager.createClassLoader();
 		PrintStream out = System.out, err = System.err;
 		try {
-			Class<?> clas = instrumentationClassLoader.loadClass(configuration.getMain());
+			Class<?> clas = classLoader.loadClass(configuration.getMain());
 			Method meth = clas.getMethod("main", String[].class);
 			// Redirect System.out/System.err
 			if (!configuration.getEchoOutput()) {
@@ -141,13 +145,13 @@ public class Diver implements Reporter {
 
 	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
-		Map<String, Integer> markers = SymbolicState.getMarkers();
-		if (markers.size() > 0) {
-			info.println("  === MARKERS ===");
-			for (Map.Entry<String, Integer> entry : markers.entrySet()) {
-				info.printf("    %-10s %6d\n", entry.getKey(), entry.getValue());
-			}
-		}
+//		Map<String, Integer> markers = symbolicState.getMarkers();
+//		if (markers.size() > 0) {
+//			info.println("  === MARKERS ===");
+//			for (Map.Entry<String, Integer> entry : markers.entrySet()) {
+//				info.printf("    %-10s %6d\n", entry.getKey(), entry.getValue());
+//			}
+//		}
 		info.println("  Runs: " + runs);
 		info.println("  Overall dive time: " + time);
 	}

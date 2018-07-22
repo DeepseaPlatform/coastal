@@ -68,16 +68,16 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 	}
 
 	@Override
-	public Map<String, Constant> refine() {
+	public Map<String, Constant> refine(SymbolicState symbolicState) {
 		long t0 = System.currentTimeMillis();
-		Map<String, Constant> refinement = refine0();
+		Map<String, Constant> refinement = refine0(symbolicState);
 		totalTime += System.currentTimeMillis() - t0;
 		return refinement;
 	}
 
-	private Map<String, Constant> refine0() {
+	private Map<String, Constant> refine0(SymbolicState symbolicState) {
 		long t;
-		SegmentedPC spc = SymbolicState.getSegmentedPathCondition();
+		SegmentedPC spc = symbolicState.getSegmentedPathCondition();
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		boolean infeasible = false;
 		while (true) {

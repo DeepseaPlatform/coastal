@@ -1,10 +1,8 @@
 package za.ac.sun.cs.coastal.instrument;
 
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
-import java.util.TreeMap;
 
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Handle;
@@ -17,31 +15,21 @@ import za.ac.sun.cs.coastal.Configuration.Trigger;
 
 public class MethodInstrumentationAdapter extends MethodVisitor {
 
+	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
+	
+	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicVM";
+	
 	private final Configuration configuration;
 
 	private final Logger log;
 
-	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
-	
-	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicState";
-
-	private static int instructionCounter = 0;
-
-	private static int methodCounter = 0;
+	private final InstrumentationClassManager classManager;
 
 	private final int triggerIndex;
 
 	private final boolean isStatic;
 
 	private final int argCount;
-
-	private static Map<Integer, Integer> firstInstruction = new TreeMap<>();
-
-	private static Map<Integer, Integer> lastInstruction = new TreeMap<>();
-
-	private static Map<Integer, BitSet> branchInstructions = new TreeMap<>();
-
-	private static Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
 
 	private static final class Tuple {
 		final int min, max, cur;
@@ -53,28 +41,19 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		}
 	}
 
-	private static BitSet currentBranchInstructions;
+	private static Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
+	
+	// private static BitSet currentBranchInstructions;
 
-	public MethodInstrumentationAdapter(Configuration configuration, MethodVisitor cv, int triggerIndex,
+	public MethodInstrumentationAdapter(Configuration configuration, InstrumentationClassManager classManager, MethodVisitor cv, int triggerIndex,
 			boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.configuration = configuration;
 		this.log = configuration.getLog();
+		this.classManager = classManager;
 		this.triggerIndex = triggerIndex;
 		this.isStatic = isStatic;
 		this.argCount = argCount;
-	}
-
-	public static Integer getFirstInstruction(int methodNumber) {
-		return firstInstruction.get(methodNumber);
-	}
-
-	public static Integer getLastInstruction(int methodNumber) {
-		return lastInstruction.get(methodNumber);
-	}
-
-	public static BitSet getJumpPoints(int methodNumber) {
-		return branchInstructions.get(methodNumber);
 	}
 
 	private void visitParameter(Trigger trigger, int triggerIndex, int index, int address) {
@@ -121,7 +100,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitLineNumber(int line, Label start) {
 		log.trace("visitLineNumber(line:{}, label:{})", line, start);
-		mv.visitLdcInsn(instructionCounter);
+		mv.visitLdcInsn(classManager.getInstructionCounter());
 		mv.visitLdcInsn(line);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(II)V", false);
 		mv.visitLineNumber(line, start);
@@ -130,8 +109,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitEnd() {
 		log.trace("visitEnd()");
-		lastInstruction.put(methodCounter, instructionCounter);
-		branchInstructions.put(methodCounter, currentBranchInstructions);
+		classManager.registerLastInstruction();
+		// branchInstructions.put(methodCounter, currentBranchInstructions);
 		mv.visitEnd();
 	}
 
@@ -144,7 +123,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			Label label = new Label();
 			mv.visitJumpInsn(Opcodes.IFNE, label);
 			//---   triggerMethod()
-			mv.visitLdcInsn(++methodCounter);
+			mv.visitLdcInsn(classManager.getNextMethodCounter());
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(I)V", false);
 			//---   GENERATE PARAMETER OVERRIDES
 			Trigger trigger = configuration.getTrigger(triggerIndex);
@@ -158,7 +137,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitLabel(label);
 			//--- } else {
 			//---   startMethod()
-			mv.visitLdcInsn(methodCounter);
+			mv.visitLdcInsn(classManager.getMethodCounter());
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
@@ -166,19 +145,19 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitLabel(end);
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		} else {
-			mv.visitLdcInsn(++methodCounter);
+			mv.visitLdcInsn(classManager.getNextMethodCounter());
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 		}
-		firstInstruction.put(methodCounter, instructionCounter + 1);
-		currentBranchInstructions = new BitSet();
+		classManager.registerFirstInstruction();
+		// currentBranchInstructions = new BitSet();
 		mv.visitCode();
 	}
 
 	@Override
 	public void visitInsn(int opcode) {
 		log.trace("visitInsn(opcode:{})", opcode);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(II)V", false);
 		mv.visitInsn(opcode);
@@ -187,7 +166,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitIntInsn(int opcode, int operand) {
 		log.trace("visitIntInsn(opcode:{}, operand:{})", opcode, operand);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(operand);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "intInsn", "(III)V", false);
@@ -197,7 +176,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitVarInsn(int opcode, int var) {
 		log.trace("visitVarInsn(opcode:{}, var:{})", opcode, var);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(var);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "varInsn", "(III)V", false);
@@ -207,7 +186,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
 		log.trace("visitTypeInsn(opcode:{}, type:{})", opcode, type);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "typeInsn", "(II)V", false);
 		mv.visitTypeInsn(opcode, type);
@@ -216,7 +195,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
 		log.trace("visitFieldInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(owner);
 		mv.visitLdcInsn(name);
@@ -232,7 +211,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		if (owner.equals(SYMBOLIC)) {
 			mv.visitMethodInsn(opcode, LIBRARY, name, descriptor, isInterface);
 		} else {
-			mv.visitLdcInsn(++instructionCounter);
+			mv.visitLdcInsn(classManager.getNextInstructionCounter());
 			mv.visitLdcInsn(opcode);
 			mv.visitLdcInsn(owner);
 			mv.visitLdcInsn(name);
@@ -247,7 +226,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle,
 			Object... bootstrapMethodArguments) {
 		log.trace("visitInvokeDynamicInsn(name:{})", name);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(186);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "invokeDynamicInsn", "(II)V", false);
 		mv.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
@@ -256,22 +235,22 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
 		log.trace("visitJumpInsn(opcode:{}, label:{})", opcode, label);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(II)V", false);
 		mv.visitJumpInsn(opcode, label);
 		if (opcode != Opcodes.GOTO) {
-			mv.visitLdcInsn(instructionCounter);
+			mv.visitLdcInsn(classManager.getInstructionCounter());
 			mv.visitLdcInsn(opcode);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "postJumpInsn", "(II)V", false);
-			currentBranchInstructions.set(instructionCounter);
+			// currentBranchInstructions.set(instructionCounter);
 		}
 	}
 
 	@Override
 	public void visitLdcInsn(Object value) {
 		log.trace("visitLdcInsn(value:{})", value);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(18);
 		mv.visitLdcInsn(value);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "ldcInsn", "(IILjava/lang/Object;)V", false);
@@ -281,7 +260,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitIincInsn(int var, int increment) {
 		log.trace("visitJumpInsn(var:{}, increment:{})", var, increment);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(var);
 		mv.visitLdcInsn(increment);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "iincInsn", "(III)V", false);
@@ -291,7 +270,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
 		log.trace("visitTableSwitchInsn(min:{}, max:{}, dflt:{})", min, max, dflt);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(170);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableSwitchInsn", "(II)V", false);
 		assert labels.length == (max - min + 1);
@@ -330,7 +309,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
 		log.trace("visitLookupSwitchInsn(dflt:{})", dflt);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(171);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "lookupSwitchInsn", "(II)V", false);
 		mv.visitLookupSwitchInsn(dflt, keys, labels);
@@ -339,14 +318,10 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	@Override
 	public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
 		log.trace("visitMultiANewArrayInsn(numDimensions:{})", numDimensions);
-		mv.visitLdcInsn(++instructionCounter);
+		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(197);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "multiANewArrayInsn", "(II)V", false);
 		mv.visitMultiANewArrayInsn(descriptor, numDimensions);
-	}
-
-	public static int getInstructionCount() {
-		return instructionCounter;
 	}
 
 }

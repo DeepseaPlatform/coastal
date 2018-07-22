@@ -1,6 +1,10 @@
 package za.ac.sun.cs.coastal.listener;
 
+import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
+
 public interface InstructionListener extends Listener {
+
+	void changeInstrumentationManager(InstrumentationClassManager classManager);
 
 	void enterMethod(int methodNumber);
 

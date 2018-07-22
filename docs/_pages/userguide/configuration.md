@@ -50,7 +50,6 @@ instead of the default file distributed with COASTAL.
 | `coastal.limit.time` | Limit on number of seconds allowed for runs | 0 |
 | `coastal.limit.path` | Limit on number of paths investigated | 0 |
 | `coastal.limit.conjuncts` | Limit on number of conjuncts investigated per path | 0 |
-| `coastal.dump.asm` | Whether instrumented code displayed (at end) | `false` |
 | `coastal.dump.paths` | Whether path tree construction information is logged | `false` |
 | `coastal.dump` | Set all dump settings | - |
 
@@ -213,18 +212,6 @@ coastal.limit.conjuncts = 50
 ~~~
 
 The default value is 0.
-
-The default value is _false_.
-
-## coastal.dump.asm
-
-A boolean setting to control whether the instrumented bytecodes should
-be dumped to the log at the end of the execution of the tool.
-This is mainly for debugging purposes and users should not need to use this.
-
-~~~
-coastal.dump.asm = false
-~~~
 
 The default value is _false_.
 

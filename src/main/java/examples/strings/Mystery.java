@@ -1,6 +1,6 @@
 package examples.strings;
 
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+import za.ac.sun.cs.coastal.Symbolic;
 
 public class Mystery {
 	
@@ -42,7 +42,7 @@ public class Mystery {
 				//	Debug.printPC("Current PC: ");
 				//}
 				// throw new RuntimeException("Infinite loop");
-				SymbolicState.stop("BUG");
+				Symbolic.stop("BUG");
 				return "EXCEPTION: Infinite loop";
 			}
 			old = i;

@@ -7,15 +7,16 @@ import java.util.Properties;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.instrument.MethodInstrumentationAdapter;
+import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class InstructionCoverage implements InstructionListener, Reporter, ConfigurationListener {
 
 	private Logger log;
+
+	private InstrumentationClassManager classManager = null;
 
 	private final BitSet covered = new BitSet();
 
@@ -30,7 +31,6 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 
 	@Override
 	public void configurationLoaded(Configuration configuration) {
-		SymbolicState.registerListener(this);
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
 		dumpCoverage = configuration.getBooleanProperty("coastal.dump.coverage", dumpCoverage);
@@ -42,9 +42,14 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	}
 
 	@Override
+	public void changeInstrumentationManager(InstrumentationClassManager classManager) {
+		this.classManager = classManager;
+	}
+
+	@Override
 	public void enterMethod(int methodNumber) {
-		Integer first = MethodInstrumentationAdapter.getFirstInstruction(methodNumber);
-		Integer last = MethodInstrumentationAdapter.getLastInstruction(methodNumber);
+		Integer first = classManager.getFirstInstruction(methodNumber);
+		Integer last = classManager.getLastInstruction(methodNumber);
 		if ((first != null) && (last != null)) {
 			for (int i = first; i <= last; i++) {
 				potentials.set(i);

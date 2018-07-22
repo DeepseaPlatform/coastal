@@ -19,7 +19,7 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 
 	private final Configuration configuration;
 
-	private final boolean dumpAsm;
+	private final InstrumentationClassManager classManager;
 
 	private final String name;
 
@@ -27,14 +27,12 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 
 	private final PrintWriter pwriter = new PrintWriter(swriter);
 
-	public InstrumentationAdapter(Configuration configuration, String name, ClassVisitor cv) {
+	public InstrumentationAdapter(Configuration configuration, InstrumentationClassManager classManager, String name, ClassVisitor cv) {
 		super(Opcodes.ASM6, cv);
 		this.configuration = configuration;
-		this.dumpAsm = configuration.getDumpAsm();
+		this.classManager = classManager;
 		this.name = name;
-		if (dumpAsm) {
-			configuration.getReporterManager().register(this);
-		}
+		configuration.getReporterManager().register(this);
 	}
 
 	@Override
@@ -43,7 +41,7 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 		boolean isStatic = (access & Opcodes.ACC_STATIC) > 0;
 		int argCount = countArguments(desc);
 		MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
-		if ((mv != null) && dumpAsm) {
+		if (mv != null) {
 			Printer p = new Textifier(Opcodes.ASM6) {
 				@Override
 				public void visitCode() {
@@ -58,7 +56,7 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 			mv = new TraceMethodVisitor(mv, p);
 		}
 		if (mv != null) {
-			mv = new MethodInstrumentationAdapter(configuration, mv, triggerIndex, isStatic, argCount);
+			mv = new MethodInstrumentationAdapter(configuration, classManager, mv, triggerIndex, isStatic, argCount);
 		}
 		return mv;
 	}
