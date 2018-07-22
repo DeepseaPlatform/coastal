@@ -19,13 +19,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - All features from DEEPSEA
 
 ### Changed
-- ...
+- Setting `coastal.recordmarks` replaced with marker listener
+- Internally, (almost) all classes are made non-static
 
 ### Deprecated
 - ...
 
 ### Removed
-- ...
+- All `coastal.dump...` settings
 
 ### Fixed
 - ...
