@@ -16,6 +16,7 @@ import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
 import za.ac.sun.cs.coastal.listener.MarkerListener;
+import za.ac.sun.cs.coastal.listener.PathListener;
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 import za.ac.sun.cs.coastal.strategy.Strategy;
@@ -43,14 +44,17 @@ public class Diver implements Reporter {
 
 	public void dive() {
 		List<InstructionListener> instructionListeners = new ArrayList<>();
-		for (InstructionListener listener : configuration
-				.<InstructionListener>getListeners(InstructionListener.class)) {
+		for (InstructionListener listener : configuration.<InstructionListener>getListeners(InstructionListener.class)) {
 			listener.changeInstrumentationManager(classManager);
 			instructionListeners.add(listener);
 		}
 		List<MarkerListener> markerListeners = new ArrayList<>();
 		for (MarkerListener listener : configuration.<MarkerListener>getListeners(MarkerListener.class)) {
 			markerListeners.add(listener);
+		}
+		List<PathListener> pathListeners = new ArrayList<>();
+		for (PathListener listener : configuration.<PathListener>getListeners(PathListener.class)) {
+			pathListeners.add(listener);
 		}
 		Strategy strategy = configuration.getStrategy();
 		if (strategy == null) {
@@ -84,6 +88,9 @@ public class Diver implements Reporter {
 			SymbolicVM.setState(symbolicState);
 			performRun();
 			time += System.currentTimeMillis() - t0;
+			for (PathListener listener : pathListeners) {
+				listener.visit(symbolicState);
+			}
 			concreteValues = strategy.refine(symbolicState);
 			if (!symbolicState.mayContinue()) {
 				break;
