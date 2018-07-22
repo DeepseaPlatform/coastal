@@ -6,7 +6,7 @@ permalink: /devguide/
 
 This is the developer's guide.  It should include:
 
-- architecture of COASTAL
+- [Architecture of COASTAL]({{ "/devguide/architecture" | relative_url }})
 - [Design decisions]({{ "/devguide/design" | relative_url }})
 - limitations
 
