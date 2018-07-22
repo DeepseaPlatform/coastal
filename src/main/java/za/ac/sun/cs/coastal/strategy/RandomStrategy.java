@@ -49,13 +49,13 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
+		pathTree = new RandomPathTree(configuration);
 		randomSeed = configuration.getLongProperty("coastal.randomStrategy.seed", randomSeed);
 		pathTree.setSeed(randomSeed);
 		pathLimit = configuration.getLimitPaths();
 		if (pathLimit == 0) {
 			pathLimit = Long.MIN_VALUE;
 		}
-		pathTree = new RandomPathTree(configuration);
 		// Set up green
 		green = new Green("COASTAL", LogManager.getLogger("GREEN"));
 		Properties greenProperties = configuration.getOriginalProperties();
