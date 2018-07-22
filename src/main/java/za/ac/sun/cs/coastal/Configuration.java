@@ -49,7 +49,6 @@ public class Configuration {
 	private final long limitConjuncts; // cap on the number of conjuncts per path condition
 	private final boolean echoOutput; // is main program output displayed
 	private final boolean obeyStops; // are symbolic termination calls obeyed
-	private final boolean recordMarks; // are symbolic markers are recorded
 	private final boolean dumpPaths; // dump path tree after each dive?
 	private final boolean dumpAll; // dump everything?
 	private final List<Listener> listeners; // listeners for various events
@@ -69,10 +68,8 @@ public class Configuration {
 			final Map<String, Integer> minBounds, final Map<String, Integer> maxBounds,
 			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
 			final long limitPaths, final long limitConjuncts, final boolean echoOutput, final boolean obeyStops,
-			final boolean recordMarks,
-			final boolean dumpPaths, final boolean dumpAll,
-			final List<Listener> listeners, final List<ConfigurationListener> configurationListeners,
-			final Properties originalProperties) {
+			final boolean dumpPaths, final boolean dumpAll, final List<Listener> listeners,
+			final List<ConfigurationListener> configurationListeners, final Properties originalProperties) {
 		this.version = version;
 		this.log = log;
 		this.reporterManager = reporterManager;
@@ -90,7 +87,6 @@ public class Configuration {
 		this.limitConjuncts = limitConjuncts;
 		this.echoOutput = echoOutput;
 		this.obeyStops = obeyStops;
-		this.recordMarks = recordMarks;
 		this.dumpPaths = dumpPaths;
 		this.dumpAll = dumpAll;
 		this.listeners = new ArrayList<>(listeners);
@@ -226,16 +222,23 @@ public class Configuration {
 		return obeyStops;
 	}
 
-	public boolean getRecordMarks() {
-		return recordMarks;
-	}
-
 	public boolean getDumpPaths() {
 		return dumpPaths;
 	}
 
 	public boolean getDumpAll() {
 		return dumpAll;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <L extends Listener> List<L> getListeners(Class<L> clas) {
+		List<L> result = new ArrayList<>();
+		for (Listener listener : listeners) {
+			if (clas.isInstance(listener)) {
+				result.add((L) listener);
+			}
+		}
+		return result;
 	}
 
 	//	/**
@@ -317,7 +320,6 @@ public class Configuration {
 		properties.put("coastal.limit.conjuncts", limitConjuncts);
 		properties.put("coastal.echooutput", echoOutput);
 		properties.put("coastal.obeystops", obeyStops);
-		properties.put("coastal.recordmarks", recordMarks);
 		properties.put("coastal.dump.paths", dumpPaths);
 		properties.put("coastal.dump", dumpAll);
 		if (!listeners.isEmpty()) {

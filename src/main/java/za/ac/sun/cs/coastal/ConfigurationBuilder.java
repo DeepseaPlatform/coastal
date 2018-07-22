@@ -49,7 +49,6 @@ public class ConfigurationBuilder {
 	private long limitConjuncts = 0; // cap on the number of conjuncts per path condition
 	private boolean echoOutput = false; // is main program output displayed
 	private boolean obeyStops = false; // are symbolic termination calls obeyed
-	private boolean recordMarks = false; // are symbolic markers are recorded
 	private boolean dumpPaths = false; // dump path tree after each dive?
 	private boolean dumpAll = false; // dump everything?
 	private final List<Listener> listeners = new ArrayList<>(); // listeners for various events
@@ -147,11 +146,6 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
-	public ConfigurationBuilder setRecordMarks(boolean recordMarks) {
-		this.recordMarks = recordMarks;
-		return this;
-	}
-
 	public ConfigurationBuilder setDumpPaths(boolean dumpPaths) {
 		this.dumpPaths = dumpPaths;
 		return this;
@@ -171,10 +165,9 @@ public class ConfigurationBuilder {
 	}
 
 	public Configuration construct() {
-		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds, delegates, strategy,
-				limitRuns, limitTime, limitPaths, limitConjuncts, echoOutput, obeyStops, recordMarks,
-				dumpPaths, dumpAll, listeners, configurationListeners,
-				originalProperties);
+		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds,
+				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, echoOutput, obeyStops, dumpPaths,
+				dumpAll, listeners, configurationListeners, originalProperties);
 	}
 
 	// ======================================================================
@@ -272,7 +265,6 @@ public class ConfigurationBuilder {
 		setDumpPaths(getBooleanProperty(properties, "coastal.dump.paths", dumpPaths));
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", echoOutput));
 		setObeyStops(getBooleanProperty(properties, "coastal.obeystops", obeyStops));
-		setRecordMarks(getBooleanProperty(properties, "coastal.recordmarks", recordMarks));
 		p = properties.getProperty("coastal.strategy");
 		if (p != null) {
 			Object str = createInstance(p);

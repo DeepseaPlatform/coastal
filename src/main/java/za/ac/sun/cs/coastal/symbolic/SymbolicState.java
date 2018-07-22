@@ -2,7 +2,6 @@ package za.ac.sun.cs.coastal.symbolic;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +16,7 @@ import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.Configuration.Trigger;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
+import za.ac.sun.cs.coastal.listener.MarkerListener;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
@@ -45,15 +45,15 @@ public class SymbolicState {
 
 	private boolean symbolicMode = false;
 
-	private Stack<SymbolicFrame> frames = new Stack<>();
+	private final Stack<SymbolicFrame> frames = new Stack<>();
 
 	private int objectIdCount = 0;
 
 	private int newVariableCount = 0;
 
-	private Map<String, Expression> instanceData = new HashMap<>();
+	private final Map<String, Expression> instanceData = new HashMap<>();
 
-	private Stack<Expression> args = new Stack<>();
+	private final Stack<Expression> args = new Stack<>();
 
 	private SegmentedPC spc = null;
 
@@ -63,39 +63,28 @@ public class SymbolicState {
 
 	private boolean isPreviousDuplicate = false;
 
-	private Set<String> conjunctSet = new HashSet<>();
+	private final Set<String> conjunctSet = new HashSet<>();
 
 	private final Map<String, Constant> concreteValues;
 
 	private boolean mayContinue = true;
 
-	private Map<String, Integer> markers = new HashMap<>();
+	private final Stack<Expression> pendingSwitch = new Stack<>();
 
-	private Stack<Expression> pendingSwitch = new Stack<>();
+	private final List<InstructionListener> instructionListeners;
 
-	public SymbolicState(Configuration configuration, Map<String, Constant> concreteValues) {
+	private final List<MarkerListener> markerListeners;
+
+	public SymbolicState(Configuration configuration, Map<String, Constant> concreteValues,
+			List<InstructionListener> instructionListeners, List<MarkerListener> markerListeners) {
 		this.configuration = configuration;
 		this.log = configuration.getLog();
 		long lc = configuration.getLimitConjuncts();
 		this.limitConjuncts = (lc == 0) ? Long.MAX_VALUE : lc;
 		this.concreteValues = concreteValues;
+		this.instructionListeners = instructionListeners;
+		this.markerListeners = markerListeners;
 	}
-
-	/*
-	public static void reset(Map<String, Constant> concreteValues) {
-		dangerFlag = false;
-		symbolicMode = false;
-		frames.clear();
-		objectIdCount = 0;
-		// newVariableCount must NOT be reset
-		instanceData.clear();
-		args.clear();
-		spc = null;
-		pendingExtraConjunct = null;
-		conjunctSet.clear();
-		SymbolicState.concreteValues = concreteValues;
-	}
-	*/
 
 	public boolean getSymbolicMode() {
 		return symbolicMode;
@@ -103,10 +92,6 @@ public class SymbolicState {
 
 	public boolean mayContinue() {
 		return mayContinue;
-	}
-
-	public Map<String, Integer> getMarkers() {
-		return markers;
 	}
 
 	public SegmentedPC getSegmentedPathCondition() {
@@ -141,7 +126,7 @@ public class SymbolicState {
 		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
 		instanceData.put(fullFieldName, value);
 	}
-	
+
 	private Expression getField(int objectId, String fieldName) {
 		return getField(Integer.toString(objectId), fieldName);
 	}
@@ -157,15 +142,15 @@ public class SymbolicState {
 		}
 		return value;
 	}
-	
+
 	// Arrays are just objects
 	private int createArray() {
 		return incrAndGetNewObjectId();
 	}
 
-//	private int getArrayLength(int arrayId) {
-//		return ((IntConstant) getField(arrayId, "length")).getValue();
-//	}
+	//	private int getArrayLength(int arrayId) {
+	//		return ((IntConstant) getField(arrayId, "length")).getValue();
+	//	}
 
 	private void setArrayLength(int arrayId, int length) {
 		putField(arrayId, "length", new IntConstant(length));
@@ -242,7 +227,7 @@ public class SymbolicState {
 			log.trace(">>> duplicate (switch) conjunct ignored: {}", c);
 		}
 	}
-	
+
 	public void pushExtraConjunct(Expression extraConjunct) {
 		if (!isConstant(extraConjunct)) {
 			if (pendingExtraConjunct == null) {
@@ -333,20 +318,14 @@ public class SymbolicState {
 	}
 
 	public void mark(int marker) {
-		if (configuration.getRecordMarks()) {
-			mark(Integer.toString(marker));
+		for (MarkerListener listener : markerListeners) {
+			listener.mark(this, marker);
 		}
 	}
 
 	public void mark(String marker) {
-		if (configuration.getRecordMarks()) {
-			String key = marker;
-			Integer n = markers.get(key);
-			if (n == null) {
-				markers.put(key, 1);
-			} else {
-				markers.put(key, n + 1);
-			}
+		for (MarkerListener listener : markerListeners) {
+			listener.mark(this, marker);
 		}
 	}
 
@@ -1005,109 +984,103 @@ public class SymbolicState {
 	//
 	// ======================================================================
 
-	private static List<InstructionListener> instructionListeners = new ArrayList<>();
-
-//	private void registerListener(InstructionListener listener) {
-//		instructionListeners.add(listener);
-//	}
-
-	private static void notifyEnterMethod(int methodNumber) {
+	private void notifyEnterMethod(int methodNumber) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.enterMethod(methodNumber);
 		}
 	}
 
-	private static void notifyExitMethod(int methodNumber) {
+	private void notifyExitMethod(int methodNumber) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.exitMethod(methodNumber);
 		}
 	}
 
-	private static void notifyLinenumber(int instr, int opcode) {
+	private void notifyLinenumber(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.linenumber(instr, opcode);
 		}
 	}
 
-	private static void notifyInsn(int instr, int opcode) {
+	private void notifyInsn(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.insn(instr, opcode);
 		}
 	}
 
-	private static void notifyIntInsn(int instr, int opcode, int operand) {
+	private void notifyIntInsn(int instr, int opcode, int operand) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.intInsn(instr, opcode, operand);
 		}
 	}
 
-	private static void notifyVarInsn(int instr, int opcode, int var) {
+	private void notifyVarInsn(int instr, int opcode, int var) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.varInsn(instr, opcode, var);
 		}
 	}
 
-	private static void notifyTypeInsn(int instr, int opcode) {
+	private void notifyTypeInsn(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.typeInsn(instr, opcode);
 		}
 	}
 
-	private static void notifyFieldInsn(int instr, int opcode, String owner, String name, String descriptor) {
+	private void notifyFieldInsn(int instr, int opcode, String owner, String name, String descriptor) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.fieldInsn(instr, opcode, owner, name, descriptor);
 		}
 	}
 
-	private static void notifyMethodInsn(int instr, int opcode, String owner, String name, String descriptor) {
+	private void notifyMethodInsn(int instr, int opcode, String owner, String name, String descriptor) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.methodInsn(instr, opcode, owner, name, descriptor);
 		}
 	}
 
-	private static void notifyInvokeDynamicInsn(int instr, int opcode) {
+	private void notifyInvokeDynamicInsn(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.invokeDynamicInsn(instr, opcode);
 		}
 	}
 
-	private static void notifyJumpInsn(int instr, int opcode) {
+	private void notifyJumpInsn(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.jumpInsn(instr, opcode);
 		}
 	}
 
-	private static void notifyPostJumpInsn(int instr, int opcode) {
+	private void notifyPostJumpInsn(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.postJumpInsn(instr, opcode);
 		}
 	}
 
-	private static void notifyLdcInsn(int instr, int opcode, Object value) {
+	private void notifyLdcInsn(int instr, int opcode, Object value) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.ldcInsn(instr, opcode, value);
 		}
 	}
 
-	private static void notifyIincInsn(int instr, int var, int increment) {
+	private void notifyIincInsn(int instr, int var, int increment) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.iincInsn(instr, var, increment);
 		}
 	}
 
-	private static void notifyTableSwitchInsn(int instr, int opcode) {
+	private void notifyTableSwitchInsn(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.tableSwitchInsn(instr, opcode);
 		}
 	}
 
-	private static void notifyLookupSwitchInsn(int instr, int opcode) {
+	private void notifyLookupSwitchInsn(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.lookupSwitchInsn(instr, opcode);
 		}
 	}
 
-	private static void notifyMultiANewArrayInsn(int instr, int opcode) {
+	private void notifyMultiANewArrayInsn(int instr, int opcode) {
 		for (InstructionListener listener : instructionListeners) {
 			listener.multiANewArrayInsn(instr, opcode);
 		}

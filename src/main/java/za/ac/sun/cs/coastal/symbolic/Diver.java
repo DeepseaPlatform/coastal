@@ -6,12 +6,16 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
+import za.ac.sun.cs.coastal.listener.InstructionListener;
+import za.ac.sun.cs.coastal.listener.MarkerListener;
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 import za.ac.sun.cs.coastal.strategy.Strategy;
@@ -28,7 +32,7 @@ public class Diver implements Reporter {
 	private long time = 0;
 
 	private final InstrumentationClassManager classManager;
-	
+
 	public Diver(Configuration configuration) {
 		this.configuration = configuration;
 		this.log = configuration.getLog();
@@ -38,6 +42,16 @@ public class Diver implements Reporter {
 	}
 
 	public void dive() {
+		List<InstructionListener> instructionListeners = new ArrayList<>();
+		for (InstructionListener listener : configuration
+				.<InstructionListener>getListeners(InstructionListener.class)) {
+			listener.changeInstrumentationManager(classManager);
+			instructionListeners.add(listener);
+		}
+		List<MarkerListener> markerListeners = new ArrayList<>();
+		for (MarkerListener listener : configuration.<MarkerListener>getListeners(MarkerListener.class)) {
+			markerListeners.add(listener);
+		}
 		Strategy strategy = configuration.getStrategy();
 		if (strategy == null) {
 			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
@@ -65,7 +79,8 @@ public class Diver implements Reporter {
 			runs++;
 			log.info(Banner.getBannerLine("starting dive " + runs, '-'));
 			long t0 = System.currentTimeMillis();
-			SymbolicState symbolicState = new SymbolicState(configuration, concreteValues);
+			SymbolicState symbolicState = new SymbolicState(configuration, concreteValues, instructionListeners,
+					markerListeners);
 			SymbolicVM.setState(symbolicState);
 			performRun();
 			time += System.currentTimeMillis() - t0;
@@ -127,7 +142,7 @@ public class Diver implements Reporter {
 			Throwable t = x.getCause();
 			if ((t == null) || !(t instanceof LimitConjunctException)) {
 				x.printStackTrace();
-			// else: limit on nr of conjuncts has been reached
+				// else: limit on nr of conjuncts has been reached
 			}
 		}
 	}
@@ -145,13 +160,6 @@ public class Diver implements Reporter {
 
 	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
-//		Map<String, Integer> markers = symbolicState.getMarkers();
-//		if (markers.size() > 0) {
-//			info.println("  === MARKERS ===");
-//			for (Map.Entry<String, Integer> entry : markers.entrySet()) {
-//				info.printf("    %-10s %6d\n", entry.getKey(), entry.getValue());
-//			}
-//		}
 		info.println("  Runs: " + runs);
 		info.println("  Overall dive time: " + time);
 	}

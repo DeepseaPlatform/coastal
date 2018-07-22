@@ -55,13 +55,11 @@ public class ConfigurationBuilderTest {
 		assertEquals(cb, cb.setDumpPaths(true));
 		assertEquals(cb, cb.setEchoOutput(true));
 		assertEquals(cb, cb.setObeyStops(true));
-		assertEquals(cb, cb.setRecordMarks(true));
 		Configuration c = cb.construct();
 		assertTrue(c.getDumpAll());
 		assertTrue(c.getDumpPaths());
 		assertTrue(c.getEchoOutput());
 		assertTrue(c.getObeyStops());
-		assertTrue(c.getRecordMarks());
 	}
 	
 	@Test

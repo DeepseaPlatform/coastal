@@ -22,8 +22,6 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 
 	private final BitSet potentials = new BitSet();
 
-	private boolean dumpCoverage = false;
-
 	public InstructionCoverage() {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
@@ -33,12 +31,11 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
-		dumpCoverage = configuration.getBooleanProperty("coastal.dump.coverage", dumpCoverage);
 	}
 
 	@Override
 	public void collectProperties(Properties properties) {
-		properties.setProperty("coastal.dump.coverage", Boolean.toString(dumpCoverage));
+		// do nothing
 	}
 
 	@Override
@@ -59,120 +56,94 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 
 	@Override
 	public void exitMethod(int methodNumber) {
-		// ignore
+		// do nothing
 	}
 
 	@Override
 	public void linenumber(int instr, int opcode) {
-		// ignore
+		// do nothing
 	}
 
 	@Override
 	public void insn(int instr, int opcode) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void intInsn(int instr, int opcode, int operand) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void varInsn(int instr, int opcode, int var) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void typeInsn(int instr, int opcode) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void methodInsn(int instr, int opcode, String owner, String name, String descriptor) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void invokeDynamicInsn(int instr, int opcode) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void jumpInsn(int instr, int opcode) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void postJumpInsn(int instr, int opcode) {
-		// ignore
+		// do nothing
 	}
 
 	@Override
 	public void ldcInsn(int instr, int opcode, Object value) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void iincInsn(int instr, int var, int increment) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void tableSwitchInsn(int instr, int opcode) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void lookupSwitchInsn(int instr, int opcode) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
 	@Override
 	public void multiANewArrayInsn(int instr, int opcode) {
-		if (dumpCoverage) {
-			log.trace("+++ {}", instr);
-		}
+		log.trace("+++ {}", instr);
 		covered.set(instr);
 	}
 
