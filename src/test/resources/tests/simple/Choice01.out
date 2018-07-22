@@ -5,8 +5,6 @@
 ~~~~                                                              ~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-coastal.dump = false
-coastal.dump.paths = false
 coastal.echooutput = false
 coastal.limit.conjuncts = 0
 coastal.limit.paths = 0
@@ -90,9 +88,23 @@ RETURN
 >>> symbolic mode switched off
 --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 explored <1> X>=5
+depth:1
+#1
+X>=5
+F-+-T
+|   |
+-   #2
+    LEAF
 trying   <0> X<5
 no model
 (The spc is X<5)
+depth:1
+  #1
+  X>=5
+F---+----T
+|        |
+#3       #2
+INFEAS   LEAF
 no further paths
 Tree shape: (IL)
 ====  tests.simple.Choice01  =========================================

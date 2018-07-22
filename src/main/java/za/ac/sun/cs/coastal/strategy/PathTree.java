@@ -9,8 +9,6 @@ public abstract class PathTree {
 
 	protected final Logger log;
 
-	protected final boolean dumpPaths;
-
 	private PathTreeNode root = null;
 
 	private int pathCount = 0;
@@ -19,7 +17,6 @@ public abstract class PathTree {
 
 	public PathTree(Configuration configuration) {
 		log = configuration.getLog();
-		dumpPaths = configuration.getDumpPaths();
 	}
 
 	public PathTreeNode getRoot() {
@@ -46,23 +43,15 @@ public abstract class PathTree {
 			path[idx--] = s;
 		}
 		assert idx == -1;
-		if (dumpPaths) {
-			log.trace("depth:{}", depth);
-		}
+		log.trace("depth:{}", depth);
 		/*
 		 * Step 2: Add the new path (spc) to the path tree
 		 */
 		root = insert(root, path, 0, depth, isInfeasible);
-		//		if ((cur != null) && cur.isLeaf() && (idx == depth)) {
-		//			if (dumpPaths) {
-		//				lgr.debug("Revisit!");
-		//			}
-		//			revisitCount++;
-		//		}
 		/*
 		 * Step 3: Dump the tree if required
 		 */
-		if (dumpPaths && (root != null)) {
+		if (root != null) {
 			for (String ll : stringRepr()) {
 				log.trace(ll);
 			}

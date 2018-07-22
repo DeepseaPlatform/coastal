@@ -18,10 +18,6 @@ However, COASTAL also reads properties from two other locations.  In all, it che
   
 Settings in later files, and override settings in earlier files.
 Once all properties has been loaded, they are processed.
-This last point is important, because it means that if an earlier file specified `coastal.dump.X = true`,
-and a later file specified that `coastal.dump = false`, then the `coastal.dump.X` value is still true.
-The order in which the settings appear in properties file is not important;
-the `coastal.dump.X` property is processed *after* the `coastal.dump` property, which explains this behavior.
 
 ## Logging
 
@@ -50,8 +46,6 @@ instead of the default file distributed with COASTAL.
 | `coastal.limit.time` | Limit on number of seconds allowed for runs | 0 |
 | `coastal.limit.path` | Limit on number of paths investigated | 0 |
 | `coastal.limit.conjuncts` | Limit on number of conjuncts investigated per path | 0 |
-| `coastal.dump.paths` | Whether path tree construction information is logged | `false` |
-| `coastal.dump` | Set all dump settings | - |
 
 ## coastal.targets
 
@@ -214,27 +208,3 @@ coastal.limit.conjuncts = 50
 The default value is 0.
 
 The default value is _false_.
-
-## coastal.dump.paths
-
-A boolean setting to control whether step-by-step debugging information is displayed
-as the tree of paths is updated.
-This includes a textual representation of the tree which is of considerable help
-when tracking down errors.
-This is mainly for debugging purposes and users should not need to use this.
-
-~~~
-coastal.dump.paths = false
-~~~
-
-The default value is _false_.
-
-## coastal.dump
-
-This settings will set all of the above `coastal.dump...` settings at once.
-Subsequent (individual) settings will override this value, but this setting
-will *not* override the individual settings. 
-
-~~~
-coastal.dump = true
-~~~

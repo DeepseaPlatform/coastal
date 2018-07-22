@@ -49,8 +49,6 @@ public class ConfigurationBuilder {
 	private long limitConjuncts = 0; // cap on the number of conjuncts per path condition
 	private boolean echoOutput = false; // is main program output displayed
 	private boolean obeyStops = false; // are symbolic termination calls obeyed
-	private boolean dumpPaths = false; // dump path tree after each dive?
-	private boolean dumpAll = false; // dump everything?
 	private final List<Listener> listeners = new ArrayList<>(); // listeners for various events
 	private final Properties originalProperties = new Properties(); // non-coastal properties
 
@@ -146,17 +144,6 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
-	public ConfigurationBuilder setDumpPaths(boolean dumpPaths) {
-		this.dumpPaths = dumpPaths;
-		return this;
-	}
-
-	public ConfigurationBuilder setDumpAll(boolean dumpAll) {
-		this.dumpAll = dumpAll;
-		setDumpPaths(dumpAll);
-		return this;
-	}
-
 	public ConfigurationBuilder addListener(Listener listener) {
 		if (listener != null) {
 			listeners.add(listener);
@@ -166,8 +153,8 @@ public class ConfigurationBuilder {
 
 	public Configuration construct() {
 		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds,
-				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, echoOutput, obeyStops, dumpPaths,
-				dumpAll, listeners, configurationListeners, originalProperties);
+				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, echoOutput, obeyStops, listeners,
+				configurationListeners, originalProperties);
 	}
 
 	// ======================================================================
@@ -261,8 +248,6 @@ public class ConfigurationBuilder {
 		setLimitTime(getLongProperty(properties, "coastal.limit.time", limitTime));
 		setLimitPaths(getLongProperty(properties, "coastal.limit.paths", limitPaths));
 		setLimitConjuncts(getLongProperty(properties, "coastal.limit.conjuncts", limitConjuncts));
-		setDumpAll(getBooleanProperty(properties, "coastal.dump", dumpAll));
-		setDumpPaths(getBooleanProperty(properties, "coastal.dump.paths", dumpPaths));
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", echoOutput));
 		setObeyStops(getBooleanProperty(properties, "coastal.obeystops", obeyStops));
 		p = properties.getProperty("coastal.strategy");
