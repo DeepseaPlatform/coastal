@@ -46,8 +46,8 @@ public class SymbolicVM {
 	//
 	// ======================================================================
 
-	public static boolean getSymbolicMode() {
-		return symbolicState.getSymbolicMode();
+	public static boolean getRecordMode() {
+		return symbolicState.getRecordMode();
 	}
 
 	public static int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {

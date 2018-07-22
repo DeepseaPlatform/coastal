@@ -22,6 +22,10 @@ public class SymbolicFrame {
 		return methodNumber;
 	}
 
+	public boolean isEmpty() {
+		return stack.isEmpty();
+	}
+
 	public Expression pop() {
 		return stack.pop();
 	}

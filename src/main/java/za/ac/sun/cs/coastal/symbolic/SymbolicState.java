@@ -40,10 +40,16 @@ public class SymbolicState {
 
 	private final long limitConjuncts;
 
+	private final boolean traceAll;
+
 	// if true, check for limit on conjuncts
 	private static boolean dangerFlag = false;
 
 	private boolean symbolicMode = false;
+
+	private boolean recordMode = false;
+
+	private boolean mayRecord = true;
 
 	private final Stack<SymbolicFrame> frames = new Stack<>();
 
@@ -81,13 +87,19 @@ public class SymbolicState {
 		this.log = configuration.getLog();
 		long lc = configuration.getLimitConjuncts();
 		this.limitConjuncts = (lc == 0) ? Long.MAX_VALUE : lc;
+		this.traceAll = configuration.getTraceAll();
 		this.concreteValues = concreteValues;
 		this.instructionListeners = instructionListeners;
 		this.markerListeners = markerListeners;
+		symbolicMode = traceAll;
 	}
 
-	public boolean getSymbolicMode() {
-		return symbolicMode;
+	//	public boolean getSymbolicMode() {
+	//		return symbolicMode;
+	//	}
+
+	public boolean getRecordMode() {
+		return recordMode;
 	}
 
 	public boolean mayContinue() {
@@ -246,9 +258,11 @@ public class SymbolicState {
 		assert symbolicMode;
 		assert !frames.isEmpty();
 		int methodNumber = frames.pop().getMethodNumber();
-		if (frames.isEmpty()) {
-			log.trace(">>> symbolic mode switched off");
-			symbolicMode = false;
+		if (frames.isEmpty() && recordMode) {
+			log.trace(">>> symbolic record mode switched off");
+			recordMode = false;
+			mayRecord = false;
+			symbolicMode = traceAll;
 		}
 		notifyExitMethod(methodNumber);
 		return symbolicMode;
@@ -332,7 +346,7 @@ public class SymbolicState {
 
 	// ======================================================================
 	//
-	// INSTRUCTIONS
+	// SEMI-INSTRUCTIONS
 	//
 	// ======================================================================
 
@@ -427,11 +441,15 @@ public class SymbolicState {
 	}
 
 	public void triggerMethod(int methodNumber) {
-		if (!symbolicMode) {
-			log.trace(">>> symbolic mode switched on");
-			symbolicMode = true;
-			frames.push(new SymbolicFrame(methodNumber));
-			dumpFrames();
+		if (!recordMode) {
+			recordMode = mayRecord;
+			if (recordMode) {
+				log.trace(">>> symbolic record mode switched on");
+				mayRecord = false;
+				symbolicMode = true;
+				frames.push(new SymbolicFrame(methodNumber));
+				dumpFrames();
+			}
 		}
 		notifyEnterMethod(methodNumber);
 	}
@@ -441,17 +459,39 @@ public class SymbolicState {
 			return;
 		}
 		log.trace(">>> transferring arguments");
-		assert args.isEmpty();
-		for (int i = 0; i < argCount; i++) {
-			args.push(pop());
-		}
-		frames.push(new SymbolicFrame(methodNumber));
-		for (int i = 0; i < argCount; i++) {
-			setLocal(i, args.pop());
+		if (frames.isEmpty()) {
+			frames.push(new SymbolicFrame(methodNumber));
+			for (int i = 0; i < argCount; i++) {
+				setLocal(1, Operation.ZERO);
+			}
+		} else {
+			assert args.isEmpty();
+			for (int i = 0; i < argCount; i++) {
+				args.push(pop());
+			}
+			frames.push(new SymbolicFrame(methodNumber));
+			for (int i = 0; i < argCount; i++) {
+				setLocal(i, args.pop());
+			}
 		}
 		dumpFrames();
 		notifyEnterMethod(methodNumber);
 	}
+
+	private void checkLimitConjuncts() throws LimitConjunctException {
+		if (dangerFlag) {
+			if ((spc != null) && (spc.getDepth() >= limitConjuncts)) {
+				throw new LimitConjunctException();
+			}
+			dangerFlag = false;
+		}
+	}
+
+	// ======================================================================
+	//
+	// INSTRUCTIONS
+	//
+	// ======================================================================
 
 	public void linenumber(int instr, int line) {
 		if (!symbolicMode) {
@@ -466,10 +506,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{}", () -> Bytecodes.toString(opcode));
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyInsn(instr, opcode);
+		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.ACONST_NULL:
 			push(Operation.ZERO);
@@ -573,10 +611,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{} {}", Bytecodes.toString(opcode), operand);
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyIntInsn(instr, opcode, operand);
+		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.BIPUSH:
 			push(new IntConstant(operand));
@@ -607,10 +643,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{} {}", Bytecodes.toString(opcode), var);
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyVarInsn(instr, opcode, var);
+		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.ALOAD:
 			push(getLocal(var));
@@ -636,10 +670,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{}", Bytecodes.toString(opcode));
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyTypeInsn(instr, opcode);
+		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.NEW:
 			int id = incrAndGetNewObjectId();
@@ -658,10 +690,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyFieldInsn(instr, opcode, owner, name, descriptor);
+		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.GETSTATIC:
 			push(getField(owner, name));
@@ -693,10 +723,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{} {} {} {}", Bytecodes.toString(opcode), owner, name, descriptor);
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyMethodInsn(instr, opcode, owner, name, descriptor);
+		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.INVOKESPECIAL:
 		case Opcodes.INVOKEVIRTUAL:
@@ -750,10 +778,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{}", Bytecodes.toString(opcode));
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyInvokeDynamicInsn(instr, opcode);
+		checkLimitConjuncts();
 		switch (opcode) {
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
@@ -768,82 +794,108 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{}", Bytecodes.toString(opcode));
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyJumpInsn(instr, opcode);
-		dangerFlag = true;
-		switch (opcode) {
-		case Opcodes.GOTO:
-			// do nothing
-			break;
-		case Opcodes.IFEQ:
-			Expression e = pop();
-			pushConjunct(new Operation(Operator.EQ, e, Operation.ZERO));
-			break;
-		case Opcodes.IFNE:
-			e = pop();
-			pushConjunct(new Operation(Operator.NE, e, Operation.ZERO));
-			break;
-		case Opcodes.IFLT:
-			e = pop();
-			pushConjunct(new Operation(Operator.LT, e, Operation.ZERO));
-			break;
-		case Opcodes.IFGE:
-			e = pop();
-			pushConjunct(new Operation(Operator.GE, e, Operation.ZERO));
-			break;
-		case Opcodes.IFGT:
-			e = pop();
-			pushConjunct(new Operation(Operator.GT, e, Operation.ZERO));
-			break;
-		case Opcodes.IFLE:
-			e = pop();
-			pushConjunct(new Operation(Operator.LE, e, Operation.ZERO));
-			break;
-		case Opcodes.IF_ICMPEQ:
-			e = pop();
-			pushConjunct(new Operation(Operator.EQ, pop(), e));
-			break;
-		case Opcodes.IF_ICMPNE:
-			e = pop();
-			pushConjunct(new Operation(Operator.NE, pop(), e));
-			break;
-		case Opcodes.IF_ICMPLT:
-			e = pop();
-			pushConjunct(new Operation(Operator.LT, pop(), e));
-			break;
-		case Opcodes.IF_ICMPGE:
-			e = pop();
-			pushConjunct(new Operation(Operator.GE, pop(), e));
-			break;
-		case Opcodes.IF_ICMPGT:
-			e = pop();
-			pushConjunct(new Operation(Operator.GT, pop(), e));
-			break;
-		case Opcodes.IF_ICMPLE:
-			e = pop();
-			pushConjunct(new Operation(Operator.LE, pop(), e));
-			break;
-		case Opcodes.IF_ACMPEQ:
-			e = pop();
-			pushConjunct(new Operation(Operator.EQ, pop(), e));
-			break;
-		case Opcodes.IF_ACMPNE:
-			e = pop();
-			pushConjunct(new Operation(Operator.NE, pop(), e));
-			break;
-		case Opcodes.IFNULL:
-			e = pop();
-			pushConjunct(new Operation(Operator.EQ, e, Operation.ZERO));
-			break;
-		case Opcodes.IFNONNULL:
-			e = pop();
-			pushConjunct(new Operation(Operator.NE, e, Operation.ZERO));
-			break;
-		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
-			System.exit(1);
+		checkLimitConjuncts();
+		if (recordMode) {
+			dangerFlag = true;
+			switch (opcode) {
+			case Opcodes.GOTO:
+				// do nothing
+				break;
+			case Opcodes.IFEQ:
+				Expression e = pop();
+				pushConjunct(new Operation(Operator.EQ, e, Operation.ZERO));
+				break;
+			case Opcodes.IFNE:
+				e = pop();
+				pushConjunct(new Operation(Operator.NE, e, Operation.ZERO));
+				break;
+			case Opcodes.IFLT:
+				e = pop();
+				pushConjunct(new Operation(Operator.LT, e, Operation.ZERO));
+				break;
+			case Opcodes.IFGE:
+				e = pop();
+				pushConjunct(new Operation(Operator.GE, e, Operation.ZERO));
+				break;
+			case Opcodes.IFGT:
+				e = pop();
+				pushConjunct(new Operation(Operator.GT, e, Operation.ZERO));
+				break;
+			case Opcodes.IFLE:
+				e = pop();
+				pushConjunct(new Operation(Operator.LE, e, Operation.ZERO));
+				break;
+			case Opcodes.IF_ICMPEQ:
+				e = pop();
+				pushConjunct(new Operation(Operator.EQ, pop(), e));
+				break;
+			case Opcodes.IF_ICMPNE:
+				e = pop();
+				pushConjunct(new Operation(Operator.NE, pop(), e));
+				break;
+			case Opcodes.IF_ICMPLT:
+				e = pop();
+				pushConjunct(new Operation(Operator.LT, pop(), e));
+				break;
+			case Opcodes.IF_ICMPGE:
+				e = pop();
+				pushConjunct(new Operation(Operator.GE, pop(), e));
+				break;
+			case Opcodes.IF_ICMPGT:
+				e = pop();
+				pushConjunct(new Operation(Operator.GT, pop(), e));
+				break;
+			case Opcodes.IF_ICMPLE:
+				e = pop();
+				pushConjunct(new Operation(Operator.LE, pop(), e));
+				break;
+			case Opcodes.IF_ACMPEQ:
+				e = pop();
+				pushConjunct(new Operation(Operator.EQ, pop(), e));
+				break;
+			case Opcodes.IF_ACMPNE:
+				e = pop();
+				pushConjunct(new Operation(Operator.NE, pop(), e));
+				break;
+			case Opcodes.IFNULL:
+				e = pop();
+				pushConjunct(new Operation(Operator.EQ, e, Operation.ZERO));
+				break;
+			case Opcodes.IFNONNULL:
+				e = pop();
+				pushConjunct(new Operation(Operator.NE, e, Operation.ZERO));
+				break;
+			default:
+				log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+				System.exit(1);
+			}
+		} else {
+			switch (opcode) {
+			case Opcodes.GOTO:
+				break;
+			case Opcodes.IFEQ:
+			case Opcodes.IFNE:
+			case Opcodes.IFLT:
+			case Opcodes.IFGE:
+			case Opcodes.IFGT:
+			case Opcodes.IFLE:
+			case Opcodes.IF_ICMPEQ:
+			case Opcodes.IF_ICMPNE:
+			case Opcodes.IF_ICMPLT:
+			case Opcodes.IF_ICMPGE:
+			case Opcodes.IF_ICMPGT:
+			case Opcodes.IF_ICMPLE:
+			case Opcodes.IF_ACMPEQ:
+			case Opcodes.IF_ACMPNE:
+			case Opcodes.IFNULL:
+			case Opcodes.IFNONNULL:
+				pop();
+				break;
+			default:
+				log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
+				System.exit(1);
+			}
 		}
 		dumpFrames();
 	}
@@ -852,22 +904,17 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		log.trace("(POST) {}", Bytecodes.toString(opcode));
-		if (!isPreviousConstant && !isPreviousDuplicate) {
-			log.trace(">>> previous conjunct is false");
-			notifyPostJumpInsn(instr, opcode);
-			assert spc instanceof SegmentedPCIf;
-			spc = ((SegmentedPCIf) spc).negate();
-			checkLimitConjuncts();
-			log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+		if (recordMode) {
+			log.trace("(POST) {}", Bytecodes.toString(opcode));
+			if (!isPreviousConstant && !isPreviousDuplicate) {
+				log.trace(">>> previous conjunct is false");
+				notifyPostJumpInsn(instr, opcode);
+				assert spc instanceof SegmentedPCIf;
+				spc = ((SegmentedPCIf) spc).negate();
+				checkLimitConjuncts();
+				log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+			}
 		}
-	}
-
-	private void checkLimitConjuncts() throws LimitConjunctException {
-		if ((spc != null) && (spc.getDepth() >= limitConjuncts)) {
-			throw new LimitConjunctException();
-		}
-		dangerFlag = false;
 	}
 
 	public void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException {
@@ -875,10 +922,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{} {}", Bytecodes.toString(opcode), value);
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyLdcInsn(instr, opcode, value);
+		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.LDC:
 			if (value instanceof Integer) {
@@ -908,10 +953,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{} {}", Bytecodes.toString(opcode), increment);
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyIincInsn(instr, var, increment);
+		checkLimitConjuncts();
 		Expression e0 = getLocal(var);
 		Expression e1 = new IntConstant(increment);
 		setLocal(var, Operation.apply(Operator.ADD, e0, e1));
@@ -923,10 +966,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{}", Bytecodes.toString(opcode));
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyTableSwitchInsn(instr, opcode);
+		checkLimitConjuncts();
 		pendingSwitch.push(pop());
 		dumpFrames();
 	}
@@ -935,14 +976,14 @@ public class SymbolicState {
 		if (!symbolicMode) {
 			return;
 		}
-		log.trace("CASE FOR {}", Bytecodes.toString(Opcodes.TABLESWITCH));
-		if (dangerFlag) {
+		if (recordMode) {
+			log.trace("CASE FOR {}", Bytecodes.toString(Opcodes.TABLESWITCH));
 			checkLimitConjuncts();
+			if (!pendingSwitch.isEmpty()) {
+				pushConjunct(pendingSwitch.pop(), min, max, value);
+			}
+			dumpFrames();
 		}
-		if (!pendingSwitch.isEmpty()) {
-			pushConjunct(pendingSwitch.pop(), min, max, value);
-		}
-		dumpFrames();
 	}
 
 	public void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException {
@@ -950,10 +991,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{}", Bytecodes.toString(opcode));
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyLookupSwitchInsn(instr, opcode);
+		checkLimitConjuncts();
 		switch (opcode) {
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);
@@ -967,10 +1006,8 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("{}", Bytecodes.toString(opcode));
-		if (dangerFlag) {
-			checkLimitConjuncts();
-		}
 		notifyMultiANewArrayInsn(instr, opcode);
+		checkLimitConjuncts();
 		switch (opcode) {
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: {} (opcode: {})", Bytecodes.toString(opcode), opcode);

@@ -5,7 +5,7 @@
 ~~~~                                                              ~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-coastal.drawpaths = false
+coastal.draw.paths = false
 coastal.echooutput = false
 coastal.limit.conjuncts = 0
 coastal.limit.paths = 0
@@ -14,6 +14,7 @@ coastal.limit.time = 0
 coastal.main = tests.simple.Choice01
 coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
 coastal.targets = tests.simple
+coastal.trace.all = false
 coastal.triggers = tests.simple.Choice01.run(X: int)
 ----  starting dive 1  -----------------------------------------------
 *** loading class tests.simple.Choice01, identified as target
@@ -51,12 +52,12 @@ visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
 visitLineNumber(line:16, label:L
 visitInsn(opcode:177)
 visitEnd()
-*** instrumented tests.simple.Choice01: 
+*** instrumented tests.simple.Choice01: 722 -> 1684 bytes
 *** class tests.simple.Choice01 instrumented
 *** loading class java.lang.Object, uninstrumented
 *** loading class java.lang.String, uninstrumented
 *** loading class za.ac.sun.cs.coastal.symbolic.SymbolicVM, uninstrumented
->>> symbolic mode switched on
+>>> symbolic record mode switched on
 --> st[] locals:{}
 --> data:{}
 ### LINENUMBER 11
@@ -85,7 +86,7 @@ INVOKEVIRTUAL java/io/PrintStream println (Ljava/lang/String;)V
 *** loading class java.io.PrintStream, uninstrumented
 ### LINENUMBER 16
 RETURN
->>> symbolic mode switched off
+>>> symbolic record mode switched off
 --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 explored <1> X>=5
 depth:1
@@ -184,7 +185,7 @@ Tree shape: (IL)
     MAXSTACK = 2
     MAXLOCALS = 1
 ------ run ------
-    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.getSymbolicMode ()Z
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.getRecordMode ()Z
     IFNE L0
     LDC 3
     INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.triggerMethod (I)V
@@ -294,8 +295,8 @@ Tree shape: (IL)
   Class load requests: 6
   Cache hits: 0
   Classes instrumented: 1
-  Pre-instrumented size: 
-  Post-instrumented size: 
+  Pre-instrumented size: 722
+  Post-instrumented size: 1684
   Load time: 
   Instrumentation time: 
 ====  Dive  ==========================================================

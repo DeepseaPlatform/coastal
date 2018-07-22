@@ -5,7 +5,7 @@
 ~~~~                                                              ~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-coastal.drawpaths = false
+coastal.draw.paths = false
 coastal.echooutput = false
 coastal.limit.conjuncts = 0
 coastal.limit.paths = 0
@@ -14,6 +14,7 @@ coastal.limit.time = 0
 coastal.main = tests.simple.Straight01
 coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
 coastal.targets = tests.simple
+coastal.trace.all = false
 coastal.triggers = tests.simple.Straight01.run(X: int)
 ----  starting dive 1  -----------------------------------------------
 *** loading class tests.simple.Straight01, identified as target
@@ -42,12 +43,12 @@ visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
 visitLineNumber(line:12, label:L
 visitInsn(opcode:177)
 visitEnd()
-*** instrumented tests.simple.Straight01: 670 -> 1489 bytes
+*** instrumented tests.simple.Straight01: 670 -> 1487 bytes
 *** class tests.simple.Straight01 instrumented
 *** loading class java.lang.Object, uninstrumented
 *** loading class java.lang.String, uninstrumented
 *** loading class za.ac.sun.cs.coastal.symbolic.SymbolicVM, uninstrumented
->>> symbolic mode switched on
+>>> symbolic record mode switched on
 --> st[] locals:{}
 --> data:{}
 ### LINENUMBER 11
@@ -64,7 +65,7 @@ INVOKEVIRTUAL java/io/PrintStream println (I)V
 *** loading class java.io.PrintStream, uninstrumented
 ### LINENUMBER 12
 RETURN
->>> symbolic mode switched off
+>>> symbolic record mode switched off
 --> data:{java/lang/System/out=U_D_0}
 ====  tests.simple.Straight01  =======================================
 ------ <init> ------
@@ -155,7 +156,7 @@ RETURN
     MAXSTACK = 2
     MAXLOCALS = 1
 ------ run ------
-    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.getSymbolicMode ()Z
+    INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.getRecordMode ()Z
     IFNE L0
     LDC 3
     INVOKESTATIC za/ac/sun/cs/coastal/symbolic/SymbolicVM.triggerMethod (I)V
@@ -215,7 +216,7 @@ RETURN
   Cache hits: 0
   Classes instrumented: 1
   Pre-instrumented size: 670
-  Post-instrumented size: 1489
+  Post-instrumented size: 1487
   Load time: 
   Instrumentation time: 
 ====  Dive  ==========================================================

@@ -47,6 +47,7 @@ public class ConfigurationBuilder {
 	private long limitTime = 0; // cap on the time use
 	private long limitPaths = 0; // cap on the number of paths to explore
 	private long limitConjuncts = 0; // cap on the number of conjuncts per path condition
+	private boolean traceAll; // should all everything be traced?
 	private boolean echoOutput = false; // is main program output displayed
 	private boolean drawPaths = false; // display path trees in detailed log
 	private final List<Listener> listeners = new ArrayList<>(); // listeners for various events
@@ -134,6 +135,11 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
+	public ConfigurationBuilder setTraceAll(boolean traceAll) {
+		this.traceAll = traceAll;
+		return this;
+	}
+
 	public ConfigurationBuilder setEchoOutput(boolean echoOutput) {
 		this.echoOutput = echoOutput;
 		return this;
@@ -143,7 +149,7 @@ public class ConfigurationBuilder {
 		this.drawPaths = drawPaths;
 		return this;
 	}
-	
+
 	public ConfigurationBuilder addListener(Listener listener) {
 		if (listener != null) {
 			listeners.add(listener);
@@ -153,8 +159,8 @@ public class ConfigurationBuilder {
 
 	public Configuration construct() {
 		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds,
-				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, echoOutput, drawPaths, listeners,
-				configurationListeners, originalProperties);
+				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, traceAll, echoOutput, drawPaths,
+				listeners, configurationListeners, originalProperties);
 	}
 
 	// ======================================================================
@@ -248,8 +254,9 @@ public class ConfigurationBuilder {
 		setLimitTime(getLongProperty(properties, "coastal.limit.time", limitTime));
 		setLimitPaths(getLongProperty(properties, "coastal.limit.paths", limitPaths));
 		setLimitConjuncts(getLongProperty(properties, "coastal.limit.conjuncts", limitConjuncts));
+		setTraceAll(getBooleanProperty(properties, "coastal.trace.all", traceAll));
 		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", echoOutput));
-		setDrawPaths(getBooleanProperty(properties, "coastal.drawPaths", drawPaths));
+		setDrawPaths(getBooleanProperty(properties, "coastal.draw.paths", drawPaths));
 		p = properties.getProperty("coastal.strategy");
 		if (p != null) {
 			Object str = createInstance(p);

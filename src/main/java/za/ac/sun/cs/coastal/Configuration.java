@@ -47,6 +47,7 @@ public class Configuration {
 	private final long limitTime; // cap on the time use
 	private final long limitPaths; // cap on the number of paths to explore
 	private final long limitConjuncts; // cap on the number of conjuncts per path condition
+	private final boolean traceAll; // should all everything be traced?
 	private final boolean echoOutput; // is main program output displayed
 	private final boolean drawPaths; // is main program output displayed
 	private final List<Listener> listeners; // listeners for various events
@@ -65,9 +66,9 @@ public class Configuration {
 			final String main, final String args, final List<String> targets, final List<Trigger> triggers,
 			final Map<String, Integer> minBounds, final Map<String, Integer> maxBounds,
 			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
-			final long limitPaths, final long limitConjuncts, final boolean echoOutput, final boolean drawPaths,
-			final List<Listener> listeners, final List<ConfigurationListener> configurationListeners,
-			final Properties originalProperties) {
+			final long limitPaths, final long limitConjuncts, final boolean traceAll, final boolean echoOutput,
+			final boolean drawPaths, final List<Listener> listeners,
+			final List<ConfigurationListener> configurationListeners, final Properties originalProperties) {
 		this.version = version;
 		this.log = log;
 		this.reporterManager = reporterManager;
@@ -83,6 +84,7 @@ public class Configuration {
 		this.limitTime = limitTime;
 		this.limitPaths = limitPaths;
 		this.limitConjuncts = limitConjuncts;
+		this.traceAll = traceAll;
 		this.echoOutput = echoOutput;
 		this.drawPaths = drawPaths;
 		this.listeners = new ArrayList<>(listeners);
@@ -210,6 +212,10 @@ public class Configuration {
 		return limitConjuncts;
 	}
 
+	public boolean getTraceAll() {
+		return traceAll;
+	}
+
 	public boolean getEchoOutput() {
 		return echoOutput;
 	}
@@ -306,8 +312,9 @@ public class Configuration {
 		properties.put("coastal.limit.time", limitTime);
 		properties.put("coastal.limit.paths", limitPaths);
 		properties.put("coastal.limit.conjuncts", limitConjuncts);
+		properties.put("coastal.trace.all", traceAll);
 		properties.put("coastal.echooutput", echoOutput);
-		properties.put("coastal.drawpaths", drawPaths);
+		properties.put("coastal.draw.paths", drawPaths);
 		if (!listeners.isEmpty()) {
 			String l = listeners.stream().map(x -> x.getClass().getName()).collect(Collectors.joining(";"));
 			properties.put("coastal.triggers", l);
