@@ -565,7 +565,16 @@ public class SymbolicState {
 			break;
 		case Opcodes.IMUL:
 			e = pop();
-			push(new Operation(Operator.MUL, pop(), e));
+			if (e instanceof IntConstant) {
+				Expression f = pop();
+				if (f instanceof IntConstant) {
+					push(new IntConstant(((IntConstant) f).getValue() * ((IntConstant) e).getValue()));
+				} else {
+					push(new Operation(Operator.MUL, f, e));
+				}
+			} else {
+				push(new Operation(Operator.MUL, pop(), e));
+			}
 			break;
 		case Opcodes.ISUB:
 			e = pop();
