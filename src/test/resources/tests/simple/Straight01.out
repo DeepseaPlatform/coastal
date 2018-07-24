@@ -5,6 +5,7 @@
 ~~~~                                                              ~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+coastal.concrete.values = true
 coastal.draw.paths = false
 coastal.echooutput = false
 coastal.limit.conjuncts = 0

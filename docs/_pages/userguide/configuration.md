@@ -43,6 +43,7 @@ instead of the default file distributed with COASTAL.
 | `coastal.delegates` | Delegated classes | - |
 | `coastal.echooutput` | Whether program output is displayed | `false` |
 | `coastal.draw.paths` | Whether path trees are displayed in detailed log | `false` |
+| `coastal.concrete.values` | Whether actual return values are used | `true` | 
 | `coastal.trace.all` | Whether all code is symbolically traced | `false` |
 | `coastal.limit.run` | Limit on number of runs executed | 0 |
 | `coastal.limit.time` | Limit on number of seconds allowed for runs | 0 |
@@ -176,6 +177,17 @@ coastal.draw.paths = true
 ~~~
 
 The default value is _false_.
+
+## coastal.concrete.values
+
+A boolean setting to control whether the actual values of uninstrumented methods
+are used (true) or whether symbolic return values are introduced (false).
+
+~~~
+coastal.concrete.values = true
+~~~
+
+The default value is _true_.
 
 ## coastal.trace.all
 
