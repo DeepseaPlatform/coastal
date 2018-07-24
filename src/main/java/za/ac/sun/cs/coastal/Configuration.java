@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ import za.ac.sun.cs.coastal.listener.Listener;
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.reporting.ReporterManager;
 import za.ac.sun.cs.coastal.strategy.Strategy;
+import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class Configuration {
 
@@ -50,6 +52,7 @@ public class Configuration {
 	private final boolean traceAll; // should all everything be traced?
 	private final boolean echoOutput; // is main program output displayed
 	private final boolean drawPaths; // is main program output displayed
+	private final boolean useConcreteValues; // use actual values as returns from functions
 	private final List<Listener> listeners; // listeners for various events
 	private final Properties originalProperties; // original properties
 
@@ -67,7 +70,7 @@ public class Configuration {
 			final Map<String, Integer> minBounds, final Map<String, Integer> maxBounds,
 			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
 			final long limitPaths, final long limitConjuncts, final boolean traceAll, final boolean echoOutput,
-			final boolean drawPaths, final List<Listener> listeners,
+			final boolean drawPaths, final boolean useConcreteValues, final List<Listener> listeners,
 			final List<ConfigurationListener> configurationListeners, final Properties originalProperties) {
 		this.version = version;
 		this.log = log;
@@ -87,6 +90,7 @@ public class Configuration {
 		this.traceAll = traceAll;
 		this.echoOutput = echoOutput;
 		this.drawPaths = drawPaths;
+		this.useConcreteValues = useConcreteValues;
 		this.listeners = new ArrayList<>(listeners);
 		this.originalProperties = new Properties(originalProperties);
 
@@ -224,6 +228,10 @@ public class Configuration {
 		return drawPaths;
 	}
 
+	public boolean getUseConcreteValues() {
+		return useConcreteValues;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <L extends Listener> List<L> getListeners(Class<L> clas) {
 		List<L> result = new ArrayList<>();
@@ -273,6 +281,30 @@ public class Configuration {
 	// CONVERT TO PROPERTIES
 	//
 	// ======================================================================
+	
+	private static final Class<?>[] EMPTY_PARAMETERS = new Class<?>[0];
+
+	public Method findDelegate(String owner, String name, String descriptor) {
+		Object delegate = findDelegate(owner);
+		if (delegate == null) {
+			return null;
+		}
+		String methodName = name + SymbolicState.getAsciiSignature(descriptor);
+		Method delegateMethod = null;
+		try {
+			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, EMPTY_PARAMETERS);
+		} catch (NoSuchMethodException | SecurityException e) {
+			return null;
+		}
+		assert delegateMethod != null;
+		return delegateMethod;
+	}
+
+	// ======================================================================
+	//
+	// CONVERT TO PROPERTIES
+	//
+	// ======================================================================
 
 	private Properties createProperties() {
 		Properties properties = new Properties();
@@ -315,6 +347,7 @@ public class Configuration {
 		properties.put("coastal.trace.all", traceAll);
 		properties.put("coastal.echooutput", echoOutput);
 		properties.put("coastal.draw.paths", drawPaths);
+		properties.put("coastal.concrete.values", useConcreteValues);
 		if (!listeners.isEmpty()) {
 			String l = listeners.stream().map(x -> x.getClass().getName()).collect(Collectors.joining(";"));
 			properties.put("coastal.triggers", l);

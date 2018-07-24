@@ -74,6 +74,34 @@ public class SymbolicVM {
 		symbolicState.startMethod(methodNumber, argCount);
 	}
 
+	public static void returnValue(boolean returnValue) {
+		symbolicState.returnValue(returnValue);
+	}
+	
+	public static void returnValue(char returnValue) {
+		symbolicState.returnValue(returnValue);
+	}
+	
+	public static void returnValue(double returnValue) {
+		symbolicState.returnValue(returnValue);
+	}
+	
+	public static void returnValue(float returnValue) {
+		symbolicState.returnValue(returnValue);
+	}
+	
+	public static void returnValue(int returnValue) {
+		symbolicState.returnValue(returnValue);
+	}
+	
+	public static void returnValue(long returnValue) {
+		symbolicState.returnValue(returnValue);
+	}
+	
+	public static void returnValue(short returnValue) {
+		symbolicState.returnValue(returnValue);
+	}
+	
 	// ======================================================================
 	//
 	// INSTRUCTIONS

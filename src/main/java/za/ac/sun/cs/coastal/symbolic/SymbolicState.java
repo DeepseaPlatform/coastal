@@ -782,6 +782,41 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	public void returnValue(boolean returnValue) {
+		pop();
+		push(new IntConstant(returnValue ? 1 : 0));
+	}
+	
+	public void returnValue(char returnValue) {
+		pop();
+		push(new IntConstant(returnValue));
+	}
+	
+	public void returnValue(double returnValue) {
+		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE double");
+		System.exit(1);
+	}
+	
+	public void returnValue(float returnValue) {
+		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE float");
+		System.exit(1);
+	}
+	
+	public void returnValue(int returnValue) {
+		pop();
+		push(new IntConstant(returnValue));
+	}
+	
+	public void returnValue(long returnValue) {
+		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE long");
+		System.exit(1);
+	}
+	
+	public void returnValue(short returnValue) {
+		pop();
+		push(new IntConstant(returnValue));
+	}
+	
 	public void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1180,7 +1215,7 @@ public class SymbolicState {
 		}
 	}
 
-	private static String getReturnType(String descriptor) {
+	public static String getReturnType(String descriptor) {
 		int i = 0;
 		if (descriptor.charAt(i++) != '(') {
 			return "?"; // missing '('
@@ -1192,7 +1227,7 @@ public class SymbolicState {
 		return descriptor.substring(i + 1);
 	}
 
-	private String getAsciiSignature(String descriptor) {
+	public static String getAsciiSignature(String descriptor) {
 		return descriptor.replace('/', '_').replace("_", "_1").replace(";", "_2").replace("[", "_3").replace("(", "__")
 				.replace(")", "__");
 	}

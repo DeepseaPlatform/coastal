@@ -12,16 +12,19 @@ import org.objectweb.asm.Opcodes;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.Configuration.Trigger;
+import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
-	
+
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicVM";
-	
+
 	private final Configuration configuration;
 
 	private final Logger log;
+
+	private final boolean useConcreteValues;
 
 	private final InstrumentationClassManager classManager;
 
@@ -42,14 +45,15 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	}
 
 	private static Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
-	
+
 	// private static BitSet currentBranchInstructions;
 
-	public MethodInstrumentationAdapter(Configuration configuration, InstrumentationClassManager classManager, MethodVisitor cv, int triggerIndex,
-			boolean isStatic, int argCount) {
+	public MethodInstrumentationAdapter(Configuration configuration, InstrumentationClassManager classManager,
+			MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.configuration = configuration;
 		this.log = configuration.getLog();
+		this.useConcreteValues = configuration.getUseConcreteValues();
 		this.classManager = classManager;
 		this.triggerIndex = triggerIndex;
 		this.isStatic = isStatic;
@@ -205,6 +209,25 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitFieldInsn(opcode, owner, name, descriptor);
 	}
 
+	private char primitiveReturnType(String descriptor) {
+		String type = SymbolicState.getReturnType(descriptor);
+		if (type.length() == 0) {
+			return 'X';
+		}
+		switch (type.charAt(0)) {
+		case 'B':
+		case 'C':
+		case 'D':
+		case 'F':
+		case 'I':
+		case 'J':
+		case 'S':
+			return type.charAt(0);
+		default:
+			return 'X';
+		}
+	}
+
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
 		log.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
@@ -219,6 +242,15 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn",
 					"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+			String className = owner.replace('/', '.');
+			if (useConcreteValues && !configuration.isTarget(className)
+					&& (configuration.findDelegate(owner, className, descriptor) == null)) {
+				char returnType = primitiveReturnType(descriptor);
+				if (returnType != 'X') {
+					mv.visitInsn(Opcodes.DUP);
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "returnValue", "(" + returnType + ")V", false);
+				}
+			}
 		}
 	}
 

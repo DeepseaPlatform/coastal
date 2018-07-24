@@ -50,6 +50,7 @@ public class ConfigurationBuilder {
 	private boolean traceAll; // should all everything be traced?
 	private boolean echoOutput = false; // is main program output displayed
 	private boolean drawPaths = false; // display path trees in detailed log
+	private boolean useConcreteValues = true; // use actual values as returns from functions
 	private final List<Listener> listeners = new ArrayList<>(); // listeners for various events
 	private final Properties originalProperties = new Properties(); // non-coastal properties
 
@@ -146,6 +147,11 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
+	public ConfigurationBuilder setUseConcreteValues(boolean useConcreteValues) {
+		this.useConcreteValues = useConcreteValues;
+		return this;
+	}
+
 	public ConfigurationBuilder addListener(Listener listener) {
 		if (listener != null) {
 			listeners.add(listener);
@@ -157,7 +163,7 @@ public class ConfigurationBuilder {
 		processProperties();
 		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds,
 				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, traceAll, echoOutput, drawPaths,
-				listeners, configurationListeners, originalProperties);
+				useConcreteValues, listeners, configurationListeners, originalProperties);
 	}
 
 	// ======================================================================
@@ -206,7 +212,7 @@ public class ConfigurationBuilder {
 		originalProperties.putAll(properties);
 		return true;
 	}
-	
+
 	private boolean processProperties() {
 		setMain(originalProperties.getProperty("coastal.main"));
 		setArgs(originalProperties.getProperty("coastal.args"));
@@ -258,6 +264,7 @@ public class ConfigurationBuilder {
 		setTraceAll(getBooleanProperty(originalProperties, "coastal.trace.all", traceAll));
 		setEchoOutput(getBooleanProperty(originalProperties, "coastal.echooutput", echoOutput));
 		setDrawPaths(getBooleanProperty(originalProperties, "coastal.draw.paths", drawPaths));
+		setUseConcreteValues(getBooleanProperty(originalProperties, "coastal.concrete.values", useConcreteValues));
 		p = originalProperties.getProperty("coastal.strategy");
 		if (p != null) {
 			Object str = createInstance(p);
