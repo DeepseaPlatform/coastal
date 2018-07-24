@@ -158,6 +158,7 @@ public class ConfigurationBuilder {
 	}
 
 	public Configuration construct() {
+		processProperties();
 		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds,
 				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, traceAll, echoOutput, drawPaths,
 				listeners, configurationListeners, originalProperties);
@@ -207,21 +208,25 @@ public class ConfigurationBuilder {
 
 	public boolean readFromProperties(Properties properties) {
 		originalProperties.putAll(properties);
-		setMain(properties.getProperty("coastal.main"));
-		setArgs(properties.getProperty("coastal.args"));
-		String p = properties.getProperty("coastal.targets");
+		return true;
+	}
+	
+	private boolean processProperties() {
+		setMain(originalProperties.getProperty("coastal.main"));
+		setArgs(originalProperties.getProperty("coastal.args"));
+		String p = originalProperties.getProperty("coastal.targets");
 		if (p != null) {
 			for (String t : p.trim().split(";")) {
 				addTarget(t.trim());
 			}
 		}
-		p = properties.getProperty("coastal.triggers");
+		p = originalProperties.getProperty("coastal.triggers");
 		if (p != null) {
 			for (String t : p.trim().split(";")) {
 				addTrigger(Trigger.createTrigger(t.trim()));
 			}
 		}
-		for (Object key : properties.keySet()) {
+		for (Object key : originalProperties.keySet()) {
 			if (!(key instanceof String)) {
 				continue;
 			}
@@ -229,17 +234,17 @@ public class ConfigurationBuilder {
 			if (k.startsWith("coastal.bounds.")) {
 				String var = k.substring("coastal.bounds.".length());
 				if (var.endsWith(".min")) {
-					Integer min = getIntegerProperty(properties, k);
+					Integer min = getIntegerProperty(originalProperties, k);
 					if (min != null) {
 						setMinBound(var.substring(0, var.length() - 4), min);
 					}
 				} else if (var.endsWith(".max")) {
-					Integer max = getIntegerProperty(properties, k);
+					Integer max = getIntegerProperty(originalProperties, k);
 					if (max != null) {
 						setMaxBound(var.substring(0, var.length() - 4), max);
 					}
 				} else {
-					String[] bounds = properties.getProperty(k).split("\\.\\.");
+					String[] bounds = originalProperties.getProperty(k).split("\\.\\.");
 					assert bounds.length >= 2;
 					try {
 						setMinBound(var, Integer.parseInt(bounds[0].trim()));
@@ -250,14 +255,14 @@ public class ConfigurationBuilder {
 				}
 			}
 		}
-		setLimitRuns(getLongProperty(properties, "coastal.limit.runs", limitRuns));
-		setLimitTime(getLongProperty(properties, "coastal.limit.time", limitTime));
-		setLimitPaths(getLongProperty(properties, "coastal.limit.paths", limitPaths));
-		setLimitConjuncts(getLongProperty(properties, "coastal.limit.conjuncts", limitConjuncts));
-		setTraceAll(getBooleanProperty(properties, "coastal.trace.all", traceAll));
-		setEchoOutput(getBooleanProperty(properties, "coastal.echooutput", echoOutput));
-		setDrawPaths(getBooleanProperty(properties, "coastal.draw.paths", drawPaths));
-		p = properties.getProperty("coastal.strategy");
+		setLimitRuns(getLongProperty(originalProperties, "coastal.limit.runs", limitRuns));
+		setLimitTime(getLongProperty(originalProperties, "coastal.limit.time", limitTime));
+		setLimitPaths(getLongProperty(originalProperties, "coastal.limit.paths", limitPaths));
+		setLimitConjuncts(getLongProperty(originalProperties, "coastal.limit.conjuncts", limitConjuncts));
+		setTraceAll(getBooleanProperty(originalProperties, "coastal.trace.all", traceAll));
+		setEchoOutput(getBooleanProperty(originalProperties, "coastal.echooutput", echoOutput));
+		setDrawPaths(getBooleanProperty(originalProperties, "coastal.draw.paths", drawPaths));
+		p = originalProperties.getProperty("coastal.strategy");
 		if (p != null) {
 			Object str = createInstance(p);
 			if (str instanceof Strategy) {
@@ -266,7 +271,7 @@ public class ConfigurationBuilder {
 				log.warn("CLASS \"{}\" IS NOT A STRATEGY, IGNORED", p);
 			}
 		}
-		p = properties.getProperty("coastal.delegates");
+		p = originalProperties.getProperty("coastal.delegates");
 		if (p != null) {
 			String[] delegates = p.trim().split(";");
 			for (String delegate : delegates) {
@@ -277,7 +282,7 @@ public class ConfigurationBuilder {
 				}
 			}
 		}
-		p = properties.getProperty("coastal.listeners");
+		p = originalProperties.getProperty("coastal.listeners");
 		if (p != null) {
 			for (String t : p.trim().split(";")) {
 				Object lst = createInstance(t.trim());
