@@ -1,7 +1,7 @@
 package za.ac.sun.cs.coastal;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,8 +17,9 @@ public class ConfigurationBuilderTest {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
 		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
-		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
-		assertFalse(cb.isMainSet());
+		final ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
+		final Configuration c = cb.construct();
+		assertEquals(null, c.getMain());
 	}
 
 	@Test
@@ -26,10 +27,11 @@ public class ConfigurationBuilderTest {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
 		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
-		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
-		ConfigurationBuilder cb0 = cb.setMain("main");
+		final ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
+		final ConfigurationBuilder cb0 = cb.setMain("main");
 		assertEquals(cb, cb0);
-		assertTrue(cb.isMainSet());
+		final Configuration c = cb.construct();
+		assertNotEquals(null, c.getMain());
 	}
 	
 	@Test
@@ -37,10 +39,10 @@ public class ConfigurationBuilderTest {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
 		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
-		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
+		final ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertEquals(cb, cb.setArgs("args"));
 		assertEquals(cb, cb.setMain("main"));
-		Configuration c = cb.construct();
+		final Configuration c = cb.construct();
 		assertEquals("args", c.getArgs());
 		assertEquals("main", c.getMain());
 	}
@@ -50,9 +52,9 @@ public class ConfigurationBuilderTest {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
 		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
-		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
+		final ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertEquals(cb, cb.setEchoOutput(true));
-		Configuration c = cb.construct();
+		final Configuration c = cb.construct();
 		assertTrue(c.getEchoOutput());
 	}
 	
@@ -61,12 +63,12 @@ public class ConfigurationBuilderTest {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
 		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
-		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
+		final ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
 		assertEquals(cb, cb.setLimitConjuncts(123));
 		assertEquals(cb, cb.setLimitPaths(234));
 		assertEquals(cb, cb.setLimitRuns(345));
 		assertEquals(cb, cb.setLimitTime(456));
-		Configuration c = cb.construct();
+		final Configuration c = cb.construct();
 		assertEquals(123, c.getLimitConjuncts());
 		assertEquals(234, c.getLimitPaths());
 		assertEquals(345, c.getLimitRuns());

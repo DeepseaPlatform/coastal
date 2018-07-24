@@ -63,10 +63,6 @@ public class ConfigurationBuilder {
 		registerListener(reporterManager);
 	}
 
-	public boolean isMainSet() {
-		return (main != null);
-	}
-
 	public ConfigurationBuilder setMain(String main) {
 		if (main != null) {
 			this.main = main;

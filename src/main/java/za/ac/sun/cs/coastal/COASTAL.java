@@ -27,7 +27,7 @@ public class COASTAL implements Reporter {
 		final Logger log = LogManager.getLogger("COASTAL");
 		final String version = new Version().read();
 		final ReporterManager reporterManager = new ReporterManager();
-		final ConfigurationBuilder b = new ConfigurationBuilder(log, version, reporterManager);
+		final ConfigurationBuilder builder = new ConfigurationBuilder(log, version, reporterManager);
 		new Banner('~').println("COASTAL version " + version).display(log);
 
 		if (args.length < 1) {
@@ -37,14 +37,16 @@ public class COASTAL implements Reporter {
 			bn.display(log);
 			return;
 		}
-		if (!b.read(args[0])) {
+		if (!builder.read(args[0])) {
 			Banner bn = new Banner('@');
 			bn.println("COASTAL PROBLEM\n");
 			bn.println("COULD NOT READ PROPERTIES FILE \"" + args[0] + "\"");
 			bn.display(log);
 			return;
 		}
-		if (!b.isMainSet()) {
+
+		final Configuration configuration = builder.construct();
+		if (configuration.getMain() == null) {
 			Banner bn = new Banner('@');
 			bn.println("SUSPICIOUS PROPERTIES FILE\n");
 			bn.println("ARE YOU SURE THAT THE ARGUMENT IS A .properties FILE?");
@@ -52,7 +54,7 @@ public class COASTAL implements Reporter {
 			return;
 		}
 
-		new COASTAL(b.construct()).start(false);
+		new COASTAL(configuration).start(false);
 		new Banner('~').println("COASTAL DONE").display(log);
 	}
 
