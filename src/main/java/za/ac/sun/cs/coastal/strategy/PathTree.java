@@ -81,7 +81,8 @@ public abstract class PathTree {
 		 */
 		PathTreeNode nd = node;
 		if (node == null) {
-			nd = node = PathTreeNode.createNode(path[cur], path[cur].getNrOfOutcomes());
+			node = PathTreeNode.createNode(path[cur], path[cur].getNrOfOutcomes());
+			nd = node;
 			log.trace("::: create missing node {}", getId(nd));
 		} else {
 			if (!nd.getPc().getExpression().equals(path[cur].getExpression())) {
