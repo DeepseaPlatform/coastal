@@ -6,7 +6,7 @@ public final class PathTreeNode {
 
 	private static final int SPACING = 3;
 
-	private static int pathTreeNodeCounter = 0;
+	private static int pathTreeNodeCounter = -1;
 
 	private final int id = ++pathTreeNodeCounter;
 
@@ -37,6 +37,10 @@ public final class PathTreeNode {
 
 	public static PathTreeNode createLeaf() {
 		return new PathTreeNode(null, 0, true, false);
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	public SegmentedPC getPc() {

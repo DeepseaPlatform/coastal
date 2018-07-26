@@ -46,7 +46,7 @@ public abstract class PathTree {
 			path[idx--] = s;
 		}
 		assert idx == -1;
-		log.trace("depth:{}", depth);
+		log.trace("::: depth:{}", depth);
 		/*
 		 * Step 2: Add the new path (spc) to the path tree
 		 */
@@ -55,8 +55,9 @@ public abstract class PathTree {
 		 * Step 3: Dump the tree if required
 		 */
 		if (drawPaths && (root != null)) {
+			log.trace(":::");
 			for (String ll : stringRepr()) {
-				log.trace(ll);
+				log.trace("::: {}", ll);
 			}
 		}
 		/*
@@ -65,12 +66,27 @@ public abstract class PathTree {
 		return findNewPath();
 	}
 
+	private String getId(PathTreeNode node) {
+		if (node == null) {
+			return "NUL";
+		} else {
+			return "#" + node.getId();
+		}
+	}
+
 	private PathTreeNode insert(PathTreeNode node, SegmentedPC[] path, int cur, int depth, boolean isInfeasible) {
+		log.trace("::: insert(node:{}, conjunct:{}, cur/depth:{}/{})", getId(node), path[cur].getActiveConjunct(), cur, depth);
 		/*
 		 * Step 1: create node if necessary
 		 */
+		PathTreeNode nd = node;
 		if (node == null) {
-			node = PathTreeNode.createNode(path[cur], path[cur].getNrOfOutcomes());
+			nd = node = PathTreeNode.createNode(path[cur], path[cur].getNrOfOutcomes());
+			log.trace("::: create missing node {}", getId(nd));
+		} else {
+			if (!nd.getPc().getExpression().equals(path[cur].getExpression())) {
+				log.trace("::: {} conjunct disagreement", getId(nd));
+			}
 		}
 		/*
 		 * Step 2: find the child and check that it checks out
@@ -80,11 +96,13 @@ public abstract class PathTree {
 		 * Step 3: insert the rest of the path
 		 */
 		if (cur + 1 < depth) {
-			node.setChild(i, insert(node.getChild(i), path, cur + 1, depth, isInfeasible));
+			nd.setChild(i, insert(nd.getChild(i), path, cur + 1, depth, isInfeasible));
 		} else if (isInfeasible) {
-			node.setChild(i, PathTreeNode.createInfeasible());
+			log.trace("::: create infeasible node");
+			nd.setChild(i, PathTreeNode.createInfeasible());
 		} else {
-			node.setChild(i, PathTreeNode.createLeaf());
+			log.trace("::: create leaf");
+			nd.setChild(i, PathTreeNode.createLeaf());
 		}
 		/*
 		 * Step 4: check if this node is now fully explored
@@ -100,6 +118,7 @@ public abstract class PathTree {
 				}
 			}
 			if (full) {
+				log.trace("::: setting {} as fully explored", getId(node));
 				node.setFullyExplored();
 			}
 		}
