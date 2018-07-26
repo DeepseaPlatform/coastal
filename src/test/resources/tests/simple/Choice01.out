@@ -90,11 +90,17 @@ RETURN
 >>> symbolic record mode switched off
 --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 explored <1> X>=5
-depth:1
+::: depth:1
+::: insert(node:NUL, conjunct:X>=5, cur/depth:0/1)
+::: create missing node #0
+::: create leaf
 trying   <0> X<5
 no model
 (The spc is X<5)
-depth:1
+::: depth:1
+::: insert(node:#0, conjunct:X<5, cur/depth:0/1)
+::: create infeasible node
+::: setting #0 as fully explored
 no further paths
 Tree shape: (IL)
 ====  tests.simple.Choice01  =========================================
