@@ -783,13 +783,13 @@ public class SymbolicState {
 	}
 
 	public void returnValue(boolean returnValue) {
-		pop();
-		push(new IntConstant(returnValue ? 1 : 0));
+		Expression value = returnValue ? Operation.ONE : Operation.ZERO;
+		pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
 	}
 	
 	public void returnValue(char returnValue) {
-		pop();
-		push(new IntConstant(returnValue));
+		Expression value = new IntConstant(returnValue);
+		pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
 	}
 	
 	public void returnValue(double returnValue) {
@@ -803,8 +803,8 @@ public class SymbolicState {
 	}
 	
 	public void returnValue(int returnValue) {
-		pop();
-		push(new IntConstant(returnValue));
+		Expression value = new IntConstant(returnValue);
+		pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
 	}
 	
 	public void returnValue(long returnValue) {
@@ -813,8 +813,8 @@ public class SymbolicState {
 	}
 	
 	public void returnValue(short returnValue) {
-		pop();
-		push(new IntConstant(returnValue));
+		Expression value = new IntConstant(returnValue);
+		pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
 	}
 	
 	public void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
