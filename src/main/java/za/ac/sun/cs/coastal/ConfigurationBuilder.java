@@ -173,7 +173,10 @@ public class ConfigurationBuilder {
 	// ======================================================================
 
 	public boolean read(String filename) {
-		return readFromResource(COASTAL_PROPERTY_FILE) && readFromFile(HOME_PROPERTY_FILE) && readFromFile(filename);
+		boolean a = readFromResource(COASTAL_PROPERTY_FILE);
+		boolean b = readFromFile(HOME_PROPERTY_FILE);
+		boolean c = readFromFile(filename);
+		return a || b || c;
 	}
 
 	public boolean readFromFile(String filename) {
