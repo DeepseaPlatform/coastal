@@ -1,9 +1,9 @@
 package examples.arrays;
 
-public class ArrayTest {
+public class ArrayCharTest {
 
-	public static int test(int x, int y) {
-		int[] arr = new int[2];
+	public static int test(char x, char y) {
+		char[] arr = new char[2];
 		arr[0] = x;
 		arr[1] = y;
 		if (arr[0] < arr[1]) {
@@ -15,7 +15,7 @@ public class ArrayTest {
 		}
 	}
 	
-	public static int test2(int[] arr) {
+	public static int test2(char[] arr) {
 		if (arr[0] < arr[1]) {
 			return -1;
 		} else if (arr[0] > arr[1]) {
@@ -26,7 +26,7 @@ public class ArrayTest {
 	}
 	
 	public static void main(String[] args) {
-		int[] a = new int[2];
+		char[] a = new char[2];
 		a[0] = 0;
 		a[1] = 0;
 		test2(a);

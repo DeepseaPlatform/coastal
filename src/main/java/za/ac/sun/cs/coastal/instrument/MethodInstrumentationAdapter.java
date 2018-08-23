@@ -87,6 +87,13 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitIntInsn(Opcodes.ALOAD, address);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteIntArray", "(III[I)[I", false);
 			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == char[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteCharArray", "(III[C)[I", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
 		} else if (type == String.class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);

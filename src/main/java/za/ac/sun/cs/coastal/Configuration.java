@@ -440,6 +440,8 @@ public class Configuration {
 				String arrayType = type.substring(0, i);
 				if (arrayType.equals("int")) {
 					return int[].class;
+		 		} else if (arrayType.equals("char")) {
+					return char[].class;
 				} else {
 					return Object[].class;
 				}
