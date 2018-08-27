@@ -66,6 +66,10 @@ public class SymbolicVM {
 		return symbolicState.getConcreteIntArray(triggerIndex, index, address, currentValue);
 	}
 
+	public static char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
+		return symbolicState.getConcreteCharArray(triggerIndex, index, address, currentValue);
+	}
+	
 	public static void triggerMethod(int methodNumber) {
 		symbolicState.triggerMethod(methodNumber);
 	}

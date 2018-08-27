@@ -432,8 +432,10 @@ public class Configuration {
 
 		// To implement a new type:
 		// (1) Add it here
-		// (2) Add it to MethodInstrumentationAdapter.visitParameter(...)
-		// (3) Add a "getConcreteXXX(...)" method to SymbolicState.java
+		// (2) Add a case to "toString()" method below
+		// (3) Add it to MethodInstrumentationAdapter.visitParameter(...)
+		// (4) Add a "getConcreteXXX(...)" method to SymbolicState.java
+		// (5) Add a "getConcreteXXX(...)" method to SymbolicVM.java
 		private static Class<?> parseType(String type) {
 			int i = type.indexOf('[');
 			if (i > -1) {
@@ -516,6 +518,8 @@ public class Configuration {
 						sb.append("string");
 					} else if (paramTypes[i] == int[].class) {
 						sb.append("int[]");
+					} else if (paramTypes[i] == char[].class) {
+						sb.append("char[]");
 					} else {
 						sb.append('*');
 					}

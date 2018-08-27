@@ -570,8 +570,19 @@ public class SymbolicState {
 			int a = ((IntConstant) pop()).getValue();
 			push(getArrayValue(a, i));
 			break;
+		case Opcodes.CALOAD:
+			i = ((IntConstant) pop()).getValue();
+			a = ((IntConstant) pop()).getValue();
+			push(getArrayValue(a, i));
+			break;
 		case Opcodes.IASTORE:
 			Expression e = pop();
+			i = ((IntConstant) pop()).getValue();
+			a = ((IntConstant) pop()).getValue();
+			setArrayValue(a, i, e);
+			break;
+		case Opcodes.CASTORE:
+			e = pop();
 			i = ((IntConstant) pop()).getValue();
 			a = ((IntConstant) pop()).getValue();
 			setArrayValue(a, i, e);
