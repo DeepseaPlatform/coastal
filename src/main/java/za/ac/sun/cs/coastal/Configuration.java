@@ -444,11 +444,15 @@ public class Configuration {
 					return int[].class;
 		 		} else if (arrayType.equals("char")) {
 					return char[].class;
+		 		} else if (arrayType.equals("byte")) {
+		 			return byte[].class;
 				} else {
 					return Object[].class;
 				}
 			} else if (type.equals("int")) {
 				return int.class;
+			} else if (type.equals("byte")) {
+				return byte.class;
 			} else if (type.equals("char")) {
 				return char.class;
 			} else if (type.equals("String")) {
@@ -514,12 +518,18 @@ public class Configuration {
 						sb.append("boolean");
 					} else if (paramTypes[i] == int.class) {
 						sb.append("int");
+					} else if (paramTypes[i] == byte.class) {
+						sb.append("byte");
+					} else if (paramTypes[i] == char.class) {
+						sb.append("char");
 					} else if (paramTypes[i] == String.class) {
 						sb.append("string");
 					} else if (paramTypes[i] == int[].class) {
 						sb.append("int[]");
 					} else if (paramTypes[i] == char[].class) {
 						sb.append("char[]");
+					} else if (paramTypes[i] == byte[].class) {
+						sb.append("byte[]");
 					} else {
 						sb.append('*');
 					}
