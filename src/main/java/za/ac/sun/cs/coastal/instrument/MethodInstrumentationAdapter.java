@@ -80,6 +80,13 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitIntInsn(Opcodes.ILOAD, address);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteChar", "(IIIC)C", false);
 			mv.visitIntInsn(Opcodes.ISTORE, address);
+		} else if (type == byte.class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ILOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteByte", "(IIIB)B", false);
+			mv.visitIntInsn(Opcodes.ISTORE, address);
 		} else if (type == int[].class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);
@@ -93,6 +100,13 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitLdcInsn(address);
 			mv.visitIntInsn(Opcodes.ALOAD, address);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteCharArray", "(III[C)[C", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == byte[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteByteArray", "(III[B)[B", false);
 			mv.visitIntInsn(Opcodes.ASTORE, address);
 		} else if (type == String.class) {
 			mv.visitLdcInsn(triggerIndex);

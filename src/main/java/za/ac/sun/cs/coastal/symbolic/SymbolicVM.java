@@ -58,6 +58,10 @@ public class SymbolicVM {
 		return symbolicState.getConcreteChar(triggerIndex, index, address, currentValue);
 	}
 
+	public static byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
+		return symbolicState.getConcreteByte(triggerIndex, index, address, currentValue);
+	}
+	
 	public static String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
 		return symbolicState.getConcreteString(triggerIndex, index, address, currentValue);
 	}
@@ -68,6 +72,10 @@ public class SymbolicVM {
 
 	public static char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
 		return symbolicState.getConcreteCharArray(triggerIndex, index, address, currentValue);
+	}
+	
+	public static byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) {
+		return symbolicState.getConcreteByteArray(triggerIndex, index, address, currentValue);
 	}
 	
 	public static void triggerMethod(int methodNumber) {

@@ -378,6 +378,20 @@ public class SymbolicState {
 		return (concrete == null) ? currentValue : (char) concrete.getValue();
 	}
 
+	public byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
+		Trigger trigger = configuration.getTrigger(triggerIndex);
+		String name = trigger.getParamName(index);
+		if (name == null) { // not symbolic
+			setLocal(address, new IntConstant(currentValue));
+			return currentValue;
+		}
+		int min = configuration.getMinBound(name);
+		int max = configuration.getMaxBound(name);
+		setLocal(address, new IntVariable(name, min, max));
+		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
+		return (concrete == null) ? currentValue : (byte) concrete.getValue();
+	}
+	
 	public String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
 		Trigger trigger = configuration.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -472,6 +486,38 @@ public class SymbolicState {
 		return value;
 	}
 
+	public byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) {
+		Trigger trigger = configuration.getTrigger(triggerIndex);
+		String name = trigger.getParamName(index);
+		int length = currentValue.length;
+		int arrayId = createArray();
+		setArrayLength(arrayId, length);
+		byte[] value;
+		if (name == null) { // not symbolic
+			value = currentValue;
+			for (int i = 0; i < length; i++) {
+				setArrayValue(arrayId, i, new IntConstant(value[i]));
+			}
+		} else {
+			value = new byte[length];
+			for (int i = 0; i < length; i++) {
+				String entryName = name + INDEX_SEPARATOR + i;
+				Constant concrete = ((name == null) || (concreteValues == null)) ? null : concreteValues.get(entryName);
+				if ((concrete != null) && (concrete instanceof IntConstant)) {
+					value[i] = (byte) ((IntConstant) concrete).getValue();
+				} else {
+					value[i] = currentValue[i];
+				}
+				int min = configuration.getMinBound(entryName, name);
+				int max = configuration.getMaxBound(entryName, name);
+				Expression entryExpr = new IntVariable(entryName, min, max);
+				setArrayValue(arrayId, i, entryExpr);
+			}
+		}
+		setLocal(index, new IntConstant(arrayId));
+		return value;
+	}
+	
 	public void triggerMethod(int methodNumber) {
 		if (!recordMode) {
 			recordMode = mayRecord;
@@ -570,6 +616,11 @@ public class SymbolicState {
 			int a = ((IntConstant) pop()).getValue();
 			push(getArrayValue(a, i));
 			break;
+		case Opcodes.BALOAD:
+			i = ((IntConstant) pop()).getValue();
+			a = ((IntConstant) pop()).getValue();
+			push(getArrayValue(a, i));
+			break;
 		case Opcodes.CALOAD:
 			i = ((IntConstant) pop()).getValue();
 			a = ((IntConstant) pop()).getValue();
@@ -577,6 +628,12 @@ public class SymbolicState {
 			break;
 		case Opcodes.IASTORE:
 			Expression e = pop();
+			i = ((IntConstant) pop()).getValue();
+			a = ((IntConstant) pop()).getValue();
+			setArrayValue(a, i, e);
+			break;
+		case Opcodes.BASTORE:
+			e = pop();
 			i = ((IntConstant) pop()).getValue();
 			a = ((IntConstant) pop()).getValue();
 			setArrayValue(a, i, e);
