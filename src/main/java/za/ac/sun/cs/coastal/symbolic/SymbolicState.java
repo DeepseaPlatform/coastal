@@ -75,6 +75,8 @@ public class SymbolicState {
 
 	private boolean mayContinue = true;
 
+	private boolean justExecutedDelegate = false;
+	
 	private final Stack<Expression> pendingSwitch = new Stack<>();
 
 	private final List<InstructionListener> instructionListeners;
@@ -305,6 +307,7 @@ public class SymbolicState {
 		log.trace("@@@ found delegate: {}", methodName);
 		try {
 			if ((boolean) delegateMethod.invoke(delegate, EMPTY_ARGUMENTS)) {
+				justExecutedDelegate = true;
 				return true;
 			}
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException x) {
@@ -883,13 +886,21 @@ public class SymbolicState {
 	}
 
 	public void returnValue(boolean returnValue) {
-		Expression value = returnValue ? Operation.ONE : Operation.ZERO;
-		pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
+		if (justExecutedDelegate) {
+			justExecutedDelegate = false;
+		} else {
+			Expression value = returnValue ? Operation.ONE : Operation.ZERO;
+			pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
+		}
 	}
 	
 	public void returnValue(char returnValue) {
-		Expression value = new IntConstant(returnValue);
-		pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
+		if (justExecutedDelegate) {
+			justExecutedDelegate = false;
+		} else {
+			Expression value = new IntConstant(returnValue);
+			pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
+		}
 	}
 	
 	public void returnValue(double returnValue) {
@@ -903,8 +914,12 @@ public class SymbolicState {
 	}
 	
 	public void returnValue(int returnValue) {
-		Expression value = new IntConstant(returnValue);
-		pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
+		if (justExecutedDelegate) {
+			justExecutedDelegate = false;
+		} else {
+			Expression value = new IntConstant(returnValue);
+			pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
+		}
 	}
 	
 	public void returnValue(long returnValue) {
@@ -913,8 +928,12 @@ public class SymbolicState {
 	}
 	
 	public void returnValue(short returnValue) {
-		Expression value = new IntConstant(returnValue);
-		pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
+		if (justExecutedDelegate) {
+			justExecutedDelegate = false;
+		} else {
+			Expression value = new IntConstant(returnValue);
+			pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
+		}
 	}
 	
 	public void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
