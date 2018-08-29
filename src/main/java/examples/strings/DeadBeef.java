@@ -22,7 +22,7 @@ public class DeadBeef {
                     }
                 }
             }
-        } /*else if (word.charAt(0) == 'f') {
+        } else if (word.charAt(0) == 'f') {
             if (word.charAt(1) == 'u') {
                 if (word.charAt(2) == 'n') {
                     if (word.charAt(3) == 'd') {
@@ -38,7 +38,7 @@ public class DeadBeef {
                     }
                 }
             }
-        }*/
+        }
 		return 0;
 	}
 	
