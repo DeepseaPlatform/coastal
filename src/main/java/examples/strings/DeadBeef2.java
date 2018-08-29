@@ -22,7 +22,7 @@ public class DeadBeef2 {
                     }
                 }
             }
-        } else if (word[0] == 'f') {
+        } /*else if (word[0] == 'f') {
             if (word[1] == 'u') {
                 if (word[2] == 'n') {
                     if (word[3] == 'd') {
@@ -38,7 +38,7 @@ public class DeadBeef2 {
                     }
                 }
             }
-        }
+        }*/
 		return 0;
 	}
 	
