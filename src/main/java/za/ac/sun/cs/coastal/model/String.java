@@ -15,6 +15,8 @@ import za.ac.sun.cs.green.expr.Operation.Operator;
  */
 public class String {
 
+	private static final Expression MONE = new IntConstant(-1);
+
 	public String() {
 	}
 
@@ -43,6 +45,84 @@ public class String {
 		}
 		SymbolicVM.pushExtraConjunct(guard);
 		return true;
+	}
+
+	public boolean indexOf__C__I() {
+		Expression chr = SymbolicVM.pop();
+		int thisAddress = intConstantValue(SymbolicVM.pop());
+		int thisLength = intConstantValue(SymbolicVM.getStringLength(thisAddress));
+		if (thisLength == 0) {
+			SymbolicVM.push(MONE);
+		} else {
+			Expression var = new IntVariable(SymbolicVM.getNewVariableName(), -1, thisLength - 1);
+			SymbolicVM.pushExtraConjunct(firstOccurrenceGuard(thisAddress, chr, var, 0, thisLength));
+			SymbolicVM.push(var);
+		}
+		return true;
+	}
+	
+	public boolean indexOf__CI__I() {
+		Expression chr = SymbolicVM.pop();
+		Expression expr = SymbolicVM.pop();
+		int thisAddress = intConstantValue(SymbolicVM.pop());
+		int thisLength = intConstantValue(SymbolicVM.getStringLength(thisAddress));
+		if (thisLength == 0) {
+			SymbolicVM.push(MONE);
+		} else if (expr instanceof IntConstant) {
+			int ofs = intConstantValue(expr);
+			if (ofs >= thisLength) {
+				SymbolicVM.push(MONE);
+			} else {
+				Expression var = new IntVariable(SymbolicVM.getNewVariableName(), -1, thisLength - 1);
+				SymbolicVM.pushExtraConjunct(firstOccurrenceGuard(thisAddress, chr, var, ofs, thisLength));
+				SymbolicVM.push(var);
+			}
+		} else {
+			Expression var = new IntVariable(SymbolicVM.getNewVariableName(), -1, thisLength - 1);
+			Expression pc = null;
+			for (int i = 0; i < thisLength; i++) {
+				Expression guard = Operation.apply(Operator.EQ, expr, new IntConstant(i));
+				guard = Operation.apply(Operator.AND, guard, firstOccurrenceGuard(thisAddress, chr, var, i, thisLength));
+				if (pc == null) {
+					pc = guard;
+				} else {
+					pc = Operation.apply(Operator.OR, pc, guard);
+				}
+			}
+			SymbolicVM.pushExtraConjunct(pc);
+			SymbolicVM.push(var);
+		}
+		return true;
+	}
+
+	// Encode the constraint that the first occurrence of character "chr" in string "strAddresss"
+	// occurs at position "rval".  The string has fixed concrete length "len" and the first occurrence
+	// is at least "ofs".
+	private Expression firstOccurrenceGuard(int strAddress, Expression chr, Expression rval, int ofs, int len) {
+		assert ofs < len;
+		Expression thisChar = SymbolicVM.getStringChar(strAddress, ofs);
+		Expression foundAtOfs = Operation.apply(Operator.EQ, thisChar, chr);
+		Expression returnValue = Operation.apply(Operator.EQ, rval, new IntConstant(ofs));
+		Expression guard = Operation.apply(Operator.AND, foundAtOfs, returnValue);
+		Expression mismatch = null;
+		for (int o = ofs + 1; o < len; o++) {
+			if (mismatch == null) {
+				mismatch = Operation.apply(Operator.NOT, foundAtOfs);
+			} else {
+				mismatch = Operation.apply(Operator.AND, mismatch, Operation.apply(Operator.NOT, foundAtOfs));
+			}
+			thisChar = SymbolicVM.getStringChar(strAddress, o);
+			foundAtOfs = Operation.apply(Operator.AND, mismatch, Operation.apply(Operator.EQ, thisChar, chr));
+			returnValue = Operation.apply(Operator.EQ, rval, new IntConstant(o));
+			guard = Operation.apply(Operator.OR, guard, Operation.apply(Operator.AND, foundAtOfs, returnValue));
+		}
+		if (mismatch == null) {
+			mismatch = Operation.apply(Operator.NOT, foundAtOfs);
+		} else {
+			mismatch = Operation.apply(Operator.AND, mismatch, Operation.apply(Operator.NOT, foundAtOfs));
+		}
+		mismatch = Operation.apply(Operator.AND, mismatch, Operation.apply(Operator.EQ, rval, MONE));
+		return Operation.apply(Operator.OR, mismatch, guard);
 	}
 
 	public boolean startsWith__Ljava_1lang_1String_2__Z() {
