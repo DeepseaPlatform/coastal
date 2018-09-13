@@ -62,8 +62,8 @@ public class String {
 	}
 	
 	public boolean indexOf__CI__I() {
-		Expression chr = SymbolicVM.pop();
 		Expression expr = SymbolicVM.pop();
+		Expression chr = SymbolicVM.pop();
 		int thisAddress = intConstantValue(SymbolicVM.pop());
 		int thisLength = intConstantValue(SymbolicVM.getStringLength(thisAddress));
 		if (thisLength == 0) {
@@ -159,6 +159,46 @@ public class String {
 		return true;
 	}
 
+	public boolean startsWith__Ljava_1lang_1String_2I__Z() {
+		Expression offset = SymbolicVM.pop();
+		int prefixAddress = intConstantValue(SymbolicVM.pop());
+		int thisAddress = intConstantValue(SymbolicVM.pop());
+		int prefixLength = intConstantValue(SymbolicVM.getStringLength(prefixAddress));
+		int thisLength = intConstantValue(SymbolicVM.getStringLength(thisAddress));
+		int first = 0;
+		if (offset instanceof IntConstant) {
+			first = intConstantValue(offset);
+		} else {
+			return false; // CANNOT (YET) HANDLE SYMBOLIC OFFSETS
+		}
+		if (thisLength >= first + prefixLength) {
+			Expression guard = null;
+			for (int i = 0; i < prefixLength; i++) {
+				Expression prefixChar = SymbolicVM.getStringChar(prefixAddress, i);
+				Expression thisChar = SymbolicVM.getStringChar(thisAddress, i + first);
+				Expression eq = Operation.apply(Operator.EQ, prefixChar, thisChar);
+				if (i == 0) {
+					guard = eq;
+				} else {
+					guard = Operation.apply(Operator.AND, guard, eq);
+				}
+			}
+			if (guard == null) {
+				SymbolicVM.push(Operation.ONE); // |prefix| == 0, so result is always TRUE (=1)
+			} else {
+				Expression var = new IntVariable(SymbolicVM.getNewVariableName(), 0, 1);
+				Expression posGuard = Operation.apply(Operator.AND, guard, Operation.apply(Operator.EQ, var, Operation.ONE)); 
+				Expression negGuard = Operation.apply(Operator.AND, Operation.apply(Operator.NOT, guard), Operation.apply(Operator.EQ, var, Operation.ZERO)); 
+				Expression pc = Operation.apply(Operator.OR, posGuard, negGuard);
+				SymbolicVM.pushExtraConjunct(pc);
+				SymbolicVM.push(var);
+			}
+		} else {
+			SymbolicVM.push(Operation.ZERO); // |this| < |prefix|, so result is always FALSE (=0)
+		}
+		return true;
+	}
+	
 	public boolean endsWith__Ljava_1lang_1String_2__Z() {
 		int prefixAddress = intConstantValue(SymbolicVM.pop());
 		int thisAddress = intConstantValue(SymbolicVM.pop());
