@@ -1,8 +1,5 @@
 package examples.strings;
 
-import java.io.*;
-import java.util.*;
-
 public class DeadBeef2 {
 	
 	public static int analyse(char[] word) {
@@ -43,7 +40,7 @@ public class DeadBeef2 {
 	}
 	
     public static void main(String[] args) throws Exception {
-    	char[] w = {'1','2','3','4','5','6','7','8'};
+    	char[] w = {'1', '2', '3', '4', '5', '6', '7', '8'};
     	int r = analyse(w);
     	System.out.println("Found Path " + r);
     }

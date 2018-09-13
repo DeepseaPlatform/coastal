@@ -1,8 +1,5 @@
 package examples.strings;
 
-import java.io.*;
-import java.util.*;
-
 public class DeadBeef {
 	
 	public static int analyse(String word) {

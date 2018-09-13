@@ -3,7 +3,7 @@ package examples.strings;
 public class CharAt {
 
 	public static void main(String[] args) {
-		test("hello", 3);
+		test("abc", 1);
 	}
 
 	private static void test(String str, int ofs) {

@@ -187,8 +187,12 @@ public class String {
 				SymbolicVM.push(Operation.ONE); // |prefix| == 0, so result is always TRUE (=1)
 			} else {
 				Expression var = new IntVariable(SymbolicVM.getNewVariableName(), 0, 1);
-				Expression posGuard = Operation.apply(Operator.AND, guard, Operation.apply(Operator.EQ, var, Operation.ONE)); 
-				Expression negGuard = Operation.apply(Operator.AND, Operation.apply(Operator.NOT, guard), Operation.apply(Operator.EQ, var, Operation.ZERO)); 
+				Expression posGuard = Operation.apply(Operator.AND,
+						guard,
+						Operation.apply(Operator.EQ, var, Operation.ONE)); 
+				Expression negGuard = Operation.apply(Operator.AND,
+						Operation.apply(Operator.NOT, guard),
+						Operation.apply(Operator.EQ, var, Operation.ZERO)); 
 				Expression pc = Operation.apply(Operator.OR, posGuard, negGuard);
 				SymbolicVM.pushExtraConjunct(pc);
 				SymbolicVM.push(var);

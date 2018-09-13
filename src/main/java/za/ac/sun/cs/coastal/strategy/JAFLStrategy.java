@@ -138,14 +138,14 @@ public class JAFLStrategy implements Strategy, ConfigurationListener {
 				String modelString = newModel.toString();
 				modelExtractionTime += System.currentTimeMillis() - t;
 				log.info("new model: {}", modelString);
-				
+
 				if (visitedModels.add(modelString)) {
 					//return newModel;
 					list.add(newModel);
 				} else {
 					log.info("model {} has been visited before, retrying", modelString);
 				}
-				
+
 			}			
 		}
 	}
