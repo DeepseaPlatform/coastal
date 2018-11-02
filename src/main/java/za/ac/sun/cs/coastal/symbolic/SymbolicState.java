@@ -574,6 +574,55 @@ public class SymbolicState {
 	//
 	// ======================================================================
 
+	/*
+	 * Instructions that can throw exceptions:
+	 * 
+	 * AALOAD
+	 * AASTORE
+	 * ANEWARRAY
+	 * ARETURN
+	 * ARRAYLENGTH
+	 * ATHROW
+	 * BALOAD
+	 * BASTORE
+	 * CALOAD
+	 * CASTORE
+	 * CHECKCAST
+	 * DALOAD
+	 * DASTORE
+	 * DRETURN
+	 * FALOAD
+	 * FASTORE
+	 * FRETURN
+	 * GETFIELD
+	 * GETSTATIC
+	 * IALOAD
+	 * IASTORE
+	 * IDIV
+	 * INVOKEDYNAMIC
+	 * INVOKEINTERFACE
+	 * INVOKESPECIAL
+	 * INVOKESTATIC
+	 * INVOKEVIRTUAL
+	 * IREM
+	 * IRETURN
+	 * LALOAD
+	 * LASTORE
+	 * LDIV
+	 * LREM
+	 * LRETURN
+	 * MONITORENTER
+	 * MONITOREXIT
+	 * MULTIANEWARRAY
+	 * NEW
+	 * NEWARRAY
+	 * PUTFIELD
+	 * PUTSTATIC
+	 * RETURN
+	 * SALOAD
+	 * SASTORE
+	 */
+
 	public void linenumber(int instr, int line) {
 		if (!symbolicMode) {
 			return;
@@ -677,6 +726,19 @@ public class SymbolicState {
 				}
 			} else {
 				push(new Operation(Operator.MUL, pop(), e));
+			}
+			break;
+		case Opcodes.IDIV:
+			e = pop();
+			if (e instanceof IntConstant) {
+				Expression f = pop();
+				if (f instanceof IntConstant) {
+					push(new IntConstant(((IntConstant) f).getValue() / ((IntConstant) e).getValue()));
+				} else {
+					push(new Operation(Operator.DIV, f, e));
+				}
+			} else {
+				push(new Operation(Operator.DIV, pop(), e));
 			}
 			break;
 		case Opcodes.ISUB:
@@ -1349,6 +1411,10 @@ public class SymbolicState {
 	public static String getAsciiSignature(String descriptor) {
 		return descriptor.replace('/', '_').replace("_", "_1").replace(";", "_2").replace("[", "_3").replace("(", "__")
 				.replace(")", "__");
+	}
+
+	public void startCatch() {
+		// Do nothing
 	}
 
 }

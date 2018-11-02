@@ -1,7 +1,9 @@
 package za.ac.sun.cs.coastal.instrument;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import org.apache.logging.log4j.Logger;
@@ -46,6 +48,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private static Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
 
+	private static Set<Label> catchLabels = new HashSet<>();
+	
 	// private static BitSet currentBranchInstructions;
 
 	public MethodInstrumentationAdapter(Configuration configuration, InstrumentationClassManager classManager,
@@ -139,6 +143,13 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitEnd();
 	}
 
+	@Override
+	public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
+		log.trace("visitTryCatchBlock(start:{}, end:{}, handler:{}, type:{})", start, end, handler, type);
+		catchLabels.add(handler);
+		mv.visitTryCatchBlock(start, end, handler, type);
+	}
+	
 	@Override
 	public void visitCode() {
 		log.trace("visitCode()");
@@ -346,15 +357,20 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	@Override
 	public void visitLabel(Label label) {
+		log.trace("visitLabel(label:{})", label);
 		mv.visitLabel(label);
-		Stack<Tuple> pending = caseLabels.get(label);
-		if (pending != null) {
-			while (!pending.isEmpty()) {
-				Tuple t = pending.pop();
-				mv.visitLdcInsn(t.min);
-				mv.visitLdcInsn(t.max);
-				mv.visitLdcInsn(t.cur);
-				mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableCaseInsn", "(III)V", false);
+		if (catchLabels.contains(label)) {
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startCatch", "()V", false);
+		} else {
+			Stack<Tuple> pending = caseLabels.get(label);
+			if (pending != null) {
+				while (!pending.isEmpty()) {
+					Tuple t = pending.pop();
+					mv.visitLdcInsn(t.min);
+					mv.visitLdcInsn(t.max);
+					mv.visitLdcInsn(t.cur);
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableCaseInsn", "(III)V", false);
+				}
 			}
 		}
 	}
