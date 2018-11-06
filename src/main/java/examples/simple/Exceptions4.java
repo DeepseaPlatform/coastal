@@ -29,7 +29,7 @@ public class Exceptions4 {
 	@SuppressWarnings("serial")
 	private static class MyException extends Exception {
 		private final int value;
-		public MyException(int v) {
+		MyException(int v) {
 			value = v;
 		}
 		public int getValue() {

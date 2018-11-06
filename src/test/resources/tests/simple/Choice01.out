@@ -20,37 +20,29 @@ coastal.triggers = tests.simple.Choice01.run(X: int)
 ----  starting dive 1  -----------------------------------------------
 *** loading class tests.simple.Choice01, identified as target
 visitCode()
-visitLineNumber(line:3, label:L
 visitVarInsn(opcode:25, var:0)
 visitMethodInsn(opcode:183, owner:java/lang/Object, name:<init>)
 visitInsn(opcode:177)
 visitEnd()
 visitCode()
-visitLineNumber(line:6, label:L
 visitIntInsn(opcode:16, operand:10)
 visitMethodInsn(opcode:184, owner:tests/simple/Choice01, name:run)
-visitLineNumber(line:7, label:L
 visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
 visitLdcInsn(value:done)
 visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
-visitLineNumber(line:8, label:L
 visitInsn(opcode:177)
 visitEnd()
 visitCode()
-visitLineNumber(line:11, label:L
 visitVarInsn(opcode:21, var:0)
 visitInsn(opcode:8)
-visitJumpInsn(opcode:162, label:L
-visitLineNumber(line:12, label:L
+visitJumpInsn(opcode:162, label
 visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
 visitLdcInsn(value:<5)
 visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
-visitJumpInsn(opcode:167, label:L
-visitLineNumber(line:14, label:L
+visitJumpInsn(opcode:167, label:
 visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
 visitLdcInsn(value:>=5)
 visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
-visitLineNumber(line:16, label:L
 visitInsn(opcode:177)
 visitEnd()
 *** instrumented tests.simple.Choice01: 722 -> 1684 bytes
@@ -59,34 +51,31 @@ visitEnd()
 *** loading class java.lang.String, uninstrumented
 *** loading class za.ac.sun.cs.coastal.symbolic.SymbolicVM, uninstrumented
 >>> symbolic record mode switched on
---> st[] locals:{}
+--> st[] locals:{} <0>
 --> data:{}
-### LINENUMBER 11
-ILOAD 0
---> st[X] locals:{0=X}
+<10> ILOAD 0
+--> st[X] locals:{0=X} <0>
 --> data:{}
-ICONST_5
---> st[X, 5] locals:{0=X}
+<11> ICONST_5
+--> st[X, 5] locals:{0=X} <0>
 --> data:{}
-IF_ICMPGE
+<12> IF_ICMPGE
 >>> adding conjunct: X>=5
 >>> spc is now: X>=5
---> st[] locals:{0=X}
+--> st[] locals:{0=X} <0>
 --> data:{}
-### LINENUMBER 14
-GETSTATIC java/lang/System out Ljava/io/PrintStream;
---> st[U_D_0] locals:{0=X}
+<17> GETSTATIC java/lang/System out Ljava/io/PrintStream;
+--> st[U_D_0] locals:{0=X} <0>
 --> data:{java/lang/System/out=U_D_0}
 *** loading class java.lang.System, uninstrumented
-LDC >=5
---> st[U_D_0, 1] locals:{0=X}
+<18> LDC >=5
+--> st[U_D_0, 1] locals:{0=X} <0>
 --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
-INVOKEVIRTUAL java/io/PrintStream println (Ljava/lang/String;)V
---> st[] locals:{0=X}
+<19> INVOKEVIRTUAL java/io/PrintStream println (Ljava/lang/String;)V
+--> st[] locals:{0=X} <0>
 --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 *** loading class java.io.PrintStream, uninstrumented
-### LINENUMBER 16
-RETURN
+<20> RETURN
 >>> symbolic record mode switched off
 --> data:{1/0=62, 1/1=61, 1/2=53, java/lang/System/out=U_D_0, 1/length=3}
 explored <1> X>=5
@@ -109,23 +98,23 @@ Tree shape: (IL)
   Classes instrumented: 1
   Pre-instrumented size: 722
   Post-instrumented size: 1684
-  Load time: 
-  Instrumentation time: 
+  Load time:
+  Instrumentation time:
 ====  Dive  ==========================================================
   Runs: 1
-  Overall dive time: 
+  Overall dive time:
 ====  COASTAL  =======================================================
-  Started: 
-  Stopped: 
-  Overall time: 
+  Started:
+  Stopped:
+  Overall time:
 ====  DepthFirstStrategy  ============================================
   Inserted paths: 2
   Revisited paths: 0
   Infeasible paths: 1
-  Solver time: 
-  Path tree time: 
-  Model extraction time: 
-  Overall strategy time: 
+  Solver time:
+  Path tree time:
+  Model extraction time:
+  Overall strategy time:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@                                                              @@@@

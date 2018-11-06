@@ -20,28 +20,22 @@ coastal.triggers = tests.simple.Straight01.run(X: int)
 ----  starting dive 1  -----------------------------------------------
 *** loading class tests.simple.Straight01, identified as target
 visitCode()
-visitLineNumber(line:3, label:L
 visitVarInsn(opcode:25, var:0)
 visitMethodInsn(opcode:183, owner:java/lang/Object, name:<init>)
 visitInsn(opcode:177)
 visitEnd()
 visitCode()
-visitLineNumber(line:6, label:L
 visitIntInsn(opcode:16, operand:10)
 visitMethodInsn(opcode:184, owner:tests/simple/Straight01, name:run)
-visitLineNumber(line:7, label:L
 visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
 visitLdcInsn(value:done)
 visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
-visitLineNumber(line:8, label:L
 visitInsn(opcode:177)
 visitEnd()
 visitCode()
-visitLineNumber(line:11, label:L
 visitFieldInsn(opcode:178, owner:java/lang/System, name:out)
 visitVarInsn(opcode:21, var:0)
 visitMethodInsn(opcode:182, owner:java/io/PrintStream, name:println)
-visitLineNumber(line:12, label:L
 visitInsn(opcode:177)
 visitEnd()
 *** instrumented tests.simple.Straight01: 670 -> 1487 bytes
@@ -50,22 +44,20 @@ visitEnd()
 *** loading class java.lang.String, uninstrumented
 *** loading class za.ac.sun.cs.coastal.symbolic.SymbolicVM, uninstrumented
 >>> symbolic record mode switched on
---> st[] locals:{}
+--> st[] locals:{} <0>
 --> data:{}
-### LINENUMBER 11
-GETSTATIC java/lang/System out Ljava/io/PrintStream;
---> st[U_D_0] locals:{0=X}
+<10> GETSTATIC java/lang/System out Ljava/io/PrintStream;
+--> st[U_D_0] locals:{0=X} <0>
 --> data:{java/lang/System/out=U_D_0}
 *** loading class java.lang.System, uninstrumented
-ILOAD 0
---> st[U_D_0, X] locals:{0=X}
+<11> ILOAD 0
+--> st[U_D_0, X] locals:{0=X} <0>
 --> data:{java/lang/System/out=U_D_0}
-INVOKEVIRTUAL java/io/PrintStream println (I)V
---> st[] locals:{0=X}
+<12> INVOKEVIRTUAL java/io/PrintStream println (I)V
+--> st[] locals:{0=X} <0>
 --> data:{java/lang/System/out=U_D_0}
 *** loading class java.io.PrintStream, uninstrumented
-### LINENUMBER 12
-RETURN
+<13> RETURN
 >>> symbolic record mode switched off
 --> data:{java/lang/System/out=U_D_0}
 ====  Instrumentation  ===============================================
@@ -74,23 +66,23 @@ RETURN
   Classes instrumented: 1
   Pre-instrumented size: 670
   Post-instrumented size: 1487
-  Load time: 
-  Instrumentation time: 
+  Load time:
+  Instrumentation time:
 ====  Dive  ==========================================================
   Runs: 1
-  Overall dive time: 
+  Overall dive time:
 ====  COASTAL  =======================================================
-  Started: 
-  Stopped: 
-  Overall time: 
+  Started:
+  Stopped:
+  Overall time:
 ====  DepthFirstStrategy  ============================================
   Inserted paths: 0
   Revisited paths: 0
   Infeasible paths: 0
-  Solver time: 
-  Path tree time: 
-  Model extraction time: 
-  Overall strategy time: 
+  Solver time:
+  Path tree time:
+  Model extraction time:
+  Overall strategy time:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@                                                              @@@@
