@@ -192,8 +192,12 @@ public class SymbolicVM {
 	//
 	// ======================================================================
 
-	public static void startCatch() {
-		symbolicState.startCatch();
+	public static void noException() throws LimitConjunctException {
+		symbolicState.noException();
+	}
+	
+	public static void startCatch(int instr) throws LimitConjunctException {
+		symbolicState.startCatch(instr);
 	}
 
 	// ======================================================================

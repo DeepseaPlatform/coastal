@@ -197,6 +197,9 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(II)V", false);
 		mv.visitInsn(opcode);
+		if (opcode == Opcodes.IDIV) {
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "noException", "()V", false);
+		}
 	}
 
 	@Override
@@ -360,7 +363,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 		log.trace("visitLabel(label:{})", label);
 		mv.visitLabel(label);
 		if (catchLabels.contains(label)) {
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startCatch", "()V", false);
+			mv.visitLdcInsn(classManager.getInstructionCounter());
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startCatch", "(I)V", false);
 		} else {
 			Stack<Tuple> pending = caseLabels.get(label);
 			if (pending != null) {

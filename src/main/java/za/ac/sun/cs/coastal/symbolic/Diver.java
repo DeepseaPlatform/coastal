@@ -148,8 +148,12 @@ public class Diver implements Reporter {
 			System.setErr(err);
 			Throwable t = x.getCause();
 			if ((t == null) || !(t instanceof LimitConjunctException)) {
-				x.printStackTrace();
-				// else: limit on nr of conjuncts has been reached
+				// x.printStackTrace();
+				try {
+					SymbolicVM.startCatch(-1);
+				} catch (LimitConjunctException e) {
+					// ignore, since run is over in any case
+				}
 			}
 		}
 	}
