@@ -1,20 +1,20 @@
 package examples.simple;
 
-public class Exceptions {
+public class Exceptions2 {
 
 	public static void main(String[] args) {
-		int result = op0(1, 4);
+		int result = op0(0, 4);
 		System.out.println(result);
 	}
 
 	private static int op0(int x, int y) throws ArithmeticException {
 		return op1(x - 1, y + 1);
 	}
-	
+
 	private static int op1(int x, int y) throws ArithmeticException {
 		int z = x / y;
 		try {
-			int q = op2(y + 1, x - 1) / x;
+			int q = op2(y - 1, x + 1) / x;
 			return q;
 		} catch (ArithmeticException e) {
 			System.out.println("DIVZERO1");
@@ -23,14 +23,21 @@ public class Exceptions {
 	}
 
 	private static int op2(int x, int y) throws ArithmeticException {
-		int z = x / y;
 		try {
-			int q = y / x;
-			return q;
+			int z = x / y;
+			try {
+				int q = 2 + y / x;
+				return q;
+			} catch (ArithmeticException e) {
+				System.out.println("DIVZERO2");
+			}
+			return z;
 		} catch (ArithmeticException e) {
-			System.out.println("DIVZERO2");
+			System.out.println("DIVZERO3");
+		} catch (NullPointerException e) {
+			System.out.println("NULL");
 		}
-		return z;
+		return 0;
 	}
-	
+
 }
