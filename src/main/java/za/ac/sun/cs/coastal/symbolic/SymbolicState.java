@@ -211,7 +211,7 @@ public class SymbolicState {
 		putField(stringId, "" + index, value);
 	}
 
-	private void pushConjunct(Expression conjunct) {
+	private void pushConjunct(Expression conjunct, boolean truthValue) {
 		String c = conjunct.toString();
 		/*
 		 * Set "isPreviousConstant" and "isPreviousDuplicate" so that if we
@@ -222,7 +222,7 @@ public class SymbolicState {
 		if (isPreviousConstant) {
 			log.trace(">>> constant conjunct ignored: {}", c);
 		} else if (conjunctSet.add(c)) {
-			spc = new SegmentedPCIf(spc, conjunct, pendingExtraConjunct, true);
+			spc = new SegmentedPCIf(spc, conjunct, pendingExtraConjunct, truthValue);
 			pendingExtraConjunct = null;
 			log.trace(">>> adding conjunct: {}", c);
 			log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
@@ -230,6 +230,10 @@ public class SymbolicState {
 			log.trace(">>> duplicate conjunct ignored: {}", c);
 			isPreviousDuplicate = true;
 		}
+	}
+	
+	private void pushConjunct(Expression conjunct) {
+		pushConjunct(conjunct, true);
 	}
 
 	private void pushConjunct(Expression expression, int min, int max, int cur) {
@@ -1466,9 +1470,8 @@ public class SymbolicState {
 			push(throwable);
 		}
 		assert noExceptionExpression != null;
-		pushConjunct(noExceptionExpression);
+		pushConjunct(noExceptionExpression, false);
 		noExceptionExpression = null;
-		spc = ((SegmentedPCIf) spc).negate();
 		checkLimitConjuncts();
 		log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 		dumpFrames();
