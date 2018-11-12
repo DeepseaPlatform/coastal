@@ -69,6 +69,11 @@ public class MarkerCoverage implements MarkerListener, Reporter, ConfigurationLi
 	// ======================================================================
 
 	@Override
+	public int getOrder() {
+		return 555;
+	}
+	
+	@Override
 	public String getName() {
 		return "MarkerCoverage";
 	}

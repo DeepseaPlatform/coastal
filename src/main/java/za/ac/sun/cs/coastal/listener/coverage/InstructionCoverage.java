@@ -154,10 +154,15 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	// ======================================================================
 
 	@Override
+	public int getOrder() {
+		return 555;
+	}
+	
+	@Override
 	public String getName() {
 		return "InstructionCoverage";
 	}
-
+	
 	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
 		int coveredCount = covered.cardinality();

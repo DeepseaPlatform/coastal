@@ -175,6 +175,11 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 	// ======================================================================
 
 	@Override
+	public int getOrder() {
+		return 333;
+	}
+	
+	@Override
 	public String getName() {
 		return "DepthFirstStrategyOLD";
 	}

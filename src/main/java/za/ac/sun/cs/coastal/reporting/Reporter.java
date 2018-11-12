@@ -4,6 +4,8 @@ import java.io.PrintWriter;
 
 public interface Reporter {
 
+	int getOrder();
+
 	String getName();
 
 	void report(PrintWriter info, PrintWriter trace);

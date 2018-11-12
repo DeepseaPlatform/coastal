@@ -37,9 +37,8 @@ public class ReporterManager implements ConfigurationListener {
 	}
 
 	public void report() {
-		for (Reporter reporter : reporters) {
-			report(reporter);
-		}
+		reporters.sort((Reporter r1, Reporter r2) -> r1.getOrder() - r2.getOrder());
+		reporters.forEach(r -> report(r));
 	}
 
 	private static final String LS = System.getProperty("line.separator");

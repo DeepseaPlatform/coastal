@@ -84,6 +84,11 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 	// ======================================================================
 
 	@Override
+	public int getOrder() {
+		return 111;
+	}
+	
+	@Override
 	public String getName() {
 		return name;
 	}

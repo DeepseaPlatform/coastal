@@ -178,6 +178,11 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	// ======================================================================
 
 	@Override
+	public int getOrder() {
+		return 555;
+	}
+	
+	@Override
 	public String getName() {
 		return "ConditionCoverage";
 	}

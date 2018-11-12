@@ -118,22 +118,6 @@ public class InstrumentationClassManager implements Reporter {
 		return null;
 	}
 
-	@Override
-	public String getName() {
-		return "Instrumentation";
-	}
-
-	@Override
-	public void report(PrintWriter info, PrintWriter trace) {
-		info.println("  Class load requests: " + requestCount);
-		info.println("  Cache hits: " + cachedCount);
-		info.println("  Classes instrumented: " + instrumentedCount);
-		info.println("  Pre-instrumented size: " + preInstrumentedSize);
-		info.println("  Post-instrumented size: " + postInstrumentedSize);
-		info.println("  Load time: " + loadTime);
-		info.println("  Instrumentation time: " + instrumentedTime);
-	}
-
 	private int instructionCounter = 0;
 	private int methodCounter = 0;
 	private Map<Integer, Integer> firstInstruction = new TreeMap<>();
@@ -176,4 +160,31 @@ public class InstrumentationClassManager implements Reporter {
 		lastInstruction.put(methodCounter, instructionCounter);
 	}
 	
+	// ======================================================================
+	//
+	// REPORTING
+	//
+	// ======================================================================
+
+	@Override
+	public int getOrder() {
+		return 155;
+	}
+	
+	@Override
+	public String getName() {
+		return "Instrumentation";
+	}
+
+	@Override
+	public void report(PrintWriter info, PrintWriter trace) {
+		info.println("  Class load requests: " + requestCount);
+		info.println("  Cache hits: " + cachedCount);
+		info.println("  Classes instrumented: " + instrumentedCount);
+		info.println("  Pre-instrumented size: " + preInstrumentedSize);
+		info.println("  Post-instrumented size: " + postInstrumentedSize);
+		info.println("  Load time: " + loadTime);
+		info.println("  Instrumentation time: " + instrumentedTime);
+	}
+
 }

@@ -165,10 +165,15 @@ public class Diver implements Reporter {
 	// ======================================================================
 
 	@Override
+	public int getOrder() {
+		return 888;
+	}
+
+	@Override
 	public String getName() {
 		return "Dive";
 	}
-
+	
 	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
 		info.println("  Runs: " + runs);

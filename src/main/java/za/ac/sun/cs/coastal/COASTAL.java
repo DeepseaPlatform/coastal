@@ -90,11 +90,22 @@ public class COASTAL implements Reporter {
 		}
 	}
 
+	// ======================================================================
+	//
+	// REPORTING
+	//
+	// ======================================================================
+
+	@Override
+	public int getOrder() {
+		return 999;
+	}
+
 	@Override
 	public String getName() {
 		return "COASTAL";
 	}
-
+	
 	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
 		stopped = Calendar.getInstance();
