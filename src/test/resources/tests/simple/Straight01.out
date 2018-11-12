@@ -68,13 +68,6 @@ visitEnd()
   Post-instrumented size: 1487
   Load time:
   Instrumentation time:
-====  Dive  ==========================================================
-  Runs: 1
-  Overall dive time:
-====  COASTAL  =======================================================
-  Started:
-  Stopped:
-  Overall time:
 ====  DepthFirstStrategy  ============================================
   Inserted paths: 0
   Revisited paths: 0
@@ -83,6 +76,13 @@ visitEnd()
   Path tree time:
   Model extraction time:
   Overall strategy time:
+====  Dive  ==========================================================
+  Runs: 1
+  Overall dive time:
+====  COASTAL  =======================================================
+  Started:
+  Stopped:
+  Overall time:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@                                                              @@@@

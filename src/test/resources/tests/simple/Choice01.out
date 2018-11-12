@@ -100,13 +100,6 @@ Tree shape: (IL)
   Post-instrumented size: 1684
   Load time:
   Instrumentation time:
-====  Dive  ==========================================================
-  Runs: 1
-  Overall dive time:
-====  COASTAL  =======================================================
-  Started:
-  Stopped:
-  Overall time:
 ====  DepthFirstStrategy  ============================================
   Inserted paths: 2
   Revisited paths: 0
@@ -115,6 +108,13 @@ Tree shape: (IL)
   Path tree time:
   Model extraction time:
   Overall strategy time:
+====  Dive  ==========================================================
+  Runs: 1
+  Overall dive time:
+====  COASTAL  =======================================================
+  Started:
+  Stopped:
+  Overall time:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@                                                              @@@@
