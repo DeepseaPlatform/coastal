@@ -49,8 +49,7 @@ public class Configuration {
 	private final long limitTime; // cap on the time use
 	private final long limitPaths; // cap on the number of paths to explore
 	private final long limitConjuncts; // cap on the number of conjuncts per path condition
-	private final long threadsDiver; // number of Diver threads
-	private final long threadsStrategy; // number of Strategy threads
+	private final long threadsMax; // maximum number of threads
 	private final boolean traceAll; // should all everything be traced?
 	private final boolean echoOutput; // is main program output displayed
 	private final boolean drawPaths; // is main program output displayed
@@ -71,7 +70,7 @@ public class Configuration {
 			final String main, final String args, final List<String> targets, final List<Trigger> triggers,
 			final Map<String, Integer> minBounds, final Map<String, Integer> maxBounds,
 			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
-			final long limitPaths, final long limitConjuncts, final long threadsDiver, final long threadsStrategy,
+			final long limitPaths, final long limitConjuncts, final long threadsMax,
 			final boolean traceAll, final boolean echoOutput, final boolean drawPaths, final boolean useConcreteValues,
 			final List<Listener> listeners, final List<ConfigurationListener> configurationListeners,
 			final Properties originalProperties) {
@@ -90,8 +89,7 @@ public class Configuration {
 		this.limitTime = limitTime;
 		this.limitPaths = limitPaths;
 		this.limitConjuncts = limitConjuncts;
-		this.threadsDiver = threadsDiver;
-		this.threadsStrategy = threadsStrategy;
+		this.threadsMax = threadsMax;
 		this.traceAll = traceAll;
 		this.echoOutput = echoOutput;
 		this.drawPaths = drawPaths;
@@ -221,12 +219,8 @@ public class Configuration {
 		return limitConjuncts;
 	}
 
-	public long getThreadsDiver() {
-		return threadsDiver;
-	}
-	
-	public long getThreadsStrategy() {
-		return threadsStrategy;
+	public long getThreadsMax() {
+		return threadsMax;
 	}
 	
 	public boolean getTraceAll() {
