@@ -47,6 +47,8 @@ public class ConfigurationBuilder {
 	private long limitTime = 0; // cap on the time use
 	private long limitPaths = 0; // cap on the number of paths to explore
 	private long limitConjuncts = 0; // cap on the number of conjuncts per path condition
+	private long threadsDiver = 1; // number of Diver threads
+	private long threadsStrategy = 1; // number of Strategy threads
 	private boolean traceAll; // should all everything be traced?
 	private boolean echoOutput = false; // is main program output displayed
 	private boolean drawPaths = false; // display path trees in detailed log
@@ -132,6 +134,16 @@ public class ConfigurationBuilder {
 		return this;
 	}
 
+	public ConfigurationBuilder setThreadsDiver(long threadsDiver) {
+		this.threadsDiver = threadsDiver;
+		return this;
+	}
+	
+	public ConfigurationBuilder setThreadsStrategy(long threadsStrategy) {
+		this.threadsStrategy = threadsStrategy;
+		return this;
+	}
+	
 	public ConfigurationBuilder setTraceAll(boolean traceAll) {
 		this.traceAll = traceAll;
 		return this;
@@ -162,8 +174,9 @@ public class ConfigurationBuilder {
 	public Configuration construct() {
 		processProperties();
 		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds,
-				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, traceAll, echoOutput, drawPaths,
-				useConcreteValues, listeners, configurationListeners, originalProperties);
+				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, threadsDiver, threadsStrategy,
+				traceAll, echoOutput, drawPaths, useConcreteValues, listeners, configurationListeners,
+				originalProperties);
 	}
 
 	// ======================================================================
@@ -264,6 +277,8 @@ public class ConfigurationBuilder {
 		setLimitTime(getLongProperty(originalProperties, "coastal.limit.time", limitTime));
 		setLimitPaths(getLongProperty(originalProperties, "coastal.limit.paths", limitPaths));
 		setLimitConjuncts(getLongProperty(originalProperties, "coastal.limit.conjuncts", limitConjuncts));
+		setThreadsDiver(getLongProperty(originalProperties, "coastal.threads.diver", threadsDiver));
+		setThreadsStrategy(getLongProperty(originalProperties, "coastal.threads.strategy", threadsStrategy));
 		setTraceAll(getBooleanProperty(originalProperties, "coastal.trace.all", traceAll));
 		setEchoOutput(getBooleanProperty(originalProperties, "coastal.echooutput", echoOutput));
 		setDrawPaths(getBooleanProperty(originalProperties, "coastal.draw.paths", drawPaths));

@@ -49,6 +49,8 @@ public class Configuration {
 	private final long limitTime; // cap on the time use
 	private final long limitPaths; // cap on the number of paths to explore
 	private final long limitConjuncts; // cap on the number of conjuncts per path condition
+	private final long threadsDiver; // number of Diver threads
+	private final long threadsStrategy; // number of Strategy threads
 	private final boolean traceAll; // should all everything be traced?
 	private final boolean echoOutput; // is main program output displayed
 	private final boolean drawPaths; // is main program output displayed
@@ -69,9 +71,10 @@ public class Configuration {
 			final String main, final String args, final List<String> targets, final List<Trigger> triggers,
 			final Map<String, Integer> minBounds, final Map<String, Integer> maxBounds,
 			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
-			final long limitPaths, final long limitConjuncts, final boolean traceAll, final boolean echoOutput,
-			final boolean drawPaths, final boolean useConcreteValues, final List<Listener> listeners,
-			final List<ConfigurationListener> configurationListeners, final Properties originalProperties) {
+			final long limitPaths, final long limitConjuncts, final long threadsDiver, final long threadsStrategy,
+			final boolean traceAll, final boolean echoOutput, final boolean drawPaths, final boolean useConcreteValues,
+			final List<Listener> listeners, final List<ConfigurationListener> configurationListeners,
+			final Properties originalProperties) {
 		this.version = version;
 		this.log = log;
 		this.reporterManager = reporterManager;
@@ -87,6 +90,8 @@ public class Configuration {
 		this.limitTime = limitTime;
 		this.limitPaths = limitPaths;
 		this.limitConjuncts = limitConjuncts;
+		this.threadsDiver = threadsDiver;
+		this.threadsStrategy = threadsStrategy;
 		this.traceAll = traceAll;
 		this.echoOutput = echoOutput;
 		this.drawPaths = drawPaths;
@@ -216,6 +221,14 @@ public class Configuration {
 		return limitConjuncts;
 	}
 
+	public long getThreadsDiver() {
+		return threadsDiver;
+	}
+	
+	public long getThreadsStrategy() {
+		return threadsStrategy;
+	}
+	
 	public boolean getTraceAll() {
 		return traceAll;
 	}
@@ -231,7 +244,7 @@ public class Configuration {
 	public boolean getUseConcreteValues() {
 		return useConcreteValues;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <L extends Listener> List<L> getListeners(Class<L> clas) {
 		List<L> result = new ArrayList<>();
@@ -281,7 +294,7 @@ public class Configuration {
 	// CONVERT TO PROPERTIES
 	//
 	// ======================================================================
-	
+
 	private static final Class<?>[] EMPTY_PARAMETERS = new Class<?>[0];
 
 	public Method findDelegate(String owner, String name, String descriptor) {
@@ -442,10 +455,10 @@ public class Configuration {
 				String arrayType = type.substring(0, i);
 				if (arrayType.equals("int")) {
 					return int[].class;
-		 		} else if (arrayType.equals("char")) {
+				} else if (arrayType.equals("char")) {
 					return char[].class;
-		 		} else if (arrayType.equals("byte")) {
-		 			return byte[].class;
+				} else if (arrayType.equals("byte")) {
+					return byte[].class;
 				} else {
 					return Object[].class;
 				}
