@@ -3,6 +3,8 @@ package za.ac.sun.cs.coastal.strategy;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -12,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
+import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.Green;
@@ -68,16 +71,15 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 	}
 
 	@Override
-	public Map<String, Constant> refine(SymbolicState symbolicState) {
+	public List<Model> refine(SegmentedPC spc) {
 		long t0 = System.currentTimeMillis();
-		Map<String, Constant> refinement = refine0(symbolicState);
+		List<Model> refinement = refine0(spc);
 		totalTime += System.currentTimeMillis() - t0;
 		return refinement;
 	}
 
-	private Map<String, Constant> refine0(SymbolicState symbolicState) {
+	private List<Model> refine0(SegmentedPC spc) {
 		long t;
-		SegmentedPC spc = symbolicState.getSegmentedPathCondition();
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		boolean infeasible = false;
 		while (true) {
@@ -122,7 +124,9 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 				modelExtractionTime += System.currentTimeMillis() - t;
 				log.info("new model: {}", modelString);
 				if (visitedModels.add(modelString)) {
-					return newModel;
+					List<Model> models = new LinkedList<>();
+					models.add(new Model(0, newModel));
+					return models;
 				} else {
 					log.info("model {} has been visited before, retrying", modelString);
 				}

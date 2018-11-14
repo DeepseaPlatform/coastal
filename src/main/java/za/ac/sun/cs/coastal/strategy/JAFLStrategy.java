@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
+import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.Green;
@@ -75,25 +76,24 @@ public class JAFLStrategy implements Strategy, ConfigurationListener {
 	}
 
 	@Override
-	public Map<String, Constant> refine(SymbolicState symbolicState) {
+	public List<Model> refine(SegmentedPC spc) {
 		long t0 = System.currentTimeMillis();
-		List<Map<String, Constant>> refinement = refine0(symbolicState);
+		List<Model> refinement = refine0(spc);
 		totalTime += System.currentTimeMillis() - t0;
 		//return refinement;
 		System.out.println("Printing input options");
-		for (Map<String, Constant> entry : refinement) {
+		for (Model entry : refinement) {
 			System.out.println("Input -> ");
-			for (Map.Entry<String, Constant> e : entry.entrySet()) {
+			for (Map.Entry<String, Constant> e : entry.getConcreteValues().entrySet()) {
 				System.out.println(e.getKey() + " -> " + e.getValue());
 			}
 		}
 		return null;
 	}
 
-	private List<Map<String, Constant>> refine0(SymbolicState symbolicState) {
+	private List<Model> refine0(SegmentedPC spc) {
 		List<Map<String, Constant>> list = new LinkedList<Map<String, Constant>>();
 		long t;
-		SegmentedPC spc = symbolicState.getSegmentedPathCondition();
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		//return null;
 		boolean infeasible = false;

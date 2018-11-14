@@ -3,13 +3,13 @@
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT" direct="true">
 			<ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-      		<PatternLayout pattern="%msg%n"/>
+      		<PatternLayout pattern="{%T} %msg%n"/>
   		</Console>
 		<File name="FILE" fileName="/tmp/coastal.log" append="false">
-      		<PatternLayout pattern="%d{HH:mm:ss.SSS} %msg%n"/>
+      		<PatternLayout pattern="%d{HH:mm:ss.SSS} {%T} %msg%n"/>
 		</File>
 		<File name="GREEN" fileName="/tmp/coastal-green.log" append="false">
-      		<PatternLayout pattern="%d{HH:mm:ss.SSS} %-6level %msg%n"/>
+      		<PatternLayout pattern="%d{HH:mm:ss.SSS} {%T} %-6level %msg%n"/>
 		</File>
 	</Appenders>
 	<Loggers>

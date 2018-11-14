@@ -38,29 +38,29 @@ public class Diver implements Reporter {
 		this.configuration = configuration;
 		this.log = configuration.getLog();
 		configuration.getReporterManager().register(this);
-		String cp = System.getProperty("java.class.path");
-		classManager = new InstrumentationClassManager(configuration, cp);
+//		String cp = System.getProperty("java.class.path");
+//		classManager = new InstrumentationClassManager(configuration, cp);
 	}
 
 	public void dive() {
-		List<InstructionListener> instructionListeners = new ArrayList<>();
-		for (InstructionListener listener : configuration.<InstructionListener>getListeners(InstructionListener.class)) {
-			listener.changeInstrumentationManager(classManager);
-			instructionListeners.add(listener);
-		}
-		List<MarkerListener> markerListeners = new ArrayList<>();
-		for (MarkerListener listener : configuration.<MarkerListener>getListeners(MarkerListener.class)) {
-			markerListeners.add(listener);
-		}
-		List<PathListener> pathListeners = new ArrayList<>();
-		for (PathListener listener : configuration.<PathListener>getListeners(PathListener.class)) {
-			pathListeners.add(listener);
-		}
-		Strategy strategy = configuration.getStrategy();
-		if (strategy == null) {
-			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
-			System.exit(1);
-		}
+//		List<InstructionListener> instructionListeners = new ArrayList<>();
+//		for (InstructionListener listener : configuration.<InstructionListener>getListeners(InstructionListener.class)) {
+//			listener.changeInstrumentationManager(classManager);
+//			instructionListeners.add(listener);
+//		}
+//		List<MarkerListener> markerListeners = new ArrayList<>();
+//		for (MarkerListener listener : configuration.<MarkerListener>getListeners(MarkerListener.class)) {
+//			markerListeners.add(listener);
+//		}
+//		List<PathListener> pathListeners = new ArrayList<>();
+//		for (PathListener listener : configuration.<PathListener>getListeners(PathListener.class)) {
+//			pathListeners.add(listener);
+//		}
+//		Strategy strategy = configuration.getStrategy();
+//		if (strategy == null) {
+//			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
+//			System.exit(1);
+//		}
 		Map<String, Constant> concreteValues = null;
 		long runLimit = configuration.getLimitRuns();
 		if (runLimit == 0) {
