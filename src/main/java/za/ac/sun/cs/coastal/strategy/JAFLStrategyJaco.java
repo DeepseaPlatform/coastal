@@ -15,6 +15,8 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
+import za.ac.sun.cs.coastal.reporting.Recorder;
+import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPCIf;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
@@ -76,25 +78,24 @@ public class JAFLStrategyJaco implements Strategy, ConfigurationListener {
 	}
 
 	@Override
-	public Map<String, Constant> refine(SymbolicState symbolicState) {
+	public List<Model> refine(SegmentedPC spc) {
 		long t0 = System.currentTimeMillis();
-		List<Map<String, Constant>> refinement = refine0(symbolicState);
+		List<Model> refinement = refine0(spc);
 		totalTime += System.currentTimeMillis() - t0;
 		//return refinement;
-		System.out.println("Printing input options");
-		for (Map<String, Constant> entry : refinement) {
-			System.out.println("Input -> ");
-			for (Map.Entry<String, Constant> e : entry.entrySet()) {
-				System.out.println(e.getKey() + " -> " + e.getValue());
-			}
-		}
+//		System.out.println("Printing input options");
+//		for (Map<String, Constant> entry : refinement) {
+//			System.out.println("Input -> ");
+//			for (Map.Entry<String, Constant> e : entry.entrySet()) {
+//				System.out.println(e.getKey() + " -> " + e.getValue());
+//			}
+//		}
 		return null;
 	}
 
-	private List<Map<String, Constant>> refine0(SymbolicState symbolicState) {
+	private List<Model> refine0(SegmentedPC spc) {
 		List<Map<String, Constant>> list = new LinkedList<Map<String, Constant>>();
 		long t;
-		SegmentedPC spc = symbolicState.getSegmentedPathCondition();
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		// generate new segmented pcs, all with one conjunct negated:
 		Set<SegmentedPC> altSpcs = new HashSet<>();
@@ -106,7 +107,7 @@ public class JAFLStrategyJaco implements Strategy, ConfigurationListener {
 		while (true) {
 			if (--pathLimit < 0) {
 				log.warn("path limit reached");
-				return list;
+				return null; // list;
 			}
 			t = System.currentTimeMillis();
 			spc = pathTree.insertPath(spc, infeasible);
@@ -114,7 +115,7 @@ public class JAFLStrategyJaco implements Strategy, ConfigurationListener {
 			if (spc == null) {
 				log.info("no further paths");
 				log.trace("Tree shape: {}", pathTree.getShape());
-				return list;
+				return null; // list;
 			}
 			infeasible = false;
 			Expression pc = spc.getPathCondition();
@@ -238,6 +239,11 @@ public class JAFLStrategyJaco implements Strategy, ConfigurationListener {
 		info.println("  Path tree time: " + pathTreeTime);
 		info.println("  Model extraction time: " + modelExtractionTime);
 		info.println("  Overall strategy time: " + totalTime);
+	}
+
+	@Override
+	public void record(Recorder recorder) {
+		// nothing to record
 	}
 
 }

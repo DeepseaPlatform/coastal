@@ -25,7 +25,7 @@ import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyThread;
-import za.ac.sun.cs.coastal.symbolic.DiverThread;
+import za.ac.sun.cs.coastal.symbolic.Diver;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
@@ -172,7 +172,7 @@ public class Disposition implements Reporter {
 	}
 
 	public void addDiverTask() {
-		futures.add(cs.submit(new DiverThread(this)));
+		futures.add(cs.submit(new Diver(this)));
 		diveThreadCount++;
 	}
 
@@ -180,20 +180,17 @@ public class Disposition implements Reporter {
 		futures.add(cs.submit(new StrategyThread(configuration, strategy, models, pcs, work, workDone)));
 	}
 
-	public void cancelThreads() {
+	public void shutdown() {
 		futures.forEach(f -> f.cancel(true));
+		executor.shutdownNow();
 	}
 
 	public Configuration getConfiguration() {
 		return configuration;
 	}
 
-	public Map<String, Constant> getNextModel() {
-		try {
-			return models.take().getConcreteValues();
-		} catch (InterruptedException e) {
-			return null;
-		}
+	public Map<String, Constant> getNextModel() throws InterruptedException {
+		return models.take().getConcreteValues();
 	}
 
 	public long getNextDiveCount() {

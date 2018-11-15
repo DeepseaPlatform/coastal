@@ -3,94 +3,73 @@ package za.ac.sun.cs.coastal.symbolic;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
-import za.ac.sun.cs.coastal.listener.InstructionListener;
-import za.ac.sun.cs.coastal.listener.MarkerListener;
-import za.ac.sun.cs.coastal.listener.PathListener;
+import za.ac.sun.cs.coastal.Disposition;
 import za.ac.sun.cs.coastal.reporting.Banner;
-import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.strategy.Strategy;
-import za.ac.sun.cs.green.expr.Constant;
 
-public class Diver implements Reporter {
+public class Diver implements Callable<Void> {
+
+	private final Disposition disposition;
 
 	private final Configuration configuration;
 
 	private final Logger log;
 
-	private int runs = 0;
+	//	private final BlockingQueue<Model> models;
+	//
+	//	private final BlockingQueue<SegmentedPC> pcs;
+	//
+	//	private final InstrumentationClassManager classManager;
+	//
+	//	private final List<InstructionListener> instructionListeners;
+	//
+	//	private final List<MarkerListener> markerListeners;
+	//
+	//	private final List<PathListener> pathListeners;
 
-	private long time = 0;
-
-	private final InstrumentationClassManager classManager;
-
-	public Diver(Configuration configuration) {
-		this.configuration = configuration;
+	public Diver(Disposition disposition) {
+		this.disposition = disposition;
+		this.configuration = disposition.getConfiguration();
 		this.log = configuration.getLog();
-		configuration.getReporterManager().register(this);
-//		String cp = System.getProperty("java.class.path");
-//		classManager = new InstrumentationClassManager(configuration, cp);
+		//		this.models = models;
+		//		this.pcs = pcs;
+		//		this.classManager = classManager;
+		//		this.instructionListeners = instructionListeners;
+		//		this.markerListeners = markerListeners;
+		//		this.pathListeners = pathListeners;
 	}
 
-	public void dive() {
-//		List<InstructionListener> instructionListeners = new ArrayList<>();
-//		for (InstructionListener listener : configuration.<InstructionListener>getListeners(InstructionListener.class)) {
-//			listener.changeInstrumentationManager(classManager);
-//			instructionListeners.add(listener);
-//		}
-//		List<MarkerListener> markerListeners = new ArrayList<>();
-//		for (MarkerListener listener : configuration.<MarkerListener>getListeners(MarkerListener.class)) {
-//			markerListeners.add(listener);
-//		}
-//		List<PathListener> pathListeners = new ArrayList<>();
-//		for (PathListener listener : configuration.<PathListener>getListeners(PathListener.class)) {
-//			pathListeners.add(listener);
-//		}
-//		Strategy strategy = configuration.getStrategy();
-//		if (strategy == null) {
-//			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
-//			System.exit(1);
-//		}
-		Map<String, Constant> concreteValues = null;
-		long runLimit = configuration.getLimitRuns();
-		if (runLimit == 0) {
-			runLimit = Long.MIN_VALUE;
+	@Override
+	public Void call() throws Exception {
+		log.info("Diver thread starting");
+		try {
+			while (true) {
+				log.info(Banner.getBannerLine("starting dive " + disposition.getNextDiveCount(), '-'));
+				long t0 = System.currentTimeMillis();
+				SymbolicState symbolicState = new SymbolicState(disposition);
+				ClassLoader classLoader = disposition.createClassLoader(symbolicState);
+				SymbolicVM.setState(symbolicState);
+				performRun(classLoader);
+				disposition.recordDiveTime(System.currentTimeMillis() - t0);
+				disposition.notifyPathListeners(symbolicState);
+				SegmentedPC spc = symbolicState.getSegmentedPathCondition();
+				// log.info(Banner.getBannerLine("stopping dive, spc == " + spc, '-'));
+				disposition.addPc(spc);
+				// log.info(Banner.getBannerLine("after dive pcs.size() == " + pcs.size(), '-'));
+				if (!symbolicState.mayContinue()) {
+					disposition.stopWork();
+				}
+			}
+		} catch (InterruptedException e) {
+			log.info("Canceled");
+			throw e;
 		}
-		do {
-			if (--runLimit < 0) {
-				log.warn("run limit reached");
-				return;
-			}
-			runs++;
-			log.info(Banner.getBannerLine("starting dive " + runs, '-'));
-			long t0 = System.currentTimeMillis();
-			SymbolicState symbolicState = new SymbolicState(configuration, concreteValues, instructionListeners,
-					markerListeners);
-			SymbolicVM.setState(symbolicState);
-			performRun();
-			time += System.currentTimeMillis() - t0;
-			for (PathListener listener : pathListeners) {
-				listener.visit(symbolicState);
-			}
-			concreteValues = strategy.refine(symbolicState);
-			if (!symbolicState.mayContinue()) {
-				break;
-			}
-		} while (concreteValues != null);
-	}
-
-	public int getRuns() {
-		return runs;
 	}
 
 	private static final PrintStream NUL = new PrintStream(new OutputStream() {
@@ -100,8 +79,7 @@ public class Diver implements Reporter {
 		}
 	});
 
-	private void performRun() {
-		ClassLoader classLoader = classManager.createClassLoader();
+	private void performRun(ClassLoader classLoader) {
 		PrintStream out = System.out, err = System.err;
 		try {
 			Class<?> clas = classLoader.loadClass(configuration.getMain());
@@ -147,28 +125,6 @@ public class Diver implements Reporter {
 				}
 			}
 		}
-	}
-
-	// ======================================================================
-	//
-	// REPORTING
-	//
-	// ======================================================================
-
-	@Override
-	public int getOrder() {
-		return 888;
-	}
-
-	@Override
-	public String getName() {
-		return "Dive";
-	}
-	
-	@Override
-	public void report(PrintWriter info, PrintWriter trace) {
-		info.println("  Runs: " + runs);
-		info.println("  Overall dive time: " + time);
 	}
 
 }

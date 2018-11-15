@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
+import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
@@ -100,7 +101,7 @@ public class JAFLStrategy implements Strategy, ConfigurationListener {
 		while (true) {
 			if (--pathLimit < 0) {
 				log.warn("path limit reached");
-				return list;
+				return null;
 			}
 			t = System.currentTimeMillis();
 			spc = pathTree.insertPath(spc, infeasible);
@@ -108,7 +109,7 @@ public class JAFLStrategy implements Strategy, ConfigurationListener {
 			if (spc == null) {
 				log.info("no further paths");
 				log.trace("Tree shape: {}", pathTree.getShape());
-				return list;
+				return null;
 			}
 			infeasible = false;
 			Expression pc = spc.getPathCondition();
@@ -220,6 +221,11 @@ public class JAFLStrategy implements Strategy, ConfigurationListener {
 		info.println("  Path tree time: " + pathTreeTime);
 		info.println("  Model extraction time: " + modelExtractionTime);
 		info.println("  Overall strategy time: " + totalTime);
+	}
+
+	@Override
+	public void record(Recorder recorder) {
+		// nothing to record
 	}
 
 }

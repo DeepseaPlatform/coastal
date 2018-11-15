@@ -92,7 +92,7 @@ public class SymbolicState {
 
 	private final List<MarkerListener> markerListeners;
 
-	public SymbolicState(Disposition disposition) {
+	public SymbolicState(Disposition disposition) throws InterruptedException {
 		this.configuration = disposition.getConfiguration();
 		this.log = configuration.getLog();
 		long lc = configuration.getLimitConjuncts();

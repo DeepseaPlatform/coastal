@@ -92,7 +92,7 @@ public class COASTAL implements Reporter {
 		} catch (InterruptedException e) {
 			log.info(Banner.getBannerLine("main thread interrupted", '!'));
 		} finally {
-			disposition.cancelThreads();
+			disposition.shutdown();
 		}
 		stopped = Calendar.getInstance();
 		overallTime = stopped.getTimeInMillis() - started.getTimeInMillis();

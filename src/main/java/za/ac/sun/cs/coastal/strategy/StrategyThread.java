@@ -40,28 +40,33 @@ public class StrategyThread implements Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		log.info("Strategy thread starting");
-		while (true) {
-			SegmentedPC spc = pcs.take();
-			log.info(Banner.getBannerLine("starting refinement, spc == " + spc, '-'));
-			List<Model> mdls = strategy.refine(spc);
-			int d = -1;
-			if (mdls != null) {
-				mdls.forEach(m -> {
-					try {
-						models.put(m);
-						log.info(Banner.getBannerLine("added model " + m, '-'));
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				});
-				d = mdls.size() - 1;
+		try {
+			while (true) {
+				SegmentedPC spc = pcs.take();
+				log.info(Banner.getBannerLine("starting refinement, spc == " + spc, '-'));
+				List<Model> mdls = strategy.refine(spc);
+				int d = -1;
+				if (mdls != null) {
+					mdls.forEach(m -> {
+						try {
+							models.put(m);
+							log.info(Banner.getBannerLine("added model " + m, '-'));
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
+					d = mdls.size() - 1;
+				}
+				log.info(Banner.getBannerLine("added models d == " + d, '-'));
+				long n = work.addAndGet(d);
+				if (n == 0) {
+					workDone.set(true);
+				}
 			}
-			log.info(Banner.getBannerLine("added models d == " + d, '-'));
-			long n = work.addAndGet(d);
-			if (n == 0) {
-				workDone.set(true);
-			}
+		} catch (InterruptedException e) {
+			log.info("Canceled");
+			throw e;
 		}
 	}
 
