@@ -1,8 +1,11 @@
 package za.ac.sun.cs.coastal.instrument;
 
+import java.io.PrintWriter;
+
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class InstrumentationClassLoader extends ClassLoader {
 
@@ -12,10 +15,13 @@ public class InstrumentationClassLoader extends ClassLoader {
 
 	private final InstrumentationClassManager manager;
 	
-	InstrumentationClassLoader(Configuration configuration, InstrumentationClassManager manager) {
+	private final SymbolicState symbolicState;
+	
+	InstrumentationClassLoader(Configuration configuration, InstrumentationClassManager manager, SymbolicState symbolicState) {
 		this.configuration = configuration;
 		this.log = configuration.getLog();
 		this.manager = manager;
+		this.symbolicState = symbolicState;
 	}
 
 	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {

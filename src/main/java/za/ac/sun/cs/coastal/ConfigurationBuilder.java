@@ -43,10 +43,10 @@ public class ConfigurationBuilder {
 	private final Map<String, Integer> maxBounds = new HashMap<>(); // map: variable name -> upper bound
 	private final Map<String, Object> delegates = new HashMap<>(); // map: method -> delegate
 	private Strategy strategy = null; // strategy to refine paths
-	private long limitRuns = 0; // cap on the number of runs executed
-	private long limitTime = 0; // cap on the time use
-	private long limitPaths = 0; // cap on the number of paths to explore
-	private long limitConjuncts = 0; // cap on the number of conjuncts per path condition
+	private long limitRuns = Long.MAX_VALUE; // cap on the number of runs executed
+	private long limitTime = Long.MAX_VALUE; // cap on the time use
+	private long limitPaths = Long.MAX_VALUE; // cap on the number of paths to explore
+	private long limitConjuncts = Long.MAX_VALUE; // cap on the number of conjuncts per path condition
 	private long threadsMax = 2; // maximum number of threads
 	private boolean traceAll; // should all everything be traced?
 	private boolean echoOutput = false; // is main program output displayed

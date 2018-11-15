@@ -14,6 +14,7 @@ import org.objectweb.asm.Opcodes;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.Configuration.Trigger;
+import za.ac.sun.cs.coastal.Disposition;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
 import za.ac.sun.cs.coastal.listener.MarkerListener;
@@ -91,16 +92,15 @@ public class SymbolicState {
 
 	private final List<MarkerListener> markerListeners;
 
-	public SymbolicState(Configuration configuration, Map<String, Constant> concreteValues,
-			List<InstructionListener> instructionListeners, List<MarkerListener> markerListeners) {
-		this.configuration = configuration;
+	public SymbolicState(Disposition disposition) {
+		this.configuration = disposition.getConfiguration();
 		this.log = configuration.getLog();
 		long lc = configuration.getLimitConjuncts();
 		this.limitConjuncts = (lc == 0) ? Long.MAX_VALUE : lc;
 		this.traceAll = configuration.getTraceAll();
-		this.concreteValues = concreteValues;
-		this.instructionListeners = instructionListeners;
-		this.markerListeners = markerListeners;
+		this.concreteValues = disposition.getNextModel();
+		this.instructionListeners = disposition.getInstructionListeners();
+		this.markerListeners = disposition.getMarkerListeners();
 		symbolicMode = traceAll;
 	}
 

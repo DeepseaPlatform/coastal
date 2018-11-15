@@ -10,6 +10,7 @@ import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
+import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 
 public class InstructionCoverage implements InstructionListener, Reporter, ConfigurationListener {
@@ -147,6 +148,14 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 		covered.set(instr);
 	}
 
+	public int getCoveredCount() {
+		return covered.cardinality();
+	}
+
+	public int getPotentialCount() {
+		return potentials.cardinality();
+	}
+	
 	// ======================================================================
 	//
 	// REPORTING
@@ -164,11 +173,19 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	}
 	
 	@Override
+	public void record(Recorder recorder) {
+		recorder.record(getName(), "total", getPotentialCount());
+		recorder.record(getName(), "cover", getCoveredCount());
+	}
+	
+	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
-		int coveredCount = covered.cardinality();
-		int coveredTotal = potentials.cardinality();
+		int coveredCount = getCoveredCount();
+		int coveredTotal = getPotentialCount();
 		double percentage = coveredCount * 100.0 / coveredTotal;
-		info.printf("  Covered %d of %d instructions == %.2f%%\n", coveredCount, coveredTotal, percentage);
+		info.printf("  Total instructions: %d\n", coveredTotal);
+		info.printf("  Covered instructions: %d\n", coveredCount);
+		info.printf("  Percentage: %.2f%%\n", percentage);
 	}
 
 }

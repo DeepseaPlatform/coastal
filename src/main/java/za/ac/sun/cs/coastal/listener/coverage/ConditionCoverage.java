@@ -15,6 +15,7 @@ import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
+import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 
 public class ConditionCoverage implements InstructionListener, Reporter, ConfigurationListener {
@@ -185,6 +186,11 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	@Override
 	public String getName() {
 		return "ConditionCoverage";
+	}
+
+	@Override
+	public void record(Recorder recorder) {
+		// nothing recorded for now
 	}
 
 	@Override

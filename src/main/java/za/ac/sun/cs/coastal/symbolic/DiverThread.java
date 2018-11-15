@@ -5,71 +5,65 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
-import za.ac.sun.cs.coastal.listener.InstructionListener;
-import za.ac.sun.cs.coastal.listener.MarkerListener;
-import za.ac.sun.cs.coastal.listener.PathListener;
+import za.ac.sun.cs.coastal.Disposition;
 import za.ac.sun.cs.coastal.reporting.Banner;
-import za.ac.sun.cs.green.expr.Constant;
 
 public class DiverThread implements Callable<Void> {
 
-	private final Logger log;
+	private final Disposition disposition;
 
 	private final Configuration configuration;
 
-	private final BlockingQueue<Model> models;
+	private final Logger log;
 
-	private final BlockingQueue<SegmentedPC> pcs;
+	//	private final BlockingQueue<Model> models;
+	//
+	//	private final BlockingQueue<SegmentedPC> pcs;
+	//
+	//	private final InstrumentationClassManager classManager;
+	//
+	//	private final List<InstructionListener> instructionListeners;
+	//
+	//	private final List<MarkerListener> markerListeners;
+	//
+	//	private final List<PathListener> pathListeners;
 
-	private final InstrumentationClassManager classManager;
-
-	private final List<InstructionListener> instructionListeners;
-
-	private final List<MarkerListener> markerListeners;
-
-	private final List<PathListener> pathListeners;
-
-	public DiverThread(Configuration configuration, BlockingQueue<Model> models, BlockingQueue<SegmentedPC> pcs,
-			InstrumentationClassManager classManager, List<InstructionListener> instructionListeners,
-			List<MarkerListener> markerListeners, List<PathListener> pathListeners) {
-		this.configuration = configuration;
+	public DiverThread(Disposition disposition) {
+		this.disposition = disposition;
+		this.configuration = disposition.getConfiguration();
 		this.log = configuration.getLog();
-		this.models = models;
-		this.pcs = pcs;
-		this.classManager = classManager;
-		this.instructionListeners = instructionListeners;
-		this.markerListeners = markerListeners;
-		this.pathListeners = pathListeners;
+		//		this.models = models;
+		//		this.pcs = pcs;
+		//		this.classManager = classManager;
+		//		this.instructionListeners = instructionListeners;
+		//		this.markerListeners = markerListeners;
+		//		this.pathListeners = pathListeners;
 	}
 
 	@Override
 	public Void call() throws Exception {
 		log.info("Diver thread starting");
 		while (true) {
-			Map<String, Constant> concreteValues = models.take().getConcreteValues();
-			log.info(Banner.getBannerLine("starting dive", '-'));
-			SymbolicState symbolicState = new SymbolicState(configuration, concreteValues, instructionListeners,
-					markerListeners);
+			log.info(Banner.getBannerLine("starting dive " + disposition.getNextDiveCount(), '-'));
+			long t0 = System.currentTimeMillis();
+			SymbolicState symbolicState = new SymbolicState(disposition);
+			ClassLoader classLoader = disposition.createClassLoader(symbolicState);
 			SymbolicVM.setState(symbolicState);
-			performRun();
-			//			time += System.currentTimeMillis() - t0;
-			pathListeners.forEach(l -> l.visit(symbolicState));
-			SegmentedPC spc = symbolicState.getSegmentedPathCondition(); 
-			log.info(Banner.getBannerLine("stopping dive, spc == " + spc, '-'));
-			pcs.put(spc);
-			log.info(Banner.getBannerLine("after dive pcs.size() == " + pcs.size(), '-'));
-			//			if (!symbolicState.mayContinue()) {
-			//				break;
-			//			}
+			performRun(classLoader);
+			disposition.recordDiveTime(System.currentTimeMillis() - t0);
+			disposition.notifyPathListeners(symbolicState);
+			SegmentedPC spc = symbolicState.getSegmentedPathCondition();
+			// log.info(Banner.getBannerLine("stopping dive, spc == " + spc, '-'));
+			disposition.addPc(spc);
+			// log.info(Banner.getBannerLine("after dive pcs.size() == " + pcs.size(), '-'));
+			if (!symbolicState.mayContinue()) {
+				disposition.stopWork();
+			}
 		}
 	}
 
@@ -80,8 +74,7 @@ public class DiverThread implements Callable<Void> {
 		}
 	});
 
-	private void performRun() {
-		ClassLoader classLoader = classManager.createClassLoader();
+	private void performRun(ClassLoader classLoader) {
 		PrintStream out = System.out, err = System.err;
 		try {
 			Class<?> clas = classLoader.loadClass(configuration.getMain());

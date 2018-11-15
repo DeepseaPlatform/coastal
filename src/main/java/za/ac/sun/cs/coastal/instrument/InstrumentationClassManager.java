@@ -16,7 +16,9 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
 import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
+import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class InstrumentationClassManager implements Reporter {
 
@@ -45,8 +47,8 @@ public class InstrumentationClassManager implements Reporter {
 		classPaths.add(".");
 	}
 
-	public ClassLoader createClassLoader() {
-		return new InstrumentationClassLoader(configuration, this);
+	public ClassLoader createClassLoader(SymbolicState symbolicState) {
+		return new InstrumentationClassLoader(configuration, this, symbolicState);
 	}
 
 	public void startLoad() {
@@ -174,6 +176,17 @@ public class InstrumentationClassManager implements Reporter {
 	@Override
 	public String getName() {
 		return "Instrumentation";
+	}
+
+	@Override
+	public void record(Recorder recorder) {
+		recorder.record(getName(), "load-requests", requestCount);
+		recorder.record(getName(), "cache-hits", cachedCount);
+		recorder.record(getName(), "instrumented-classes", instrumentedCount);
+		recorder.record(getName(), "pre-instrumented-size", preInstrumentedSize);
+		recorder.record(getName(), "post-instrumented-size", postInstrumentedSize);
+		recorder.record(getName(), "load-time", loadTime);
+		recorder.record(getName(), "instrumentation-time", instrumentedTime);
 	}
 
 	@Override

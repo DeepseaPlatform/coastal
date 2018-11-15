@@ -2,8 +2,10 @@ package za.ac.sun.cs.coastal.reporting;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
@@ -11,11 +13,13 @@ import org.apache.logging.log4j.Logger;
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 
-public class ReporterManager implements ConfigurationListener {
+public class ReporterManager implements ConfigurationListener, Recorder {
 
 	private Logger log = null;
 
 	private final List<Reporter> reporters = new LinkedList<>();
+
+	private final Map<String, Object> records = new HashMap<>();
 
 	public ReporterManager() {
 		// We expect configurationLoaded(...) to be called shortly.
@@ -66,6 +70,22 @@ public class ReporterManager implements ConfigurationListener {
 				}
 			}
 		}
+	}
+
+	public void record() {
+		reporters.forEach(r -> r.record(this));
+	}
+
+	@Override
+	public void record(String name, String property, String value) {
+		String key = String.join(".", name, property).toLowerCase().replaceAll("[^-\\w\\d]", "");
+		records.put(key, value);
+	}
+
+	@Override
+	public void record(String name, String property, long value) {
+		String key = String.join(".", name, property).toLowerCase().replaceAll("[^-\\w\\d]", "");
+		records.put(key, value);		
 	}
 
 }

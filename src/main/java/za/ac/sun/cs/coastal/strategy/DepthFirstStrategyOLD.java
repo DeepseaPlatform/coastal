@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
+import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
@@ -188,6 +189,17 @@ public class DepthFirstStrategyOLD implements Strategy, ConfigurationListener {
 		return "DepthFirstStrategyOLD";
 	}
 
+	@Override
+	public void record(Recorder recorder) {
+		recorder.record(getName(), "inserted-paths", pathTree.getPathCount());
+		recorder.record(getName(), "revisited-paths", pathTree.getRevisitCount());
+		recorder.record(getName(), "infeasible-paths", infeasibleCount);
+		recorder.record(getName(), "solver-time", solverTime);
+		recorder.record(getName(), "pathtree-time", pathTreeTime);
+		recorder.record(getName(), "extraction-time", modelExtractionTime);
+		recorder.record(getName(), "overall-time", totalTime);
+	}
+	
 	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
 		info.println("  Inserted paths: " + pathTree.getPathCount());

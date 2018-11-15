@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.MarkerListener;
+import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
@@ -78,6 +79,15 @@ public class MarkerCoverage implements MarkerListener, Reporter, ConfigurationLi
 		return "MarkerCoverage";
 	}
 
+	@Override
+	public void record(Recorder recorder) {
+		if (markers.size() > 0) {
+			for (Map.Entry<String, Integer> entry : markers.entrySet()) {
+				recorder.record(getName(), "marker-" + entry.getKey(), entry.getValue());
+			}
+		}
+	}
+	
 	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
 		if (markers.size() > 0) {

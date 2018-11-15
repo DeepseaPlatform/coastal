@@ -13,6 +13,7 @@ import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
 import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 
 public class InstrumentationAdapter extends ClassVisitor implements Reporter {
@@ -91,6 +92,11 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public void record(Recorder recorder) {
+		// nothing to record
 	}
 
 	@Override

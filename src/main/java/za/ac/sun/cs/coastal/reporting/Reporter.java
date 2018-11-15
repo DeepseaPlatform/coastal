@@ -8,6 +8,8 @@ public interface Reporter {
 
 	String getName();
 
+	void record(Recorder recorder);
+
 	void report(PrintWriter info, PrintWriter trace);
 
 }

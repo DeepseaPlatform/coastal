@@ -66,16 +66,7 @@ public class Diver implements Reporter {
 		if (runLimit == 0) {
 			runLimit = Long.MIN_VALUE;
 		}
-		long timeLimit = configuration.getLimitTime();
-		if (timeLimit == 0) {
-			timeLimit = Long.MAX_VALUE;
-		}
-		long tl0 = System.currentTimeMillis();
 		do {
-			if ((System.currentTimeMillis() - tl0) / 1000 > timeLimit) {
-				log.warn("time limit reached");
-				return;
-			}
 			if (--runLimit < 0) {
 				log.warn("run limit reached");
 				return;
