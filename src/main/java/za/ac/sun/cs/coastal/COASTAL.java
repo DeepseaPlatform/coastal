@@ -109,8 +109,8 @@ public class COASTAL implements Reporter {
 		}
 	}
 
-	public long getOverallTime() {
-		return overallTime;
+	public Recorder getRecorder() {
+		return reporterManager;
 	}
 
 	// ======================================================================
@@ -133,14 +133,14 @@ public class COASTAL implements Reporter {
 	public void record(Recorder recorder) {
 		recorder.record(getName(), "started", DATE_FORMAT.format(started.getTime()));
 		recorder.record(getName(), "stopped", DATE_FORMAT.format(stopped.getTime()));
-		recorder.record(getName(), "time", getOverallTime());
+		recorder.record(getName(), "time", overallTime);
 	}
 
 	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
 		info.println("  Started: " + DATE_FORMAT.format(started.getTime()));
 		info.println("  Stopped: " + DATE_FORMAT.format(stopped.getTime()));
-		info.println("  Overall time: " + getOverallTime());
+		info.println("  Overall time: " + overallTime);
 	}
 
 }

@@ -158,10 +158,12 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 				int n = cur.getChildCount();
 				for (int i = 0; i < n; i++) {
 					PathTreeNode ch = cur.getChild(i);
-					if ((ch != null) && !ch.isComplete()) {
-						pc = cur.getPcForChild(i, pc);
-						cur = ch;
-						continue outer;
+					if (ch != null) {
+						if (!ch.isComplete()) {
+							pc = cur.getPcForChild(i, pc);
+							cur = ch;
+							continue outer;
+						}
 					}
 				}
 				for (int i = 0; i < n; i++) {

@@ -5,18 +5,41 @@ import org.apache.logging.log4j.Logger;
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
+/**
+ * Representation of all execution paths in a single tree.
+ */
 public abstract class PathTree {
 
+	/**
+	 * The one-and-only logger.
+	 */
 	protected final Logger log;
 
+	/**
+	 * Flag to indicate whether paths should be drawn after updates.
+	 */
 	private final boolean drawPaths; 
 
+	/**
+	 * The root of the tree.
+	 */
 	private PathTreeNode root = null;
 
+	/**
+	 * The number of paths inserted.
+	 */
 	private int pathCount = 0;
 
+	/**
+	 * The number of paths whose insertion was unnecessary because they constitute a revisit of an already-inserted path.
+	 */
 	private int revisitCount = 0;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param configuration the runtime configuration
+	 */
 	public PathTree(Configuration configuration) {
 		log = configuration.getLog();
 		drawPaths = configuration.getDrawPaths();

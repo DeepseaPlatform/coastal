@@ -1,7 +1,5 @@
 package za.ac.sun.cs.coastal.instrument;
 
-import java.io.PrintWriter;
-
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;

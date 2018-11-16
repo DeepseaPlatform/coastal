@@ -88,4 +88,26 @@ public class ReporterManager implements ConfigurationListener, Recorder {
 		records.put(key, value);		
 	}
 
+	@Override
+	public String getRecordedString(String name, String property) {
+		String key = String.join(".", name, property).toLowerCase().replaceAll("[^-\\w\\d]", "");
+		Object value = records.get(key);
+		if ((value != null) && (value instanceof String)) {
+			return (String) value;
+		} else {
+			return "";
+		}
+	}
+
+	@Override
+	public long getLong(String name, String property) {
+		String key = String.join(".", name, property).toLowerCase().replaceAll("[^-\\w\\d]", "");
+		Object value = records.get(key);
+		if ((value != null) && (value instanceof Long)) {
+			return (Long) value;
+		} else {
+			return 0;
+		}
+	}
+
 }

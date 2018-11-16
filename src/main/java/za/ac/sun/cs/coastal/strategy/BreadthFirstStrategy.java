@@ -161,7 +161,8 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 					PathTreeNode ch = node.getChild(i);
 					if (ch == null) {
 						return node.getPcForChild(i, parent);
-					} else if (!ch.isComplete()) {
+					}
+					if (!ch.isComplete()) {
 						workingPCs.add(node.getPcForChild(i, parent));
 						workingSet.add(ch);
 					}
