@@ -86,6 +86,8 @@ public class COASTAL implements Reporter {
 		try {
 			disposition.addDiverTask();
 			disposition.addStrategyTask();
+			disposition.addDiverTask();
+			disposition.addStrategyTask();
 			while (!disposition.workIsDone()) {
 				disposition.idle(500);
 			}

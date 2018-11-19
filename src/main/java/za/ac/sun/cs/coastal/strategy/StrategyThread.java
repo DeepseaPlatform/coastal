@@ -65,7 +65,7 @@ public class StrategyThread implements Callable<Void> {
 				}
 			}
 		} catch (InterruptedException e) {
-			log.info("Canceled");
+			log.info("strategy canceled");
 			throw e;
 		}
 	}

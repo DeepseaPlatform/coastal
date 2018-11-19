@@ -1,6 +1,7 @@
 package za.ac.sun.cs.coastal.strategy;
 
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
@@ -22,7 +23,7 @@ public final class PathTreeNode {
 
 	private boolean fullyExplored = false;
 
-	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(false);
+	private final WriteLock lock = new ReentrantReadWriteLock(false).writeLock();
 
 	private PathTreeNode(SegmentedPC pc, int nrOfChildren, boolean isLeaf, boolean isInfeasible) {
 		this.pc = pc;
@@ -43,12 +44,12 @@ public final class PathTreeNode {
 		return new PathTreeNode(null, 0, true, false);
 	}
 
-	public void readLock() {
-		lock.readLock().lock();
+	public void lock() {
+		lock.lock();
 	}
 
-	public void readUnlock() {
-		lock.readLock().unlock();
+	public void unlock() {
+		lock.unlock();
 	}
 	
 	public int getId() {

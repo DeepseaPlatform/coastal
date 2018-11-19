@@ -67,7 +67,7 @@ public class Diver implements Callable<Void> {
 				}
 			}
 		} catch (InterruptedException e) {
-			log.info("Canceled");
+			log.info("diver canceled");
 			throw e;
 		}
 	}
