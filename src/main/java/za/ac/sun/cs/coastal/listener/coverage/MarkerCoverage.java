@@ -12,7 +12,7 @@ import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.MarkerListener;
 import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+import za.ac.sun.cs.coastal.run.SymbolicState;
 
 public class MarkerCoverage implements MarkerListener, Reporter, ConfigurationListener {
 

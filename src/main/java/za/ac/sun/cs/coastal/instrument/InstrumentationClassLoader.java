@@ -3,7 +3,7 @@ package za.ac.sun.cs.coastal.instrument;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+import za.ac.sun.cs.coastal.run.SymbolicState;
 
 public class InstrumentationClassLoader extends ClassLoader {
 

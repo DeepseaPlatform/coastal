@@ -12,7 +12,7 @@ import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
 import za.ac.sun.cs.coastal.reporting.ReporterManager;
-import za.ac.sun.cs.coastal.symbolic.Model;
+import za.ac.sun.cs.coastal.run.Model;
 
 public class COASTAL implements Reporter {
 

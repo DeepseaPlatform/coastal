@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
+import za.ac.sun.cs.coastal.run.SegmentedPC;
 
 /**
  * Representation of all execution paths in a single tree.

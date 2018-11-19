@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.symbolic;
+package za.ac.sun.cs.coastal.run;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -14,7 +14,7 @@ import org.objectweb.asm.Opcodes;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.Configuration.Trigger;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+import za.ac.sun.cs.coastal.run.SymbolicState;
 
 public class MethodInstrumentationAdapter extends MethodVisitor {
 

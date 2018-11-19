@@ -18,7 +18,7 @@ import org.objectweb.asm.ClassWriter;
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+import za.ac.sun.cs.coastal.run.SymbolicState;
 
 public class InstrumentationClassManager implements Reporter {
 

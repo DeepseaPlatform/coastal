@@ -23,12 +23,12 @@ import za.ac.sun.cs.coastal.listener.MarkerListener;
 import za.ac.sun.cs.coastal.listener.PathListener;
 import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.reporting.Reporter;
+import za.ac.sun.cs.coastal.run.Diver;
+import za.ac.sun.cs.coastal.run.Model;
+import za.ac.sun.cs.coastal.run.SegmentedPC;
+import za.ac.sun.cs.coastal.run.SymbolicState;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyThread;
-import za.ac.sun.cs.coastal.symbolic.Diver;
-import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.expr.Constant;
 
 /**

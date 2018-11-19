@@ -1,6 +1,6 @@
 package za.ac.sun.cs.coastal.listener;
 
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+import za.ac.sun.cs.coastal.run.SymbolicState;
 
 public interface MarkerListener extends Listener {
 

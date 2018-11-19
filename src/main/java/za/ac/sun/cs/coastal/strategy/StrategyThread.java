@@ -10,8 +10,8 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.reporting.Banner;
-import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
+import za.ac.sun.cs.coastal.run.Model;
+import za.ac.sun.cs.coastal.run.SegmentedPC;
 
 public class StrategyThread implements Callable<Void> {
 

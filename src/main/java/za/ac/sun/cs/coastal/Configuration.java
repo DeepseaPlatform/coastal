@@ -19,8 +19,8 @@ import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.Listener;
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.reporting.ReporterManager;
+import za.ac.sun.cs.coastal.run.SymbolicState;
 import za.ac.sun.cs.coastal.strategy.Strategy;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class Configuration {
 

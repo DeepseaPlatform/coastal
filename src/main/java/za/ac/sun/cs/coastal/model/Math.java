@@ -4,7 +4,7 @@ import java.util.Properties;
 
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
-import za.ac.sun.cs.coastal.symbolic.SymbolicVM;
+import za.ac.sun.cs.coastal.run.SymbolicVM;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;

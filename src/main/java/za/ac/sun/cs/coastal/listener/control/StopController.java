@@ -8,7 +8,7 @@ import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.MarkerListener;
 import za.ac.sun.cs.coastal.reporting.Banner;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+import za.ac.sun.cs.coastal.run.SymbolicState;
 
 public class StopController implements MarkerListener, ConfigurationListener {
 

@@ -1,7 +1,7 @@
 // CHECKSTYLE:OFF
 package examples.simple;
 
-import za.ac.sun.cs.coastal.symbolic.SymbolicVM;
+import za.ac.sun.cs.coastal.run.SymbolicVM;
 
 public class StateMachine {
 

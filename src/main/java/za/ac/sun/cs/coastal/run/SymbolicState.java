@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.symbolic;
+package za.ac.sun.cs.coastal.run;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -3,7 +3,7 @@ package za.ac.sun.cs.coastal.strategy;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
+import za.ac.sun.cs.coastal.run.SegmentedPC;
 
 public final class PathTreeNode {
 
