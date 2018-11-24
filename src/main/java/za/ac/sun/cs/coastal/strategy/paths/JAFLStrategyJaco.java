@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.strategy;
+package za.ac.sun.cs.coastal.strategy.paths;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +18,9 @@ import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.run.Model;
 import za.ac.sun.cs.coastal.run.SegmentedPC;
+import za.ac.sun.cs.coastal.run.SegmentedPCIf;
 import za.ac.sun.cs.coastal.run.SymbolicState;
+import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Constant;
@@ -26,7 +28,7 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 
-public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
+public class JAFLStrategyJaco implements Strategy, ConfigurationListener {
 
 	private Logger log;
 
@@ -36,13 +38,15 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 
 	private int infeasibleCount = 0;
 
-	private BFPathTree pathTree;
+	private RandomPathTree pathTree;
+
+	private long randomSeed = 987654321;
 
 	private long pathLimit = 0;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
-	public BreadthFirstStrategy() {
+	public JAFLStrategyJaco() {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
 	}
@@ -51,11 +55,13 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
+		pathTree = new RandomPathTree(configuration);
+		randomSeed = configuration.getLongProperty("coastal.randomStrategy.seed", randomSeed);
+		pathTree.setSeed(randomSeed);
 		pathLimit = configuration.getLimitPaths();
 		if (pathLimit == 0) {
 			pathLimit = Long.MIN_VALUE;
 		}
-		pathTree = new BFPathTree(configuration);
 		// Set up green
 		green = new Green("COASTAL", LogManager.getLogger("GREEN"));
 		Properties greenProperties = configuration.getOriginalProperties();
@@ -69,7 +75,7 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 
 	@Override
 	public void collectProperties(Properties properties) {
-		// do nothing
+		properties.setProperty("coastal.randomStrategy.seed", Long.toString(randomSeed));
 	}
 
 	@Override
@@ -77,17 +83,32 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 		long t0 = System.currentTimeMillis();
 		List<Model> refinement = refine0(spc);
 		totalTime += System.currentTimeMillis() - t0;
-		return refinement;
+		//return refinement;
+//		System.out.println("Printing input options");
+//		for (Map<String, Constant> entry : refinement) {
+//			System.out.println("Input -> ");
+//			for (Map.Entry<String, Constant> e : entry.entrySet()) {
+//				System.out.println(e.getKey() + " -> " + e.getValue());
+//			}
+//		}
+		return null;
 	}
 
 	private List<Model> refine0(SegmentedPC spc) {
+		List<Map<String, Constant>> list = new LinkedList<Map<String, Constant>>();
 		long t;
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
+		// generate new segmented pcs, all with one conjunct negated:
+		Set<SegmentedPC> altSpcs = new HashSet<>();
+		for (SegmentedPC pointer = spc; pointer != null; pointer = pointer.getParent()) {
+			altSpcs.add(generateAltSpc(spc, pointer));
+		}
+		//return null;
 		boolean infeasible = false;
 		while (true) {
 			if (--pathLimit < 0) {
 				log.warn("path limit reached");
-				return null;
+				return null; // list;
 			}
 			t = System.currentTimeMillis();
 			spc = pathTree.insertPath(spc, infeasible);
@@ -95,7 +116,7 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 			if (spc == null) {
 				log.info("no further paths");
 				log.trace("Tree shape: {}", pathTree.getShape());
-				return null;
+				return null; // list;
 			}
 			infeasible = false;
 			Expression pc = spc.getPathCondition();
@@ -125,50 +146,71 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 				String modelString = newModel.toString();
 				modelExtractionTime += System.currentTimeMillis() - t;
 				log.info("new model: {}", modelString);
+
 				if (visitedModels.add(modelString)) {
-					List<Model> models = new LinkedList<>();
-					models.add(new Model(0, newModel));
-					return models;
+					//return newModel;
+					list.add(newModel);
 				} else {
 					log.info("model {} has been visited before, retrying", modelString);
 				}
-			}
+
+			}			
 		}
+	}
+
+	private SegmentedPC generateAltSpc(SegmentedPC spc, SegmentedPC pointer) {
+		SegmentedPC parent = null;
+		boolean value = ((SegmentedPCIf) spc).getValue();
+		if (spc == pointer) {
+			parent = spc.getParent();
+			value = !value;
+		} else {
+			parent = generateAltSpc(spc.getParent(), pointer);
+		}
+		return new SegmentedPCIf(parent, spc.getExpression(), spc.getPassiveConjunct(), value);
 	}
 
 	// ======================================================================
 	//
-	// BFPathTree
+	// RandomPathTree
 	//
 	// ======================================================================
 
-	private static class BFPathTree extends PathTree {
+	private static class RandomPathTree extends PathTree {
 
-		BFPathTree(Configuration configuration) {
+		private final Random rng = new Random();
+
+		RandomPathTree(Configuration configuration) {
 			super(configuration);
+		}
+
+		public void setSeed(long seed) {
+			rng.setSeed(seed);
 		}
 
 		@Override
 		public SegmentedPC findNewPath() {
-			Queue<SegmentedPC> workingPCs = new LinkedList<>();
-			Queue<PathTreeNode> workingSet = new LinkedList<>();
-			workingSet.add(getRoot());
-			while (!workingSet.isEmpty()) {
-				SegmentedPC parent = workingPCs.isEmpty() ? null : workingPCs.remove();
-				PathTreeNode node = workingSet.remove();
-				int n = node.getChildCount();
-				for (int i = 0; i < n; i++) {
-					PathTreeNode ch = node.getChild(i);
-					if (ch == null) {
-						return node.getPcForChild(i, parent);
-					}
-					if (!ch.isComplete()) {
-						workingPCs.add(node.getPcForChild(i, parent));
-						workingSet.add(ch);
+			SegmentedPC pc = null;
+			PathTreeNode cur = getRoot();
+			outer: while (true) {
+				int n = cur.getChildCount();
+				int i = rng.nextInt(n);
+				for (int j = 0; j < n; j++, i = (i + 1) % n) {
+					PathTreeNode ch = cur.getChild(i);
+					if ((ch != null) && !ch.isComplete()) {
+						pc = cur.getPcForChild(i, pc);
+						cur = ch;
+						continue outer;
 					}
 				}
+				for (int j = 0; j < n; j++, i = (i + 1) % n) {
+					PathTreeNode ch = cur.getChild(i);
+					if (ch == null) {
+						return cur.getPcForChild(i, pc);
+					}
+				}
+				return null;
 			}
-			return null;
 		}
 
 	}
@@ -186,20 +228,9 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 	
 	@Override
 	public String getName() {
-		return "BreadthFirstStrategy";
+		return "RandomStrategy";
 	}
 
-	@Override
-	public void record(Recorder recorder) {
-		recorder.record(getName(), "inserted-paths", pathTree.getPathCount());
-		recorder.record(getName(), "revisited-paths", pathTree.getRevisitCount());
-		recorder.record(getName(), "infeasible-paths", infeasibleCount);
-		recorder.record(getName(), "solver-time", solverTime);
-		recorder.record(getName(), "pathtree-time", pathTreeTime);
-		recorder.record(getName(), "extraction-time", modelExtractionTime);
-		recorder.record(getName(), "overall-time", totalTime);
-	}
-	
 	@Override
 	public void report(PrintWriter info, PrintWriter trace) {
 		info.println("  Inserted paths: " + pathTree.getPathCount());
@@ -209,6 +240,11 @@ public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 		info.println("  Path tree time: " + pathTreeTime);
 		info.println("  Model extraction time: " + modelExtractionTime);
 		info.println("  Overall strategy time: " + totalTime);
+	}
+
+	@Override
+	public void record(Recorder recorder) {
+		// nothing to record
 	}
 
 }

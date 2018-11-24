@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.strategy;
+package za.ac.sun.cs.coastal.strategy.paths;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -18,6 +18,7 @@ import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.run.Model;
 import za.ac.sun.cs.coastal.run.SegmentedPC;
 import za.ac.sun.cs.coastal.run.SymbolicState;
+import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Constant;
@@ -25,7 +26,7 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 
-public class GenerationalStrategy implements Strategy, ConfigurationListener {
+public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 
 	private Logger log;
 
@@ -41,7 +42,7 @@ public class GenerationalStrategy implements Strategy, ConfigurationListener {
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
-	public GenerationalStrategy() {
+	public DepthFirstStrategy() {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
 	}

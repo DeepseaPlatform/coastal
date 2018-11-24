@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.strategy;
+package za.ac.sun.cs.coastal.strategy.paths;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
+import java.util.Queue;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,6 +19,7 @@ import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.run.Model;
 import za.ac.sun.cs.coastal.run.SegmentedPC;
 import za.ac.sun.cs.coastal.run.SymbolicState;
+import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Constant;
@@ -26,7 +27,7 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 
-public class RandomStrategy implements Strategy, ConfigurationListener {
+public class BreadthFirstStrategy implements Strategy, ConfigurationListener {
 
 	private Logger log;
 
@@ -36,15 +37,13 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 
 	private int infeasibleCount = 0;
 
-	private RandomPathTree pathTree;
-
-	private long randomSeed = 987654321;
+	private BFPathTree pathTree;
 
 	private long pathLimit = 0;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
-	public RandomStrategy() {
+	public BreadthFirstStrategy() {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
 	}
@@ -53,13 +52,11 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
-		pathTree = new RandomPathTree(configuration);
-		randomSeed = configuration.getLongProperty("coastal.randomStrategy.seed", randomSeed);
-		pathTree.setSeed(randomSeed);
 		pathLimit = configuration.getLimitPaths();
 		if (pathLimit == 0) {
 			pathLimit = Long.MIN_VALUE;
 		}
+		pathTree = new BFPathTree(configuration);
 		// Set up green
 		green = new Green("COASTAL", LogManager.getLogger("GREEN"));
 		Properties greenProperties = configuration.getOriginalProperties();
@@ -73,7 +70,7 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 
 	@Override
 	public void collectProperties(Properties properties) {
-		properties.setProperty("coastal.randomStrategy.seed", Long.toString(randomSeed));
+		// do nothing
 	}
 
 	@Override
@@ -142,45 +139,37 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 
 	// ======================================================================
 	//
-	// RandomPathTree
+	// BFPathTree
 	//
 	// ======================================================================
 
-	private static class RandomPathTree extends PathTree {
+	private static class BFPathTree extends PathTree {
 
-		private final Random rng = new Random();
-
-		RandomPathTree(Configuration configuration) {
+		BFPathTree(Configuration configuration) {
 			super(configuration);
-		}
-
-		public void setSeed(long seed) {
-			rng.setSeed(seed);
 		}
 
 		@Override
 		public SegmentedPC findNewPath() {
-			SegmentedPC pc = null;
-			PathTreeNode cur = getRoot();
-			outer: while (true) {
-				int n = cur.getChildCount();
-				int i = rng.nextInt(n);
-				for (int j = 0; j < n; j++, i = (i + 1) % n) {
-					PathTreeNode ch = cur.getChild(i);
-					if ((ch != null) && !ch.isComplete()) {
-						pc = cur.getPcForChild(i, pc);
-						cur = ch;
-						continue outer;
-					}
-				}
-				for (int j = 0; j < n; j++, i = (i + 1) % n) {
-					PathTreeNode ch = cur.getChild(i);
+			Queue<SegmentedPC> workingPCs = new LinkedList<>();
+			Queue<PathTreeNode> workingSet = new LinkedList<>();
+			workingSet.add(getRoot());
+			while (!workingSet.isEmpty()) {
+				SegmentedPC parent = workingPCs.isEmpty() ? null : workingPCs.remove();
+				PathTreeNode node = workingSet.remove();
+				int n = node.getChildCount();
+				for (int i = 0; i < n; i++) {
+					PathTreeNode ch = node.getChild(i);
 					if (ch == null) {
-						return cur.getPcForChild(i, pc);
+						return node.getPcForChild(i, parent);
+					}
+					if (!ch.isComplete()) {
+						workingPCs.add(node.getPcForChild(i, parent));
+						workingSet.add(ch);
 					}
 				}
-				return null;
 			}
+			return null;
 		}
 
 	}
@@ -198,7 +187,7 @@ public class RandomStrategy implements Strategy, ConfigurationListener {
 	
 	@Override
 	public String getName() {
-		return "RandomStrategy";
+		return "BreadthFirstStrategy";
 	}
 
 	@Override

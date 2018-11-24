@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.strategy;
+package za.ac.sun.cs.coastal.strategy.paths;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -18,6 +18,7 @@ import za.ac.sun.cs.coastal.reporting.Recorder;
 import za.ac.sun.cs.coastal.run.Model;
 import za.ac.sun.cs.coastal.run.SegmentedPC;
 import za.ac.sun.cs.coastal.run.SymbolicState;
+import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Constant;
@@ -25,23 +26,21 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 
-public class AlternatingStrategy implements Strategy, ConfigurationListener {
+public class AbstractPathStrategy implements Strategy, ConfigurationListener {
 
 	private Logger log;
 
-	private Green green;
-
-	private final Set<String> visitedModels = new HashSet<>();
+//	private final Set<String> visitedModels = new HashSet<>();
 
 	private int infeasibleCount = 0;
 
-	private AltPathTree pathTree;
+//	private DFPathTree pathTree;
 
 	private long pathLimit = 0;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
-	public AlternatingStrategy() {
+	public AbstractPathStrategy() {
 		// We expect configurationLoaded(...) to be called shortly.
 		// This will initialize this instance.
 	}
@@ -49,12 +48,11 @@ public class AlternatingStrategy implements Strategy, ConfigurationListener {
 	@Override
 	public void configurationLoaded(Configuration configuration) {
 		log = configuration.getLog();
-		configuration.getReporterManager().register(this);
 		pathLimit = configuration.getLimitPaths();
 		if (pathLimit == 0) {
 			pathLimit = Long.MIN_VALUE;
 		}
-		pathTree = new AltPathTree(configuration);
+		pathTree = new DFPathTree(configuration);
 		// Set up green
 		green = new Green("COASTAL", LogManager.getLogger("GREEN"));
 		Properties greenProperties = configuration.getOriginalProperties();
@@ -81,6 +79,9 @@ public class AlternatingStrategy implements Strategy, ConfigurationListener {
 
 	private List<Model> refine0(SegmentedPC spc) {
 		long t;
+		if (spc == null) {
+			return null;
+		}
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		boolean infeasible = false;
 		while (true) {
@@ -137,15 +138,13 @@ public class AlternatingStrategy implements Strategy, ConfigurationListener {
 
 	// ======================================================================
 	//
-	// AltPathTree
+	// DFPathTree
 	//
 	// ======================================================================
 
-	private static class AltPathTree extends PathTree {
+	private static class DFPathTree extends PathTree {
 
-		private int counter = 0;
-
-		AltPathTree(Configuration configuration) {
+		DFPathTree(Configuration configuration) {
 			super(configuration);
 		}
 
@@ -155,17 +154,17 @@ public class AlternatingStrategy implements Strategy, ConfigurationListener {
 			PathTreeNode cur = getRoot();
 			outer: while (true) {
 				int n = cur.getChildCount();
-				for (int j = 0; j < n; j++) {
-					int i = (j + counter++) % n;
+				for (int i = 0; i < n; i++) {
 					PathTreeNode ch = cur.getChild(i);
-					if ((ch != null) && !ch.isComplete()) {
-						pc = cur.getPcForChild(i, pc);
-						cur = ch;
-						continue outer;
+					if (ch != null) {
+						if (!ch.isComplete()) {
+							pc = cur.getPcForChild(i, pc);
+							cur = ch;
+							continue outer;
+						}
 					}
 				}
-				for (int j = 0; j < n; j++) {
-					int i = (j + counter++) % n;
+				for (int i = 0; i < n; i++) {
 					PathTreeNode ch = cur.getChild(i);
 					if (ch == null) {
 						return cur.getPcForChild(i, pc);
@@ -190,7 +189,7 @@ public class AlternatingStrategy implements Strategy, ConfigurationListener {
 	
 	@Override
 	public String getName() {
-		return "DepthLastStrategy";
+		return "DepthFirstStrategy";
 	}
 
 	@Override
