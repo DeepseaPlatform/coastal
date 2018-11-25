@@ -3,7 +3,6 @@ package za.ac.sun.cs.coastal.symbolic;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -12,21 +11,25 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
+import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
 import za.ac.sun.cs.coastal.listener.MarkerListener;
 import za.ac.sun.cs.coastal.listener.PathListener;
+import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.Pair;
 import za.ac.sun.cs.coastal.reporting.Banner;
-import za.ac.sun.cs.coastal.reporting.Reporter;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.green.expr.Constant;
 
-public class Diver implements Reporter {
-
-	private final Configuration configuration;
+public class Diver {
 
 	private final Logger log;
+	
+	private final Configuration configuration;
+
+	private final Broker broker;
 
 	private int runs = 0;
 
@@ -34,10 +37,12 @@ public class Diver implements Reporter {
 
 	private final InstrumentationClassManager classManager;
 
-	public Diver(Configuration configuration) {
-		this.configuration = configuration;
-		this.log = configuration.getLog();
-		configuration.getReporterManager().register(this);
+	public Diver(COASTAL coastal) {
+		this.log = coastal.getLog();
+		this.configuration = coastal.getConfiguration();
+		this.broker = coastal.getBroker();
+		broker.subscribe("coastal-stop", this::report);
+		// configuration.getReporterManager().register(this);
 		String cp = System.getProperty("java.class.path");
 		classManager = new InstrumentationClassManager(configuration, cp);
 	}
@@ -158,21 +163,26 @@ public class Diver implements Reporter {
 		}
 	}
 
+	public void report(Object object) {
+		broker.publish("report", new Pair("Diver.runs", runs));
+		broker.publish("report", new Pair("Diver.time", time));
+	}
+
 	// ======================================================================
 	//
 	// REPORTING
 	//
 	// ======================================================================
 
-	@Override
-	public String getName() {
-		return "Dive";
-	}
-
-	@Override
-	public void report(PrintWriter info, PrintWriter trace) {
-		info.println("  Runs: " + runs);
-		info.println("  Overall dive time: " + time);
-	}
+//	@Override
+//	public String getName() {
+//		return "Dive";
+//	}
+//
+//	@Override
+//	public void report(PrintWriter info, PrintWriter trace) {
+//		info.println("  Runs: " + runs);
+//		info.println("  Overall dive time: " + time);
+//	}
 
 }
