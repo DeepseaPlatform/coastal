@@ -399,7 +399,7 @@ public class COASTAL {
 	 * @param showBanner
 	 *            a flag to tell whether or not to show banners
 	 */
-	private void start(boolean showBanner) {
+	public void start(boolean showBanner) {
 		Calendar started = Calendar.getInstance();
 		getBroker().publish("coastal-start", this);
 		getBroker().publish("report", new Tuple("COASTAL.start", started));
@@ -493,7 +493,7 @@ public class COASTAL {
 	 *            the command-line arguments
 	 * @return an immutable configuration
 	 */
-	private static ImmutableConfiguration loadConfiguration(Logger log, String[] args) {
+	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args) {
 		// Configurations configs = new Configurations();
 		CombinedConfiguration config = new CombinedConfiguration();
 		Configuration cfg1 = loadConfigFromResource(log, COASTAL_CONFIGURATION);

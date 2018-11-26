@@ -3,8 +3,10 @@ package za.ac.sun.cs.coastal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
@@ -18,6 +20,8 @@ public class Reporter {
 	
 	private final List<Tuple> stats = new LinkedList<>();
 	
+	private final Map<String, Object> statMap = new HashMap<>();
+
 	public Reporter(COASTAL coastal) {
 		log = coastal.getLog(); 
 		coastal.getBroker().subscribe("report", o -> {
@@ -48,7 +52,12 @@ public class Reporter {
 			} else {
 				log.info("  {}: {}", suffix, value); 
 			}
+			statMap.put(key, value);
 		}
+	}
+
+	public int getStatInt(String key) {
+		return (Integer) statMap.get(key);
 	}
 
 }

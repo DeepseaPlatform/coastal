@@ -13,6 +13,7 @@
 		</File>
 	</Appenders>
 	<Loggers>
+		<Logger name="COASTAL-TEST" level="ALL" additivity="false"/>
 		<Logger name="GREEN" level="ALL" additivity="false">
 			<AppenderRef ref="GREEN"/>
 		</Logger>
