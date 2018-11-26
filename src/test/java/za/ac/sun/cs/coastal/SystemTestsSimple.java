@@ -23,12 +23,10 @@ public class SystemTestsSimple {
 			assertEquals(1487, reporter.getStatInt("Instrumentation.post-instrumented-size"));
 			assertEquals(670, reporter.getStatInt("Instrumentation.pre-instrumented-size"));
 			assertEquals(6, reporter.getStatInt("Instrumentation.requests-count"));
-//			14:42:27.965 ====  Strategy  ======================================================
-//			14:42:27.965   infeasible-count: 0
-//			14:42:27.965   path-count: 0
-//			14:42:27.966   revisit-count: 0
+			assertEquals(0, reporter.getStatInt("Strategy.infeasible-count"));
+			assertEquals(0, reporter.getStatInt("Strategy.path-count"));
+			assertEquals(0, reporter.getStatInt("Strategy.revisit-count"));
 		}
-
 	}
 
 }

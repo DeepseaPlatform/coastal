@@ -1,23 +1,6 @@
 package za.ac.sun.cs.coastal.observers;
 
-import java.io.PrintWriter;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import org.apache.logging.log4j.Logger;
-import org.objectweb.asm.Opcodes;
-
-import za.ac.sun.cs.coastal.ConfigurationX;
-import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
-import za.ac.sun.cs.coastal.listener.ConfigurationListener;
-import za.ac.sun.cs.coastal.listener.InstructionListener;
-import za.ac.sun.cs.coastal.reporting.Reporter;
-
-public class ConditionCoverage implements InstructionListener, Reporter, ConfigurationListener {
+public class ConditionCoverage {
 
 	//********************************************************************************
 	//********************************************************************************
@@ -27,6 +10,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	//********************************************************************************
 	//********************************************************************************
 
+	/*
 	private Logger log;
 
 	private InstrumentationClassManager classManager = null;
@@ -259,5 +243,6 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 		}
 		return bs;
 	}
+	*/
 
 }
