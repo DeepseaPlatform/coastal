@@ -92,9 +92,10 @@ public class COASTAL {
 	 * The default maximum bound for integers.
 	 */
 	private final int defaultMaxIntValue;
-	
+
 	/**
-	 * A map from method names to delegate objects (which are instances of the modelling classes).
+	 * A map from method names to delegate objects (which are instances of the
+	 * modelling classes).
 	 */
 	private final Map<String, Object> delegates = new HashMap<>();
 
@@ -146,14 +147,15 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the reporter for this analysis run of COASTAL.  This is used mainly for testing purposes.
+	 * Return the reporter for this analysis run of COASTAL. This is used mainly
+	 * for testing purposes.
 	 * 
 	 * @return the reporter
 	 */
 	public Reporter getReporter() {
 		return reporter;
 	}
-	
+
 	/**
 	 * Return the class manager for this analysis run of COASTAL.
 	 * 
@@ -218,7 +220,8 @@ public class COASTAL {
 	/**
 	 * Find a delegate for a specified class name.
 	 * 
-	 * @param className the name of the class to search for
+	 * @param className
+	 *            the name of the class to search for
 	 * @return the delegate object or {@code null} if there is none
 	 */
 	public Object findDelegate(String className) {
@@ -226,17 +229,23 @@ public class COASTAL {
 	}
 
 	/**
-	 * A convenient constant for use in {@link #findDelegate(String, String, String)}.  This represents the empty list of parameters.
+	 * A convenient constant for use in
+	 * {@link #findDelegate(String, String, String)}. This represents the empty
+	 * list of parameters.
 	 */
 	private static final Class<?>[] EMPTY_PARAMETERS = new Class<?>[0];
 
 	/**
 	 * Find a delegate method.
 	 * 
-	 * @param owner the method class name
-	 * @param name the method name
-	 * @param descriptor the method signature
-	 * @return a Java reflection of the method or {@code null} if it was not found
+	 * @param owner
+	 *            the method class name
+	 * @param name
+	 *            the method name
+	 * @param descriptor
+	 *            the method signature
+	 * @return a Java reflection of the method or {@code null} if it was not
+	 *         found
 	 */
 	public Method findDelegate(String owner, String name, String descriptor) {
 		Object delegate = findDelegate(owner);
@@ -292,7 +301,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the lower bound for symbolic integer variables with an explicit bound of their own.
+	 * Return the lower bound for symbolic integer variables with an explicit
+	 * bound of their own.
 	 * 
 	 * @return the lower bound for symbolic integers
 	 */
@@ -303,7 +313,8 @@ public class COASTAL {
 	/**
 	 * Return the lower bound for the specified symbolic integer variable.
 	 * 
-	 * @param variable the name of the variable
+	 * @param variable
+	 *            the name of the variable
 	 * @return the lower bound for the variable
 	 */
 	public int getMinBound(String variable) {
@@ -311,12 +322,17 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the lower bound for a specific variable, or -- if there is no explicit bound -- for another variable. If there is no explicit bound, the specified default value is returned.
+	 * Return the lower bound for a specific variable, or -- if there is no
+	 * explicit bound -- for another variable. If there is no explicit bound,
+	 * the specified default value is returned.
 	 * 
-	 * This is used for array where the specific variable is the array index and the more general variable is the array as a whole.
+	 * This is used for array where the specific variable is the array index and
+	 * the more general variable is the array as a whole.
 	 * 
-	 * @param variable1 the name of the specific variable 
-	 * @param variable2 the name of the more general variable
+	 * @param variable1
+	 *            the name of the specific variable
+	 * @param variable2
+	 *            the name of the more general variable
 	 * @return the lower bound for either variable
 	 */
 	public int getMinBound(String variable1, String variable2) {
@@ -324,10 +340,13 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the lower bound for the specified symbolic integer variable.  If there is no explicit bound, the specified default value is returned.
+	 * Return the lower bound for the specified symbolic integer variable. If
+	 * there is no explicit bound, the specified default value is returned.
 	 * 
-	 * @param variable the name of the variable
-	 * @param defaultValue the default lower bound
+	 * @param variable
+	 *            the name of the variable
+	 * @param defaultValue
+	 *            the default lower bound
 	 * @return the lower bound for the variable
 	 */
 	public int getMinBound(String variable, int defaultValue) {
@@ -339,18 +358,20 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the upper bound for symbolic integer variables with an explicit bound of their own.
+	 * Return the upper bound for symbolic integer variables with an explicit
+	 * bound of their own.
 	 * 
 	 * @return the upper bound for symbolic integers
 	 */
 	public int getDefaultMaxIntValue() {
 		return defaultMaxIntValue;
 	}
-	
+
 	/**
 	 * Return the upper bound for the specified symbolic integer variable.
 	 * 
-	 * @param variable the name of the variable
+	 * @param variable
+	 *            the name of the variable
 	 * @return the upper bound for the variable
 	 */
 	public int getMaxBound(String variable) {
@@ -358,12 +379,17 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the upper bound for a specific variable, or -- if there is no explicit bound -- for another variable. If there is no explicit bound, the specified default value is returned.
+	 * Return the upper bound for a specific variable, or -- if there is no
+	 * explicit bound -- for another variable. If there is no explicit bound,
+	 * the specified default value is returned.
 	 * 
-	 * This is used for array where the specific variable is the array index and the more general variable is the array as a whole.
+	 * This is used for array where the specific variable is the array index and
+	 * the more general variable is the array as a whole.
 	 * 
-	 * @param variable1 the name of the specific variable 
-	 * @param variable2 the name of the more general variable
+	 * @param variable1
+	 *            the name of the specific variable
+	 * @param variable2
+	 *            the name of the more general variable
 	 * @return the upper bound for either variable
 	 */
 	public int getMaxBound(String variable1, String variable2) {
@@ -371,10 +397,13 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the upper bound for the specified symbolic integer variable.  If there is no explicit bound, the specified default value is returned.
+	 * Return the upper bound for the specified symbolic integer variable. If
+	 * there is no explicit bound, the specified default value is returned.
 	 * 
-	 * @param variable the name of the variable
-	 * @param defaultValue the default upper bound
+	 * @param variable
+	 *            the name of the variable
+	 * @param defaultValue
+	 *            the default upper bound
 	 * @return the upper bound for the variable
 	 */
 	public int getMaxBound(String variable, int defaultValue) {
@@ -451,13 +480,15 @@ public class COASTAL {
 	}
 
 	/**
-	 * The name of COASTAL configuration file, both the resource (part of the project, providing sensible defaults), and the user's own
-	 * configuration file (providing overriding personalizations).
+	 * The name of COASTAL configuration file, both the resource (part of the
+	 * project, providing sensible defaults), and the user's own configuration
+	 * file (providing overriding personalizations).
 	 */
 	private static final String COASTAL_CONFIGURATION = "coastal.xml";
 
 	/**
-	 * The subdirectory in the user's home directory where the personal coastal file is searched for. 
+	 * The subdirectory in the user's home directory where the personal coastal
+	 * file is searched for.
 	 */
 	private static final String COASTAL_DIRECTORY = ".coastal";
 
@@ -467,7 +498,8 @@ public class COASTAL {
 	private static final String HOME_DIRECTORY = System.getProperty("user.home");
 
 	/**
-	 * The full name of the subdirectory where the personal file is searched for.
+	 * The full name of the subdirectory where the personal file is searched
+	 * for.
 	 */
 	private static final String HOME_COASTAL_DIRECTORY = HOME_DIRECTORY + File.separator + COASTAL_DIRECTORY;
 
@@ -477,7 +509,7 @@ public class COASTAL {
 	private static final String HOME_CONFIGURATION = HOME_COASTAL_DIRECTORY + File.separator + COASTAL_CONFIGURATION;
 
 	/**
-	 * Load the COASTAL configuration.  Three sources are consulted:
+	 * Load the COASTAL configuration. Three sources are consulted:
 	 * 
 	 * <ul>
 	 * <li>a project resource</li>
@@ -485,7 +517,8 @@ public class COASTAL {
 	 * <li>the configuration file specified on the command line</li>
 	 * </ul>
 	 * 
-	 * The second source overrides the first, and the third source overrides the first two sources.
+	 * The second source overrides the first, and the third source overrides the
+	 * first two sources.
 	 * 
 	 * @param log
 	 *            the logger to which to report
@@ -538,9 +571,12 @@ public class COASTAL {
 	/**
 	 * Load a COASTAL configuration from a file.
 	 * 
-	 * @param log the logger to which to report
-	 * @param filename the name of the file
-	 * @return an immutable configuration or {@code null} if the file was not found
+	 * @param log
+	 *            the logger to which to report
+	 * @param filename
+	 *            the name of the file
+	 * @return an immutable configuration or {@code null} if the file was not
+	 *         found
 	 */
 	private static Configuration loadConfigFromFile(Logger log, String filename) {
 		try {
@@ -558,9 +594,12 @@ public class COASTAL {
 	/**
 	 * Load a COASTAL configuration from a Java resource.
 	 * 
-	 * @param log the logger to which to report
-	 * @param resourceName the name of the resource
-	 * @return an immutable configuration or {@code null} if the resource was not found
+	 * @param log
+	 *            the logger to which to report
+	 * @param resourceName
+	 *            the name of the resource
+	 * @return an immutable configuration or {@code null} if the resource was
+	 *         not found
 	 */
 	private static Configuration loadConfigFromResource(Logger log, String resourceName) {
 		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -576,17 +615,23 @@ public class COASTAL {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Load a COASTAL configuration from an input stream.
 	 * 
-	 * @param log  the logger to which to report
-	 * @param inputStream the stream from which to read
+	 * @param log
+	 *            the logger to which to report
+	 * @param inputStream
+	 *            the stream from which to read
 	 * @return an immutable configuration
-	 * @throws ConfigurationException if anything went wrong during the loading of the configuration
+	 * @throws ConfigurationException
+	 *             if anything went wrong during the loading of the
+	 *             configuration
 	 */
-	private static Configuration loadConfigFromStream(Logger log, InputStream inputStream) throws ConfigurationException {
-		XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class).configure(new Parameters().xml()).getConfiguration();
+	private static Configuration loadConfigFromStream(Logger log, InputStream inputStream)
+			throws ConfigurationException {
+		XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class).configure(new Parameters().xml())
+				.getConfiguration();
 		FileHandler fh = new FileHandler(cfg);
 		fh.load(inputStream);
 		return cfg;

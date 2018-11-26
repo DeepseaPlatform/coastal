@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<configuration>
+	<coastal>
+		<main>tests.simple.Choice01</main>
+		<target>tests.simple</target>
+		<trigger>tests.simple.Choice01.run(X: int)</trigger>
+	</coastal>
+</configuration>

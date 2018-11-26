@@ -25,8 +25,10 @@ public class Broker {
 	/**
 	 * Publish a message on a certain topic.
 	 * 
-	 * @param topic the topic to publish
-	 * @param message the message as a generic object
+	 * @param topic
+	 *            the topic to publish
+	 * @param message
+	 *            the message as a generic object
 	 */
 	public void publish(String topic, Object message) {
 		SubscriberList subscriberList = subscribers.get(topic);
@@ -38,8 +40,11 @@ public class Broker {
 	/**
 	 * Subscribe to a topic.
 	 * 
-	 * @param topic the topic to subscribe to
-	 * @param subscriber a callback that will be invoked for all new message on the topic
+	 * @param topic
+	 *            the topic to subscribe to
+	 * @param subscriber
+	 *            a callback that will be invoked for all new message on the
+	 *            topic
 	 */
 	public void subscribe(String topic, Consumer<Object> subscriber) {
 		SubscriberList subscriberList = subscribers.get(topic);
@@ -53,7 +58,9 @@ public class Broker {
 	}
 
 	/**
-	 * An encapsulation of a list of subscribers.  This sits in an inner class mainly to simplify the code that locks the access to the list of subscribers.
+	 * An encapsulation of a list of subscribers. This sits in an inner class
+	 * mainly to simplify the code that locks the access to the list of
+	 * subscribers.
 	 */
 	private static class SubscriberList {
 
@@ -61,16 +68,18 @@ public class Broker {
 		 * The list of subscribers.
 		 */
 		private final List<Consumer<Object>> subscribers = new LinkedList<>();
-		
+
 		/**
-		 * A lock to protect the list of subscribers when publishing messages or updating the list.
+		 * A lock to protect the list of subscribers when publishing messages or
+		 * updating the list.
 		 */
 		private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(false);
 
 		/**
 		 * Add a new subscriber to this list.
 		 * 
-		 * @param subscriber the new subscriber
+		 * @param subscriber
+		 *            the new subscriber
 		 */
 		public void subscribe(Consumer<Object> subscriber) {
 			lock.writeLock().lock();
@@ -81,7 +90,8 @@ public class Broker {
 		/**
 		 * Publish a message to all subscribers on this list.
 		 * 
-		 * @param message the message to publish
+		 * @param message
+		 *            the message to publish
 		 */
 		public void publish(Object message) {
 			lock.readLock().lock();

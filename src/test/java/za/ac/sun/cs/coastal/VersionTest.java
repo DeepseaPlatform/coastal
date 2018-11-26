@@ -19,7 +19,7 @@ public class VersionTest {
 		Version version = new Version();
 		Properties props = new Properties();
 		props.setProperty("version", "1.2.3");
-		assertEquals("1.2.3", version.read(props));
+		assertEquals("1.2.3", version.read(props, false));
 	}
 
 	@Test
@@ -27,14 +27,14 @@ public class VersionTest {
 		Version version = new Version();
 		Properties props = new Properties();
 		props.setProperty("version", "%VERSION%");
-		assertEquals(Version.DEFAULT_VERSION, version.read(props));
+		assertEquals(Version.DEFAULT_VERSION, version.read(props, false));
 	}
 	
 	@Test
 	public void testPropsNull() {
 		Version version = new Version();
 		Properties props = new Properties();
-		assertEquals(Version.DEFAULT_VERSION, version.read(props));
+		assertEquals(Version.DEFAULT_VERSION, version.read(props, false));
 	}
 	
 	/*
@@ -54,7 +54,7 @@ public class VersionTest {
 		Version version = new Version();
 		String versionString = "version = %VERSION%";
 		InputStream stream = new ByteArrayInputStream(versionString.getBytes());
-		assertEquals(Version.DEFAULT_VERSION, version.read(stream));
+		assertEquals(Version.DEFAULT_VERSION, version.read(stream, false));
 	}
 	
 	@Test
@@ -62,7 +62,7 @@ public class VersionTest {
 		Version version = new Version();
 		String versionString = "";
 		InputStream stream = new ByteArrayInputStream(versionString.getBytes());
-		assertEquals(Version.DEFAULT_VERSION, version.read(stream));
+		assertEquals(Version.DEFAULT_VERSION, version.read(stream, false));
 	}
 	
 	/*
@@ -72,25 +72,25 @@ public class VersionTest {
 	@Test
 	public void testResourceName345() {
 		Version version = new Version();
-		assertEquals("3.4.5", version.read("app0.properties"));
+		assertEquals("3.4.5", version.read("app0.properties", false));
 	}
 	
 	@Test
 	public void testResourceNameMacro() {
 		Version version = new Version();
-		assertEquals(Version.DEFAULT_VERSION, version.read("app1.properties"));
+		assertEquals(Version.DEFAULT_VERSION, version.read("app1.properties", false));
 	}
 	
 	@Test
 	public void testResourceNameNull() {
 		Version version = new Version();
-		assertEquals(Version.DEFAULT_VERSION, version.read("app2.properties"));
+		assertEquals(Version.DEFAULT_VERSION, version.read("app2.properties", false));
 	}
 	
 	@Test
 	public void testResourceNameBadFile() {
 		Version version = new Version();
-		assertEquals(Version.DEFAULT_VERSION, version.read("appX.properties"));
+		assertEquals(Version.DEFAULT_VERSION, version.read("appX.properties", false));
 	}
 	
 }

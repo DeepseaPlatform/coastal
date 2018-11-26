@@ -2,14 +2,10 @@ package za.ac.sun.cs.coastal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Properties;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.RefDatabase;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryBuilder;
 
@@ -29,32 +25,56 @@ public class Version {
 	}
 
 	protected String read(String resourceName) {
+		return read(resourceName, true);
+	}
+	
+	protected String read(String resourceName, boolean tryJgit) {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
 			if (resourceStream != null) {
-				return read(resourceStream);
+				return read(resourceStream, tryJgit);
 			}
 		} catch (IOException x) {
 			// ignore
 		}
-		return DEFAULT_VERSION;
+		if (tryJgit) {
+			return readJgitVersion();
+		} else {
+			return DEFAULT_VERSION;
+		}
+	}
+	
+	protected String read(InputStream inputStream) {
+		return read(inputStream, true);
 	}
 
-	protected String read(InputStream inputStream) {
+	protected String read(InputStream inputStream, boolean tryJgit) {
 		Properties properties = new Properties();
 		try {
 			properties.load(inputStream);
 		} catch (IOException x) {
 			// ignore
 		}
-		return read(properties);
+		return read(properties, tryJgit);
 	}
 
 	protected String read(Properties properties) {
+		return read(properties, true);
+	}
+
+	protected String read(Properties properties, boolean tryJgit) {
 		String v = properties.getProperty("version");
 		if ((v != null) && (v.charAt(0) != '%')) {
 			return v;
 		}
+		if (tryJgit) {
+			return readJgitVersion();
+		} else {
+			return DEFAULT_VERSION;
+		}
+	}
+
+	private String readJgitVersion() {
 		try {
 			Repository repo = new RepositoryBuilder().readEnvironment().findGitDir().build();
 			if (repo != null) {
