@@ -57,12 +57,13 @@ public class Version {
 		}
 		try {
 			Repository repo = new RepositoryBuilder().readEnvironment().findGitDir().build();
-			RefDatabase refs = repo.getRefDatabase();
-			Collection<Ref> tagList = refs.getRefsByPrefix(Constants.R_TAGS);
-//			String version = Integer.toHexString(System.identityHashCode(repo));
-			@SuppressWarnings("resource")
-			String version = new Git(repo).describe().setTags(true).call();
-			return version;
+			if (repo != null) {
+				@SuppressWarnings("resource")
+				String version = new Git(repo).describe().setTags(true).call();
+				if (version != null) {
+					return version;
+				}
+			}
 		} catch (IOException | GitAPIException x) {
 			// ignore
 		}
