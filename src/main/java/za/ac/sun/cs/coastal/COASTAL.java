@@ -113,9 +113,9 @@ public class COASTAL {
 		broker = new Broker();
 		reporter = new Reporter(this);
 		classManager = new InstrumentationClassManager(this, System.getProperty("java.class.path"));
+		defaultMinIntValue = getConfig().getInt("coastal.bound.int.min", Integer.MIN_VALUE);
+		defaultMaxIntValue = getConfig().getInt("coastal.bound.int.max", Integer.MAX_VALUE);
 		parseConfig();
-		defaultMinIntValue = config.getInt("coastal.bound.int.min", Integer.MIN_VALUE);
-		defaultMaxIntValue = config.getInt("coastal.bound.int.max", Integer.MAX_VALUE);
 	}
 
 	/**
@@ -146,6 +146,15 @@ public class COASTAL {
 		return broker;
 	}
 
+	/**
+	 * Return the reporter for this analysis run of COASTAL.  This is used mainly for testing purposes.
+	 * 
+	 * @return the reporter
+	 */
+	public Reporter getReporter() {
+		return reporter;
+	}
+	
 	/**
 	 * Return the class manager for this analysis run of COASTAL.
 	 * 
@@ -247,8 +256,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Parse the COASTAL configuration and extract the targets, triggers, and
-	 * delegates.
+	 * Parse the COASTAL configuration and extract the targets, triggers,
+	 * delegates, and bounds.
 	 */
 	public void parseConfig() {
 		// PARSE TARGETS
@@ -259,18 +268,28 @@ public class COASTAL {
 			triggers.add(Trigger.createTrigger(triggerNames[i].trim()));
 		}
 		// PARSE DELEGATES
-//		p = originalProperties.getProperty("coastal.delegates");
-//		if (p != null) {
-//			String[] delegates = p.trim().split(";");
-//			for (String delegate : delegates) {
-//				String[] pair = delegate.split(":");
-//				Object to = createInstance(pair[1].trim());
-//				if (to != null) {
-//					addDelegate(pair[0].trim(), to);
-//				}
-//			}
-//		}
+		for (int i = 0; true; i++) {
+			String key = "coastal.delegate(" + i + ")";
+			String target = getConfig().getString(key + ".target");
+			if (target == null) {
+				break;
+			}
+			String model = getConfig().getString(key + ".model");
+			Object modelObject = Conversion.createInstance(this, model.trim());
+			if (modelObject != null) {
+				delegates.put(target.trim(), modelObject);
+			}
+		}
 		// PARSE BOUNDS
+		for (int i = 0; true; i++) {
+			String key = "coastal.bound(" + i + ")";
+			String var = getConfig().getString(key + "[@name]");
+			if (var == null) {
+				break;
+			}
+			minBounds.put(var, getConfig().getInt(key + "[@min]", defaultMinIntValue));
+			maxBounds.put(var, getConfig().getInt(key + "[@max]", defaultMaxIntValue));
+		}
 	}
 
 	/**
@@ -383,8 +402,8 @@ public class COASTAL {
 	 */
 	private void start(boolean showBanner) {
 		Calendar started = Calendar.getInstance();
-		broker.publish("coastal-start", this);
-		broker.publish("report", new Tuple("COASTAL.start", started));
+		getBroker().publish("coastal-start", this);
+		getBroker().publish("report", new Tuple("COASTAL.start", started));
 		//		final String version = config.getVersion();
 		final String version = "XXX";
 		if (showBanner) {
@@ -394,10 +413,10 @@ public class COASTAL {
 		Diver d = new Diver(this);
 		d.dive();
 		Calendar stopped = Calendar.getInstance();
-		broker.publish("report", new Tuple("COASTAL.stop", stopped));
-		broker.publish("report", new Tuple("COASTAL.time", stopped.getTimeInMillis() - started.getTimeInMillis()));
-		broker.publish("coastal-stop", this);
-		reporter.report();
+		getBroker().publish("report", new Tuple("COASTAL.stop", stopped));
+		getBroker().publish("report", new Tuple("COASTAL.time", stopped.getTimeInMillis() - started.getTimeInMillis()));
+		getBroker().publish("coastal-stop", this);
+		getBroker().publish("coastal-report", this);
 		if (d.getRuns() < 2) {
 			Banner bn = new Banner('@');
 			bn.println("ONLY A SINGLE RUN EXECUTED\n");
@@ -432,18 +451,42 @@ public class COASTAL {
 		new Banner('~').println("COASTAL DONE").display(log);
 	}
 
+	/**
+	 * The name of COASTAL configuration file, both the resource (part of the project, providing sensible defaults), and the user's own
+	 * configuration file (providing overriding personalizations).
+	 */
 	private static final String COASTAL_CONFIGURATION = "coastal.xml";
 
+	/**
+	 * The subdirectory in the user's home directory where the personal coastal file is searched for. 
+	 */
 	private static final String COASTAL_DIRECTORY = ".coastal";
 
+	/**
+	 * The user's home directory.
+	 */
 	private static final String HOME_DIRECTORY = System.getProperty("user.home");
 
+	/**
+	 * The full name of the subdirectory where the personal file is searched for.
+	 */
 	private static final String HOME_COASTAL_DIRECTORY = HOME_DIRECTORY + File.separator + COASTAL_DIRECTORY;
 
+	/**
+	 * The full name of the personal configuration file.
+	 */
 	private static final String HOME_CONFIGURATION = HOME_COASTAL_DIRECTORY + File.separator + COASTAL_CONFIGURATION;
 
 	/**
-	 * Load the COASTAL configuration.
+	 * Load the COASTAL configuration.  Three sources are consulted:
+	 * 
+	 * <ul>
+	 * <li>a project resource</li>
+	 * <li>the user's personal configuration file</li>
+	 * <li>the configuration file specified on the command line</li>
+	 * </ul>
+	 * 
+	 * The second source overrides the first, and the third source overrides the first two sources.
 	 * 
 	 * @param log
 	 *            the logger to which to report
@@ -493,32 +536,56 @@ public class COASTAL {
 		return ConfigurationUtils.unmodifiableConfiguration(config);
 	}
 
+	/**
+	 * Load a COASTAL configuration from a file.
+	 * 
+	 * @param log the logger to which to report
+	 * @param filename the name of the file
+	 * @return an immutable configuration or {@code null} if the file was not found
+	 */
 	private static Configuration loadConfigFromFile(Logger log, String filename) {
 		try {
 			InputStream inputStream = new FileInputStream(filename);
 			Configuration cfg = loadConfigFromStream(log, inputStream);
-			log.trace("loaded default configuration from {}", filename);
+			log.trace("loaded configuration from {}", filename);
 			return cfg;
 		} catch (FileNotFoundException | ConfigurationException x) {
-			log.trace("tried to load default configuration from " + filename + " but failed", x);
+			log.trace("failed to load configuration from {}", filename);
+			// log.trace("tried to load configuration from " + filename + " but failed", x);
 		}
 		return null;
 	}
 
+	/**
+	 * Load a COASTAL configuration from a Java resource.
+	 * 
+	 * @param log the logger to which to report
+	 * @param resourceName the name of the resource
+	 * @return an immutable configuration or {@code null} if the resource was not found
+	 */
 	private static Configuration loadConfigFromResource(Logger log, String resourceName) {
 		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try (InputStream resourceStream = loader.getResourceAsStream(COASTAL_CONFIGURATION)) {
 			if (resourceStream != null) {
 				Configuration cfg = loadConfigFromStream(log, resourceStream);
-				log.trace("loaded default configuration from {}", resourceName);
+				log.trace("loaded configuration from {}", resourceName);
 				return cfg;
 			}
 		} catch (IOException | ConfigurationException x) {
-			log.trace("tried to load default configuration from " + resourceName + " but failed", x);
+			log.trace("failed to load configuration from {}", resourceName);
+			// log.trace("tried to load configuration from " + resourceName + " but failed", x);
 		}
 		return null;
 	}
 	
+	/**
+	 * Load a COASTAL configuration from an input stream.
+	 * 
+	 * @param log  the logger to which to report
+	 * @param inputStream the stream from which to read
+	 * @return an immutable configuration
+	 * @throws ConfigurationException if anything went wrong during the loading of the configuration
+	 */
 	private static Configuration loadConfigFromStream(Logger log, InputStream inputStream) throws ConfigurationException {
 		XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class).configure(new Parameters().xml()).getConfiguration();
 		FileHandler fh = new FileHandler(cfg);

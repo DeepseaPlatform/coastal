@@ -26,9 +26,10 @@ public class Reporter {
 				stats.add((Tuple) o);
 			}
 		});
+		coastal.getBroker().subscribe("coastal-report", this::report);
 	}
 
-	public void report() {
+	private void report(Object object) {
 		stats.sort((a, b) -> ((String) a.get(0)).compareTo((String) b.get(0)));
 		String curPrefix = "";
 		for (Tuple stat : stats) {

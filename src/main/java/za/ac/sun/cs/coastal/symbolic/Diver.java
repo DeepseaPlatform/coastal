@@ -114,7 +114,7 @@ public class Diver {
 			Class<?> clas = classLoader.loadClass(config.getString("coastal.main"));
 			Method meth = clas.getMethod("main", String[].class);
 			// Redirect System.out/System.err
-			if (config.getBoolean("coastal.echo.output", false)) {
+			if (!config.getBoolean("coastal.echo-output", false)) {
 				System.setOut(NUL);
 				System.setErr(NUL);
 			}

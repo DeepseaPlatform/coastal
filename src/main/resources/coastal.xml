@@ -1,23 +1,65 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <configuration>
 	<coastal>
+	
+		<!-- ======================================================================
+		The strategy that is used to refine newly explored paths.
+		======================================================================= -->
 		<strategy>za.ac.sun.cs.coastal.strategy.DepthFirstStrategy</strategy>
 		<!--
 		<strategy>za.ac.sun.cs.coastal.strategy.BreadthFirstStrategy</strategy>
 		<strategy>za.ac.sun.cs.coastal.strategy.RandomStrategy</strategy>
 		-->
+		
+		<!-- ======================================================================
+		A random seed, used primarily for the RandomStrategy.
+		======================================================================= -->
 		<randomseed>12348765</randomseed>
+		
+		<!-- ======================================================================
+		Delegates are specified as follows:
+		======================================================================= -->
+		<!--
+		<delegate>
+			<target>java.lang.String</target>
+			<model>za.ac.sun.cs.coastal.model.String</model>
+		</delegate>
+		-->
+		
+		<!-- ======================================================================
+		Whether or not the program's original output is shown.
+		======================================================================= -->
 		<trace-all>false</trace-all>
+		
+		<!-- ======================================================================
+		Whether or not the program's original output is shown.
+		======================================================================= -->
 		<echo-output>false</echo-output>
+		
+		<!-- ======================================================================
+		Whether or not the path tree is drawn (crudely) after each insertion.
+		======================================================================= -->
 		<draw-paths>false</draw-paths>
+		
+		<!-- ======================================================================
+		Whether or not the concrete return values of uninstrumented functions are
+		used, or whether they are replaced with fresh symbolic variables.
+		======================================================================= -->
 		<concrete-values>true</concrete-values>
+		
+		<!-- ======================================================================
+		Limits on the number of runs, total running time, the number of paths, and
+		the number of conjuncts per path.
+		======================================================================= -->
 		<limits>
 			<!-- <runs>0</runs> -->
 			<!-- <time>0</time> -->
 			<!-- <path>0</path> -->
 			<!-- <conjuncts>0</conjuncts> -->
 		</limits>
+
 	</coastal>
+
 	<green>
 		<z3>
 			<path>/usr/local/bin/z3</path>
