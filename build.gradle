@@ -18,6 +18,8 @@ dependencies {
 	compile group: 'za.ac.sun.cs', name: 'green', version: '0.1.3-5-g75f3961-SNAPSHOT'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
+	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
+	compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.0'
 	compile group: 'org.ow2.asm', name: 'asm', version: '6.2'
 	compile group: 'org.ow2.asm', name: 'asm-commons', version: '6.2'
 	compile group: 'org.ow2.asm', name: 'asm-util', version: '6.2'

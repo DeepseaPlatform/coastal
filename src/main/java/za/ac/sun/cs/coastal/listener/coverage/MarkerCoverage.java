@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.ConfigurationX;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.MarkerListener;
 import za.ac.sun.cs.coastal.reporting.Reporter;
@@ -25,7 +25,7 @@ public class MarkerCoverage implements MarkerListener, Reporter, ConfigurationLi
 	}
 
 	@Override
-	public void configurationLoaded(Configuration configuration) {
+	public void configurationLoaded(ConfigurationX configuration) {
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
 	}

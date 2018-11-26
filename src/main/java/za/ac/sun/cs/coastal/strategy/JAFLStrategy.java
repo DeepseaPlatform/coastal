@@ -10,11 +10,11 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.listener.ConfigurationListener;
+import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.Green;
@@ -24,7 +24,7 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 
-public class JAFLStrategy implements Strategy, ConfigurationListener {
+public class JAFLStrategy implements Strategy {
 
 	private Logger log;
 
@@ -34,44 +34,32 @@ public class JAFLStrategy implements Strategy, ConfigurationListener {
 
 	private int infeasibleCount = 0;
 
-	private RandomPathTree pathTree;
+	private final RandomPathTree pathTree;
 
-	private long randomSeed = 987654321;
+	private final long randomSeed;
 
-	private long pathLimit = 0;
+	private final long pathLimit;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
-	public JAFLStrategy() {
-		// We expect configurationLoaded(...) to be called shortly.
-		// This will initialize this instance.
-	}
-
-	@Override
-	public void configurationLoaded(Configuration configuration) {
-		log = configuration.getLog();
-		configuration.getReporterManager().register(this);
-		pathTree = new RandomPathTree(configuration);
-		randomSeed = configuration.getLongProperty("coastal.randomStrategy.seed", randomSeed);
+	public JAFLStrategy(COASTAL coastal) {
+		log = coastal.getLog();
+		ImmutableConfiguration config = coastal.getConfig();
+		long p = config.getLong("coastal.limits.paths", 0);
+		pathLimit = (p == 0) ? Long.MAX_VALUE : p;
+		pathTree = new RandomPathTree(coastal);
+		randomSeed = config.getLong("coastal.random-seed", 987654321);
 		pathTree.setSeed(randomSeed);
-		pathLimit = configuration.getLimitPaths();
-		if (pathLimit == 0) {
-			pathLimit = Long.MIN_VALUE;
-		}
 		// Set up green
 		green = new Green("COASTAL", LogManager.getLogger("GREEN"));
-		Properties greenProperties = configuration.getOriginalProperties();
+		Properties greenProperties = new Properties();
+		config.getKeys("green.").forEachRemaining(k -> greenProperties.setProperty(k, config.getString(k)));
 		greenProperties.setProperty("green.log.level", "ALL");
 		greenProperties.setProperty("green.services", "model");
 		greenProperties.setProperty("green.service.model", "(bounder modeller)");
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3Service");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
-	}
-
-	@Override
-	public void collectProperties(Properties properties) {
-		properties.setProperty("coastal.randomStrategy.seed", Long.toString(randomSeed));
 	}
 
 	@Override
@@ -97,8 +85,9 @@ public class JAFLStrategy implements Strategy, ConfigurationListener {
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		//return null;
 		boolean infeasible = false;
+		long pathCount = 0;
 		while (true) {
-			if (--pathLimit < 0) {
+			if (++pathCount > pathLimit) {
 				log.warn("path limit reached");
 				return list;
 			}
@@ -160,8 +149,8 @@ public class JAFLStrategy implements Strategy, ConfigurationListener {
 
 		private final Random rng = new Random();
 
-		RandomPathTree(Configuration configuration) {
-			super(configuration);
+		RandomPathTree(COASTAL coastal) {
+			super(coastal);
 		}
 
 		public void setSeed(long seed) {

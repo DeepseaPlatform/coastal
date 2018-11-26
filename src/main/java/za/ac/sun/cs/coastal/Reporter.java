@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.messages.Pair;
+import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.reporting.Banner;
 
 public class Reporter {
@@ -17,22 +17,22 @@ public class Reporter {
 
 	private final Logger log;
 	
-	private final List<Pair> stats = new LinkedList<>();
+	private final List<Tuple> stats = new LinkedList<>();
 	
 	public Reporter(COASTAL coastal) {
 		log = coastal.getLog(); 
 		coastal.getBroker().subscribe("report", o -> {
-			if (o instanceof Pair) {
-				stats.add((Pair) o);
+			if (o instanceof Tuple) {
+				stats.add((Tuple) o);
 			}
 		});
 	}
 
 	public void report() {
-		stats.sort((a, b) -> ((String) a.getKey()).compareTo((String) b.getKey()));
+		stats.sort((a, b) -> ((String) a.get(0)).compareTo((String) b.get(0)));
 		String curPrefix = "";
-		for (Pair stat : stats) {
-			String key = (String) stat.getKey(), prefix = "", suffix = key; 
+		for (Tuple stat : stats) {
+			String key = (String) stat.get(0), prefix = "", suffix = key; 
 			int n = key.indexOf('.');
 			if (n != -1) {
 				prefix = key.substring(0, n);
@@ -42,7 +42,7 @@ public class Reporter {
 				log.info(Banner.getBannerLine(prefix, '='));
 				curPrefix = prefix;
 			}
-			Object value = stat.getValue();
+			Object value = stat.get(1);
 			if (value instanceof Calendar) {
 				log.info("  {}: {}", suffix, DATE_FORMAT.format(((Calendar) value).getTime())); 
 			} else {

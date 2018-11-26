@@ -2,19 +2,19 @@ package za.ac.sun.cs.coastal.instrument;
 
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.COASTAL;
 
 public class InstrumentationClassLoader extends ClassLoader {
 
-	private final Configuration configuration;
-
+	private final COASTAL coastal;
+	
 	private final Logger log;
 
 	private final InstrumentationClassManager manager;
-	
-	InstrumentationClassLoader(Configuration configuration, InstrumentationClassManager manager) {
-		this.configuration = configuration;
-		this.log = configuration.getLog();
+
+	public InstrumentationClassLoader(COASTAL coastal, InstrumentationClassManager manager) {
+		this.coastal = coastal;
+		this.log = coastal.getLog();
 		this.manager = manager;
 	}
 
@@ -27,7 +27,7 @@ public class InstrumentationClassLoader extends ClassLoader {
 			manager.endLoad(t, true);
 			return clas;
 		}
-		if (configuration.isTarget(name)) {
+		if (coastal.isTarget(name)) {
 			log.trace("*** loading class {}, identified as target", name);
 			byte[] raw = manager.instrument(name);
 			if (raw != null) {

@@ -6,7 +6,7 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.ConfigurationX;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
@@ -28,7 +28,7 @@ public class InstructionCoverage implements InstructionListener, Reporter, Confi
 	}
 
 	@Override
-	public void configurationLoaded(Configuration configuration) {
+	public void configurationLoaded(ConfigurationX configuration) {
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
 	}

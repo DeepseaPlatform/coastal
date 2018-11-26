@@ -30,7 +30,7 @@ public class SystemTest {
 		final Logger log = new TestLogger();
 		final String version = "coastal-test";
 		final ReporterManager reporterManager = new ReporterManager();
-		ConfigurationBuilder cb = new ConfigurationBuilder(log, version, reporterManager);
+		ConfigurationBuilderX cb = new ConfigurationBuilderX(log, version, reporterManager);
 		assertTrue(cb.readFromProperties(props));
 		new COASTAL(cb.construct()).start();
 		checkOutput(log, expectedFilename);

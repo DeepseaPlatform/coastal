@@ -12,32 +12,27 @@ import org.objectweb.asm.util.Printer;
 import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
-import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.reporting.Reporter;
+import za.ac.sun.cs.coastal.COASTAL;
 
-public class InstrumentationAdapter extends ClassVisitor implements Reporter {
+public class InstrumentationAdapter extends ClassVisitor {
 
-	private final Configuration configuration;
-
-	private final InstrumentationClassManager classManager;
-
+	private final COASTAL coastal;
+	
 	private final String name;
 
 	private final StringWriter swriter = new StringWriter();
 
 	private final PrintWriter pwriter = new PrintWriter(swriter);
 
-	public InstrumentationAdapter(Configuration configuration, InstrumentationClassManager classManager, String name, ClassVisitor cv) {
+	public InstrumentationAdapter(COASTAL coastal, String name, ClassVisitor cv) {
 		super(Opcodes.ASM6, cv);
-		this.configuration = configuration;
-		this.classManager = classManager;
+		this.coastal = coastal;
 		this.name = name;
-		configuration.getReporterManager().register(this);
 	}
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-		int triggerIndex = configuration.isTrigger(this.name + "." + name, desc);
+		int triggerIndex = coastal.findTrigger(this.name + "." + name, desc);
 		boolean isStatic = (access & Opcodes.ACC_STATIC) > 0;
 		int argCount = countArguments(desc);
 		MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
@@ -56,7 +51,7 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 			mv = new TraceMethodVisitor(mv, p);
 		}
 		if (mv != null) {
-			mv = new MethodInstrumentationAdapter(configuration, classManager, mv, triggerIndex, isStatic, argCount);
+			mv = new MethodInstrumentationAdapter(coastal, mv, triggerIndex, isStatic, argCount);
 		}
 		return mv;
 	}
@@ -77,20 +72,20 @@ public class InstrumentationAdapter extends ClassVisitor implements Reporter {
 		return count;
 	}
 
-	// ======================================================================
-	//
-	// REPORTING
-	//
-	// ======================================================================
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public void report(PrintWriter info, PrintWriter trace) {
-		trace.print(swriter.toString());
-	}
+//	// ======================================================================
+//	//
+//	// REPORTING
+//	//
+//	// ======================================================================
+//
+//	@Override
+//	public String getName() {
+//		return name;
+//	}
+//
+//	@Override
+//	public void report(PrintWriter info, PrintWriter trace) {
+//		trace.print(swriter.toString());
+//	}
 
 }

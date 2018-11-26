@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<configuration>
+	<coastal>
+		<strategy>za.ac.sun.cs.coastal.strategy.DepthFirstStrategy</strategy>
+		<!--
+		<strategy>za.ac.sun.cs.coastal.strategy.BreadthFirstStrategy</strategy>
+		<strategy>za.ac.sun.cs.coastal.strategy.RandomStrategy</strategy>
+		-->
+		<randomseed>12348765</randomseed>
+		<trace-all>false</trace-all>
+		<echo-output>false</echo-output>
+		<draw-paths>false</draw-paths>
+		<concrete-values>true</concrete-values>
+		<limits>
+			<!-- <runs>0</runs> -->
+			<!-- <time>0</time> -->
+			<!-- <path>0</path> -->
+			<!-- <conjuncts>0</conjuncts> -->
+		</limits>
+	</coastal>
+	<green>
+		<z3>
+			<path>/usr/local/bin/z3</path>
+		</z3>
+	</green>
+</configuration>
+

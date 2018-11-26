@@ -5,29 +5,26 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
-import za.ac.sun.cs.coastal.listener.InstructionListener;
-import za.ac.sun.cs.coastal.listener.MarkerListener;
-import za.ac.sun.cs.coastal.listener.PathListener;
+import za.ac.sun.cs.coastal.Conversion;
 import za.ac.sun.cs.coastal.messages.Broker;
-import za.ac.sun.cs.coastal.messages.Pair;
+import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.green.expr.Constant;
 
 public class Diver {
 
+	private final COASTAL coastal;
+	
 	private final Logger log;
 	
-	private final Configuration configuration;
+	private final ImmutableConfiguration config;
 
 	private final Broker broker;
 
@@ -35,46 +32,43 @@ public class Diver {
 
 	private long time = 0;
 
-	private final InstrumentationClassManager classManager;
-
 	public Diver(COASTAL coastal) {
-		this.log = coastal.getLog();
-		this.configuration = coastal.getConfiguration();
-		this.broker = coastal.getBroker();
+		this.coastal = coastal;
+		log = coastal.getLog();
+		config = coastal.getConfig();
+		broker = coastal.getBroker();
 		broker.subscribe("coastal-stop", this::report);
-		// configuration.getReporterManager().register(this);
-		String cp = System.getProperty("java.class.path");
-		classManager = new InstrumentationClassManager(configuration, cp);
 	}
 
 	public void dive() {
-		List<InstructionListener> instructionListeners = new ArrayList<>();
-		for (InstructionListener listener : configuration.<InstructionListener>getListeners(InstructionListener.class)) {
-			listener.changeInstrumentationManager(classManager);
-			instructionListeners.add(listener);
+//		List<InstructionListener> instructionListeners = new ArrayList<>();
+//		for (InstructionListener listener : config.<InstructionListener>getListeners(InstructionListener.class)) {
+//			listener.changeInstrumentationManager(classManager);
+//			instructionListeners.add(listener);
+//		}
+//		List<MarkerListener> markerListeners = new ArrayList<>();
+//		for (MarkerListener listener : config.<MarkerListener>getListeners(MarkerListener.class)) {
+//			markerListeners.add(listener);
+//		}
+//		List<PathListener> pathListeners = new ArrayList<>();
+//		for (PathListener listener : config.<PathListener>getListeners(PathListener.class)) {
+//			pathListeners.add(listener);
+//		}
+		String strategyName = config.getString("coastal.strategy");
+		Object strategyObject = null;
+		Strategy strategy = null;
+		if (strategyName != null) {
+			strategyObject = Conversion.createInstance(coastal, strategyName);
 		}
-		List<MarkerListener> markerListeners = new ArrayList<>();
-		for (MarkerListener listener : configuration.<MarkerListener>getListeners(MarkerListener.class)) {
-			markerListeners.add(listener);
-		}
-		List<PathListener> pathListeners = new ArrayList<>();
-		for (PathListener listener : configuration.<PathListener>getListeners(PathListener.class)) {
-			pathListeners.add(listener);
-		}
-		Strategy strategy = configuration.getStrategy();
-		if (strategy == null) {
+		if ((strategyObject != null) && (strategyObject instanceof Strategy)) {
+			strategy = (Strategy) strategyObject;
+		} else {
 			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
 			System.exit(1);
 		}
 		Map<String, Constant> concreteValues = null;
-		long runLimit = configuration.getLimitRuns();
-		if (runLimit == 0) {
-			runLimit = Long.MIN_VALUE;
-		}
-		long timeLimit = configuration.getLimitTime();
-		if (timeLimit == 0) {
-			timeLimit = Long.MAX_VALUE;
-		}
+		long runLimit = config.getLong("coastal.limit.runs", Long.MAX_VALUE);
+		long timeLimit = config.getLong("coastal.limit.time", Long.MAX_VALUE);
 		long tl0 = System.currentTimeMillis();
 		do {
 			if ((System.currentTimeMillis() - tl0) / 1000 > timeLimit) {
@@ -88,14 +82,13 @@ public class Diver {
 			runs++;
 			log.info(Banner.getBannerLine("starting dive " + runs, '-'));
 			long t0 = System.currentTimeMillis();
-			SymbolicState symbolicState = new SymbolicState(configuration, concreteValues, instructionListeners,
-					markerListeners);
+			SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
 			SymbolicVM.setState(symbolicState);
 			performRun();
 			time += System.currentTimeMillis() - t0;
-			for (PathListener listener : pathListeners) {
-				listener.visit(symbolicState);
-			}
+//			for (PathListener listener : pathListeners) {
+//				listener.visit(symbolicState);
+//			}
 			concreteValues = strategy.refine(symbolicState);
 			if (!symbolicState.mayContinue()) {
 				break;
@@ -115,13 +108,13 @@ public class Diver {
 	});
 
 	private void performRun() {
-		ClassLoader classLoader = classManager.createClassLoader();
+		ClassLoader classLoader = coastal.getClassManager().createClassLoader();
 		PrintStream out = System.out, err = System.err;
 		try {
-			Class<?> clas = classLoader.loadClass(configuration.getMain());
+			Class<?> clas = classLoader.loadClass(config.getString("coastal.main"));
 			Method meth = clas.getMethod("main", String[].class);
 			// Redirect System.out/System.err
-			if (!configuration.getEchoOutput()) {
+			if (config.getBoolean("coastal.echo.output", false)) {
 				System.setOut(NUL);
 				System.setErr(NUL);
 			}
@@ -164,25 +157,8 @@ public class Diver {
 	}
 
 	public void report(Object object) {
-		broker.publish("report", new Pair("Diver.runs", runs));
-		broker.publish("report", new Pair("Diver.time", time));
+		broker.publish("report", new Tuple("Diver.runs", runs));
+		broker.publish("report", new Tuple("Diver.time", time));
 	}
-
-	// ======================================================================
-	//
-	// REPORTING
-	//
-	// ======================================================================
-
-//	@Override
-//	public String getName() {
-//		return "Dive";
-//	}
-//
-//	@Override
-//	public void report(PrintWriter info, PrintWriter trace) {
-//		info.println("  Runs: " + runs);
-//		info.println("  Overall dive time: " + time);
-//	}
 
 }

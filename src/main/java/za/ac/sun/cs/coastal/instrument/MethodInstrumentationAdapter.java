@@ -12,8 +12,8 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.Configuration.Trigger;
+import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class MethodInstrumentationAdapter extends MethodVisitor {
@@ -22,10 +22,10 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicVM";
 
-	private final Configuration configuration;
+	private final COASTAL coastal;
 
 	private final Logger log;
-
+	
 	private final boolean useConcreteValues;
 
 	private final InstrumentationClassManager classManager;
@@ -52,13 +52,12 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 	
 	// private static BitSet currentBranchInstructions;
 
-	public MethodInstrumentationAdapter(Configuration configuration, InstrumentationClassManager classManager,
-			MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
+	public MethodInstrumentationAdapter(COASTAL coastal, MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
-		this.configuration = configuration;
-		this.log = configuration.getLog();
-		this.useConcreteValues = configuration.getUseConcreteValues();
-		this.classManager = classManager;
+		this.coastal = coastal;
+		this.log = coastal.getLog();
+		this.useConcreteValues = coastal.getConfig().getBoolean("coastal.use-concrete-values", false);
+		this.classManager = coastal.getClassManager();
 		this.triggerIndex = triggerIndex;
 		this.isStatic = isStatic;
 		this.argCount = argCount;
@@ -162,7 +161,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitLdcInsn(classManager.getNextMethodCounter());
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(I)V", false);
 			//---   GENERATE PARAMETER OVERRIDES
-			Trigger trigger = configuration.getTrigger(triggerIndex);
+			Trigger trigger = coastal.getTrigger(triggerIndex);
 			int n = trigger.getParamCount();
 			int offset = (isStatic ? 0 : 1);
 			for (int i = 0; i < n; i++) {
@@ -278,8 +277,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 					"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 			String className = owner.replace('/', '.');
-			if (useConcreteValues && !configuration.isTarget(className)
-					&& (configuration.findDelegate(owner, className, descriptor) == null)) {
+			if (useConcreteValues && !coastal.isTarget(className)
+					&& (coastal.findDelegate(owner, className, descriptor) == null)) {
 				char returnType = primitiveReturnType(descriptor);
 				if (returnType != 'X') {
 					mv.visitInsn(Opcodes.DUP);

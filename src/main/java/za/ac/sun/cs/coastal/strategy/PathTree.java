@@ -2,7 +2,7 @@ package za.ac.sun.cs.coastal.strategy;
 
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
 public abstract class PathTree {
@@ -17,9 +17,9 @@ public abstract class PathTree {
 
 	private int revisitCount = 0;
 
-	public PathTree(Configuration configuration) {
-		log = configuration.getLog();
-		drawPaths = configuration.getDrawPaths();
+	public PathTree(COASTAL coastal) {
+		log = coastal.getLog();
+		drawPaths = coastal.getConfig().getBoolean("coastal.draw-paths", false);
 	}
 
 	public PathTreeNode getRoot() {

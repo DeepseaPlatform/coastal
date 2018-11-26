@@ -14,13 +14,13 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Configuration.Trigger;
+import za.ac.sun.cs.coastal.ConfigurationX.Trigger;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.Listener;
 import za.ac.sun.cs.coastal.reporting.ReporterManager;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 
-public class ConfigurationBuilder {
+public class ConfigurationBuilderX {
 
 	private static final String COASTAL_PROPERTY_FILE = "coastal.properties";
 
@@ -54,7 +54,7 @@ public class ConfigurationBuilder {
 	private final List<Listener> listeners = new ArrayList<>(); // listeners for various events
 	private final Properties originalProperties = new Properties(); // non-coastal properties
 
-	public ConfigurationBuilder(final Logger log, final String version, final ReporterManager reporterManager) {
+	public ConfigurationBuilderX(final Logger log, final String version, final ReporterManager reporterManager) {
 		assert log != null;
 		this.log = log;
 		assert version != null;
@@ -64,104 +64,104 @@ public class ConfigurationBuilder {
 		registerListener(reporterManager);
 	}
 
-	public ConfigurationBuilder setMain(String main) {
+	public ConfigurationBuilderX setMain(String main) {
 		if (main != null) {
 			this.main = main;
 		}
 		return this;
 	}
 
-	public ConfigurationBuilder setArgs(String args) {
+	public ConfigurationBuilderX setArgs(String args) {
 		if (args != null) {
 			this.args = args;
 		}
 		return this;
 	}
 
-	public ConfigurationBuilder addTarget(String prefix) {
+	public ConfigurationBuilderX addTarget(String prefix) {
 		if (prefix != null) {
 			targets.add(prefix);
 		}
 		return this;
 	}
 
-	public ConfigurationBuilder addTrigger(Trigger trigger) {
+	public ConfigurationBuilderX addTrigger(Trigger trigger) {
 		if (trigger != null) {
 			triggers.add(trigger);
 		}
 		return this;
 	}
 
-	public ConfigurationBuilder setMinBound(String variable, int min) {
+	public ConfigurationBuilderX setMinBound(String variable, int min) {
 		minBounds.put(variable, min);
 		return this;
 	}
 
-	public ConfigurationBuilder setMaxBound(String variable, int max) {
+	public ConfigurationBuilderX setMaxBound(String variable, int max) {
 		maxBounds.put(variable, max);
 		return this;
 	}
 
-	public ConfigurationBuilder addDelegate(String target, Object delegate) {
+	public ConfigurationBuilderX addDelegate(String target, Object delegate) {
 		delegates.put(target, delegate);
 		return this;
 	}
 
-	public ConfigurationBuilder setStrategy(Strategy strategy) {
+	public ConfigurationBuilderX setStrategy(Strategy strategy) {
 		this.strategy = strategy;
 		return this;
 	}
 
-	public ConfigurationBuilder setLimitRuns(long limitRuns) {
+	public ConfigurationBuilderX setLimitRuns(long limitRuns) {
 		this.limitRuns = limitRuns;
 		return this;
 	}
 
-	public ConfigurationBuilder setLimitTime(long limitTime) {
+	public ConfigurationBuilderX setLimitTime(long limitTime) {
 		this.limitTime = limitTime;
 		return this;
 	}
 
-	public ConfigurationBuilder setLimitPaths(long limitPaths) {
+	public ConfigurationBuilderX setLimitPaths(long limitPaths) {
 		this.limitPaths = limitPaths;
 		return this;
 	}
 
-	public ConfigurationBuilder setLimitConjuncts(long limitConjuncts) {
+	public ConfigurationBuilderX setLimitConjuncts(long limitConjuncts) {
 		this.limitConjuncts = limitConjuncts;
 		return this;
 	}
 
-	public ConfigurationBuilder setTraceAll(boolean traceAll) {
+	public ConfigurationBuilderX setTraceAll(boolean traceAll) {
 		this.traceAll = traceAll;
 		return this;
 	}
 
-	public ConfigurationBuilder setEchoOutput(boolean echoOutput) {
+	public ConfigurationBuilderX setEchoOutput(boolean echoOutput) {
 		this.echoOutput = echoOutput;
 		return this;
 	}
 
-	public ConfigurationBuilder setDrawPaths(boolean drawPaths) {
+	public ConfigurationBuilderX setDrawPaths(boolean drawPaths) {
 		this.drawPaths = drawPaths;
 		return this;
 	}
 
-	public ConfigurationBuilder setUseConcreteValues(boolean useConcreteValues) {
+	public ConfigurationBuilderX setUseConcreteValues(boolean useConcreteValues) {
 		this.useConcreteValues = useConcreteValues;
 		return this;
 	}
 
-	public ConfigurationBuilder addListener(Listener listener) {
+	public ConfigurationBuilderX addListener(Listener listener) {
 		if (listener != null) {
 			listeners.add(listener);
 		}
 		return this;
 	}
 
-	public Configuration construct() {
+	public ConfigurationX construct() {
 		processProperties();
-		return new Configuration(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds,
+		return new ConfigurationX(version, log, reporterManager, main, args, targets, triggers, minBounds, maxBounds,
 				delegates, strategy, limitRuns, limitTime, limitPaths, limitConjuncts, traceAll, echoOutput, drawPaths,
 				useConcreteValues, listeners, configurationListeners, originalProperties);
 	}
@@ -358,7 +358,7 @@ public class ConfigurationBuilder {
 		Class<?> clas = null;
 		if ((className != null) && (className.length() > 0)) {
 			try {
-				ClassLoader cl = ConfigurationBuilder.class.getClassLoader();
+				ClassLoader cl = ConfigurationBuilderX.class.getClassLoader();
 				clas = cl.loadClass(className);
 			} catch (ClassNotFoundException x) {
 				log.warn("CLASS NOT FOUND: " + className, x);

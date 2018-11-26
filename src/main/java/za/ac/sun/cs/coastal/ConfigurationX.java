@@ -22,7 +22,7 @@ import za.ac.sun.cs.coastal.reporting.ReporterManager;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
-public class Configuration {
+public class ConfigurationX {
 
 	// TODO these should also be properties!
 	private static final int DEFAULT_MIN_INT_VALUE = 0;
@@ -65,7 +65,7 @@ public class Configuration {
 	//
 	// ======================================================================
 
-	public Configuration(final String version, final Logger log, final ReporterManager reporterManager,
+	public ConfigurationX(final String version, final Logger log, final ReporterManager reporterManager,
 			final String main, final String args, final List<String> targets, final List<Trigger> triggers,
 			final Map<String, Integer> minBounds, final Map<String, Integer> maxBounds,
 			final Map<String, Object> delegates, final Strategy strategy, final long limitRuns, final long limitTime,
@@ -156,22 +156,6 @@ public class Configuration {
 		return DEFAULT_MIN_INT_VALUE;
 	}
 
-	public int getMinBound(String variable) {
-		return getMinBound(variable, getDefaultMinIntValue());
-	}
-
-	public int getMinBound(String variable1, String variable2) {
-		return getMinBound(variable1, getMinBound(variable2, getDefaultMinIntValue()));
-	}
-
-	public int getMinBound(String variable, int defaultValue) {
-		Integer min = minBounds.get(variable);
-		if (min == null) {
-			min = defaultValue;
-		}
-		return min;
-	}
-
 	public int getDefaultMaxIntValue() {
 		return DEFAULT_MAX_INT_VALUE;
 	}
@@ -253,27 +237,27 @@ public class Configuration {
 	}
 
 	public boolean getBooleanProperty(String key, boolean defaultValue) {
-		return ConfigurationBuilder.getBooleanProperty(originalProperties, key, defaultValue);
+		return ConfigurationBuilderX.getBooleanProperty(originalProperties, key, defaultValue);
 	}
 
 	public Boolean getBooleanProperty(String key) {
-		return ConfigurationBuilder.getBooleanProperty(originalProperties, key);
+		return ConfigurationBuilderX.getBooleanProperty(originalProperties, key);
 	}
 
 	public int getIntegerProperty(String key, int defaultValue) {
-		return ConfigurationBuilder.getIntegerProperty(originalProperties, key, defaultValue);
+		return ConfigurationBuilderX.getIntegerProperty(originalProperties, key, defaultValue);
 	}
 
 	public Integer getIntegerProperty(String key) {
-		return ConfigurationBuilder.getIntegerProperty(originalProperties, key);
+		return ConfigurationBuilderX.getIntegerProperty(originalProperties, key);
 	}
 
 	public long getLongProperty(String key, long defaultValue) {
-		return ConfigurationBuilder.getLongProperty(originalProperties, key, defaultValue);
+		return ConfigurationBuilderX.getLongProperty(originalProperties, key, defaultValue);
 	}
 
 	public Long getLongProperty(String key) {
-		return ConfigurationBuilder.getLongProperty(originalProperties, key);
+		return ConfigurationBuilderX.getLongProperty(originalProperties, key);
 	}
 
 	// ======================================================================
@@ -282,24 +266,6 @@ public class Configuration {
 	//
 	// ======================================================================
 	
-	private static final Class<?>[] EMPTY_PARAMETERS = new Class<?>[0];
-
-	public Method findDelegate(String owner, String name, String descriptor) {
-		Object delegate = findDelegate(owner);
-		if (delegate == null) {
-			return null;
-		}
-		String methodName = name + SymbolicState.getAsciiSignature(descriptor);
-		Method delegateMethod = null;
-		try {
-			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, EMPTY_PARAMETERS);
-		} catch (NoSuchMethodException | SecurityException e) {
-			return null;
-		}
-		assert delegateMethod != null;
-		return delegateMethod;
-	}
-
 	// ======================================================================
 	//
 	// CONVERT TO PROPERTIES

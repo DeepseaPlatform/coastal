@@ -2,11 +2,11 @@ package za.ac.sun.cs.coastal.listener;
 
 import java.util.Properties;
 
-import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.ConfigurationX;
 
 public interface ConfigurationListener extends Listener {
 
-	void configurationLoaded(Configuration configuration);
+	void configurationLoaded(ConfigurationX configuration);
 
 	void collectProperties(Properties properties);
 

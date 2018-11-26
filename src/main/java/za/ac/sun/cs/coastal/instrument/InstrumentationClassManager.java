@@ -3,7 +3,6 @@ package za.ac.sun.cs.coastal.instrument;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -15,14 +14,17 @@ import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
-import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.reporting.Reporter;
+import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.Tuple;
 
-public class InstrumentationClassManager implements Reporter {
+public class InstrumentationClassManager {
 
-	private final Configuration configuration;
-
+	private final COASTAL coastal;
+	
 	private final Logger log;
+	
+	private final Broker broker;
 
 	private final List<String> classPaths = new ArrayList<>();
 
@@ -34,10 +36,11 @@ public class InstrumentationClassManager implements Reporter {
 
 	private final Map<String, byte[]> cache = new HashMap<>();
 
-	public InstrumentationClassManager(Configuration configuration, String classPath) {
-		this.configuration = configuration;
-		this.log = configuration.getLog();
-		configuration.getReporterManager().register(this);
+	public InstrumentationClassManager(COASTAL coastal, String classPath) {
+		this.coastal = coastal;
+		log = coastal.getLog();
+		broker = coastal.getBroker();
+		broker.subscribe("coastal-stop", this::report);
 		String[] paths = classPath.split(File.pathSeparator);
 		for (String path : paths) {
 			classPaths.add(path);
@@ -46,7 +49,7 @@ public class InstrumentationClassManager implements Reporter {
 	}
 
 	public ClassLoader createClassLoader() {
-		return new InstrumentationClassLoader(configuration, this);
+		return new InstrumentationClassLoader(coastal, this);
 	}
 
 	public void startLoad() {
@@ -85,7 +88,7 @@ public class InstrumentationClassManager implements Reporter {
 		}
 		ClassReader cr = new ClassReader(in);
 		ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
-		InstrumentationAdapter ia = new InstrumentationAdapter(configuration, this, name, cw);
+		InstrumentationAdapter ia = new InstrumentationAdapter(coastal, name, cw);
 		cr.accept(ia, 0);
 		byte[] out = cw.toByteArray();
 		preInstrumentedSize += in.length;
@@ -118,20 +121,14 @@ public class InstrumentationClassManager implements Reporter {
 		return null;
 	}
 
-	@Override
-	public String getName() {
-		return "Instrumentation";
-	}
-
-	@Override
-	public void report(PrintWriter info, PrintWriter trace) {
-		info.println("  Class load requests: " + requestCount);
-		info.println("  Cache hits: " + cachedCount);
-		info.println("  Classes instrumented: " + instrumentedCount);
-		info.println("  Pre-instrumented size: " + preInstrumentedSize);
-		info.println("  Post-instrumented size: " + postInstrumentedSize);
-		info.println("  Load time: " + loadTime);
-		info.println("  Instrumentation time: " + instrumentedTime);
+	public void report(Object object) {
+		broker.publish("report", new Tuple("Instrumentation.requests-count", requestCount));
+		broker.publish("report", new Tuple("Instrumentation.cached-count", cachedCount));
+		broker.publish("report", new Tuple("Instrumentation.instrumented-count", instrumentedCount));
+		broker.publish("report", new Tuple("Instrumentation.pre-instrumented-size", preInstrumentedSize));
+		broker.publish("report", new Tuple("Instrumentation.post-instrumented-size", postInstrumentedSize));
+		broker.publish("report", new Tuple("Instrumentation.load-time", loadTime));
+		broker.publish("report", new Tuple("Instrumentation.instrumented-time", instrumentedTime));
 	}
 
 	private int instructionCounter = 0;

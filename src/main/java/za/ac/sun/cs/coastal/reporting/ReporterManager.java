@@ -8,7 +8,7 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.ConfigurationX;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 
 public class ReporterManager implements ConfigurationListener {
@@ -23,7 +23,7 @@ public class ReporterManager implements ConfigurationListener {
 	}
 
 	@Override
-	public void configurationLoaded(Configuration configuration) {
+	public void configurationLoaded(ConfigurationX configuration) {
 		log = configuration.getLog();
 	}
 

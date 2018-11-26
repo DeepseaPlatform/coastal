@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<configuration>
+	<coastal>
+		<main>examples.simple.MaxChoice4</main>
+		<target>examples.simple</target>
+		<trigger>examples.simple.MaxChoice4.compute(X:int, Y:int, Z:int)</trigger>
+		<trigger>examples.simple.MaxChoice4.compute2(X:int, Y:int, Z:int)</trigger>
+		<bounds name="X" min="0" max="14" />
+		<bounds name="Y" min="0" max="14" />
+		<bounds name="Z" min="0" max="14" />
+	</coastal>
+</configuration>

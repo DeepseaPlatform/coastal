@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -12,11 +11,11 @@ import java.util.Stack;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 
-import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.Configuration.Trigger;
+import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
-import za.ac.sun.cs.coastal.listener.InstructionListener;
-import za.ac.sun.cs.coastal.listener.MarkerListener;
+import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
@@ -34,9 +33,11 @@ public class SymbolicState {
 
 	public static final String NEW_VAR_PREFIX = "U_D_"; // "$"
 
-	private final Configuration configuration;
+	private final COASTAL coastal;
 
 	private final Logger log;
+
+	private final Broker broker;
 
 	private final long limitConjuncts;
 
@@ -87,20 +88,13 @@ public class SymbolicState {
 	
 	private final Stack<Expression> pendingSwitch = new Stack<>();
 
-	private final List<InstructionListener> instructionListeners;
-
-	private final List<MarkerListener> markerListeners;
-
-	public SymbolicState(Configuration configuration, Map<String, Constant> concreteValues,
-			List<InstructionListener> instructionListeners, List<MarkerListener> markerListeners) {
-		this.configuration = configuration;
-		this.log = configuration.getLog();
-		long lc = configuration.getLimitConjuncts();
-		this.limitConjuncts = (lc == 0) ? Long.MAX_VALUE : lc;
-		this.traceAll = configuration.getTraceAll();
+	public SymbolicState(COASTAL coastal, Map<String, Constant> concreteValues) {
+		this.coastal = coastal;
+		log = coastal.getLog();
+		broker = coastal.getBroker();
+		limitConjuncts = coastal.getConfig().getLong("coastal.limit.conjuncts", Long.MAX_VALUE);
+		traceAll = coastal.getConfig().getBoolean("coastal.trace.all", false);
 		this.concreteValues = concreteValues;
-		this.instructionListeners = instructionListeners;
-		this.markerListeners = markerListeners;
 		symbolicMode = traceAll;
 	}
 
@@ -161,8 +155,8 @@ public class SymbolicState {
 		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
 		Expression value = instanceData.get(fullFieldName);
 		if (value == null) {
-			int min = configuration.getDefaultMinIntValue();
-			int max = configuration.getDefaultMaxIntValue();
+			int min = coastal.getDefaultMinIntValue();
+			int max = coastal.getDefaultMaxIntValue();
 			value = new IntVariable(getNewVariableName(), min, max);
 			instanceData.put(fullFieldName, value);
 		}
@@ -278,7 +272,7 @@ public class SymbolicState {
 			mayRecord = false;
 			symbolicMode = traceAll;
 		}
-		notifyExitMethod(methodNumber);
+		broker.publish("exit-method", methodNumber);
 		return symbolicMode;
 	}
 
@@ -303,7 +297,7 @@ public class SymbolicState {
 	private static final Object[] EMPTY_ARGUMENTS = new Object[0];
 
 	private boolean executeDelegate(String owner, String name, String descriptor) {
-		Object delegate = configuration.findDelegate(owner);
+		Object delegate = coastal.findDelegate(owner);
 		if (delegate == null) {
 			return false;
 		}
@@ -336,27 +330,19 @@ public class SymbolicState {
 	// ======================================================================
 
 	public void stop() {
-		for (MarkerListener listener : markerListeners) {
-			listener.stop(this);
-		}
+		broker.publish("stop", null);
 	}
 
 	public void stop(String message) {
-		for (MarkerListener listener : markerListeners) {
-			listener.stop(this, message);
-		}
+		broker.publish("stop", message);
 	}
 
 	public void mark(int marker) {
-		for (MarkerListener listener : markerListeners) {
-			listener.mark(this, marker);
-		}
+		broker.publish("mark", marker);
 	}
 
 	public void mark(String marker) {
-		for (MarkerListener listener : markerListeners) {
-			listener.mark(this, marker);
-		}
+		broker.publish("mark", marker);
 	}
 
 	// ======================================================================
@@ -366,49 +352,49 @@ public class SymbolicState {
 	// ======================================================================
 
 	public int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
-		Trigger trigger = configuration.getTrigger(triggerIndex);
+		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
 			setLocal(address, new IntConstant(currentValue));
 			return currentValue;
 		}
-		int min = configuration.getMinBound(name);
-		int max = configuration.getMaxBound(name);
+		int min = coastal.getMinBound(name);
+		int max = coastal.getMaxBound(name);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : concrete.getValue();
 	}
 
 	public char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
-		Trigger trigger = configuration.getTrigger(triggerIndex);
+		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
 			setLocal(address, new IntConstant(currentValue));
 			return currentValue;
 		}
-		int min = configuration.getMinBound(name);
-		int max = configuration.getMaxBound(name);
+		int min = coastal.getMinBound(name);
+		int max = coastal.getMaxBound(name);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : (char) concrete.getValue();
 	}
 
 	public byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
-		Trigger trigger = configuration.getTrigger(triggerIndex);
+		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
 			setLocal(address, new IntConstant(currentValue));
 			return currentValue;
 		}
-		int min = configuration.getMinBound(name);
-		int max = configuration.getMaxBound(name);
+		int min = coastal.getMinBound(name);
+		int max = coastal.getMaxBound(name);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : (byte) concrete.getValue();
 	}
 	
 	public String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
-		Trigger trigger = configuration.getTrigger(triggerIndex);
+		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length();
 		int stringId = createString();
@@ -438,7 +424,7 @@ public class SymbolicState {
 	}
 
 	public int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
-		Trigger trigger = configuration.getTrigger(triggerIndex);
+		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length;
 		int arrayId = createArray();
@@ -459,8 +445,8 @@ public class SymbolicState {
 				} else {
 					value[i] = currentValue[i];
 				}
-				int min = configuration.getMinBound(entryName, name);
-				int max = configuration.getMaxBound(entryName, name);
+				int min = coastal.getMinBound(entryName, name);
+				int max = coastal.getMaxBound(entryName, name);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}
@@ -470,7 +456,7 @@ public class SymbolicState {
 	}
 
 	public char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
-		Trigger trigger = configuration.getTrigger(triggerIndex);
+		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length;
 		int arrayId = createArray();
@@ -491,8 +477,8 @@ public class SymbolicState {
 				} else {
 					value[i] = currentValue[i];
 				}
-				int min = configuration.getMinBound(entryName, name);
-				int max = configuration.getMaxBound(entryName, name);
+				int min = coastal.getMinBound(entryName, name);
+				int max = coastal.getMaxBound(entryName, name);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}
@@ -502,7 +488,7 @@ public class SymbolicState {
 	}
 
 	public byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) {
-		Trigger trigger = configuration.getTrigger(triggerIndex);
+		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length;
 		int arrayId = createArray();
@@ -523,8 +509,8 @@ public class SymbolicState {
 				} else {
 					value[i] = currentValue[i];
 				}
-				int min = configuration.getMinBound(entryName, name);
-				int max = configuration.getMaxBound(entryName, name);
+				int min = coastal.getMinBound(entryName, name);
+				int max = coastal.getMaxBound(entryName, name);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}
@@ -544,7 +530,7 @@ public class SymbolicState {
 				dumpFrames();
 			}
 		}
-		notifyEnterMethod(methodNumber);
+		broker.publish("enter-method", methodNumber);
 	}
 
 	public void startMethod(int methodNumber, int argCount) {
@@ -568,7 +554,7 @@ public class SymbolicState {
 			}
 		}
 		dumpFrames();
-		notifyEnterMethod(methodNumber);
+		broker.publish("enter-method", methodNumber);
 	}
 
 	private void checkLimitConjuncts() throws LimitConjunctException {
@@ -640,7 +626,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("### LINENUMBER {}", line);
-		notifyLinenumber(instr, line);
+		broker.publish("linenumber", new Tuple(instr, line));
 	}
 
 	public void insn(int instr, int opcode) throws LimitConjunctException {
@@ -648,7 +634,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		notifyInsn(instr, opcode);
+		broker.publish("insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.ACONST_NULL:
@@ -807,7 +793,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {}", instr, Bytecodes.toString(opcode), operand);
-		notifyIntInsn(instr, opcode, operand);
+		broker.publish("int-insn", new Tuple(instr, opcode, operand));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.BIPUSH:
@@ -839,7 +825,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {}", instr, Bytecodes.toString(opcode), var);
-		notifyVarInsn(instr, opcode, var);
+		broker.publish("var-insn", new Tuple(instr, opcode, var));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.ALOAD:
@@ -866,7 +852,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		notifyTypeInsn(instr, opcode);
+		broker.publish("type-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.NEW:
@@ -886,7 +872,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {} {} {}", instr, Bytecodes.toString(opcode), owner, name, descriptor);
-		notifyFieldInsn(instr, opcode, owner, name, descriptor);
+		broker.publish("field-insn", new Tuple(instr, opcode, owner, name, descriptor));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.GETSTATIC:
@@ -919,14 +905,14 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {} {} {}", instr, Bytecodes.toString(opcode), owner, name, descriptor);
-		notifyMethodInsn(instr, opcode, owner, name, descriptor);
+		broker.publish("method-insn", new Tuple(instr, opcode, owner, name, descriptor));
 		checkLimitConjuncts();
 		lastInvokingInstruction = instr;
 		switch (opcode) {
 		case Opcodes.INVOKESPECIAL:
 		case Opcodes.INVOKEVIRTUAL:
 			String className = owner.replace('/', '.');
-			if (!configuration.isTarget(className)) {
+			if (!coastal.isTarget(className)) {
 				if (!executeDelegate(className, name, descriptor)) {
 					// get rid of arguments
 					int n = 1 + getArgumentCount(descriptor);
@@ -945,7 +931,7 @@ public class SymbolicState {
 			break;
 		case Opcodes.INVOKESTATIC:
 			className = owner.replace('/', '.');
-			if (!configuration.isTarget(className)) {
+			if (!coastal.isTarget(className)) {
 				if (!executeDelegate(className, name, descriptor)) {
 					// get rid of arguments
 					int n = getArgumentCount(descriptor);
@@ -1026,7 +1012,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		notifyInvokeDynamicInsn(instr, opcode);
+		broker.publish("invoke-dynamic-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		lastInvokingInstruction = instr;
 		switch (opcode) {
@@ -1043,7 +1029,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		notifyJumpInsn(instr, opcode);
+		broker.publish("jump-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		if (recordMode) {
 			dangerFlag = true;
@@ -1157,7 +1143,7 @@ public class SymbolicState {
 			log.trace("(POST) {}", Bytecodes.toString(opcode));
 			if (!isPreviousConstant && !isPreviousDuplicate) {
 				log.trace(">>> previous conjunct is false");
-				notifyPostJumpInsn(instr, opcode);
+				broker.publish("post-jump-insn", new Tuple(instr, opcode));
 				assert spc instanceof SegmentedPCIf;
 				spc = ((SegmentedPCIf) spc).negate();
 				checkLimitConjuncts();
@@ -1171,7 +1157,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {}", instr, Bytecodes.toString(opcode), value);
-		notifyLdcInsn(instr, opcode, value);
+		broker.publish("ldc-insn", new Tuple(instr, opcode, value));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.LDC:
@@ -1202,7 +1188,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {}", instr, Bytecodes.toString(opcode), increment);
-		notifyIincInsn(instr, var, increment);
+		broker.publish("iinc-insn", new Tuple(instr, var, increment));
 		checkLimitConjuncts();
 		Expression e0 = getLocal(var);
 		Expression e1 = new IntConstant(increment);
@@ -1215,7 +1201,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		notifyTableSwitchInsn(instr, opcode);
+		broker.publish("table-switch-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		pendingSwitch.push(pop());
 		dumpFrames();
@@ -1240,7 +1226,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		notifyLookupSwitchInsn(instr, opcode);
+		broker.publish("lookup-switch-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		default:
@@ -1255,7 +1241,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		notifyMultiANewArrayInsn(instr, opcode);
+		broker.publish("multi-anew-array-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		default:
@@ -1263,114 +1249,6 @@ public class SymbolicState {
 			System.exit(1);
 		}
 		dumpFrames();
-	}
-
-	// ======================================================================
-	//
-	// LISTENERS
-	//
-	// ======================================================================
-
-	private void notifyEnterMethod(int methodNumber) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.enterMethod(methodNumber);
-		}
-	}
-
-	private void notifyExitMethod(int methodNumber) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.exitMethod(methodNumber);
-		}
-	}
-
-	private void notifyLinenumber(int instr, int opcode) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.linenumber(instr, opcode);
-		}
-	}
-
-	private void notifyInsn(int instr, int opcode) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.insn(instr, opcode);
-		}
-	}
-
-	private void notifyIntInsn(int instr, int opcode, int operand) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.intInsn(instr, opcode, operand);
-		}
-	}
-
-	private void notifyVarInsn(int instr, int opcode, int var) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.varInsn(instr, opcode, var);
-		}
-	}
-
-	private void notifyTypeInsn(int instr, int opcode) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.typeInsn(instr, opcode);
-		}
-	}
-
-	private void notifyFieldInsn(int instr, int opcode, String owner, String name, String descriptor) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.fieldInsn(instr, opcode, owner, name, descriptor);
-		}
-	}
-
-	private void notifyMethodInsn(int instr, int opcode, String owner, String name, String descriptor) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.methodInsn(instr, opcode, owner, name, descriptor);
-		}
-	}
-
-	private void notifyInvokeDynamicInsn(int instr, int opcode) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.invokeDynamicInsn(instr, opcode);
-		}
-	}
-
-	private void notifyJumpInsn(int instr, int opcode) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.jumpInsn(instr, opcode);
-		}
-	}
-
-	private void notifyPostJumpInsn(int instr, int opcode) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.postJumpInsn(instr, opcode);
-		}
-	}
-
-	private void notifyLdcInsn(int instr, int opcode, Object value) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.ldcInsn(instr, opcode, value);
-		}
-	}
-
-	private void notifyIincInsn(int instr, int var, int increment) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.iincInsn(instr, var, increment);
-		}
-	}
-
-	private void notifyTableSwitchInsn(int instr, int opcode) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.tableSwitchInsn(instr, opcode);
-		}
-	}
-
-	private void notifyLookupSwitchInsn(int instr, int opcode) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.lookupSwitchInsn(instr, opcode);
-		}
-	}
-
-	private void notifyMultiANewArrayInsn(int instr, int opcode) {
-		for (InstructionListener listener : instructionListeners) {
-			listener.multiANewArrayInsn(instr, opcode);
-		}
 	}
 
 	// ======================================================================

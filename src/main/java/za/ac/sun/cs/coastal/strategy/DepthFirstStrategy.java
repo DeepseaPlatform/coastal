@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Configuration;
-import za.ac.sun.cs.coastal.listener.ConfigurationListener;
+import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.Green;
@@ -21,7 +21,7 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 
-public class DepthFirstStrategy implements Strategy, ConfigurationListener {
+public class DepthFirstStrategy implements Strategy {
 
 	private Logger log;
 
@@ -31,40 +31,28 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 
 	private int infeasibleCount = 0;
 
-	private DFPathTree pathTree;
+	private final DFPathTree pathTree;
 
-	private long pathLimit = 0;
+	private final long pathLimit;
 
 	private long totalTime = 0, solverTime = 0, pathTreeTime = 0, modelExtractionTime = 0;
 
-	public DepthFirstStrategy() {
-		// We expect configurationLoaded(...) to be called shortly.
-		// This will initialize this instance.
-	}
-
-	@Override
-	public void configurationLoaded(Configuration configuration) {
-		log = configuration.getLog();
-		configuration.getReporterManager().register(this);
-		pathLimit = configuration.getLimitPaths();
-		if (pathLimit == 0) {
-			pathLimit = Long.MIN_VALUE;
-		}
-		pathTree = new DFPathTree(configuration);
+	public DepthFirstStrategy(COASTAL coastal) {
+		log = coastal.getLog();
+		ImmutableConfiguration config = coastal.getConfig();
+		long p = config.getLong("coastal.limits.paths", 0);
+		pathLimit = (p == 0) ? Long.MAX_VALUE : p;
+		pathTree = new DFPathTree(coastal);
 		// Set up green
 		green = new Green("COASTAL", LogManager.getLogger("GREEN"));
-		Properties greenProperties = configuration.getOriginalProperties();
+		Properties greenProperties = new Properties();
+		config.getKeys("green.").forEachRemaining(k -> greenProperties.setProperty(k, config.getString(k)));
 		greenProperties.setProperty("green.log.level", "ALL");
 		greenProperties.setProperty("green.services", "model");
 		greenProperties.setProperty("green.service.model", "(bounder modeller)");
 		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
 		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3Service");
 		new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
-	}
-
-	@Override
-	public void collectProperties(Properties properties) {
-		// do nothing
 	}
 
 	@Override
@@ -83,8 +71,9 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 		}
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		boolean infeasible = false;
+		long pathCount = 0;
 		while (true) {
-			if (--pathLimit < 0) {
+			if (++pathCount > pathLimit) {
 				log.warn("path limit reached");
 				return null;
 			}
@@ -141,8 +130,8 @@ public class DepthFirstStrategy implements Strategy, ConfigurationListener {
 
 	private static class DFPathTree extends PathTree {
 
-		DFPathTree(Configuration configuration) {
-			super(configuration);
+		DFPathTree(COASTAL coastal) {
+			super(coastal);
 		}
 
 		@Override

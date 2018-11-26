@@ -2,7 +2,7 @@ package za.ac.sun.cs.coastal.model;
 
 import java.util.Properties;
 
-import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.ConfigurationX;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.symbolic.SymbolicVM;
 import za.ac.sun.cs.green.expr.Expression;
@@ -21,7 +21,7 @@ public class Math implements ConfigurationListener {
 	}
 
 	@Override
-	public void configurationLoaded(Configuration configuration) {
+	public void configurationLoaded(ConfigurationX configuration) {
 		min = configuration.getDefaultMinIntValue();
 		max = configuration.getDefaultMaxIntValue();
 	}

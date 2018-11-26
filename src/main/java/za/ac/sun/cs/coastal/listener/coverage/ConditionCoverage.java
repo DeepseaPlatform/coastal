@@ -11,7 +11,7 @@ import java.util.TreeSet;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 
-import za.ac.sun.cs.coastal.Configuration;
+import za.ac.sun.cs.coastal.ConfigurationX;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.listener.ConfigurationListener;
 import za.ac.sun.cs.coastal.listener.InstructionListener;
@@ -47,7 +47,7 @@ public class ConditionCoverage implements InstructionListener, Reporter, Configu
 	}
 
 	@Override
-	public void configurationLoaded(Configuration configuration) {
+	public void configurationLoaded(ConfigurationX configuration) {
 		// SymbolicState.registerListener(this);
 		log = configuration.getLog();
 		configuration.getReporterManager().register(this);
