@@ -1,9 +1,6 @@
 package za.ac.sun.cs.coastal.model;
 
-import java.util.Properties;
-
-import za.ac.sun.cs.coastal.ConfigurationX;
-import za.ac.sun.cs.coastal.listener.ConfigurationListener;
+import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.symbolic.SymbolicVM;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntVariable;
@@ -13,22 +10,13 @@ import za.ac.sun.cs.green.expr.Operation.Operator;
 /**
  * A model of some operations of {@link java.lang.Math}.
  */
-public class Math implements ConfigurationListener {
+public class Math {
 
 	private static int min, max;
 
-	public Math() {
-	}
-
-	@Override
-	public void configurationLoaded(ConfigurationX configuration) {
-		min = configuration.getDefaultMinIntValue();
-		max = configuration.getDefaultMaxIntValue();
-	}
-
-	@Override
-	public void collectProperties(Properties properties) {
-		// do nothing
+	public Math(COASTAL coastal) {
+		min = coastal.getDefaultMinIntValue();
+		max = coastal.getDefaultMaxIntValue();
 	}
 
 	public boolean max__II__I() {

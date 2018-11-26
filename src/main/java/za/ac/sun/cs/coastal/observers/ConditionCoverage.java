@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.listener.coverage;
+package za.ac.sun.cs.coastal.observers;
 
 import java.io.PrintWriter;
 import java.util.BitSet;

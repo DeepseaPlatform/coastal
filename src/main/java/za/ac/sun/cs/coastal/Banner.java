@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.reporting;
+package za.ac.sun.cs.coastal;
 
 import org.apache.logging.log4j.Logger;
 
@@ -124,10 +124,6 @@ public class Banner {
 			}
 		}
 		return sb.toString();
-	}
-
-	public static String getBannerLine(Reporter reporter, char bannerChar) {
-		return getBannerLine(reporter.getName(), bannerChar);
 	}
 
 }

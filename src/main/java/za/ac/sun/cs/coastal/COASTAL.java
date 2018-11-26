@@ -27,7 +27,6 @@ import org.apache.logging.log4j.Logger;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
-import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.symbolic.Diver;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 

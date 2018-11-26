@@ -330,11 +330,11 @@ public class SymbolicState {
 	// ======================================================================
 
 	public void stop() {
-		broker.publish("stop", null);
+		broker.publish("stop", new Tuple(this, null));
 	}
 
 	public void stop(String message) {
-		broker.publish("stop", message);
+		broker.publish("stop", new Tuple(this, message));
 	}
 
 	public void mark(int marker) {

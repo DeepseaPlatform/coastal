@@ -10,11 +10,11 @@ import java.util.Map;
 import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
+import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.Conversion;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
-import za.ac.sun.cs.coastal.reporting.Banner;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.green.expr.Constant;
 

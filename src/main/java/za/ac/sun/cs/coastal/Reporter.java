@@ -9,7 +9,6 @@ import java.util.List;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.messages.Tuple;
-import za.ac.sun.cs.coastal.reporting.Banner;
 
 public class Reporter {
 

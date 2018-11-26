@@ -1,6 +1,5 @@
 package za.ac.sun.cs.coastal.strategy;
 
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,6 +12,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.Green;
@@ -24,9 +25,11 @@ import za.ac.sun.cs.green.expr.IntVariable;
 
 public class RandomStrategy implements Strategy {
 
-	private Logger log;
+	private final Logger log;
 
-	private Green green;
+	private final Broker broker;
+
+	private final Green green;
 
 	private final Set<String> visitedModels = new HashSet<>();
 
@@ -42,6 +45,8 @@ public class RandomStrategy implements Strategy {
 
 	public RandomStrategy(COASTAL coastal) {
 		log = coastal.getLog();
+		broker = coastal.getBroker();
+		broker.subscribe("coastal-stop", this::report);
 		ImmutableConfiguration config = coastal.getConfig();
 		long p = config.getLong("coastal.limits.paths", 0);
 		pathLimit = (p == 0) ? Long.MAX_VALUE : p;
@@ -169,26 +174,14 @@ public class RandomStrategy implements Strategy {
 
 	}
 
-	// ======================================================================
-	//
-	// REPORTING
-	//
-	// ======================================================================
-
-	@Override
-	public String getName() {
-		return "RandomStrategy";
-	}
-
-	@Override
-	public void report(PrintWriter info, PrintWriter trace) {
-		info.println("  Inserted paths: " + pathTree.getPathCount());
-		info.println("  Revisited paths: " + pathTree.getRevisitCount());
-		info.println("  Infeasible paths: " + infeasibleCount);
-		info.println("  Solver time: " + solverTime);
-		info.println("  Path tree time: " + pathTreeTime);
-		info.println("  Model extraction time: " + modelExtractionTime);
-		info.println("  Overall strategy time: " + totalTime);
+	public void report(Object object) {
+		broker.publish("report", new Tuple("Strategy.path-count", pathTree.getPathCount()));
+		broker.publish("report", new Tuple("Strategy.revisit-count", pathTree.getRevisitCount()));
+		broker.publish("report", new Tuple("Strategy.infeasible-count", infeasibleCount));
+		broker.publish("report", new Tuple("Strategy.solver-time", solverTime));
+		broker.publish("report", new Tuple("Strategy.pathtree-time", pathTreeTime));
+		broker.publish("report", new Tuple("Strategy.model-extraction-time", modelExtractionTime));
+		broker.publish("report", new Tuple("Strategy.time", totalTime));
 	}
 
 }

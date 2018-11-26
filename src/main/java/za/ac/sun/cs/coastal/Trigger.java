@@ -5,8 +5,6 @@ import java.util.Set;
 
 import org.objectweb.asm.Type;
 
-import za.ac.sun.cs.coastal.reporting.Banner;
-
 public class Trigger {
 
 	public static Trigger createTrigger(String desc) {
