@@ -11,6 +11,16 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.configuration2.CombinedConfiguration;
 import org.apache.commons.configuration2.Configuration;
@@ -28,6 +38,8 @@ import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.symbolic.Diver;
+import za.ac.sun.cs.coastal.symbolic.Model;
+import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 /**
@@ -74,16 +86,6 @@ public class COASTAL {
 	private final List<Trigger> triggers = new ArrayList<>();
 
 	/**
-	 * A map from variable names to their lower bounds.
-	 */
-	private final Map<String, Integer> minBounds = new HashMap<>();
-
-	/**
-	 * A map from variable names to their lower bounds.
-	 */
-	private final Map<String, Integer> maxBounds = new HashMap<>();
-
-	/**
 	 * The default minimum bound for integers.
 	 */
 	private final int defaultMinIntValue;
@@ -94,10 +96,68 @@ public class COASTAL {
 	private final int defaultMaxIntValue;
 
 	/**
+	 * A map from variable names to their lower bounds.
+	 */
+	private final Map<String, Integer> minBounds = new HashMap<>();
+
+	/**
+	 * A map from variable names to their lower bounds.
+	 */
+	private final Map<String, Integer> maxBounds = new HashMap<>();
+
+	/**
 	 * A map from method names to delegate objects (which are instances of the
 	 * modelling classes).
 	 */
 	private final Map<String, Object> delegates = new HashMap<>();
+
+	/**
+	 * The maximum number of threads to use for divers and strategies.
+	 */
+	private final int maxThreads;
+
+	/**
+	 * The task manager for concurrent divers and strategies.
+	 */
+	private final ExecutorService executor;
+
+	/**
+	 * The task completion manager that collects the "results" from divers and
+	 * strategies. In this case, there are no actual results; instead, all
+	 * products are either consumed or collected by the reporter.
+	 */
+	private final CompletionService<Void> completionService;
+
+	/**
+	 * A list of outstanding tasks.
+	 */
+	private final List<Future<Void>> futures;
+
+	/**
+	 * A queue of models produced by strategies and consumed by divers.
+	 */
+	private final BlockingQueue<Model> models;
+
+	/**
+	 * A queue of path conditions produced by divers and consumed by strategies.
+	 */
+	private final BlockingQueue<SegmentedPC> pcs;
+
+    /**
+     * The outstanding number of models that have not been processed by divers,
+     * or whose resulting path conditions have not been processed by a strategy.
+     * This is not merely the number of items in the models queue or the pcs
+     * queue: work may also be presented by a model of path condition currently
+     * being processed. The strategy adjusts the work after it has processed a
+     * path condition.
+     */
+    private final AtomicLong work = new AtomicLong(0);
+
+    /**
+     * A flag to indicate that either (1) all work is done, or (2) symbolic
+     * execution must stop because a "stop" point was reached.
+     */
+    private final AtomicBoolean workDone = new AtomicBoolean(false);
 
 	/**
 	 * Initialize the final fields for this analysis run of COASTAL.
@@ -116,6 +176,12 @@ public class COASTAL {
 		defaultMinIntValue = getConfig().getInt("coastal.bound.int.min", Integer.MIN_VALUE);
 		defaultMaxIntValue = getConfig().getInt("coastal.bound.int.max", Integer.MAX_VALUE);
 		parseConfig();
+		maxThreads = getConfig().getInt("coastal.max-threads", 2);
+		executor = Executors.newCachedThreadPool();
+        completionService = new ExecutorCompletionService<Void>(executor);
+        futures = new ArrayList<Future<Void>>(maxThreads);
+        models = new PriorityBlockingQueue<>(10, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
+        pcs = new LinkedBlockingQueue<>();
 	}
 
 	/**
