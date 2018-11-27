@@ -112,10 +112,35 @@ public class COASTAL {
 	private final Map<String, Object> delegates = new HashMap<>();
 
 	/**
+	 * The wall-clock-time that the analysis run was started.
+	 */
+	private Calendar startingTime;
+
+	/**
+	 * The wall-clock-time that the analysis run was stopped.
+	 */
+	private Calendar stoppingTime;
+
+	/**
+	 * The maximum number of SECONDS the coastal run is allowed to execute.
+	 */
+	private final long timeLimit;
+
+	/**
 	 * The maximum number of threads to use for divers and strategies.
 	 */
 	private final int maxThreads;
 
+	/**
+	 * The number of diver tasks started (ever).
+	 */
+	private int diverTaskCount = 0;
+
+	/**
+	 * The number of strategy tasks started (ever).
+	 */
+	private int strategyTaskCount = 0;
+	
 	/**
 	 * The task manager for concurrent divers and strategies.
 	 */
@@ -143,21 +168,21 @@ public class COASTAL {
 	 */
 	private final BlockingQueue<SegmentedPC> pcs;
 
-    /**
-     * The outstanding number of models that have not been processed by divers,
-     * or whose resulting path conditions have not been processed by a strategy.
-     * This is not merely the number of items in the models queue or the pcs
-     * queue: work may also be presented by a model of path condition currently
-     * being processed. The strategy adjusts the work after it has processed a
-     * path condition.
-     */
-    private final AtomicLong work = new AtomicLong(0);
+	/**
+	 * The outstanding number of models that have not been processed by divers,
+	 * or whose resulting path conditions have not been processed by a strategy.
+	 * This is not merely the number of items in the models queue or the pcs
+	 * queue: work may also be presented by a model of path condition currently
+	 * being processed. The strategy adjusts the work after it has processed a
+	 * path condition.
+	 */
+	private final AtomicLong work = new AtomicLong(0);
 
-    /**
-     * A flag to indicate that either (1) all work is done, or (2) symbolic
-     * execution must stop because a "stop" point was reached.
-     */
-    private final AtomicBoolean workDone = new AtomicBoolean(false);
+	/**
+	 * A flag to indicate that either (1) all work is done, or (2) symbolic
+	 * execution must stop because a "stop" point was reached.
+	 */
+	private final AtomicBoolean workDone = new AtomicBoolean(false);
 
 	/**
 	 * Initialize the final fields for this analysis run of COASTAL.
@@ -176,12 +201,14 @@ public class COASTAL {
 		defaultMinIntValue = getConfig().getInt("coastal.bound.int.min", Integer.MIN_VALUE);
 		defaultMaxIntValue = getConfig().getInt("coastal.bound.int.max", Integer.MAX_VALUE);
 		parseConfig();
+		long tl = getConfig().getLong("coastal.limits.time", 0);
+		timeLimit = (tl == 0) ? Long.MAX_VALUE : tl;
 		maxThreads = getConfig().getInt("coastal.max-threads", 2);
 		executor = Executors.newCachedThreadPool();
-        completionService = new ExecutorCompletionService<Void>(executor);
-        futures = new ArrayList<Future<Void>>(maxThreads);
-        models = new PriorityBlockingQueue<>(10, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
-        pcs = new LinkedBlockingQueue<>();
+		completionService = new ExecutorCompletionService<Void>(executor);
+		futures = new ArrayList<Future<Void>>(maxThreads);
+		models = new PriorityBlockingQueue<>(10, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
+		pcs = new LinkedBlockingQueue<>();
 	}
 
 	/**
@@ -481,6 +508,74 @@ public class COASTAL {
 	}
 
 	/**
+	 * Add the first model to the queue of models. This kicks off the analysis
+	 * run.
+	 * 
+	 * @param firstModel
+	 *            the very first model to add
+	 */
+	public void addFirstModel(Model firstModel) {
+		try {
+			models.put(firstModel);
+			work.incrementAndGet();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+	}
+
+	/**
+	 * Create and add a new diver task.
+	 */
+	public void addDiverTask() {
+		// TO DO: make the Diver a task
+		// futures.add(completionService.submit(new Diver(this)));
+		diverTaskCount++;
+	}
+
+	/**
+	 * Create and add a new strategy task.
+	 */
+	public void addStrategyTask() {
+		// TO DO: create a StrategyThread class
+		// futures.add(completionService.submit(new StrategyThread(this)));
+		diverTaskCount++;
+	}
+
+	/**
+	 * Wait for a change in the status of the workDone flag or until a specified
+	 * time has elapsed.
+	 * 
+	 * @param delay
+	 *            time to wait in milliseconds
+	 */
+	public void idle(long delay) throws InterruptedException {
+		if ((System.currentTimeMillis() - startingTime.getTimeInMillis()) / 1000 > timeLimit) {
+			log.warn("time limit reached");
+			stopWork();
+		} else {
+			synchronized (workDone) {
+				workDone.wait(delay);
+			}
+		}
+	}
+
+	/**
+	 * Set the flag to indicate that the analysis run must stop.
+	 */
+	public void stopWork() {
+		workDone.set(true);
+		workDone.notifyAll();
+	}
+
+	/**
+	 * Stop the still-executing tasks and the taks manager itself.
+	 */
+	public void shutdown() {
+		futures.forEach(f -> f.cancel(true));
+		executor.shutdownNow();
+	}
+
+	/**
 	 * Start the analysis run, showing all banners by default.
 	 */
 	public void start() {
@@ -495,18 +590,32 @@ public class COASTAL {
 	 *            a flag to tell whether or not to show banners
 	 */
 	public void start(boolean showBanner) {
-		Calendar started = Calendar.getInstance();
+		startingTime = Calendar.getInstance();
 		getBroker().publish("coastal-start", this);
-		getBroker().publish("report", new Tuple("COASTAL.start", started));
+		getBroker().publish("report", new Tuple("COASTAL.start", startingTime));
 		if (showBanner) {
 			new Banner('~').println("COASTAL version " + Version.read()).display(log);
 		}
 		//		config.dump();
+//		addFirstModel(new Model(0, null));
+//		try {
+//			addDiverTask();
+//			addStrategyTask();
+//			while (!workDone.get()) {
+//				idle(500);
+//				// TO DO: balance the threads
+//			}
+//		} catch (InterruptedException e) {
+//			log.info(Banner.getBannerLine("main thread interrupted", '!'));
+//		} finally {
+//			shutdown();
+//		}
 		Diver d = new Diver(this);
 		d.dive();
-		Calendar stopped = Calendar.getInstance();
-		getBroker().publish("report", new Tuple("COASTAL.stop", stopped));
-		getBroker().publish("report", new Tuple("COASTAL.time", stopped.getTimeInMillis() - started.getTimeInMillis()));
+		stoppingTime = Calendar.getInstance();
+		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
+		getBroker().publish("report",
+				new Tuple("COASTAL.time", stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis()));
 		getBroker().publish("coastal-stop", this);
 		getBroker().publish("coastal-report", this);
 		if (d.getRuns() < 2) {
@@ -590,7 +699,6 @@ public class COASTAL {
 	 * @return an immutable configuration
 	 */
 	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args) {
-		// Configurations configs = new Configurations();
 		CombinedConfiguration config = new CombinedConfiguration();
 		Configuration cfg1 = loadConfigFromResource(log, COASTAL_CONFIGURATION);
 		if (cfg1 != null) {
@@ -649,6 +757,8 @@ public class COASTAL {
 			return cfg;
 		} catch (FileNotFoundException | ConfigurationException x) {
 			log.trace("failed to load configuration from {}", filename);
+			// We used to do the following, but showing the exception
+			// looks pretty ugly in the log.
 			// log.trace("tried to load configuration from " + filename + " but failed", x);
 		}
 		return null;
@@ -674,6 +784,8 @@ public class COASTAL {
 			}
 		} catch (IOException | ConfigurationException x) {
 			log.trace("failed to load configuration from {}", resourceName);
+			// We used to do the following, but showing the exception
+			// looks pretty ugly in the log.
 			// log.trace("tried to load configuration from " + resourceName + " but failed", x);
 		}
 		return null;
