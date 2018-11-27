@@ -15,20 +15,20 @@ public class Version {
 
 	protected static final String DEFAULT_VERSION = "unspecified";
 
-	protected String version = null;
+	protected static String version = null;
 
-	public String read() {
+	public static String read() {
 		if (version == null) {
 			version = read(DEFAULT_APP_PROPERTIES);
 		}
 		return version;
 	}
 
-	protected String read(String resourceName) {
+	protected static String read(String resourceName) {
 		return read(resourceName, true);
 	}
 	
-	protected String read(String resourceName, boolean tryJgit) {
+	protected static String read(String resourceName, boolean tryJgit) {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
 			if (resourceStream != null) {
@@ -44,11 +44,11 @@ public class Version {
 		}
 	}
 	
-	protected String read(InputStream inputStream) {
+	protected static String read(InputStream inputStream) {
 		return read(inputStream, true);
 	}
 
-	protected String read(InputStream inputStream, boolean tryJgit) {
+	protected static String read(InputStream inputStream, boolean tryJgit) {
 		Properties properties = new Properties();
 		try {
 			properties.load(inputStream);
@@ -58,11 +58,11 @@ public class Version {
 		return read(properties, tryJgit);
 	}
 
-	protected String read(Properties properties) {
+	protected static String read(Properties properties) {
 		return read(properties, true);
 	}
 
-	protected String read(Properties properties, boolean tryJgit) {
+	protected static String read(Properties properties, boolean tryJgit) {
 		String v = properties.getProperty("version");
 		if ((v != null) && (v.charAt(0) != '%')) {
 			return v;
@@ -74,7 +74,7 @@ public class Version {
 		}
 	}
 
-	private String readJgitVersion() {
+	private static String readJgitVersion() {
 		try {
 			Repository repo = new RepositoryBuilder().readEnvironment().findGitDir().build();
 			if (repo != null) {

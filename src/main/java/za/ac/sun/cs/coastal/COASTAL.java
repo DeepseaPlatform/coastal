@@ -498,10 +498,8 @@ public class COASTAL {
 		Calendar started = Calendar.getInstance();
 		getBroker().publish("coastal-start", this);
 		getBroker().publish("report", new Tuple("COASTAL.start", started));
-		//		final String version = config.getVersion();
-		final String version = "XXX";
 		if (showBanner) {
-			new Banner('~').println("COASTAL version " + version).display(log);
+			new Banner('~').println("COASTAL version " + Version.read()).display(log);
 		}
 		//		config.dump();
 		Diver d = new Diver(this);
@@ -536,8 +534,7 @@ public class COASTAL {
 	 */
 	public static void main(String[] args) {
 		final Logger log = LogManager.getLogger("COASTAL");
-		final String version = new Version().read();
-		new Banner('~').println("COASTAL version " + version).display(log);
+		new Banner('~').println("COASTAL version " + Version.read()).display(log);
 		ImmutableConfiguration config = loadConfiguration(log, args);
 		if (config != null) {
 			new COASTAL(log, config).start(false);
