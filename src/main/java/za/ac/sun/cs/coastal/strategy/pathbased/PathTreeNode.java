@@ -1,5 +1,8 @@
 package za.ac.sun.cs.coastal.strategy.pathbased;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
 public final class PathTreeNode {
@@ -19,6 +22,8 @@ public final class PathTreeNode {
 	private final boolean infeasible;
 
 	private boolean fullyExplored = false;
+
+	private final WriteLock lock = new ReentrantReadWriteLock(false).writeLock();
 
 	private PathTreeNode(SegmentedPC pc, int nrOfChildren, boolean isLeaf, boolean isInfeasible) {
 		this.pc = pc;
@@ -79,6 +84,14 @@ public final class PathTreeNode {
 		return isFullyExplored() || isLeaf() || isInfeasible();
 	}
 
+	public void lock() {
+		lock.lock();
+	}
+
+	public void unlock() {
+		lock.unlock();
+	}
+	
 	public SegmentedPC getPcForChild(int i, SegmentedPC parent) {
 		return getPc().getChild(i, parent);
 	}

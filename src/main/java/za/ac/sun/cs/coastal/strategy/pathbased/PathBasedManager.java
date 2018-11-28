@@ -75,11 +75,13 @@ public class PathBasedManager implements StrategyManager {
 	}
 
 	public void report(Object object) {
+		broker.publish("report", new Tuple("Strategy.inserted-paths", pathTree.getPathCount()));
+		broker.publish("report", new Tuple("Strategy.revisited-paths", pathTree.getRevisitCount()));
 		broker.publish("report", new Tuple("Strategy.infeasible-count", infeasibleCount));
 		broker.publish("report", new Tuple("Strategy.pathtree-time", pathTreeTime.get()));
 		broker.publish("report", new Tuple("Strategy.solver-time", solverTime.get()));
 		broker.publish("report", new Tuple("Strategy.extraction-time", extractionTime.get()));
-		broker.publish("report", new Tuple("Strategy.refine-time", refineTime.get()));
+		broker.publish("report", new Tuple("Strategy.total-time", refineTime.get()));
 	}
 
 }
