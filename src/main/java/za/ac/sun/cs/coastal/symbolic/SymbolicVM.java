@@ -4,7 +4,7 @@ import za.ac.sun.cs.green.expr.Expression;
 
 public class SymbolicVM {
 
-	private static SymbolicState symbolicState = null;
+	public static SymbolicState symbolicState = null;
 
 	public static void setState(SymbolicState symbolicState) {
 		SymbolicVM.symbolicState = symbolicState;

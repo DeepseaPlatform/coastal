@@ -1,11 +1,11 @@
-package za.ac.sun.cs.coastal.strategy;
+package za.ac.sun.cs.coastal.strategy.pathbased;
 
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
-public abstract class PathTree {
+public class PathTree {
 
 	protected final Logger log;
 
@@ -34,7 +34,7 @@ public abstract class PathTree {
 		return revisitCount;
 	}
 
-	public SegmentedPC insertPath(SegmentedPC spc, boolean isInfeasible) {
+	public void insertPath(SegmentedPC spc, boolean isInfeasible) {
 		pathCount++;
 		/*
 		 * Step 1: Deconstruct the path condition.
@@ -60,10 +60,6 @@ public abstract class PathTree {
 				log.trace("::: {}", ll);
 			}
 		}
-		/*
-		 * Step 4: Return a new path through the tree
-		 */
-		return findNewPath();
 	}
 
 	private String getId(PathTreeNode node) {
@@ -128,8 +124,6 @@ public abstract class PathTree {
 		 */
 		return node;
 	}
-
-	public abstract SegmentedPC findNewPath();
 
 	public String[] stringRepr() {
 		int h = root.height() * 4 - 2;

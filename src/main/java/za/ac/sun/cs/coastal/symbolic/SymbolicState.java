@@ -65,13 +65,13 @@ public class SymbolicState {
 	private SegmentedPC spc = null;
 
 	private Expression pendingExtraConjunct = null;
-	
+
 	private Expression noExceptionExpression = null;
 
 	private int exceptionDepth = 0;
-	
+
 	private Expression throwable = null;
-	
+
 	private boolean isPreviousConstant = false;
 
 	private boolean isPreviousDuplicate = false;
@@ -83,24 +83,24 @@ public class SymbolicState {
 	private boolean mayContinue = true;
 
 	private boolean justExecutedDelegate = false;
-	
+
 	private int lastInvokingInstruction = 0;
-	
+
 	private final Stack<Expression> pendingSwitch = new Stack<>();
 
-	public SymbolicState(COASTAL coastal, Map<String, Constant> concreteValues) {
+	public SymbolicState(COASTAL coastal) throws InterruptedException {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();
 		limitConjuncts = coastal.getConfig().getLong("coastal.limit.conjuncts", Long.MAX_VALUE);
-		traceAll = coastal.getConfig().getBoolean("coastal.trace.all", false);
-		this.concreteValues = concreteValues;
+		traceAll = coastal.getConfig().getBoolean("coastal.trace-all", false);
+		this.concreteValues = coastal.getNextModel();
 		symbolicMode = traceAll;
 	}
 
-	//	public boolean getSymbolicMode() {
-	//		return symbolicMode;
-	//	}
+	public boolean getSymbolicMode() {
+		return symbolicMode;
+	}
 
 	public boolean getRecordMode() {
 		return recordMode;
@@ -225,7 +225,7 @@ public class SymbolicState {
 			isPreviousDuplicate = true;
 		}
 	}
-	
+
 	private void pushConjunct(Expression conjunct) {
 		pushConjunct(conjunct, true);
 	}
@@ -287,7 +287,8 @@ public class SymbolicState {
 	private void dumpFrames() {
 		int n = frames.size();
 		for (int i = n - 1; i >= 0; i--) {
-			log.trace("--> st{} locals:{} <{}>", frames.get(i).stack, frames.get(i).locals, frames.get(i).getInvokingInstruction());
+			log.trace("--> st{} locals:{} <{}>", frames.get(i).stack, frames.get(i).locals,
+					frames.get(i).getInvokingInstruction());
 		}
 		log.trace("--> data:{}", instanceData);
 	}
@@ -392,7 +393,7 @@ public class SymbolicState {
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : (byte) concrete.getValue();
 	}
-	
+
 	public String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -518,7 +519,7 @@ public class SymbolicState {
 		setLocal(index, new IntConstant(arrayId));
 		return value;
 	}
-	
+
 	public void triggerMethod(int methodNumber) {
 		if (!recordMode) {
 			recordMode = mayRecord;
@@ -575,50 +576,12 @@ public class SymbolicState {
 	/*
 	 * Instructions that can throw exceptions:
 	 * 
-	 * AALOAD
-	 * AASTORE
-	 * ANEWARRAY
-	 * ARETURN
-	 * ARRAYLENGTH
-	 * ATHROW
-	 * BALOAD
-	 * BASTORE
-	 * CALOAD
-	 * CASTORE
-	 * CHECKCAST
-	 * DALOAD
-	 * DASTORE
-	 * DRETURN
-	 * FALOAD
-	 * FASTORE
-	 * FRETURN
-	 * GETFIELD
-	 * GETSTATIC
-	 * IALOAD
-	 * IASTORE
-	 * IDIV
-	 * INVOKEDYNAMIC
-	 * INVOKEINTERFACE
-	 * INVOKESPECIAL
-	 * INVOKESTATIC
-	 * INVOKEVIRTUAL
-	 * IREM
-	 * IRETURN
-	 * LALOAD
-	 * LASTORE
-	 * LDIV
-	 * LREM
-	 * LRETURN
-	 * MONITORENTER
-	 * MONITOREXIT
-	 * MULTIANEWARRAY
-	 * NEW
-	 * NEWARRAY
-	 * PUTFIELD
-	 * PUTSTATIC
-	 * RETURN
-	 * SALOAD
-	 * SASTORE
+	 * AALOAD AASTORE ANEWARRAY ARETURN ARRAYLENGTH ATHROW BALOAD BASTORE CALOAD
+	 * CASTORE CHECKCAST DALOAD DASTORE DRETURN FALOAD FASTORE FRETURN GETFIELD
+	 * GETSTATIC IALOAD IASTORE IDIV INVOKEDYNAMIC INVOKEINTERFACE INVOKESPECIAL
+	 * INVOKESTATIC INVOKEVIRTUAL IREM IRETURN LALOAD LASTORE LDIV LREM LRETURN
+	 * MONITORENTER MONITOREXIT MULTIANEWARRAY NEW NEWARRAY PUTFIELD PUTSTATIC
+	 * RETURN SALOAD SASTORE
 	 */
 
 	public void linenumber(int instr, int line) {
@@ -814,7 +777,8 @@ public class SymbolicState {
 			push(new IntConstant(id));
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", instr, Bytecodes.toString(opcode), operand, opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", instr, Bytecodes.toString(opcode), operand,
+					opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -892,8 +856,8 @@ public class SymbolicState {
 			putField(id, name, e);
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr, Bytecodes.toString(opcode), owner, name,
-					descriptor, opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr, Bytecodes.toString(opcode),
+					owner, name, descriptor, opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -949,8 +913,8 @@ public class SymbolicState {
 			}
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr, Bytecodes.toString(opcode), owner, name,
-					descriptor, opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr, Bytecodes.toString(opcode),
+					owner, name, descriptor, opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -964,7 +928,7 @@ public class SymbolicState {
 			pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
 		}
 	}
-	
+
 	public void returnValue(char returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
@@ -973,17 +937,17 @@ public class SymbolicState {
 			pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
 		}
 	}
-	
+
 	public void returnValue(double returnValue) {
 		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE double");
 		System.exit(1);
 	}
-	
+
 	public void returnValue(float returnValue) {
 		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE float");
 		System.exit(1);
 	}
-	
+
 	public void returnValue(int returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
@@ -992,12 +956,12 @@ public class SymbolicState {
 			pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
 		}
 	}
-	
+
 	public void returnValue(long returnValue) {
 		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE long");
 		System.exit(1);
 	}
-	
+
 	public void returnValue(short returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
@@ -1006,7 +970,7 @@ public class SymbolicState {
 			pushExtraConjunct(new Operation(Operator.EQ, peek(), value));
 		}
 	}
-	
+
 	public void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1327,7 +1291,7 @@ public class SymbolicState {
 		log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 		dumpFrames();
 	}
-	
+
 	public void startCatch(int instr) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;

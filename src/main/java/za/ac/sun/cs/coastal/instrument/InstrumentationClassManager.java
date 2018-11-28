@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
@@ -17,6 +18,7 @@ import org.objectweb.asm.ClassWriter;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
+import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class InstrumentationClassManager {
 
@@ -28,13 +30,25 @@ public class InstrumentationClassManager {
 
 	private final List<String> classPaths = new ArrayList<>();
 
-	private int requestCount = 0, cachedCount = 0, instrumentedCount = 0;
+	private final AtomicLong requestCount = new AtomicLong(0);
+	
+	private final AtomicLong cacheHitCount = new AtomicLong(0);
 
-	private long loadTime = 0, instrumentedTime = 0;
+	private final AtomicLong instrumentedCount = new AtomicLong(0);
 
-	private int preInstrumentedSize = 0, postInstrumentedSize = 0;
+	private final AtomicLong loadTime = new AtomicLong(0);
+	
+	private final AtomicLong instrumentedTime = new AtomicLong(0);
+
+	private final AtomicLong uninstrumentedTime = new AtomicLong(0);
+	
+	private final AtomicLong preInstrumentedSize = new AtomicLong(0);
+
+	private final AtomicLong postInstrumentedSize = new AtomicLong(0);
 
 	private final Map<String, byte[]> cache = new HashMap<>();
+
+	//private final Map<Long, SymbolicState> stateMap = new HashMap<>();
 
 	public InstrumentationClassManager(COASTAL coastal, String classPath) {
 		this.coastal = coastal;
@@ -48,53 +62,70 @@ public class InstrumentationClassManager {
 		classPaths.add(".");
 	}
 
-	public ClassLoader createClassLoader() {
-		return new InstrumentationClassLoader(coastal, this);
+	public ClassLoader createClassLoader(SymbolicState symbolicState) {
+		// long threadId = Thread.currentThread().getId();
+		return new InstrumentationClassLoader(coastal, this, symbolicState);
 	}
 
 	public void startLoad() {
-		requestCount++;
+		requestCount.incrementAndGet();
 	}
 	
 	public void endLoad(long time) {
-		endLoad(time, false);
+		loadTime.addAndGet(System.currentTimeMillis() - time);
 	}
-
-	public void endLoad(long time, boolean cached) {
-		loadTime += System.currentTimeMillis() - time;
-		if (cached) {
-			cachedCount++;
+	
+	public byte[] loadUninstrumented(String name) {
+		long t = System.currentTimeMillis();
+		byte[] unInstrumented = cache.get(name);
+		if (unInstrumented == null) {
+			unInstrumented = loadUninstrumented0(name);
+		} else {
+			cacheHitCount.incrementAndGet();
 		}
+		uninstrumentedTime.addAndGet(System.currentTimeMillis() - t);
+		return unInstrumented;
 	}
 
-	public byte[] instrument(String name) {
+	private synchronized byte[] loadUninstrumented0(String name) {
+		byte[] unInstrumented = cache.get(name);
+		if (unInstrumented == null) {
+			unInstrumented = loadFile(name.replace('.', '/').concat(".class"));
+			cache.put(name, unInstrumented);
+		}
+		return unInstrumented;
+	}
+	
+	public byte[] loadIinstrumented(String name) {
 		long t = System.currentTimeMillis();
 		byte[] instrumented = cache.get(name);
 		if (instrumented == null) {
-			instrumented = instrument0(name);
-			if (instrumented != null) {
-				cache.put(name, instrumented);
-				instrumentedCount++;
-			}
+			instrumented = loadIinstrumented0(name);
+		} else {
+			cacheHitCount.incrementAndGet();
 		}
-		instrumentedTime += System.currentTimeMillis() - t;
+		instrumentedTime.addAndGet(System.currentTimeMillis() - t);
 		return instrumented;
 	}
 
-	private byte[] instrument0(String name) {
-		byte[] in = loadFile(name.replace('.', '/').concat(".class"));
-		if (in == null) {
-			return null;
+	
+	private synchronized byte[] loadIinstrumented0(String name) {
+		byte[] instrumented = cache.get(name);
+		if (instrumented == null) {
+			byte[] in = loadFile(name.replace('.', '/').concat(".class"));
+			if (in == null) {
+				return null;
+			}
+			ClassReader cr = new ClassReader(in);
+			ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
+			InstrumentationAdapter ia = new InstrumentationAdapter(coastal, name, cw);
+			cr.accept(ia, 0);
+			instrumented = cw.toByteArray();
+			preInstrumentedSize.addAndGet(in.length);
+			postInstrumentedSize.addAndGet(instrumented.length);
+			log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, instrumented.length);
 		}
-		ClassReader cr = new ClassReader(in);
-		ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
-		InstrumentationAdapter ia = new InstrumentationAdapter(coastal, name, cw);
-		cr.accept(ia, 0);
-		byte[] out = cw.toByteArray();
-		preInstrumentedSize += in.length;
-		postInstrumentedSize += out.length;
-		log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, out.length);
-		return out;
+		return instrumented;
 	}
 	
 	private byte[] loadFile(String filename) {
@@ -122,13 +153,14 @@ public class InstrumentationClassManager {
 	}
 
 	public void report(Object object) {
-		broker.publish("report", new Tuple("Instrumentation.requests-count", requestCount));
-		broker.publish("report", new Tuple("Instrumentation.cached-count", cachedCount));
-		broker.publish("report", new Tuple("Instrumentation.instrumented-count", instrumentedCount));
-		broker.publish("report", new Tuple("Instrumentation.pre-instrumented-size", preInstrumentedSize));
-		broker.publish("report", new Tuple("Instrumentation.post-instrumented-size", postInstrumentedSize));
-		broker.publish("report", new Tuple("Instrumentation.load-time", loadTime));
-		broker.publish("report", new Tuple("Instrumentation.instrumented-time", instrumentedTime));
+		broker.publish("report", new Tuple("Instrumentation.requests-count", requestCount.get()));
+		broker.publish("report", new Tuple("Instrumentation.cache-hit-count", cacheHitCount.get()));
+		broker.publish("report", new Tuple("Instrumentation.instrumented-count", instrumentedCount.get()));
+		broker.publish("report", new Tuple("Instrumentation.pre-instrumented-size", preInstrumentedSize.get()));
+		broker.publish("report", new Tuple("Instrumentation.post-instrumented-size", postInstrumentedSize.get()));
+		broker.publish("report", new Tuple("Instrumentation.load-time", loadTime.get()));
+		broker.publish("report", new Tuple("Instrumentation.instrumented-time", instrumentedTime.get()));
+		broker.publish("report", new Tuple("Instrumentation.uninstrumented-time", uninstrumentedTime.get()));
 	}
 
 	private int instructionCounter = 0;

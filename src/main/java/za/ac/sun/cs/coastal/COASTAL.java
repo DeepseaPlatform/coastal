@@ -31,16 +31,21 @@ import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.io.FileHandler;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
+import za.ac.sun.cs.coastal.strategy.StrategyFactory;
+import za.ac.sun.cs.coastal.strategy.StrategyManager;
+import za.ac.sun.cs.coastal.strategy.StrategyTask;
 import za.ac.sun.cs.coastal.symbolic.Diver;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+import za.ac.sun.cs.green.expr.Constant;
 
 /**
  * A COASTAL analysis run. The main function (or some outside client) constructs
@@ -132,6 +137,16 @@ public class COASTAL {
 	private final int maxThreads;
 
 	/**
+	 * Counter for the number of dives undertaken.
+	 */
+	private final AtomicLong diveCount = new AtomicLong(0);
+
+	/**
+	 * Accumulator of all the dive times.
+	 */
+	private final AtomicLong diveTime = new AtomicLong(0);
+
+	/**
 	 * The number of diver tasks started (ever).
 	 */
 	private int diverTaskCount = 0;
@@ -140,7 +155,7 @@ public class COASTAL {
 	 * The number of strategy tasks started (ever).
 	 */
 	private int strategyTaskCount = 0;
-	
+
 	/**
 	 * The task manager for concurrent divers and strategies.
 	 */
@@ -169,6 +184,16 @@ public class COASTAL {
 	private final BlockingQueue<SegmentedPC> pcs;
 
 	/**
+	 * The one-and-only strategy factory for this analysis run.
+	 */
+	private final StrategyFactory strategyFactory;
+
+	/**
+	 * The one-and-only strategy manager for this analysis run.
+	 */
+	private final StrategyManager strategyManager;
+	
+	/**
 	 * The outstanding number of models that have not been processed by divers,
 	 * or whose resulting path conditions have not been processed by a strategy.
 	 * This is not merely the number of items in the models queue or the pcs
@@ -196,6 +221,7 @@ public class COASTAL {
 		this.log = log;
 		this.config = config;
 		broker = new Broker();
+		broker.subscribe("coastal-stop", this::report);
 		reporter = new Reporter(this);
 		classManager = new InstrumentationClassManager(this, System.getProperty("java.class.path"));
 		defaultMinIntValue = getConfig().getInt("coastal.bound.int.min", Integer.MIN_VALUE);
@@ -209,6 +235,20 @@ public class COASTAL {
 		futures = new ArrayList<Future<Void>>(maxThreads);
 		models = new PriorityBlockingQueue<>(10, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
 		pcs = new LinkedBlockingQueue<>();
+		StrategyFactory sf = null;
+		String strategyName = config.getString("coastal.strategy");
+		if (strategyName != null) {
+			Object sfObject = Conversion.createInstance(this, strategyName);
+			if ((sfObject != null) && (sfObject instanceof StrategyFactory)) {
+				sf = (StrategyFactory) sfObject;
+			}
+		}
+		if (sf == null) {
+			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
+			System.exit(1);
+		}
+		strategyFactory = sf;
+		strategyManager = strategyFactory.createManager(this);
 	}
 
 	/**
@@ -508,6 +548,26 @@ public class COASTAL {
 	}
 
 	/**
+	 * Increment and return the dive counter.
+	 * 
+	 * @return the incremented value of the dive counter
+	 */
+	public long getNextDiveCount() {
+		return diveCount.incrementAndGet();
+	}
+
+	/**
+	 * Add a reported dive time to the accumulator that tracks how long the
+	 * dives took.
+	 * 
+	 * @param time
+	 *            the time for this dive
+	 */
+	public void recordDiveTime(long time) {
+		diveTime.addAndGet(time);
+	}
+
+	/**
 	 * Add the first model to the queue of models. This kicks off the analysis
 	 * run.
 	 * 
@@ -524,11 +584,84 @@ public class COASTAL {
 	}
 
 	/**
+	 * Add a list of models to the queue.
+	 * 
+	 * @param mdls the list of models
+	 */
+	public void addModels(List<Model> mdls) {
+		mdls.forEach(m -> {
+			try {
+				models.put(m);
+				// log.info(Banner.getBannerLine("added model " + m, '-'));
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+	/**
+	 * Return the next available model.
+	 * 
+	 * @return the model as a variable-value mapping
+	 * @throws InterruptedException
+	 *             if the task requesting the model was interrupted
+	 */
+	public Map<String, Constant> getNextModel() throws InterruptedException {
+		return models.take().getConcreteValues();
+	}
+
+	/**
+	 * Add a new entry to the queue of path conditions.
+	 * 
+	 * @param spc
+	 *            the path condition to add
+	 */
+	public void addPc(SegmentedPC spc) {
+		try {
+			if (spc == null) {
+				pcs.put(SegmentedPC.Null);
+			} else {
+				pcs.put(spc);
+			}
+		} catch (InterruptedException e) {
+			// ignore silently
+		}
+	}
+
+	/**
+	 * Return the next available path condition
+	 * 
+	 * @return the next path condition
+	 * @throws InterruptedException
+	 *             if the task requesting the model was interrupted
+	 */
+	public SegmentedPC getNextPc() throws InterruptedException {
+		return pcs.take();
+	}
+
+	/**
+	 * Return the strategy factory.
+	 * 
+	 * @return the strategy factory
+	 */
+	public StrategyFactory getStrategyFactory() {
+		return strategyFactory;
+	}
+
+	/**
+	 * Return the strategy manager.
+	 * 
+	 * @return the strategy manager
+	 */
+	public StrategyManager getStrategyManager() {
+		return strategyManager;
+	}
+	
+	/**
 	 * Create and add a new diver task.
 	 */
 	public void addDiverTask() {
-		// TO DO: make the Diver a task
-		// futures.add(completionService.submit(new Diver(this)));
+		futures.add(completionService.submit(new Diver(this)));
 		diverTaskCount++;
 	}
 
@@ -536,9 +669,8 @@ public class COASTAL {
 	 * Create and add a new strategy task.
 	 */
 	public void addStrategyTask() {
-		// TO DO: create a StrategyThread class
-		// futures.add(completionService.submit(new StrategyThread(this)));
-		diverTaskCount++;
+		futures.add(completionService.submit(new StrategyTask(this)));
+		strategyTaskCount++;
 	}
 
 	/**
@@ -560,11 +692,26 @@ public class COASTAL {
 	}
 
 	/**
+	 * Update the count of outstanding work items by a given amount.
+	 * 
+	 * @param delta
+	 *            how much to add to the number of work items
+	 */
+	public void updateWork(long delta) {
+		long w = work.addAndGet(delta);
+		if (w == 0) {
+			stopWork();
+		}
+	}
+
+	/**
 	 * Set the flag to indicate that the analysis run must stop.
 	 */
 	public void stopWork() {
 		workDone.set(true);
-		workDone.notifyAll();
+		synchronized (workDone) {
+			workDone.notifyAll();
+		}
 	}
 
 	/**
@@ -592,33 +739,29 @@ public class COASTAL {
 	public void start(boolean showBanner) {
 		startingTime = Calendar.getInstance();
 		getBroker().publish("coastal-start", this);
-		getBroker().publish("report", new Tuple("COASTAL.start", startingTime));
 		if (showBanner) {
 			new Banner('~').println("COASTAL version " + Version.read()).display(log);
 		}
 		//		config.dump();
-//		addFirstModel(new Model(0, null));
-//		try {
-//			addDiverTask();
-//			addStrategyTask();
-//			while (!workDone.get()) {
-//				idle(500);
-//				// TO DO: balance the threads
-//			}
-//		} catch (InterruptedException e) {
-//			log.info(Banner.getBannerLine("main thread interrupted", '!'));
-//		} finally {
-//			shutdown();
-//		}
-		Diver d = new Diver(this);
-		d.dive();
+		addFirstModel(new Model(0, null));
+		try {
+			addDiverTask();
+			addStrategyTask();
+			while (!workDone.get()) {
+				idle(500);
+				// idle(10000);
+				// log.info("TICK-TOCK");
+				// TO DO ----> balance the threads
+			}
+		} catch (InterruptedException e) {
+			log.info(Banner.getBannerLine("main thread interrupted", '!'));
+		} finally {
+			shutdown();
+		}
 		stoppingTime = Calendar.getInstance();
-		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
-		getBroker().publish("report",
-				new Tuple("COASTAL.time", stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis()));
 		getBroker().publish("coastal-stop", this);
 		getBroker().publish("coastal-report", this);
-		if (d.getRuns() < 2) {
+		if (diveCount.get() < 2) {
 			Banner bn = new Banner('@');
 			bn.println("ONLY A SINGLE RUN EXECUTED\n");
 			bn.println("CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE");
@@ -627,6 +770,17 @@ public class COASTAL {
 		if (showBanner) {
 			new Banner('~').println("COASTAL DONE").display(log);
 		}
+	}
+
+	public void report(Object object) {
+		getBroker().publish("report", new Tuple("COASTAL.start", startingTime));
+		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
+		long duration = stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis();
+		getBroker().publish("report", new Tuple("COASTAL.time", duration));
+		getBroker().publish("report", new Tuple("COASTAL.diver-tasks", diverTaskCount));
+		getBroker().publish("report", new Tuple("COASTAL.dive-count", diveCount.get()));
+		getBroker().publish("report", new Tuple("COASTAL.dive-time", diveTime.get()));
+		getBroker().publish("report", new Tuple("COASTAL.strategy-tasks", strategyTaskCount));
 	}
 
 	// ======================================================================
@@ -648,7 +802,7 @@ public class COASTAL {
 		if (config != null) {
 			new COASTAL(log, config).start(false);
 		}
-		new Banner('~').println("COASTAL DONE").display(log);
+		new Banner('~').println("COASTAL DONE (" + FilenameUtils.getName(args[0]) + ")").display(log);
 	}
 
 	/**

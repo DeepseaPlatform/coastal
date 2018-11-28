@@ -5,7 +5,7 @@
 		<!-- ======================================================================
 		The strategy that is used to refine newly explored paths.
 		======================================================================= -->
-		<strategy>za.ac.sun.cs.coastal.strategy.DepthFirstStrategy</strategy>
+		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
 		<!--
 		<strategy>za.ac.sun.cs.coastal.strategy.BreadthFirstStrategy</strategy>
 		<strategy>za.ac.sun.cs.coastal.strategy.RandomStrategy</strategy>

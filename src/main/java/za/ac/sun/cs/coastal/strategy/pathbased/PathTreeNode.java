@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.strategy;
+package za.ac.sun.cs.coastal.strategy.pathbased;
 
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 

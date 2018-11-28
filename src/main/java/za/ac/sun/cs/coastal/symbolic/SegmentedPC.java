@@ -6,6 +6,8 @@ import za.ac.sun.cs.green.expr.Operation.Operator;
 
 public abstract class SegmentedPC {
 
+	public static final SegmentedPC Null = new SegmentedPCIf(null, null, null, true);
+	
 	private final SegmentedPC parent;
 
 	private final Expression passiveConjunct;

@@ -84,6 +84,9 @@ public class SegmentedPCIf extends SegmentedPC {
 
 	@Override
 	public String toString0() {
+		if (this == SegmentedPC.Null) {
+			return "Null-SPC";
+		}
 		Expression e = getPassiveConjunct();
 		StringBuilder sb = new StringBuilder();
 		sb.append(String.format("%-7s ", getValue() ? "TRUE" : "FALSE"));

@@ -5,99 +5,55 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.Conversion;
-import za.ac.sun.cs.coastal.messages.Broker;
-import za.ac.sun.cs.coastal.messages.Tuple;
-import za.ac.sun.cs.coastal.strategy.Strategy;
-import za.ac.sun.cs.green.expr.Constant;
 
-public class Diver {
+public class Diver implements Callable<Void> {
 
 	private final COASTAL coastal;
-	
+
 	private final Logger log;
-	
+
 	private final ImmutableConfiguration config;
 
-	private final Broker broker;
-
-	private int runs = 0;
-
-	private long time = 0;
+	// ----> Commented for now but probably needed soon
+	// private final Broker broker;
 
 	public Diver(COASTAL coastal) {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		config = coastal.getConfig();
-		broker = coastal.getBroker();
-		broker.subscribe("coastal-stop", this::report);
+		// broker = coastal.getBroker();
 	}
 
-	public void dive() {
-//		List<InstructionListener> instructionListeners = new ArrayList<>();
-//		for (InstructionListener listener : config.<InstructionListener>getListeners(InstructionListener.class)) {
-//			listener.changeInstrumentationManager(classManager);
-//			instructionListeners.add(listener);
-//		}
-//		List<MarkerListener> markerListeners = new ArrayList<>();
-//		for (MarkerListener listener : config.<MarkerListener>getListeners(MarkerListener.class)) {
-//			markerListeners.add(listener);
-//		}
-//		List<PathListener> pathListeners = new ArrayList<>();
-//		for (PathListener listener : config.<PathListener>getListeners(PathListener.class)) {
-//			pathListeners.add(listener);
-//		}
-		String strategyName = config.getString("coastal.strategy");
-		Object strategyObject = null;
-		Strategy strategy = null;
-		if (strategyName != null) {
-			strategyObject = Conversion.createInstance(coastal, strategyName);
+	@Override
+	public Void call() throws Exception {
+		log.info("^^^ diver task starting");
+		try {
+			while (true) {
+				long t0 = System.currentTimeMillis();
+				SymbolicState symbolicState = new SymbolicState(coastal);
+				log.info(Banner.getBannerLine("starting dive " + coastal.getNextDiveCount(), '-'));
+				ClassLoader classLoader = coastal.getClassManager().createClassLoader(symbolicState);
+				// SymbolicVM.setState(symbolicState);
+				performRun(classLoader);
+				coastal.recordDiveTime(System.currentTimeMillis() - t0);
+				// ----> disposition.notifyPathListeners(symbolicState);
+				SegmentedPC spc = symbolicState.getSegmentedPathCondition();
+				coastal.addPc(spc);
+				if (!symbolicState.mayContinue()) {
+					coastal.stopWork();
+				}
+			}
+		} catch (InterruptedException e) {
+			log.info("^^^ diver task canceled");
+			throw e;
 		}
-		if ((strategyObject != null) && (strategyObject instanceof Strategy)) {
-			strategy = (Strategy) strategyObject;
-		} else {
-			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
-			System.exit(1);
-		}
-		Map<String, Constant> concreteValues = null;
-		long runLimit = config.getLong("coastal.limit.runs", Long.MAX_VALUE);
-		long timeLimit = config.getLong("coastal.limit.time", Long.MAX_VALUE);
-		long tl0 = System.currentTimeMillis();
-		do {
-			if ((System.currentTimeMillis() - tl0) / 1000 > timeLimit) {
-				log.warn("time limit reached");
-				return;
-			}
-			if (--runLimit < 0) {
-				log.warn("run limit reached");
-				return;
-			}
-			runs++;
-			log.info(Banner.getBannerLine("starting dive " + runs, '-'));
-			long t0 = System.currentTimeMillis();
-			SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
-			SymbolicVM.setState(symbolicState);
-			performRun();
-			time += System.currentTimeMillis() - t0;
-//			for (PathListener listener : pathListeners) {
-//				listener.visit(symbolicState);
-//			}
-			concreteValues = strategy.refine(symbolicState);
-			if (!symbolicState.mayContinue()) {
-				break;
-			}
-		} while (concreteValues != null);
-	}
-
-	public int getRuns() {
-		return runs;
 	}
 
 	private static final PrintStream NUL = new PrintStream(new OutputStream() {
@@ -107,8 +63,7 @@ public class Diver {
 		}
 	});
 
-	private void performRun() {
-		ClassLoader classLoader = coastal.getClassManager().createClassLoader();
+	private void performRun(ClassLoader classLoader) {
 		PrintStream out = System.out, err = System.err;
 		try {
 			Class<?> clas = classLoader.loadClass(config.getString("coastal.main"));
@@ -154,11 +109,6 @@ public class Diver {
 				}
 			}
 		}
-	}
-
-	public void report(Object object) {
-		broker.publish("report", new Tuple("Diver.runs", runs));
-		broker.publish("report", new Tuple("Diver.time", time));
 	}
 
 }
