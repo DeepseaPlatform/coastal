@@ -66,7 +66,7 @@ public abstract class PathBasedStrategy implements Strategy {
 	}
 
 	private List<Model> refine0(SegmentedPC spc) {
-		if ((spc == null) || (spc == SegmentedPC.Null)) {
+		if ((spc == null) || (spc == SegmentedPC.NULL)) {
 			return null;
 		}
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());

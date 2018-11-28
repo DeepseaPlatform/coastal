@@ -57,7 +57,13 @@ public class Reporter {
 	}
 
 	public int getStatInt(String key) {
-		return (Integer) statMap.get(key);
+		Integer value = (Integer) statMap.get(key);
+		return (value == null) ? 0 : value;
 	}
 
+	public long getStatLong(String key) {
+		Long value = (Long) statMap.get(key);
+		return (value == null) ? 0 : value;
+	}
+	
 }

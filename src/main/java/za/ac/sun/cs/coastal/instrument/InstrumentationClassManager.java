@@ -121,6 +121,7 @@ public class InstrumentationClassManager {
 			InstrumentationAdapter ia = new InstrumentationAdapter(coastal, name, cw);
 			cr.accept(ia, 0);
 			instrumented = cw.toByteArray();
+			instrumentedCount.incrementAndGet();
 			preInstrumentedSize.addAndGet(in.length);
 			postInstrumentedSize.addAndGet(instrumented.length);
 			log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, instrumented.length);

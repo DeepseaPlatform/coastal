@@ -30,14 +30,14 @@ public class RandomPathFactory implements StrategyFactory {
 
 		private final Random rng = new Random();
 
-		public RandomPathStrategy(COASTAL coastal, StrategyManager manager) {
+		RandomPathStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 			Long seed = coastal.getConfig().getLong("coastal.random-seed");
 			if (seed != null) {
 				rng.setSeed(seed);
 			}
 		}
-		
+
 		@Override
 		public SegmentedPC findNewPath(PathTree pathTree) {
 			SegmentedPC pc = null;

@@ -29,10 +29,10 @@ public class DepthFirstFactory implements StrategyFactory {
 
 	private static class DepthFirstStrategy extends PathBasedStrategy {
 
-		public DepthFirstStrategy(COASTAL coastal, StrategyManager manager) {
+		DepthFirstStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 		}
-		
+
 		@Override
 		public SegmentedPC findNewPath(PathTree pathTree) {
 			SegmentedPC pc = null;

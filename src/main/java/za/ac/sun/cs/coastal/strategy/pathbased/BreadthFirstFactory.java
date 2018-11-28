@@ -29,10 +29,10 @@ public class BreadthFirstFactory implements StrategyFactory {
 
 	private static class BreadthFirstStrategy extends PathBasedStrategy {
 
-		public BreadthFirstStrategy(COASTAL coastal, StrategyManager manager) {
+		BreadthFirstStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 		}
-		
+
 		@Override
 		public SegmentedPC findNewPath(PathTree pathTree) {
 			Queue<SegmentedPC> workingPCs = new LinkedList<>();

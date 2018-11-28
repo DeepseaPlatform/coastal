@@ -192,7 +192,7 @@ public class COASTAL {
 	 * The one-and-only strategy manager for this analysis run.
 	 */
 	private final StrategyManager strategyManager;
-	
+
 	/**
 	 * The outstanding number of models that have not been processed by divers,
 	 * or whose resulting path conditions have not been processed by a strategy.
@@ -224,12 +224,13 @@ public class COASTAL {
 		broker.subscribe("coastal-stop", this::report);
 		reporter = new Reporter(this);
 		classManager = new InstrumentationClassManager(this, System.getProperty("java.class.path"));
-		defaultMinIntValue = getConfig().getInt("coastal.bound.int.min", Integer.MIN_VALUE);
-		defaultMaxIntValue = getConfig().getInt("coastal.bound.int.max", Integer.MAX_VALUE);
+		defaultMinIntValue = Conversion.minmax(getConfig().getInt("coastal.bound.int.min", Integer.MIN_VALUE),
+				Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1);
+		defaultMaxIntValue = Conversion.minmax(getConfig().getInt("coastal.bound.int.max", Integer.MAX_VALUE),
+				Integer.MIN_VALUE + 2, Integer.MAX_VALUE);
 		parseConfig();
-		long tl = getConfig().getLong("coastal.limits.time", 0);
-		timeLimit = (tl == 0) ? Long.MAX_VALUE : tl;
-		maxThreads = getConfig().getInt("coastal.max-threads", 2);
+		timeLimit = Conversion.limitLong(getConfig(), "coastal.limits.time");
+		maxThreads = Conversion.minmax(getConfig().getInt("coastal.max-threads", 2), 2, Short.MAX_VALUE);
 		executor = Executors.newCachedThreadPool();
 		completionService = new ExecutorCompletionService<Void>(executor);
 		futures = new ArrayList<Future<Void>>(maxThreads);
@@ -586,7 +587,8 @@ public class COASTAL {
 	/**
 	 * Add a list of models to the queue.
 	 * 
-	 * @param mdls the list of models
+	 * @param mdls
+	 *            the list of models
 	 */
 	public void addModels(List<Model> mdls) {
 		mdls.forEach(m -> {
@@ -619,7 +621,7 @@ public class COASTAL {
 	public void addPc(SegmentedPC spc) {
 		try {
 			if (spc == null) {
-				pcs.put(SegmentedPC.Null);
+				pcs.put(SegmentedPC.NULL);
 			} else {
 				pcs.put(spc);
 			}
@@ -656,7 +658,7 @@ public class COASTAL {
 	public StrategyManager getStrategyManager() {
 		return strategyManager;
 	}
-	
+
 	/**
 	 * Create and add a new diver task.
 	 */
@@ -874,6 +876,9 @@ public class COASTAL {
 			filename = filename.substring(0, filename.length() - 4) + "xml";
 		}
 		Configuration cfg3 = loadConfigFromFile(log, filename);
+		if (cfg3 == null) {
+			cfg3 = loadConfigFromResource(log, filename);
+		}
 		if (cfg3 != null) {
 			config.addConfiguration(cfg3);
 		} else {
@@ -930,7 +935,7 @@ public class COASTAL {
 	 */
 	private static Configuration loadConfigFromResource(Logger log, String resourceName) {
 		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		try (InputStream resourceStream = loader.getResourceAsStream(COASTAL_CONFIGURATION)) {
+		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
 			if (resourceStream != null) {
 				Configuration cfg = loadConfigFromStream(log, resourceStream);
 				log.trace("loaded configuration from {}", resourceName);

@@ -164,8 +164,10 @@ public class PathTree {
 		} else {
 			revisitCount.incrementAndGet();
 			if (isInfeasible) {
+				assert true;
 				// TO DO ----> assert ( NODE REALLY IS INFEASIBLE ) 
 			} else {
+				assert true;
 				// TO DO ----> assert ( NODE REALLY IS LEAF ) 
 			}
 		}

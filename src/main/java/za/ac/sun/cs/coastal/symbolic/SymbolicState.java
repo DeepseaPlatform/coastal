@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Conversion;
 import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.messages.Broker;
@@ -92,7 +93,7 @@ public class SymbolicState {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();
-		limitConjuncts = coastal.getConfig().getLong("coastal.limit.conjuncts", Long.MAX_VALUE);
+		limitConjuncts = Conversion.limitLong(coastal.getConfig(), "coastal.limit.conjuncts");
 		traceAll = coastal.getConfig().getBoolean("coastal.trace-all", false);
 		this.concreteValues = coastal.getNextModel();
 		symbolicMode = traceAll;

@@ -84,7 +84,7 @@ public class SegmentedPCIf extends SegmentedPC {
 
 	@Override
 	public String toString0() {
-		if (this == SegmentedPC.Null) {
+		if (this == SegmentedPC.NULL) {
 			return "Null-SPC";
 		}
 		Expression e = getPassiveConjunct();
