@@ -14,7 +14,7 @@ url: ""
 twitter_username: coastal
 github_username:  coastal
 markdown: kramdown
-include: ["_pages"]
+include: ["_pages", "coastal.dtd"]
 exclude: ["copyapi.sh", "Gemfile", "Gemfile.lock", "_pages/userguide/figures"]
 plugins:
   - jekyll-feed
