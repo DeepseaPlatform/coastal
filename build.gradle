@@ -29,6 +29,10 @@ dependencies {
 	testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.25'
 }
 
+// So that XML files in src/test/java/tests/* are copied
+// to the test resources directory.
+sourceSets.test.resources.srcDirs += [ "src/test/java" ]
+
 checkstyle {
 	toolVersion '8.1'
 }
