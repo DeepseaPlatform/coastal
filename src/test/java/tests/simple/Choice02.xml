@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<main>tests.simple.Choice02</main>
+		<target>tests.simple</target>
+		<trigger>tests.simple.Choice02.run(X: int, Y: int)</trigger>
+	</coastal>
+</configuration>

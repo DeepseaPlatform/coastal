@@ -58,4 +58,61 @@ public class SystemTestsSimple {
 		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
 	}
 
+	@Test
+	public void testChoice02() {
+		final Logger log = LogManager.getLogger("COASTAL-TEST");
+		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/simple/Choice02.xml" });
+		assertNotNull(config);
+		COASTAL coastal = new COASTAL(log, config);
+		coastal.start(false);
+		Reporter reporter = coastal.getReporter();
+		assertEquals(4, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(1, reporter.getStatInt("COASTAL.diver-tasks"));
+		assertEquals(1, reporter.getStatInt("COASTAL.strategy-tasks"));
+		assertEquals(3, reporter.getStatLong("Instrumentation.cache-hit-count"));
+		assertEquals(4, reporter.getStatLong("Instrumentation.instrumented-count"));
+		assertEquals(28, reporter.getStatLong("Instrumentation.requests-count"));
+		assertEquals(0, reporter.getStatLong("Strategy.infeasible-count"));
+		assertEquals(4, reporter.getStatLong("Strategy.inserted-paths"));
+		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
+	}
+	
+	@Test
+	public void testChoice03() {
+		final Logger log = LogManager.getLogger("COASTAL-TEST");
+		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/simple/Choice03.xml" });
+		assertNotNull(config);
+		COASTAL coastal = new COASTAL(log, config);
+		coastal.start(false);
+		Reporter reporter = coastal.getReporter();
+		assertEquals(8, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(1, reporter.getStatInt("COASTAL.diver-tasks"));
+		assertEquals(1, reporter.getStatInt("COASTAL.strategy-tasks"));
+		assertEquals(7, reporter.getStatLong("Instrumentation.cache-hit-count"));
+		assertEquals(8, reporter.getStatLong("Instrumentation.instrumented-count"));
+		assertEquals(56, reporter.getStatLong("Instrumentation.requests-count"));
+		assertEquals(0, reporter.getStatLong("Strategy.infeasible-count"));
+		assertEquals(8, reporter.getStatLong("Strategy.inserted-paths"));
+		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
+	}
+	
+	@Test
+	public void testChoice04() {
+		final Logger log = LogManager.getLogger("COASTAL-TEST");
+		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/simple/Choice04.xml" });
+		assertNotNull(config);
+		COASTAL coastal = new COASTAL(log, config);
+		coastal.start(false);
+		Reporter reporter = coastal.getReporter();
+		assertEquals(5, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(1, reporter.getStatInt("COASTAL.diver-tasks"));
+		assertEquals(1, reporter.getStatInt("COASTAL.strategy-tasks"));
+		assertEquals(4, reporter.getStatLong("Instrumentation.cache-hit-count"));
+		assertEquals(5, reporter.getStatLong("Instrumentation.instrumented-count"));
+		assertEquals(35, reporter.getStatLong("Instrumentation.requests-count"));
+		assertEquals(1, reporter.getStatLong("Strategy.infeasible-count"));
+		assertEquals(6, reporter.getStatLong("Strategy.inserted-paths"));
+		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
+	}
+	
 }

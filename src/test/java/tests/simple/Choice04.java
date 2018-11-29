@@ -1,13 +1,13 @@
-package examples.simple;
+package tests.simple;
 
-public class Choices {
+public class Choice04 {
 
 	public static void main(String[] args) {
-		int result = tree(3, 4, 5);
+		int result = run(3, 4, 5);
 		System.out.println(result);
 	}
 
-	private static int tree(int x, int y, int z) {
+	private static int run(int x, int y, int z) {
 		if (x < 10) {
 			if (y < 10) {
 				if (z < 10) {
