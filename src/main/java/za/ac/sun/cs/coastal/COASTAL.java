@@ -38,6 +38,8 @@ import org.apache.logging.log4j.Logger;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
+import za.ac.sun.cs.coastal.observers.ObserverFactory;
+import za.ac.sun.cs.coastal.observers.ObserverManager;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.strategy.StrategyManager;
 import za.ac.sun.cs.coastal.strategy.StrategyTask;
@@ -115,6 +117,11 @@ public class COASTAL {
 	 * modelling classes).
 	 */
 	private final Map<String, Object> delegates = new HashMap<>();
+
+	/**
+	 * A list of observer factories and managers.
+	 */
+	private final List<Tuple> observers = new ArrayList<>();
 
 	/**
 	 * The wall-clock-time that the analysis run was started.
@@ -399,7 +406,7 @@ public class COASTAL {
 
 	/**
 	 * Parse the COASTAL configuration and extract the targets, triggers,
-	 * delegates, and bounds.
+	 * delegates, bounds, and observers.
 	 */
 	public void parseConfig() {
 		// PARSE TARGETS
@@ -432,6 +439,23 @@ public class COASTAL {
 			minBounds.put(var, getConfig().getInt(key + "[@min]", defaultMinIntValue));
 			maxBounds.put(var, getConfig().getInt(key + "[@max]", defaultMaxIntValue));
 		}
+		// PARSE OBSERVERS
+		for (int i = 0; true; i++) {
+			String key = "coastal.observer(" + i + ")";
+			String observerName = getConfig().getString(key);
+			if (observerName == null) {
+				break;
+			}
+			Object observerFactory = Conversion.createInstance(this, observerName.trim());
+			if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
+				ObserverManager observerManager = ((ObserverFactory) observerFactory).createManager(this);
+				observers.add(new Tuple(observerFactory, observerManager));
+			}
+		}
+	}
+
+	public Iterable<Tuple> getObservers() {
+		return observers;
 	}
 
 	/**

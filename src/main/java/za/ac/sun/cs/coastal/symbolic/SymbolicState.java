@@ -273,7 +273,7 @@ public class SymbolicState {
 			mayRecord = false;
 			symbolicMode = traceAll;
 		}
-		broker.publish("exit-method", methodNumber);
+		broker.publishThread("exit-method", methodNumber);
 		return symbolicMode;
 	}
 
@@ -332,19 +332,31 @@ public class SymbolicState {
 	// ======================================================================
 
 	public void stop() {
+		if (!symbolicMode) {
+			return;
+		}
 		broker.publish("stop", new Tuple(this, null));
 	}
 
 	public void stop(String message) {
+		if (!symbolicMode) {
+			return;
+		}
 		broker.publish("stop", new Tuple(this, message));
 	}
 
 	public void mark(int marker) {
-		broker.publish("mark", marker);
+		if (!symbolicMode) {
+			return;
+		}
+		broker.publishThread("mark", marker);
 	}
 
 	public void mark(String marker) {
-		broker.publish("mark", marker);
+		if (!symbolicMode) {
+			return;
+		}
+		broker.publishThread("mark", marker);
 	}
 
 	// ======================================================================
@@ -532,7 +544,7 @@ public class SymbolicState {
 				dumpFrames();
 			}
 		}
-		broker.publish("enter-method", methodNumber);
+		broker.publishThread("enter-method", methodNumber);
 	}
 
 	public void startMethod(int methodNumber, int argCount) {
@@ -556,7 +568,7 @@ public class SymbolicState {
 			}
 		}
 		dumpFrames();
-		broker.publish("enter-method", methodNumber);
+		broker.publishThread("enter-method", methodNumber);
 	}
 
 	private void checkLimitConjuncts() throws LimitConjunctException {
@@ -590,7 +602,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("### LINENUMBER {}", line);
-		broker.publish("linenumber", new Tuple(instr, line));
+		broker.publishThread("linenumber", new Tuple(instr, line));
 	}
 
 	public void insn(int instr, int opcode) throws LimitConjunctException {
@@ -598,7 +610,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		broker.publish("insn", new Tuple(instr, opcode));
+		broker.publishThread("insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.ACONST_NULL:
@@ -757,7 +769,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {}", instr, Bytecodes.toString(opcode), operand);
-		broker.publish("int-insn", new Tuple(instr, opcode, operand));
+		broker.publishThread("int-insn", new Tuple(instr, opcode, operand));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.BIPUSH:
@@ -790,7 +802,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {}", instr, Bytecodes.toString(opcode), var);
-		broker.publish("var-insn", new Tuple(instr, opcode, var));
+		broker.publishThread("var-insn", new Tuple(instr, opcode, var));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.ALOAD:
@@ -817,7 +829,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		broker.publish("type-insn", new Tuple(instr, opcode));
+		broker.publishThread("type-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.NEW:
@@ -837,7 +849,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {} {} {}", instr, Bytecodes.toString(opcode), owner, name, descriptor);
-		broker.publish("field-insn", new Tuple(instr, opcode, owner, name, descriptor));
+		broker.publishThread("field-insn", new Tuple(instr, opcode, owner, name, descriptor));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.GETSTATIC:
@@ -870,7 +882,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {} {} {}", instr, Bytecodes.toString(opcode), owner, name, descriptor);
-		broker.publish("method-insn", new Tuple(instr, opcode, owner, name, descriptor));
+		broker.publishThread("method-insn", new Tuple(instr, opcode, owner, name, descriptor));
 		checkLimitConjuncts();
 		lastInvokingInstruction = instr;
 		switch (opcode) {
@@ -977,7 +989,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		broker.publish("invoke-dynamic-insn", new Tuple(instr, opcode));
+		broker.publishThread("invoke-dynamic-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		lastInvokingInstruction = instr;
 		switch (opcode) {
@@ -994,7 +1006,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		broker.publish("jump-insn", new Tuple(instr, opcode));
+		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		if (recordMode) {
 			dangerFlag = true;
@@ -1108,7 +1120,7 @@ public class SymbolicState {
 			log.trace("(POST) {}", Bytecodes.toString(opcode));
 			if (!isPreviousConstant && !isPreviousDuplicate) {
 				log.trace(">>> previous conjunct is false");
-				broker.publish("post-jump-insn", new Tuple(instr, opcode));
+				broker.publishThread("post-jump-insn", new Tuple(instr, opcode));
 				assert spc instanceof SegmentedPCIf;
 				spc = ((SegmentedPCIf) spc).negate();
 				checkLimitConjuncts();
@@ -1122,7 +1134,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {}", instr, Bytecodes.toString(opcode), value);
-		broker.publish("ldc-insn", new Tuple(instr, opcode, value));
+		broker.publishThread("ldc-insn", new Tuple(instr, opcode, value));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.LDC:
@@ -1153,7 +1165,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {} {}", instr, Bytecodes.toString(opcode), increment);
-		broker.publish("iinc-insn", new Tuple(instr, var, increment));
+		broker.publishThread("iinc-insn", new Tuple(instr, var, increment));
 		checkLimitConjuncts();
 		Expression e0 = getLocal(var);
 		Expression e1 = new IntConstant(increment);
@@ -1166,7 +1178,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		broker.publish("table-switch-insn", new Tuple(instr, opcode));
+		broker.publishThread("table-switch-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		pendingSwitch.push(pop());
 		dumpFrames();
@@ -1191,7 +1203,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		broker.publish("lookup-switch-insn", new Tuple(instr, opcode));
+		broker.publishThread("lookup-switch-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		default:
@@ -1206,7 +1218,7 @@ public class SymbolicState {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		broker.publish("multi-anew-array-insn", new Tuple(instr, opcode));
+		broker.publishThread("multi-anew-array-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		default:

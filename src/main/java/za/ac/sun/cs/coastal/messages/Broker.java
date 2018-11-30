@@ -38,6 +38,22 @@ public class Broker {
 	}
 
 	/**
+	 * Publish a message on a certain topic that is local to the current thread.
+	 * 
+	 * @param topic
+	 *            the topic to publish
+	 * @param message
+	 *            the message as a generic object
+	 */
+	public void publishThread(String topic, Object message) {
+		topic = topic + Thread.currentThread().getId();
+		SubscriberList subscriberList = subscribers.get(topic);
+		if (subscriberList != null) {
+			subscriberList.publish(message);
+		}
+	}
+	
+	/**
 	 * Subscribe to a topic.
 	 * 
 	 * @param topic
@@ -47,6 +63,27 @@ public class Broker {
 	 *            topic
 	 */
 	public void subscribe(String topic, Consumer<Object> subscriber) {
+		SubscriberList subscriberList = subscribers.get(topic);
+		if (subscriberList == null) {
+			lock.writeLock().lock();
+			subscriberList = new SubscriberList();
+			subscribers.put(topic, subscriberList);
+			lock.writeLock().unlock();
+		}
+		subscriberList.subscribe(subscriber);
+	}
+	
+	/**
+	 * Subscribe to a topic that is local to the current thread.
+	 * 
+	 * @param topic
+	 *            the topic to subscribe to
+	 * @param subscriber
+	 *            a callback that will be invoked for all new message on the
+	 *            topic
+	 */
+	public void subscribeThread(String topic, Consumer<Object> subscriber) {
+		topic = topic + Thread.currentThread().getId();
 		SubscriberList subscriberList = subscribers.get(topic);
 		if (subscriberList == null) {
 			lock.writeLock().lock();

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!ELEMENT configuration (coastal,green?)>
-<!ELEMENT coastal (main|target|trigger|strategy|randomseed|delegate|trace-all|echo-output|draw-paths|concrete-values|limits)*>
+<!ELEMENT coastal (main|target|trigger|strategy|randomseed|delegate|observer|trace-all|echo-output|draw-paths|concrete-values|limits)*>
 <!ELEMENT main (#PCDATA)>
 <!ELEMENT target (#PCDATA)>
 <!ELEMENT trigger (#PCDATA)>
@@ -8,6 +8,7 @@
 <!ELEMENT randomseed (#PCDATA)>
 <!ELEMENT delegate (target,model)>
 <!ELEMENT model (#PCDATA)>
+<!ELEMENT observer (#PCDATA)>
 <!ELEMENT trace-all (#PCDATA)>
 <!ELEMENT echo-output (#PCDATA)>
 <!ELEMENT draw-paths (#PCDATA)>

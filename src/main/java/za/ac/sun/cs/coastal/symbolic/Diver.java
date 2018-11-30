@@ -12,6 +12,10 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.Tuple;
+import za.ac.sun.cs.coastal.observers.ObserverFactory;
+import za.ac.sun.cs.coastal.observers.ObserverManager;
 
 public class Diver implements Callable<Void> {
 
@@ -21,19 +25,25 @@ public class Diver implements Callable<Void> {
 
 	private final ImmutableConfiguration config;
 
-	// ----> Commented for now but probably needed soon
-	// private final Broker broker;
+	private final Broker broker;
 
 	public Diver(COASTAL coastal) {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		config = coastal.getConfig();
-		// broker = coastal.getBroker();
+		broker = coastal.getBroker();
 	}
 
 	@Override
 	public Void call() throws Exception {
 		log.info("^^^ diver task starting");
+		for (Tuple observer : coastal.getObservers()) {
+			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
+			ObserverManager observerManager = (ObserverManager) observer.get(1);
+			if (!observerManager.startObserverForEveryDive()) {
+				observerFactory.createObserver(coastal, observerManager);
+			}
+		}
 		try {
 			while (true) {
 				long t0 = System.currentTimeMillis();
@@ -46,11 +56,13 @@ public class Diver implements Callable<Void> {
 				// ----> disposition.notifyPathListeners(symbolicState);
 				SegmentedPC spc = symbolicState.getSegmentedPathCondition();
 				coastal.addPc(spc);
+				broker.publishThread("dive-end", this);
 				if (!symbolicState.mayContinue()) {
 					coastal.stopWork();
 				}
 			}
 		} catch (InterruptedException e) {
+			broker.publishThread("diver-task-end", this);
 			log.info("^^^ diver task canceled");
 			throw e;
 		}
@@ -64,6 +76,13 @@ public class Diver implements Callable<Void> {
 	});
 
 	private void performRun(ClassLoader classLoader) {
+		for (Tuple observer : coastal.getObservers()) {
+			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
+			ObserverManager observerManager = (ObserverManager) observer.get(1);
+			if (observerManager.startObserverForEveryDive()) {
+				observerFactory.createObserver(coastal, observerManager);
+			}
+		}
 		PrintStream out = System.out, err = System.err;
 		try {
 			Class<?> clas = classLoader.loadClass(config.getString("coastal.main"));
