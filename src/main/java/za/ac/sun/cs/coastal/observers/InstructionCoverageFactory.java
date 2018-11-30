@@ -15,6 +15,11 @@ public class InstructionCoverageFactory implements ObserverFactory {
 	}
 
 	@Override
+	public int getFrequency() {
+		return ObserverFactory.ONCE_PER_TASK;
+	}
+
+	@Override
 	public ObserverManager createManager(COASTAL coastal) {
 		return new InstructionCoverageManager(coastal);
 	}
@@ -41,11 +46,6 @@ public class InstructionCoverageFactory implements ObserverFactory {
 		InstructionCoverageManager(COASTAL coastal) {
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
-		}
-
-		@Override
-		public boolean startObserverForEveryDive() {
-			return false;
 		}
 
 		public synchronized void update(BitSet covered, BitSet potentials) {

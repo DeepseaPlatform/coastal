@@ -37,12 +37,10 @@ public class Diver implements Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		log.info("^^^ diver task starting");
-		for (Tuple observer : coastal.getObservers()) {
+		for (Tuple observer : coastal.getObserversPerTask()) {
 			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 			ObserverManager observerManager = (ObserverManager) observer.get(1);
-			if (!observerManager.startObserverForEveryDive()) {
-				observerFactory.createObserver(coastal, observerManager);
-			}
+			observerFactory.createObserver(coastal, observerManager);
 		}
 		try {
 			while (true) {
@@ -76,12 +74,10 @@ public class Diver implements Callable<Void> {
 	});
 
 	private void performRun(ClassLoader classLoader) {
-		for (Tuple observer : coastal.getObservers()) {
+		for (Tuple observer : coastal.getObserversPerDive()) {
 			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 			ObserverManager observerManager = (ObserverManager) observer.get(1);
-			if (observerManager.startObserverForEveryDive()) {
-				observerFactory.createObserver(coastal, observerManager);
-			}
+			observerFactory.createObserver(coastal, observerManager);
 		}
 		PrintStream out = System.out, err = System.err;
 		try {

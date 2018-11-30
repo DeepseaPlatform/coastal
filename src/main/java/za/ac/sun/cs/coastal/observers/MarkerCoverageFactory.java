@@ -15,6 +15,11 @@ public class MarkerCoverageFactory implements ObserverFactory {
 	}
 
 	@Override
+	public int getFrequency() {
+		return ObserverFactory.ONCE_PER_TASK;
+	}
+
+	@Override
 	public ObserverManager createManager(COASTAL coastal) {
 		return new MarkerCoverageManager(coastal);
 	}
@@ -39,11 +44,6 @@ public class MarkerCoverageFactory implements ObserverFactory {
 		MarkerCoverageManager(COASTAL coastal) {
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
-		}
-
-		@Override
-		public boolean startObserverForEveryDive() {
-			return false;
 		}
 
 		public synchronized void update(Map<String, Integer> markers) {

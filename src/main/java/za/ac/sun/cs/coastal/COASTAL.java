@@ -119,10 +119,20 @@ public class COASTAL {
 	private final Map<String, Object> delegates = new HashMap<>();
 
 	/**
-	 * A list of observer factories and managers.
+	 * A list of observer factories and managers that must be started once per run.
 	 */
-	private final List<Tuple> observers = new ArrayList<>();
+	private final List<Tuple> observersPerRun = new ArrayList<>();
 
+	/**
+	 * A list of observer factories and managers that must be started once per task.
+	 */
+	private final List<Tuple> observersPerTask = new ArrayList<>();
+	
+	/**
+	 * A list of observer factories and managers that must be started once per dive.
+	 */
+	private final List<Tuple> observersPerDive = new ArrayList<>();
+	
 	/**
 	 * The wall-clock-time that the analysis run was started.
 	 */
@@ -448,16 +458,32 @@ public class COASTAL {
 			}
 			Object observerFactory = Conversion.createInstance(this, observerName.trim());
 			if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
-				ObserverManager observerManager = ((ObserverFactory) observerFactory).createManager(this);
-				observers.add(new Tuple(observerFactory, observerManager));
+				ObserverFactory factory = (ObserverFactory) observerFactory;
+				ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
+				int frequency = factory.getFrequency();
+				if (frequency == ObserverFactory.ONCE_PER_RUN) {
+					observersPerRun.add(new Tuple(observerFactory, manager));
+				} else if (frequency == ObserverFactory.ONCE_PER_TASK) {
+					observersPerTask.add(new Tuple(observerFactory, manager));
+				} else {
+					observersPerDive.add(new Tuple(observerFactory, manager));
+				}
 			}
 		}
 	}
 
-	public Iterable<Tuple> getObservers() {
-		return observers;
+	public Iterable<Tuple> getObserversPerRun() {
+		return observersPerRun;
 	}
 
+	public Iterable<Tuple> getObserversPerTask() {
+		return observersPerTask;
+	}
+	
+	public Iterable<Tuple> getObserversPerDive() {
+		return observersPerDive;
+	}
+	
 	/**
 	 * Return the lower bound for symbolic integer variables with an explicit
 	 * bound of their own.
@@ -767,6 +793,11 @@ public class COASTAL {
 		getBroker().publish("coastal-start", this);
 		if (showBanner) {
 			new Banner('~').println("COASTAL version " + Version.read()).display(log);
+		}
+		for (Tuple observer : getObserversPerRun()) {
+			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
+			ObserverManager observerManager = (ObserverManager) observer.get(1);
+			observerFactory.createObserver(this, observerManager);
 		}
 		//		config.dump();
 		addFirstModel(new Model(0, null));
