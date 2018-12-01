@@ -25,25 +25,25 @@ public class StopControllerFactory implements ObserverFactory {
 	public Observer createObserver(COASTAL coastal, ObserverManager manager) {
 		return null;
 	}
-	
+
 	// ======================================================================
 	//
 	// MANAGER FOR STOP CONTROL
 	//
 	// ======================================================================
-	
+
 	private static class StopManager implements ObserverManager {
 
 		private final Logger log;
-		
+
 		private final COASTAL coastal;
 
-		public StopManager(COASTAL coastal) {
+		StopManager(COASTAL coastal) {
 			log = coastal.getLog();
 			this.coastal = coastal;
 			coastal.getBroker().subscribe("stop", this::stop);
 		}
-		
+
 		public void stop(Object object) {
 			Tuple tuple = (Tuple) object;
 			coastal.stopWork();
