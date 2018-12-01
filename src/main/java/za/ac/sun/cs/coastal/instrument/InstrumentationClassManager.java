@@ -1,8 +1,11 @@
 package za.ac.sun.cs.coastal.instrument;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -10,7 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -30,6 +37,8 @@ public class InstrumentationClassManager {
 
 	private final List<String> classPaths = new ArrayList<>();
 
+	private final Map<String, String> jars = new HashMap<>();
+	
 	private final AtomicLong requestCount = new AtomicLong(0);
 	
 	private final AtomicLong cacheHitCount = new AtomicLong(0);
@@ -60,6 +69,15 @@ public class InstrumentationClassManager {
 			classPaths.add(path);
 		}
 		classPaths.add(".");
+		for (int i = 0; true; i++) {
+			String key = "coastal.jar(" + i + ")";
+			String jar = coastal.getConfig().getString(key);
+			if (jar == null) {
+				break;
+			}
+			String dir = coastal.getConfig().getString(key + "[@directory]");
+			jars.put(jar, dir);
+		}
 	}
 
 	public ClassLoader createClassLoader(SymbolicState symbolicState) {
@@ -90,7 +108,7 @@ public class InstrumentationClassManager {
 	private synchronized byte[] loadUninstrumented0(String name) {
 		byte[] unInstrumented = cache.get(name);
 		if (unInstrumented == null) {
-			unInstrumented = loadFile(name.replace('.', '/').concat(".class"));
+			unInstrumented = loadFile(name.replace('.', '/').concat(".class"), false, false);
 			cache.put(name, unInstrumented);
 		}
 		return unInstrumented;
@@ -113,7 +131,7 @@ public class InstrumentationClassManager {
 	private synchronized byte[] loadInstrumented0(String name) {
 		byte[] instrumented = cache.get(name);
 		if (instrumented == null) {
-			byte[] in = loadFile(name.replace('.', '/').concat(".class"));
+			byte[] in = loadFile(name.replace('.', '/').concat(".class"), true, true);
 			if (in == null) {
 				return null;
 			}
@@ -130,28 +148,80 @@ public class InstrumentationClassManager {
 		return instrumented;
 	}
 	
-	private byte[] loadFile(String filename) {
-		File file = searchFor(filename);
-		if (file != null) {
-			byte[] data = new byte[(int) file.length()];
-			try (FileInputStream in = new FileInputStream(file)) {
-				in.read(data);
-				return data;
+	private byte[] loadFile(String filename, boolean tryResource, boolean tryJar) {
+		InputStream in = searchFor(filename, tryResource);
+		if (in != null) {
+			try {
+				return IOUtils.toByteArray(in);
 			} catch (IOException x) {
 				// ignore
+			}
+		} else if (tryJar) {
+			for (Map.Entry<String, String> entry : jars.entrySet()) {
+				in = searchFor(entry.getKey(), tryResource);
+				if (in == null) {
+					continue;
+				}
+				try (ZipInputStream zin = new ZipInputStream(new BufferedInputStream(in))) {
+					String fullFilename = entry.getValue();
+					if (fullFilename != null) {
+						if (fullFilename.endsWith("/")) {
+							fullFilename += filename;
+						} else {
+							fullFilename += "/" + filename;
+						}
+					} else {
+						fullFilename = filename;
+					}
+					ZipEntry ze = zin.getNextEntry();
+					while (ze != null) {
+						if (ze.getName().equals(fullFilename)) {
+							ByteArrayOutputStream out = new ByteArrayOutputStream();
+							byte[] buffer = new byte[8192];
+							int len = 0;
+							while ((len = zin.read(buffer, 0, 8192)) != -1) {
+								out.write(buffer, 0, len);
+							}
+							zin.closeEntry();
+							out.close();
+							log.trace("]]] file {} found: {}::{}", filename, entry.getKey(), fullFilename);
+							return out.toByteArray();
+						}
+						ze = zin.getNextEntry();
+					}
+				} catch (IOException x) {
+					// ignore
+				}
 			}
 		}
 		return null;
 	}
-
-	private File searchFor(String filename) {
+	
+	private InputStream searchFor(String filename, boolean tryResource) {
 		for (String classPath : classPaths) {
 			File file = new File(classPath, filename);
 			if (file.exists() && !file.isDirectory()) {
-				return file;
+				try {
+					log.trace("]]] file {} found: {}", filename, file.getAbsolutePath());
+					FileInputStream in = new FileInputStream(file);
+					if (in != null) {
+						return new BufferedInputStream(in);
+					}
+				} catch (FileNotFoundException x) {
+					// ignore
+				}
 			}
 		}
-		return null;
+		if (tryResource) {
+			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+			InputStream in = loader.getResourceAsStream(filename);
+			if (in != null) {
+				log.trace("]]] resource {} found", filename);
+			}
+			return in;
+		} else {
+			return null;
+		}
 	}
 
 	public void report(Object object) {
