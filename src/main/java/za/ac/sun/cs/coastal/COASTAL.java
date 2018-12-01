@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -119,20 +120,23 @@ public class COASTAL {
 	private final Map<String, Object> delegates = new HashMap<>();
 
 	/**
-	 * A list of observer factories and managers that must be started once per run.
+	 * A list of observer factories and managers that must be started once per
+	 * run.
 	 */
 	private final List<Tuple> observersPerRun = new ArrayList<>();
 
 	/**
-	 * A list of observer factories and managers that must be started once per task.
+	 * A list of observer factories and managers that must be started once per
+	 * task.
 	 */
 	private final List<Tuple> observersPerTask = new ArrayList<>();
-	
+
 	/**
-	 * A list of observer factories and managers that must be started once per dive.
+	 * A list of observer factories and managers that must be started once per
+	 * dive.
 	 */
 	private final List<Tuple> observersPerDive = new ArrayList<>();
-	
+
 	/**
 	 * The wall-clock-time that the analysis run was started.
 	 */
@@ -479,11 +483,11 @@ public class COASTAL {
 	public Iterable<Tuple> getObserversPerTask() {
 		return observersPerTask;
 	}
-	
+
 	public Iterable<Tuple> getObserversPerDive() {
 		return observersPerDive;
 	}
-	
+
 	/**
 	 * Return the lower bound for symbolic integer variables with an explicit
 	 * bound of their own.
@@ -912,6 +916,10 @@ public class COASTAL {
 	 * @return an immutable configuration
 	 */
 	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args) {
+		return loadConfiguration(log, args, null);
+	}
+
+	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args, String extra) {
 		CombinedConfiguration config = new CombinedConfiguration();
 		Configuration cfg1 = loadConfigFromResource(log, COASTAL_CONFIGURATION);
 		if (cfg1 != null) {
@@ -944,6 +952,10 @@ public class COASTAL {
 			bn.println("COULD NOT READ CONFIGURATION FILE \"" + filename + "\"");
 			bn.display(log);
 			return null;
+		}
+		Configuration cfg4 = loadConfigFromString(log, extra);
+		if (cfg4 != null) {
+			config.addConfiguration(cfg4);
 		}
 		if (config.getString("coastal.main") == null) {
 			Banner bn = new Banner('@');
@@ -1026,6 +1038,26 @@ public class COASTAL {
 		FileHandler fh = new FileHandler(cfg);
 		fh.load(inputStream);
 		return cfg;
+	}
+
+	private static Configuration loadConfigFromString(Logger log, String configString) {
+		if (configString == null) {
+			return null;
+		}
+		try {
+			XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class)
+					.configure(new Parameters().xml()).getConfiguration();
+			FileHandler fh = new FileHandler(cfg);
+			String finalString = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>"
+					+ "<!DOCTYPE configuration PUBLIC \"-//DEEPSEA//COASTAL configuration//EN\" "
+					+ "\"https://deepseaplatform.github.io/coastal/coastal.dtd\">" + "<configuration>" + configString
+					+ "</configuration>";
+			fh.load(new ByteArrayInputStream(finalString.getBytes()));
+			return cfg;
+		} catch (ConfigurationException x) {
+			// ignore
+		}
+		return null;
 	}
 
 }
