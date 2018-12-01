@@ -70,16 +70,14 @@ public abstract class PathBasedStrategy implements Strategy {
 			return null;
 		}
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
-		boolean infeasible = false;
+		manager.insertPath(spc, false);
 		while (true) {
-			manager.insertPath(spc, infeasible);
 			spc = findNewPath(manager.getPathTree());
 			if (spc == null) {
 				log.info("no further paths");
 				return null;
 				// log.trace("Tree shape: {}", pathTree.getShape());
 			}
-			infeasible = false;
 			Expression pc = spc.getPathCondition();
 			String sig = spc.getSignature();
 			log.info("trying   <{}> {}", sig, pc.toString());
@@ -87,7 +85,7 @@ public abstract class PathBasedStrategy implements Strategy {
 			if (model == null) {
 				log.info("no model");
 				log.trace("(The spc is {})", spc.getPathCondition().toString());
-				infeasible = true;
+				manager.insertPath(spc, true);
 				manager.incrementInfeasibleCount();
 			} else {
 				String modelString = model.toString();
