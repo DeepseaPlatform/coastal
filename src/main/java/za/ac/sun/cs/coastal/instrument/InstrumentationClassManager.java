@@ -96,11 +96,12 @@ public class InstrumentationClassManager {
 		return unInstrumented;
 	}
 	
-	public byte[] loadIinstrumented(String name) {
+	public byte[] loadInstrumented(String name) {
 		long t = System.currentTimeMillis();
 		byte[] instrumented = cache.get(name);
 		if (instrumented == null) {
-			instrumented = loadIinstrumented0(name);
+			instrumented = loadInstrumented0(name);
+			cache.put(name, instrumented);
 		} else {
 			cacheHitCount.incrementAndGet();
 		}
@@ -109,7 +110,7 @@ public class InstrumentationClassManager {
 	}
 
 	
-	private synchronized byte[] loadIinstrumented0(String name) {
+	private synchronized byte[] loadInstrumented0(String name) {
 		byte[] instrumented = cache.get(name);
 		if (instrumented == null) {
 			byte[] in = loadFile(name.replace('.', '/').concat(".class"));

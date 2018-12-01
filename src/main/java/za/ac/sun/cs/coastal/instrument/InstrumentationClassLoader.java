@@ -25,14 +25,14 @@ public class InstrumentationClassLoader extends ClassLoader {
 	}
 
 	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		log.trace("##====## LOADCLASS({}, {})", name, resolve);
+		// log.trace("##====## LOADCLASS({}, {})", name, resolve);
 		long t = System.currentTimeMillis();
 		manager.startLoad();
 		Class<?> clas = loadClass0(name, resolve);
 		manager.endLoad(t);
-		String aa = (clas == null) ? "??" : clas.getName();
-		ClassLoader bb = (clas == null) ? null : clas.getClassLoader();
-		log.trace("#----# LOADING CLASS {} WITH LOADER {}", aa, bb);
+		// String aa = (clas == null) ? "??" : clas.getName();
+		// ClassLoader bb = (clas == null) ? null : clas.getClassLoader();
+		// log.trace("#----# LOADING CLASS {} WITH LOADER {}", aa, bb);
 		return clas;
 	}
 
@@ -48,7 +48,7 @@ public class InstrumentationClassLoader extends ClassLoader {
 		}
 		if (coastal.isTarget(name)) {
 			log.trace("*** loading class {}, identified as target", name);
-			byte[] raw = manager.loadIinstrumented(name);
+			byte[] raw = manager.loadInstrumented(name);
 			if (raw != null) {
 				log.trace("*** class {} instrumented", name);
 				clas = defineClass(name, raw, 0, raw.length);
