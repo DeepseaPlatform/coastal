@@ -794,12 +794,14 @@ public class COASTAL {
 		if (showBanner) {
 			new Banner('~').println("COASTAL version " + Version.read()).display(log);
 		}
+		// Dump the configuration
+		config.getKeys().forEachRemaining(k -> log.info("{} = {}", k, config.getString(k)));
+		// Now we can start by creating run-level observers
 		for (Tuple observer : getObserversPerRun()) {
 			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 			ObserverManager observerManager = (ObserverManager) observer.get(1);
 			observerFactory.createObserver(this, observerManager);
 		}
-		//		config.dump();
 		addFirstModel(new Model(0, null));
 		try {
 			addDiverTask();
