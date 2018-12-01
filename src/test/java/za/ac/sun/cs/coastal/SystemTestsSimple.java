@@ -50,8 +50,8 @@ public class SystemTestsSimple {
 		assertEquals(2, reporter.getStatLong("COASTAL.dive-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
-		assertEquals(1, reporter.getStatLong("Instrumentation.cache-hit-count"));
-		assertEquals(2, reporter.getStatLong("Instrumentation.instrumented-count"));
+		assertEquals(2, reporter.getStatLong("Instrumentation.cache-hit-count"));
+		assertEquals(1, reporter.getStatLong("Instrumentation.instrumented-count"));
 		assertEquals(14, reporter.getStatLong("Instrumentation.requests-count"));
 		assertEquals(0, reporter.getStatLong("Strategy.infeasible-count"));
 		assertEquals(2, reporter.getStatLong("Strategy.inserted-paths"));
@@ -69,8 +69,8 @@ public class SystemTestsSimple {
 		assertEquals(4, reporter.getStatLong("COASTAL.dive-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
-		assertEquals(3, reporter.getStatLong("Instrumentation.cache-hit-count"));
-		assertEquals(4, reporter.getStatLong("Instrumentation.instrumented-count"));
+		assertEquals(6, reporter.getStatLong("Instrumentation.cache-hit-count"));
+		assertEquals(1, reporter.getStatLong("Instrumentation.instrumented-count"));
 		assertEquals(28, reporter.getStatLong("Instrumentation.requests-count"));
 		assertEquals(0, reporter.getStatLong("Strategy.infeasible-count"));
 		assertEquals(4, reporter.getStatLong("Strategy.inserted-paths"));
@@ -88,8 +88,8 @@ public class SystemTestsSimple {
 		assertEquals(8, reporter.getStatLong("COASTAL.dive-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
-		assertEquals(7, reporter.getStatLong("Instrumentation.cache-hit-count"));
-		assertEquals(8, reporter.getStatLong("Instrumentation.instrumented-count"));
+		assertEquals(14, reporter.getStatLong("Instrumentation.cache-hit-count"));
+		assertEquals(1, reporter.getStatLong("Instrumentation.instrumented-count"));
 		assertEquals(56, reporter.getStatLong("Instrumentation.requests-count"));
 		assertEquals(0, reporter.getStatLong("Strategy.infeasible-count"));
 		assertEquals(8, reporter.getStatLong("Strategy.inserted-paths"));
@@ -107,8 +107,8 @@ public class SystemTestsSimple {
 		assertEquals(5, reporter.getStatLong("COASTAL.dive-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
-		assertEquals(4, reporter.getStatLong("Instrumentation.cache-hit-count"));
-		assertEquals(5, reporter.getStatLong("Instrumentation.instrumented-count"));
+		assertEquals(8, reporter.getStatLong("Instrumentation.cache-hit-count"));
+		assertEquals(1, reporter.getStatLong("Instrumentation.instrumented-count"));
 		assertEquals(35, reporter.getStatLong("Instrumentation.requests-count"));
 		assertEquals(1, reporter.getStatLong("Strategy.infeasible-count"));
 		assertEquals(6, reporter.getStatLong("Strategy.inserted-paths"));
