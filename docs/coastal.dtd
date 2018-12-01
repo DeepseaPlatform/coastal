@@ -2,7 +2,7 @@
 <!ELEMENT configuration (coastal,green?)>
 <!ELEMENT coastal (jar|main|target|trigger|strategy|randomseed|delegate|observer|trace-all|echo-output|draw-paths|concrete-values|limits)*>
 <!ELEMENT jar (#PCDATA)>
-<!ATTLIST jar direction CDATA #IMPLIED>
+<!ATTLIST jar directory CDATA #IMPLIED>
 <!ELEMENT main (#PCDATA)>
 <!ELEMENT target (#PCDATA)>
 <!ELEMENT trigger (#PCDATA)>
