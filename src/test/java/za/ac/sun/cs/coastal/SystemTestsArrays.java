@@ -124,4 +124,42 @@ public class SystemTestsArrays {
 		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
 	}
 	
+	@Test
+	public void testSorting01() {
+		final Logger log = LogManager.getLogger("COASTAL-TEST");
+		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/arrays/Sorting01.xml" });
+		assertNotNull(config);
+		COASTAL coastal = new COASTAL(log, config);
+		coastal.start(false);
+		Reporter reporter = coastal.getReporter();
+		assertEquals(11, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
+		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
+		assertEquals(20, reporter.getStatLong("Instrumentation.cache-hit-count"));
+		assertEquals(1, reporter.getStatLong("Instrumentation.instrumented-count"));
+		assertEquals(88, reporter.getStatLong("Instrumentation.requests-count"));
+		assertEquals(22, reporter.getStatLong("Strategy.infeasible-count"));
+		assertEquals(33, reporter.getStatLong("Strategy.inserted-paths"));
+		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
+	}
+	
+	@Test
+	public void testSorting02() {
+		final Logger log = LogManager.getLogger("COASTAL-TEST");
+		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/arrays/Sorting02.xml" });
+		assertNotNull(config);
+		COASTAL coastal = new COASTAL(log, config);
+		coastal.start(false);
+		Reporter reporter = coastal.getReporter();
+		assertEquals(11, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
+		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
+		assertEquals(30, reporter.getStatLong("Instrumentation.cache-hit-count"));
+		assertEquals(2, reporter.getStatLong("Instrumentation.instrumented-count"));
+		assertEquals(99, reporter.getStatLong("Instrumentation.requests-count"));
+		assertEquals(22, reporter.getStatLong("Strategy.infeasible-count"));
+		assertEquals(33, reporter.getStatLong("Strategy.inserted-paths"));
+		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
+	}
+	
 }

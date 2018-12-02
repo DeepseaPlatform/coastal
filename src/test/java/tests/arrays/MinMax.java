@@ -1,4 +1,4 @@
-package examples.arrays;
+package tests.arrays;
 
 public class MinMax {
 

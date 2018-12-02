@@ -1,6 +1,6 @@
-package examples.arrays;
+package tests.arrays;
 
-public class MinMaxSorting {
+public class Sorting01 {
 
 	private static final int N = 3;
 
