@@ -2,9 +2,9 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>tests.arrays.Array03</main>
+		<main>tests.arrays.Array06</main>
 		<target>tests.arrays</target>
-		<trigger>tests.arrays.Array03.test(X: char, Y: char)</trigger>
+		<trigger>tests.arrays.Array06.test(X: byte[])</trigger>
 		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
 		<trace-all>false</trace-all>
 		<echo-output>false</echo-output>

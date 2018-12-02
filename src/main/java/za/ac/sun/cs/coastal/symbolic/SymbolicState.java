@@ -158,6 +158,7 @@ public class SymbolicState {
 		if (value == null) {
 			// THIS int.class ASSUMPTION IS SOMETIMES WRONG
 			// WE MUST INSTEAD ALSO STORE THE TYPE OF THE ARRAY ELEMS
+			// THIS PROBABLY REQUIRES A SECOND MAP LIKE instanceData
 			int min = coastal.getDefaultMinValue(int.class);
 			int max = coastal.getDefaultMaxValue(int.class);
 			value = new IntVariable(getNewVariableName(), min, max);
@@ -175,6 +176,10 @@ public class SymbolicState {
 	//		return ((IntConstant) getField(arrayId, "length")).getValue();
 	//	}
 
+	private void setArrayType(int arrayId, int type) {
+		putField(arrayId, "type", new IntConstant(type));
+	}
+	
 	private void setArrayLength(int arrayId, int length) {
 		putField(arrayId, "length", new IntConstant(length));
 	}
@@ -787,10 +792,11 @@ public class SymbolicState {
 			push(new IntConstant(operand));
 			break;
 		case Opcodes.NEWARRAY:
-			assert (operand == Opcodes.T_INT) || (operand == Opcodes.T_CHAR);
+			assert (operand == Opcodes.T_INT) || (operand == Opcodes.T_CHAR) || (operand == Opcodes.T_BYTE);
 			Expression e = pop();
 			int n = ((IntConstant) e).getValue();
 			int id = createArray();
+			setArrayType(id, operand);
 			setArrayLength(id, n);
 			for (int i = 0; i < n; i++) {
 				setArrayValue(id, i, Operation.ZERO);
