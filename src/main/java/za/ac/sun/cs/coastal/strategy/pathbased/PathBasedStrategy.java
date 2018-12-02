@@ -36,9 +36,9 @@ public abstract class PathBasedStrategy implements Strategy {
 	
 	protected final Broker broker;
 	
-	private final Green green;
+	protected final Green green;
 
-    private final Set<String> visitedModels = new HashSet<>();
+    protected final Set<String> visitedModels = new HashSet<>();
 
     public PathBasedStrategy(COASTAL coastal, StrategyManager manager) {
 		this.coastal = coastal;
@@ -65,12 +65,12 @@ public abstract class PathBasedStrategy implements Strategy {
 		return newModels;
 	}
 
-	private List<Model> refine0(SegmentedPC spc) {
+	protected List<Model> refine0(SegmentedPC spc) {
 		if ((spc == null) || (spc == SegmentedPC.NULL)) {
 			return null;
 		}
 		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
-		manager.insertPath(spc, false);
+		manager.insertPath(spc, false); // ignore revisited return value
 		while (true) {
 			spc = findNewPath(manager.getPathTree());
 			if (spc == null) {
@@ -99,9 +99,9 @@ public abstract class PathBasedStrategy implements Strategy {
 		}
 	}
 
-	public abstract SegmentedPC findNewPath(PathTree pathTree);
+	protected abstract SegmentedPC findNewPath(PathTree pathTree);
 
-	private Map<String, Constant> findModel(Expression pc) {
+	protected Map<String, Constant> findModel(Expression pc) {
 		Instance instance = new Instance(green, null, pc);
 		long t = System.currentTimeMillis();
 		@SuppressWarnings("unchecked")
