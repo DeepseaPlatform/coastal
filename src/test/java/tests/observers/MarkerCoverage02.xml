@@ -5,6 +5,20 @@
 		<main>tests.observers.MarkerCoverage02</main>
 		<target>tests.observers</target>
 		<trigger>tests.observers.MarkerCoverage02.compute(X: int, Y: int, Z: int)</trigger>
+		<bound name="X" min="-1000" max="1000"/>
+		<bound name="Y" min="-1000" max="1000"/>
+		<bound name="Z" min="-1000" max="1000"/>
 		<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
+		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+		<trace-all>false</trace-all>
+		<echo-output>false</echo-output>
+		<draw-paths>false</draw-paths>
+		<concrete-values>true</concrete-values>
+		<limits>
+			<runs>0</runs>
+			<time>0</time>
+			<path>0</path>
+			<conjuncts>0</conjuncts>
+		</limits>
 	</coastal>
 </configuration>
