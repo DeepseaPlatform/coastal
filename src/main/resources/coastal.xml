@@ -8,14 +8,13 @@
 		======================================================================= -->
 		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
 		<!--
-		<strategy>za.ac.sun.cs.coastal.strategy.BreadthFirstStrategy</strategy>
-		<strategy>za.ac.sun.cs.coastal.strategy.RandomStrategy</strategy>
+		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.BreadthFirstFactory</strategy>
+		<strategy seed="12348765">za.ac.sun.cs.coastal.strategy.pathbased.RandomFactory</strategy>
+		<strategy full="true" topdown="true">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+		<strategy full="true" topdown="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+		<strategy full="false" topdown="true">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+		<strategy full="false" topdown="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
 		-->
-		
-		<!-- ======================================================================
-		A random seed, used primarily for the RandomStrategy.
-		======================================================================= -->
-		<randomseed>12348765</randomseed>
 		
 		<!-- ======================================================================
 		Delegates are specified as follows:
