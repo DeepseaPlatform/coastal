@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!ELEMENT configuration (coastal,green?)>
-<!ELEMENT coastal (jar|main|target|trigger|strategy|randomseed|delegate|observer|trace-all|echo-output|draw-paths|concrete-values|limits)*>
+<!ELEMENT coastal (jar|main|target|trigger|strategy|delegate|observer|bound|trace-all|echo-output|draw-paths|concrete-values|limits)*>
 <!ELEMENT jar (#PCDATA)>
 <!ATTLIST jar directory CDATA #IMPLIED>
 <!ELEMENT main (#PCDATA)>
 <!ELEMENT target (#PCDATA)>
 <!ELEMENT trigger (#PCDATA)>
 <!ELEMENT strategy (#PCDATA)>
-<!ELEMENT randomseed (#PCDATA)>
+<!ATTLIST strategy seed NMTOKEN #IMPLIED>
+<!ATTLIST strategy full CDATA #IMPLIED>
+<!ATTLIST strategy topdown CDATA #IMPLIED>
 <!ELEMENT delegate (target,model)>
 <!ELEMENT model (#PCDATA)>
 <!ELEMENT observer (#PCDATA)>
+<!ELEMENT bound EMPTY>
+<!ATTLIST bound name ID #REQUIRED>
+<!ATTLIST bound min NMTOKEN #REQUIRED>
+<!ATTLIST bound max NMTOKEN #REQUIRED>
 <!ELEMENT trace-all (#PCDATA)>
 <!ELEMENT echo-output (#PCDATA)>
 <!ELEMENT draw-paths (#PCDATA)>
