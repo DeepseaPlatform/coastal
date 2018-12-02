@@ -246,10 +246,19 @@ public class COASTAL {
 		broker.subscribe("coastal-stop", this::report);
 		reporter = new Reporter(this);
 		classManager = new InstrumentationClassManager(this, System.getProperty("java.class.path"));
-		defaultMinIntValue = Conversion.minmax(getConfig().getInt("coastal.bound.int.min", Integer.MIN_VALUE),
-				Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1);
-		defaultMaxIntValue = Conversion.minmax(getConfig().getInt("coastal.bound.int.max", Integer.MAX_VALUE),
-				Integer.MIN_VALUE + 2, Integer.MAX_VALUE);
+		int intMin = Integer.MIN_VALUE, intMax = Integer.MAX_VALUE;
+		for (int i = 0; true; i++) {
+			String key = "coastal.bound(" + i + ")";
+			String var = getConfig().getString(key + "[@name]");
+			if (var == null) {
+				break;
+			} else if (var.equals("int")) {
+				intMin = getConfig().getInt(key + "[@min]", Integer.MIN_VALUE);
+				intMax = getConfig().getInt(key + "[@max]", Integer.MAX_VALUE);
+			}
+		}
+		defaultMinIntValue = Conversion.minmax(intMin, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1);
+		defaultMaxIntValue = Conversion.minmax(intMax, Integer.MIN_VALUE + 2, Integer.MAX_VALUE);
 		parseConfig();
 		timeLimit = Conversion.limitLong(getConfig(), "coastal.limits.time");
 		maxThreads = Conversion.minmax(getConfig().getInt("coastal.max-threads", 2), 2, Short.MAX_VALUE);
