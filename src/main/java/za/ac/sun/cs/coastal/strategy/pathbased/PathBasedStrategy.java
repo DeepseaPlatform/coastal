@@ -69,31 +69,31 @@ public abstract class PathBasedStrategy implements Strategy {
 		if ((spc == null) || (spc == SegmentedPC.NULL)) {
 			return null;
 		}
-		log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
+		log.info("... explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 		manager.insertPath(spc, false); // ignore revisited return value
 		while (true) {
 			spc = findNewPath(manager.getPathTree());
 			if (spc == null) {
-				log.info("no further paths");
+				log.info("... no further paths");
 				return null;
 				// log.trace("Tree shape: {}", pathTree.getShape());
 			}
 			Expression pc = spc.getPathCondition();
 			String sig = spc.getSignature();
-			log.info("trying   <{}> {}", sig, pc.toString());
+			log.info("... trying   <{}> {}", sig, pc.toString());
 			Map<String, Constant> model = findModel(pc);
 			if (model == null) {
-				log.info("no model");
+				log.info("... no model");
 				log.trace("(The spc is {})", spc.getPathCondition().toString());
 				manager.insertPath(spc, true);
 				manager.incrementInfeasibleCount();
 			} else {
 				String modelString = model.toString();
-				log.info("new model: {}", modelString);
+				log.info("... new model: {}", modelString);
 				if (visitedModels.add(modelString)) {
 					return Collections.singletonList(new Model(0, model));
 				} else {
-					log.info("model {} has been visited before, retrying", modelString);
+					log.info("... model {} has been visited before, retrying", modelString);
 				}
 			}
 		}

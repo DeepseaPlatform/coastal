@@ -156,8 +156,10 @@ public class SymbolicState {
 		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
 		Expression value = instanceData.get(fullFieldName);
 		if (value == null) {
-			int min = coastal.getDefaultMinIntValue();
-			int max = coastal.getDefaultMaxIntValue();
+			// THIS int.class ASSUMPTION IS SOMETIMES WRONG
+			// WE MUST INSTEAD ALSO STORE THE TYPE OF THE ARRAY ELEMS
+			int min = coastal.getDefaultMinValue(int.class);
+			int max = coastal.getDefaultMaxValue(int.class);
 			value = new IntVariable(getNewVariableName(), min, max);
 			instanceData.put(fullFieldName, value);
 		}
@@ -372,8 +374,9 @@ public class SymbolicState {
 			setLocal(address, new IntConstant(currentValue));
 			return currentValue;
 		}
-		int min = coastal.getMinBound(name);
-		int max = coastal.getMaxBound(name);
+		Class<?> type = trigger.getParamType(index);
+		int min = coastal.getMinBound(name, type);
+		int max = coastal.getMaxBound(name, type);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : concrete.getValue();
@@ -386,8 +389,9 @@ public class SymbolicState {
 			setLocal(address, new IntConstant(currentValue));
 			return currentValue;
 		}
-		int min = coastal.getMinBound(name);
-		int max = coastal.getMaxBound(name);
+		Class<?> type = trigger.getParamType(index);
+		int min = coastal.getMinBound(name, type);
+		int max = coastal.getMaxBound(name, type);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : (char) concrete.getValue();
@@ -400,8 +404,9 @@ public class SymbolicState {
 			setLocal(address, new IntConstant(currentValue));
 			return currentValue;
 		}
-		int min = coastal.getMinBound(name);
-		int max = coastal.getMaxBound(name);
+		Class<?> type = trigger.getParamType(index);
+		int min = coastal.getMinBound(name, type);
+		int max = coastal.getMaxBound(name, type);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : (byte) concrete.getValue();
@@ -459,8 +464,9 @@ public class SymbolicState {
 				} else {
 					value[i] = currentValue[i];
 				}
-				int min = coastal.getMinBound(entryName, name);
-				int max = coastal.getMaxBound(entryName, name);
+				Class<?> type = trigger.getParamType(index);
+				int min = coastal.getMinBound(entryName, name, type);
+				int max = coastal.getMaxBound(entryName, name, type);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}
@@ -491,8 +497,9 @@ public class SymbolicState {
 				} else {
 					value[i] = currentValue[i];
 				}
-				int min = coastal.getMinBound(entryName, name);
-				int max = coastal.getMaxBound(entryName, name);
+				Class<?> type = trigger.getParamType(index);
+				int min = coastal.getMinBound(entryName, name, type);
+				int max = coastal.getMaxBound(entryName, name, type);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}
@@ -523,8 +530,9 @@ public class SymbolicState {
 				} else {
 					value[i] = currentValue[i];
 				}
-				int min = coastal.getMinBound(entryName, name);
-				int max = coastal.getMaxBound(entryName, name);
+				Class<?> type = trigger.getParamType(index);
+				int min = coastal.getMinBound(entryName, name, type);
+				int max = coastal.getMaxBound(entryName, name, type);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}
@@ -779,7 +787,7 @@ public class SymbolicState {
 			push(new IntConstant(operand));
 			break;
 		case Opcodes.NEWARRAY:
-			assert operand == Opcodes.T_INT;
+			assert (operand == Opcodes.T_INT) || (operand == Opcodes.T_CHAR);
 			Expression e = pop();
 			int n = ((IntConstant) e).getValue();
 			int id = createArray();

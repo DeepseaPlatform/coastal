@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<main>tests.arrays.Array03</main>
+		<target>tests.arrays</target>
+		<trigger>tests.arrays.Array03.test(X: char, Y: char)</trigger>
+		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+		<trace-all>false</trace-all>
+		<echo-output>false</echo-output>
+		<draw-paths>true</draw-paths>
+		<concrete-values>true</concrete-values>
+		<limits>
+			<runs>0</runs>
+			<time>0</time>
+			<path>0</path>
+			<conjuncts>0</conjuncts>
+		</limits>
+	</coastal>
+</configuration>

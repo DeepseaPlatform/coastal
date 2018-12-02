@@ -87,6 +87,7 @@ public class PathTree {
 			lock.writeLock().lock();
 			try {
 				if (root == null) {
+					log.trace("::: creating root");
 					root = PathTreeNode.createNode(path[0], path[0].getNrOfOutcomes());
 				}
 			} finally {
@@ -130,7 +131,6 @@ public class PathTree {
 		PathTreeNode[] visitedNodes = new PathTreeNode[depth];
 		PathTreeNode parent = root;
 		visitedNodes[0] = root;
-		// RECORD THE ROOT AS WE MOVE DOWN *** TO DO ??? WHY?
 		int i = path[0].getOutcomeIndex();
 		for (int j = 1; j < depth; j++) {
 			log.trace("::: insert(parent:{}, conjunct:{}, cur/depth:{}/{})", getId(parent), path[j].getActiveConjunct(),

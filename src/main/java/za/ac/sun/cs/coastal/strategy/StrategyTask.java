@@ -5,7 +5,6 @@ import java.util.concurrent.Callable;
 
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
@@ -34,14 +33,14 @@ public class StrategyTask implements Callable<Void> {
 		try {
 			while (true) {
 				SegmentedPC spc = coastal.getNextPc();
-				log.info(Banner.getBannerLine("starting refinement, spc == " + spc, '-')); // DEBUGGING
+				log.info("+++ starting refinement");
 				List<Model> mdls = strategy.refine(spc);
 				int d = -1;
 				if (mdls != null) {
 					coastal.addModels(mdls);
 					d = mdls.size() - 1;
 				}
-				log.info(Banner.getBannerLine("added models d == " + d, '-')); // DEBUGGING
+				log.info("+++ added {} models", d);
 				coastal.updateWork(d);
 			}
 		} catch (InterruptedException e) {

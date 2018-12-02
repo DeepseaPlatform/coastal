@@ -105,6 +105,36 @@ public class COASTAL {
 	private final int defaultMaxIntValue;
 
 	/**
+	 * The default minimum bound for characters.
+	 */
+	private final int defaultMinCharValue;
+
+	/**
+	 * The default maximum bound for characters.
+	 */
+	private final int defaultMaxCharValue;
+
+	/**
+	 * The default minimum bound for booleans.
+	 */
+	private final int defaultMinBooleanValue;
+
+	/**
+	 * The default maximum bound for booleans.
+	 */
+	private final int defaultMaxBooleanValue;
+
+	/**
+	 * The default minimum bound for bytes.
+	 */
+	private final int defaultMinByteValue;
+
+	/**
+	 * The default maximum bound for bytes.
+	 */
+	private final int defaultMaxByteValue;
+
+	/**
 	 * A map from variable names to their lower bounds.
 	 */
 	private final Map<String, Integer> minBounds = new HashMap<>();
@@ -247,6 +277,7 @@ public class COASTAL {
 		reporter = new Reporter(this);
 		classManager = new InstrumentationClassManager(this, System.getProperty("java.class.path"));
 		int intMin = Integer.MIN_VALUE, intMax = Integer.MAX_VALUE;
+		int charMin = Character.MIN_VALUE, charMax = Character.MAX_VALUE;
 		for (int i = 0; true; i++) {
 			String key = "coastal.bound(" + i + ")";
 			String var = getConfig().getString(key + "[@name]");
@@ -255,10 +286,19 @@ public class COASTAL {
 			} else if (var.equals("int")) {
 				intMin = getConfig().getInt(key + "[@min]", Integer.MIN_VALUE);
 				intMax = getConfig().getInt(key + "[@max]", Integer.MAX_VALUE);
+			} else if (var.equals("char")) {
+				charMin = getConfig().getInt(key + "[@min]", Character.MIN_VALUE);
+				charMax = getConfig().getInt(key + "[@max]", Character.MAX_VALUE);
 			}
 		}
 		defaultMinIntValue = Conversion.minmax(intMin, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1);
 		defaultMaxIntValue = Conversion.minmax(intMax, Integer.MIN_VALUE + 2, Integer.MAX_VALUE);
+		defaultMinCharValue = Conversion.minmax(charMin, Character.MIN_VALUE, Character.MAX_VALUE - 1);
+		defaultMaxCharValue = Conversion.minmax(charMax, Character.MIN_VALUE + 1, Character.MAX_VALUE);
+		defaultMinBooleanValue = 0;
+		defaultMaxBooleanValue = 1;
+		defaultMinByteValue = Conversion.minmax(charMin, Byte.MIN_VALUE, Byte.MAX_VALUE - 1);
+		defaultMaxByteValue = Conversion.minmax(charMax, Byte.MIN_VALUE + 1, Byte.MAX_VALUE);
 		parseConfig();
 		timeLimit = Conversion.limitLong(getConfig(), "coastal.limits.time");
 		maxThreads = Conversion.minmax(getConfig().getInt("coastal.max-threads", 2), 2, Short.MAX_VALUE);
@@ -499,24 +539,38 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the lower bound for symbolic integer variables with an explicit
-	 * bound of their own.
+	 * Return the lower bound for symbolic variables without an explicit bound
+	 * of their own.
 	 * 
-	 * @return the lower bound for symbolic integers
+	 * @param type
+	 *            the type of the variable
+	 * @return the lower bound for symbolic variables
 	 */
-	public int getDefaultMinIntValue() {
-		return defaultMinIntValue;
+	public int getDefaultMinValue(Class<?> type) {
+		if ((type == boolean.class) || (type == boolean[].class)) {
+			return defaultMinBooleanValue;
+		} else if ((type == int.class) || (type == int[].class)) {
+			return defaultMinIntValue;
+		} else if ((type == byte.class) || (type == byte[].class)) {
+			return defaultMinByteValue;
+		} else if ((type == char.class) || (type == char[].class)) {
+			return defaultMinCharValue;
+		} else {
+			return defaultMinIntValue;
+		}
 	}
 
 	/**
-	 * Return the lower bound for the specified symbolic integer variable.
+	 * Return the lower bound for the specified symbolic variable.
 	 * 
 	 * @param variable
 	 *            the name of the variable
+	 * @param type
+	 *            the type of the variable
 	 * @return the lower bound for the variable
 	 */
-	public int getMinBound(String variable) {
-		return getMinBound(variable, getDefaultMinIntValue());
+	public int getMinBound(String variable, Class<?> type) {
+		return getMinBound(variable, getDefaultMinValue(type));
 	}
 
 	/**
@@ -531,15 +585,17 @@ public class COASTAL {
 	 *            the name of the specific variable
 	 * @param variable2
 	 *            the name of the more general variable
+	 * @param type
+	 *            the type of the variables
 	 * @return the lower bound for either variable
 	 */
-	public int getMinBound(String variable1, String variable2) {
-		return getMinBound(variable1, getMinBound(variable2, getDefaultMinIntValue()));
+	public int getMinBound(String variable1, String variable2, Class<?> type) {
+		return getMinBound(variable1, getMinBound(variable2, type));
 	}
 
 	/**
-	 * Return the lower bound for the specified symbolic integer variable. If
-	 * there is no explicit bound, the specified default value is returned.
+	 * Return the lower bound for the specified symbolic variable. If there is
+	 * no explicit bound, the specified default value is returned.
 	 * 
 	 * @param variable
 	 *            the name of the variable
@@ -556,24 +612,38 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the upper bound for symbolic integer variables with an explicit
-	 * bound of their own.
+	 * Return the upper bound for symbolic variables without an explicit bound
+	 * of their own.
 	 * 
-	 * @return the upper bound for symbolic integers
+	 * @param type
+	 *            the type of the variable
+	 * @return the upper bound for symbolic variables
 	 */
-	public int getDefaultMaxIntValue() {
-		return defaultMaxIntValue;
+	public int getDefaultMaxValue(Class<?> type) {
+		if ((type == boolean.class) || (type == boolean[].class)) {
+			return defaultMaxBooleanValue;
+		} else if ((type == int.class) || (type == int[].class)) {
+			return defaultMaxIntValue;
+		} else if ((type == byte.class) || (type == byte[].class)) {
+			return defaultMaxByteValue;
+		} else if ((type == char.class) || (type == char[].class)) {
+			return defaultMaxCharValue;
+		} else {
+			return defaultMaxIntValue;
+		}
 	}
 
 	/**
-	 * Return the upper bound for the specified symbolic integer variable.
+	 * Return the upper bound for the specified symbolic variable.
 	 * 
 	 * @param variable
 	 *            the name of the variable
+	 * @param type
+	 *            the type of the variable
 	 * @return the upper bound for the variable
 	 */
-	public int getMaxBound(String variable) {
-		return getMaxBound(variable, getDefaultMaxIntValue());
+	public int getMaxBound(String variable, Class<?> type) {
+		return getMaxBound(variable, getDefaultMaxValue(type));
 	}
 
 	/**
@@ -588,10 +658,12 @@ public class COASTAL {
 	 *            the name of the specific variable
 	 * @param variable2
 	 *            the name of the more general variable
+	 * @param type
+	 *            the type of the variables
 	 * @return the upper bound for either variable
 	 */
-	public int getMaxBound(String variable1, String variable2) {
-		return getMaxBound(variable1, getMaxBound(variable2, getDefaultMaxIntValue()));
+	public int getMaxBound(String variable1, String variable2, Class<?> type) {
+		return getMaxBound(variable1, getMaxBound(variable2, type));
 	}
 
 	/**
