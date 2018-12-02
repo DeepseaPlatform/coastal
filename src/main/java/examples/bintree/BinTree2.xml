@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<main>examples.bintree.BinTree2</main>
+		<target>examples.bintree</target>
+		<trigger>examples.bintree.BinTree2.runExplicit2(o1: int, o2: int, v1: int, v2: int)</trigger>
+		<bound name="o1" min="0" max="1"/>
+		<bound name="o2" min="0" max="1"/>
+		<bound name="v1" min="0" max="9"/>
+		<bound name="v2" min="0" max="9"/>
+	</coastal>
+</configuration>

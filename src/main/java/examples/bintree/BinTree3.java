@@ -1,4 +1,4 @@
-package examples.spf;
+package examples.bintree;
 //import gov.nasa.jpf.symbc.Debug;
 
 //
@@ -20,7 +20,7 @@ package examples.spf;
 // DOCUMENTATION, IF PROVIDED, WILL CONFORM TO THE SUBJECT SOFTWARE.
 //
 
-public class BinTree4 {
+public class BinTree3 {
 
 	private static class Node {
 
@@ -38,16 +38,18 @@ public class BinTree4 {
 
 	private Node root;
 
-	public BinTree4() {
+	public BinTree3() {
 		root = null;
 	}
 
-	private void add(int x) {
+	public void add(int x) {
 		Node current = root;
+
 		if (root == null) {
 			root = new Node(x);
 			return;
 		}
+
 		while (current.value != x) {
 			if (current.value > x) {
 				if (current.left == null) {
@@ -110,9 +112,8 @@ public class BinTree4 {
 		return false;
 	}
 
-	public static void runExplicit4(int option1, int option2, int option3, int option4, int value1, int value2,
-			int value3, int value4) {
-		BinTree4 b = new BinTree4();
+	private static void runExplicit3(int option1, int option2, int option3, int value1, int value2, int value3) {
+		BinTree3 b = new BinTree3();
 		if (option1 == 1) {
 			b.add(value1);
 		} else {
@@ -128,15 +129,10 @@ public class BinTree4 {
 		} else {
 			b.remove(value3);
 		}
-		if (option4 == 1) {
-			b.add(value4);
-		} else {
-			b.remove(value4);
-		}
 	}
 
 	public static void main(String[] args) {
-		runExplicit4(1, 1, 1, 1, 1, 1, 1, 1);
+		runExplicit3(1, 1, 1, 1, 1, 1);
 	}
 
 }
