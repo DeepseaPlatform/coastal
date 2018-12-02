@@ -32,13 +32,13 @@ public class GenerationalFactory implements StrategyFactory {
 			return new GenerationalStrategy(coastal, manager);
 		}
 	}
-	
+
 	// ======================================================================
 	//
 	// SPECIFIC MANAGER
 	//
 	// ======================================================================
-	
+
 	private static class GenerationalManager extends PathBasedManager {
 
 		private final int priorityStart;
@@ -46,7 +46,7 @@ public class GenerationalFactory implements StrategyFactory {
 		private final int priorityDelta;
 
 		private final boolean full;
-	
+
 		GenerationalManager(COASTAL coastal) {
 			super(coastal);
 			if (coastal.getConfig().getBoolean("coastal.strategy[@topdown]", false)) {
@@ -72,7 +72,7 @@ public class GenerationalFactory implements StrategyFactory {
 		private final int priorityStart;
 
 		private final int priorityDelta;
-		
+
 		GenerationalFullStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 			priorityStart = ((GenerationalManager) manager).priorityStart;
@@ -143,19 +143,19 @@ public class GenerationalFactory implements StrategyFactory {
 	// SPECIFIC STRATEGY FOR TRUNCATED PATH CONDITIONS
 	//
 	// ======================================================================
-	
+
 	private static class GenerationalStrategy extends PathBasedStrategy {
-		
+
 		private final int priorityStart;
-		
+
 		private final int priorityDelta;
-		
+
 		GenerationalStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 			priorityStart = ((GenerationalManager) manager).priorityStart;
 			priorityDelta = ((GenerationalManager) manager).priorityDelta;
 		}
-		
+
 		@Override
 		protected List<Model> refine0(SegmentedPC spc) {
 			if ((spc == null) || (spc == SegmentedPC.NULL)) {
@@ -195,7 +195,7 @@ public class GenerationalFactory implements StrategyFactory {
 			}
 			return models;
 		}
-		
+
 		private SegmentedPC generateAltSpc(SegmentedPC pointer) {
 			SegmentedPC parent = pointer.getParent();
 			Expression pc = pointer.getExpression();
@@ -203,12 +203,12 @@ public class GenerationalFactory implements StrategyFactory {
 			boolean value = ((SegmentedPCIf) pointer).getValue();
 			return new SegmentedPCIf(parent, pc, passive, !value);
 		}
-		
+
 		@Override
 		protected SegmentedPC findNewPath(PathTree pathTree) {
 			return null;
 		}
-		
+
 	}
-	
+
 }
