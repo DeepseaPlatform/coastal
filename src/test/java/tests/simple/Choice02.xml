@@ -5,5 +5,18 @@
 		<main>tests.simple.Choice02</main>
 		<target>tests.simple</target>
 		<trigger>tests.simple.Choice02.run(X: int, Y: int)</trigger>
+		<bound name="X" min="-1000" max="1000"/>
+		<bound name="Y" min="-1000" max="1000"/>
+		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+		<trace-all>false</trace-all>
+		<echo-output>false</echo-output>
+		<draw-paths>false</draw-paths>
+		<concrete-values>true</concrete-values>
+		<limits>
+			<runs>0</runs>
+			<time>0</time>
+			<path>0</path>
+			<conjuncts>0</conjuncts>
+		</limits>
 	</coastal>
 </configuration>
