@@ -32,6 +32,7 @@ import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.io.FileHandler;
+import org.apache.commons.configuration2.tree.OverrideCombiner;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -920,15 +921,8 @@ public class COASTAL {
 	}
 
 	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args, String extra) {
-		CombinedConfiguration config = new CombinedConfiguration();
 		Configuration cfg1 = loadConfigFromResource(log, COASTAL_CONFIGURATION);
-		if (cfg1 != null) {
-			config.addConfiguration(cfg1);
-		}
 		Configuration cfg2 = loadConfigFromFile(log, HOME_CONFIGURATION);
-		if (cfg2 != null) {
-			config.addConfiguration(cfg2);
-		}
 		if (args.length < 1) {
 			Banner bn = new Banner('@');
 			bn.println("MISSING PROPERTIES FILE\n");
@@ -944,9 +938,7 @@ public class COASTAL {
 		if (cfg3 == null) {
 			cfg3 = loadConfigFromResource(log, filename);
 		}
-		if (cfg3 != null) {
-			config.addConfiguration(cfg3);
-		} else {
+		if (cfg3 == null) {
 			Banner bn = new Banner('@');
 			bn.println("COASTAL PROBLEM\n");
 			bn.println("COULD NOT READ CONFIGURATION FILE \"" + filename + "\"");
@@ -954,8 +946,18 @@ public class COASTAL {
 			return null;
 		}
 		Configuration cfg4 = loadConfigFromString(log, extra);
+		CombinedConfiguration config = new CombinedConfiguration(new OverrideCombiner());
 		if (cfg4 != null) {
 			config.addConfiguration(cfg4);
+		}
+		if (cfg3 != null) {
+			config.addConfiguration(cfg3);
+		}
+		if (cfg2 != null) {
+			config.addConfiguration(cfg2);
+		}
+		if (cfg1 != null) {
+			config.addConfiguration(cfg1);
 		}
 		if (config.getString("coastal.main") == null) {
 			Banner bn = new Banner('@');
