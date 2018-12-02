@@ -52,10 +52,10 @@
 		the number of conjuncts per path.
 		======================================================================= -->
 		<limits>
-			<!-- <runs>0</runs> -->
-			<!-- <time>0</time> -->
-			<!-- <path>0</path> -->
-			<!-- <conjuncts>0</conjuncts> -->
+			<runs>0</runs>
+			<time>0</time>
+			<path>0</path>
+			<conjuncts>0</conjuncts>
 		</limits>
 
 	</coastal>
