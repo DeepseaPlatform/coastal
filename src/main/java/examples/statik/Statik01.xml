@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<main>examples.statik.Statik01</main>
+		<target>examples.statik</target>
+		<trigger>examples.statik.Statik01.run(X: int)</trigger>
+		<trace-all>true</trace-all>
+		<draw-paths>true</draw-paths>
+	</coastal>
+</configuration>

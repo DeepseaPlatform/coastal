@@ -25,9 +25,11 @@
 			<model>za.ac.sun.cs.coastal.model.String</model>
 		</delegate>
 		-->
-		
-		<!-- ======================================================================
-		Whether or not the program's original output is shown.
+
+	<!-- ====================================================================== 
+		Whether or not COASTAL keeps track (updates the symbolic state) of the entire 
+		run of the program. This is necessary when, for example, a class contains 
+		static fields.
 		======================================================================= -->
 		<trace-all>false</trace-all>
 		

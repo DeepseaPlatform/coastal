@@ -1106,6 +1106,10 @@ public class SymbolicState {
 			case Opcodes.IFGE:
 			case Opcodes.IFGT:
 			case Opcodes.IFLE:
+			case Opcodes.IFNULL:
+			case Opcodes.IFNONNULL:
+				pop();
+				break;
 			case Opcodes.IF_ICMPEQ:
 			case Opcodes.IF_ICMPNE:
 			case Opcodes.IF_ICMPLT:
@@ -1114,8 +1118,7 @@ public class SymbolicState {
 			case Opcodes.IF_ICMPLE:
 			case Opcodes.IF_ACMPEQ:
 			case Opcodes.IF_ACMPNE:
-			case Opcodes.IFNULL:
-			case Opcodes.IFNONNULL:
+				pop();
 				pop();
 				break;
 			default:
