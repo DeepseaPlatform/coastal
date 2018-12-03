@@ -32,7 +32,10 @@ public class StrategyTask implements Callable<Void> {
 		log.info("^^^ strategy task starting");
 		try {
 			while (true) {
+				long t0 = System.currentTimeMillis();
 				SegmentedPC spc = coastal.getNextPc();
+				long t1 = System.currentTimeMillis();
+				coastal.recordStrategyWaitTime(t1 - t0);
 				log.info("+++ starting refinement");
 				List<Model> mdls = strategy.refine(spc);
 				int d = -1;

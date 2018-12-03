@@ -12,8 +12,8 @@ public class KMP {
 	}
 
 	public static void main(String[] args) {
-		int[] haystack = { 1, 2, 3, 4, 5 };
-		int[] needle = { 1, 2, 3 };
+		int[] haystack = { 1, 2, 3, 4, 5, 6, 7 };
+		int[] needle = { 1, 2, 3, 4 };
 		System.out.println(search(haystack, needle));
 	}
 

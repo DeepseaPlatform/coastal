@@ -89,13 +89,13 @@ public class SymbolicState {
 
 	private final Stack<Expression> pendingSwitch = new Stack<>();
 
-	public SymbolicState(COASTAL coastal) throws InterruptedException {
+	public SymbolicState(COASTAL coastal, Map<String, Constant> concreteValues) throws InterruptedException {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();
 		limitConjuncts = Conversion.limitLong(coastal.getConfig(), "coastal.limit.conjuncts");
 		traceAll = coastal.getConfig().getBoolean("coastal.trace-all", false);
-		this.concreteValues = coastal.getNextModel();
+		this.concreteValues = concreteValues;
 		symbolicMode = traceAll;
 	}
 

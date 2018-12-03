@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.configuration2.ImmutableConfiguration;
@@ -16,6 +17,7 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverManager;
+import za.ac.sun.cs.green.expr.Constant;
 
 public class Diver implements Callable<Void> {
 
@@ -45,12 +47,15 @@ public class Diver implements Callable<Void> {
 		try {
 			while (true) {
 				long t0 = System.currentTimeMillis();
-				SymbolicState symbolicState = new SymbolicState(coastal);
+				Map<String, Constant> concreteValues = coastal.getNextModel();
+				long t1 = System.currentTimeMillis();
+				coastal.recordDiveWaitTime(t1 - t0);
+				SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
 				log.info(Banner.getBannerLine("starting dive " + coastal.getNextDiveCount(), '-'));
 				ClassLoader classLoader = coastal.getClassManager().createClassLoader(symbolicState);
 				// SymbolicVM.setState(symbolicState);
 				performRun(classLoader);
-				coastal.recordDiveTime(System.currentTimeMillis() - t0);
+				coastal.recordDiveTime(System.currentTimeMillis() - t1);
 				// ----> disposition.notifyPathListeners(symbolicState);
 				SegmentedPC spc = symbolicState.getSegmentedPathCondition();
 				coastal.addPc(spc);

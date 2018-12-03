@@ -199,6 +199,26 @@ public class COASTAL {
 	private final AtomicLong diveTime = new AtomicLong(0);
 
 	/**
+	 * Accumulator of all the dive waiting times.
+	 */
+	private final AtomicLong diveWaitTime = new AtomicLong(0);
+
+	/**
+	 * Counter for the dive waiting times.
+	 */
+	private final AtomicLong diveWaitCount = new AtomicLong(0);
+
+	/**
+	 * Accumulator of all the strategy waiting times.
+	 */
+	private final AtomicLong strategyWaitTime = new AtomicLong(0);
+
+	/**
+	 * Counter for the strategy waiting times.
+	 */
+	private final AtomicLong strategyWaitCount = new AtomicLong(0);
+
+	/**
 	 * The number of diver tasks started (ever).
 	 */
 	private int diverTaskCount = 0;
@@ -705,6 +725,30 @@ public class COASTAL {
 	}
 
 	/**
+	 * Add a reported dive wait time. This is used to determine if it makes
+	 * sense to create additional threads (or destroy them).
+	 * 
+	 * @param time
+	 *            the wait time for this dive
+	 */
+	public void recordDiveWaitTime(long time) {
+		diveWaitTime.addAndGet(time);
+		diveWaitCount.incrementAndGet();
+	}
+
+	/**
+	 * Add a reported strategy wait time. This is used to determine if it makes
+	 * sense to create additional threads (or destroy them).
+	 * 
+	 * @param time
+	 *            the wait time for this dive
+	 */
+	public void recordStrategyWaitTime(long time) {
+		strategyWaitTime.addAndGet(time);
+		strategyWaitCount.incrementAndGet();
+	}
+
+	/**
 	 * Add the first model to the queue of models. This kicks off the analysis
 	 * run.
 	 * 
@@ -925,7 +969,11 @@ public class COASTAL {
 		getBroker().publish("report", new Tuple("COASTAL.diver-tasks", diverTaskCount));
 		getBroker().publish("report", new Tuple("COASTAL.dive-count", diveCount.get()));
 		getBroker().publish("report", new Tuple("COASTAL.dive-time", diveTime.get()));
+		getBroker().publish("report",
+				new Tuple("COASTAL.dive-wait-time", diveWaitTime.get() / diveWaitCount.doubleValue()));
 		getBroker().publish("report", new Tuple("COASTAL.strategy-tasks", strategyTaskCount));
+		getBroker().publish("report",
+				new Tuple("COASTAL.strategy-wait-time", strategyWaitTime.get() / strategyWaitCount.doubleValue()));
 	}
 
 	// ======================================================================

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<main>examples.kmp.KMP</main>
+		<target>examples.kmp</target>
+		<trigger>examples.kmp.KMP.search(H: int[], N: int[])</trigger>
+	</coastal>
+</configuration>
