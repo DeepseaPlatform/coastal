@@ -93,6 +93,7 @@ public abstract class PathBasedStrategy implements Strategy {
 				if (visitedModels.add(modelString)) {
 					return Collections.singletonList(new Model(0, model));
 				} else {
+					manager.insertPath(spc, false);
 					log.info("... model {} has been visited before, retrying", modelString);
 				}
 			}
