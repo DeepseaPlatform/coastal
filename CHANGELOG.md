@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- ...
+
+### Changed
+- ...
+
+### Deprecated
+- ...
+
+### Removed
+- ...
+
+### Fixed
+- ...
+
+## [0.0.1]
+
+### Added
 - Exception handling
 - Symbolic operations in examples such as analysis termination and markers
 - Some initial documentation
