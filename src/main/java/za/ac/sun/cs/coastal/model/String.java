@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal.model;
 
+import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.symbolic.SymbolicVM;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
@@ -17,7 +18,7 @@ public class String {
 
 	private static final Expression MONE = new IntConstant(-1);
 
-	public String() {
+	public String(COASTAL coastal) {
 	}
 
 	public boolean length____I() {

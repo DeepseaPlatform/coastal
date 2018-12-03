@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<main>examples.strings.Mystery</main>
+		<target>examples.strings</target>
+		<trigger>examples.strings.Mystery.preserveSomeHtmlTagsAndRemoveWhitespaces(S: string)</trigger>
+		<delegate>
+			<target>java.lang.String</target>
+			<model>za.ac.sun.cs.coastal.model.String</model>
+		</delegate>
+		<observer>za.ac.sun.cs.coastal.observers.StopControllerFactory</observer>
+	</coastal>
+</configuration>
