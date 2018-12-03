@@ -10,7 +10,9 @@
 			<model>za.ac.sun.cs.coastal.model.String</model>
 		</delegate>
 		<observer>za.ac.sun.cs.coastal.observers.StopControllerFactory</observer>
-		<draw-paths>true</draw-paths>
-		<concrete-values>false</concrete-values>
+		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.BreadthFirstFactory</strategy>
+		<!--
+		<strategy seed="2323212">za.ac.sun.cs.coastal.strategy.pathbased.RandomPathFactory</strategy>
+		-->
 	</coastal>
 </configuration>

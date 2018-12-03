@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class StopControllerFactory implements ObserverFactory {
@@ -38,21 +39,37 @@ public class StopControllerFactory implements ObserverFactory {
 
 		private final COASTAL coastal;
 
+		private final Broker broker;
+
+		private boolean wasStopped = false;
+
+		private String stopMessage = null;
+
 		StopManager(COASTAL coastal) {
 			log = coastal.getLog();
 			this.coastal = coastal;
-			coastal.getBroker().subscribe("stop", this::stop);
+			broker = coastal.getBroker();
+			broker.subscribe("stop", this::stop);
+			broker.subscribe("coastal-stop", this::report);
+		}
+
+		public void report(Object object) {
+			broker.publish("report", new Tuple("StopController.was-stopped", wasStopped));
+			if (stopMessage != null) {
+				broker.publish("report", new Tuple("StopController.message", stopMessage));
+			}
 		}
 
 		public void stop(Object object) {
 			Tuple tuple = (Tuple) object;
 			coastal.stopWork();
-			String message = (String) tuple.get(1);
-			if (message == null) {
+			stopMessage = (String) tuple.get(1);
+			if (stopMessage == null) {
 				new Banner('!').println("PROGRAM TERMINATION POINT REACHED").display(log);
 			} else {
-				new Banner('!').println("PROGRAM TERMINATION POINT REACHED").println(message).display(log);
+				new Banner('!').println("PROGRAM TERMINATION POINT REACHED").println(stopMessage).display(log);
 			}
+			wasStopped = true;
 		}
 
 	}

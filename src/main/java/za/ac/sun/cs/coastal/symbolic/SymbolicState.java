@@ -301,9 +301,9 @@ public class SymbolicState {
 		log.trace("--> data:{}", instanceData);
 	}
 
-	private static final Class<?>[] EMPTY_PARAMETERS = new Class<?>[0];
+	private static final Class<?>[] DELEGATE_PARAMETERS = new Class<?>[] { SymbolicState.class };
 
-	private static final Object[] EMPTY_ARGUMENTS = new Object[0];
+	private final Object[] delegateArguments = new Object[] { this };
 
 	private boolean executeDelegate(String owner, String name, String descriptor) {
 		Object delegate = coastal.findDelegate(owner);
@@ -313,7 +313,7 @@ public class SymbolicState {
 		String methodName = name + getAsciiSignature(descriptor);
 		Method delegateMethod = null;
 		try {
-			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, EMPTY_PARAMETERS);
+			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, DELEGATE_PARAMETERS);
 		} catch (NoSuchMethodException | SecurityException e) {
 			log.trace("@@@ no delegate: {}", methodName);
 			return false;
@@ -321,7 +321,7 @@ public class SymbolicState {
 		assert delegateMethod != null;
 		log.trace("@@@ found delegate: {}", methodName);
 		try {
-			if ((boolean) delegateMethod.invoke(delegate, EMPTY_ARGUMENTS)) {
+			if ((boolean) delegateMethod.invoke(delegate, delegateArguments)) {
 				justExecutedDelegate = true;
 				return true;
 			}

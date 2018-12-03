@@ -1,7 +1,7 @@
 package za.ac.sun.cs.coastal.model;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.symbolic.SymbolicVM;
+import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
@@ -19,17 +19,17 @@ public class Math {
 		max = coastal.getDefaultMaxValue(int.class);
 	}
 
-	public boolean max__II__I() {
-		Expression arg0 = SymbolicVM.pop();
-		Expression arg1 = SymbolicVM.pop();
-		Expression var = new IntVariable(SymbolicVM.getNewVariableName(), min, max);
+	public boolean max__II__I(SymbolicState state) {
+		Expression arg0 = state.pop();
+		Expression arg1 = state.pop();
+		Expression var = new IntVariable(state.getNewVariableName(), min, max);
 		Expression pc = new Operation(Operator.OR,
 				new Operation(Operator.AND, new Operation(Operator.GE, arg0, arg1),
 						new Operation(Operator.EQ, arg0, var)),
 				new Operation(Operator.AND, new Operation(Operator.LT, arg0, arg1),
 						new Operation(Operator.EQ, arg1, var)));
-		SymbolicVM.pushExtraConjunct(pc);
-		SymbolicVM.push(var);
+		state.pushExtraConjunct(pc);
+		state.push(var);
 		return true;
 	}
 

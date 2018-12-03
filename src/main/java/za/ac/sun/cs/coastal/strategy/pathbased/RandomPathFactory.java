@@ -10,6 +10,9 @@ import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
 public class RandomPathFactory implements StrategyFactory {
 
+	public RandomPathFactory(COASTAL coastal) {
+	}
+
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
 		return new PathBasedManager(coastal);
@@ -32,7 +35,7 @@ public class RandomPathFactory implements StrategyFactory {
 
 		RandomPathStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
-			Long seed = coastal.getConfig().getLong("coastal.random-seed");
+			Long seed = coastal.getConfig().getLong("coastal.strategy[@seed]");
 			if (seed != null) {
 				rng.setSeed(seed);
 			}

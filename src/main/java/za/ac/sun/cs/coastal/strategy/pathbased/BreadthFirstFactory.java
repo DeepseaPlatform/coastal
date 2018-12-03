@@ -11,6 +11,9 @@ import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
 public class BreadthFirstFactory implements StrategyFactory {
 
+	public BreadthFirstFactory(COASTAL coastal) {
+	}
+
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
 		return new PathBasedManager(coastal);
