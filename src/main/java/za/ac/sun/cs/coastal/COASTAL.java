@@ -382,6 +382,15 @@ public class COASTAL {
 	}
 
 	/**
+	 * Return the starting time of the analysis run in milliseconds.
+	 * 
+	 * @return the starting time in milliseconds
+	 */
+	public long getStartingTime() {
+		return startingTime.getTimeInMillis();
+	}
+
+	/**
 	 * Return the class manager for this analysis run of COASTAL.
 	 * 
 	 * @return the class manager

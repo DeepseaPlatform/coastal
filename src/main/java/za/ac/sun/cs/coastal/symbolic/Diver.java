@@ -51,7 +51,8 @@ public class Diver implements Callable<Void> {
 				long t1 = System.currentTimeMillis();
 				coastal.recordDiveWaitTime(t1 - t0);
 				SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
-				log.info(Banner.getBannerLine("starting dive " + coastal.getNextDiveCount(), '-'));
+				String banner = "starting dive " + coastal.getNextDiveCount() + Banner.getElapsed(coastal);
+				log.info(Banner.getBannerLine(banner, '-'));
 				ClassLoader classLoader = coastal.getClassManager().createClassLoader(symbolicState);
 				// SymbolicVM.setState(symbolicState);
 				performRun(classLoader);
