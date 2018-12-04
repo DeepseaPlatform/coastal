@@ -723,6 +723,23 @@ public class COASTAL {
 	}
 
 	/**
+	 * Return the current value of the dive counter.
+	 * 
+	 * @return the value of the dive counter
+	 */
+	public long getDiveCount() {
+		return diveCount.get();
+	}
+
+	public int getModelQueueLength() {
+		return models.size();
+	}
+
+	public int getPcQueueLength() {
+		return pcs.size();
+	}
+	
+	/**
 	 * Add a reported dive time to the accumulator that tracks how long the
 	 * dives took.
 	 * 
@@ -929,7 +946,7 @@ public class COASTAL {
 	 */
 	public void start(boolean showBanner) {
 		startingTime = Calendar.getInstance();
-		getBroker().publish("coastal-start", this);
+		getBroker().publish("coastal-init", this);
 		if (showBanner) {
 			new Banner('~').println("COASTAL version " + Version.read()).display(log);
 		}
@@ -941,12 +958,14 @@ public class COASTAL {
 			ObserverManager observerManager = (ObserverManager) observer.get(1);
 			observerFactory.createObserver(this, observerManager);
 		}
+		getBroker().publish("coastal-start", this);
 		addFirstModel(new Model(0, null));
 		try {
 			addDiverTask();
 			addStrategyTask();
 			while (!workDone.get()) {
 				idle(500);
+				getBroker().publish("tick", this);
 				// idle(10000);
 				// log.info("TICK-TOCK");
 				// TO DO ----> balance the threads
@@ -954,6 +973,7 @@ public class COASTAL {
 		} catch (InterruptedException e) {
 			log.info(Banner.getBannerLine("main thread interrupted", '!'));
 		} finally {
+			getBroker().publish("tock", this);
 			shutdown();
 		}
 		stoppingTime = Calendar.getInstance();
@@ -1004,7 +1024,7 @@ public class COASTAL {
 		if (config != null) {
 			new COASTAL(log, config).start(false);
 		}
-		new Banner('~').println("COASTAL DONE (" + FilenameUtils.getName(args[0]) + ")").display(log);
+		new Banner('~').println("COASTAL DONE (" + config.getString("run-name", "?") + ")").display(log);
 	}
 
 	/**
@@ -1059,6 +1079,19 @@ public class COASTAL {
 	}
 
 	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args, String extra) {
+		String runName = (args.length > 0) ? FilenameUtils.getName(args[0]) : null;
+		return loadConfiguration(log, runName, args, extra);
+	}
+	
+	public static ImmutableConfiguration loadConfiguration(Logger log, String runName, String[] args, String extra) {
+		if (runName != null) {
+			String runNameSetting = "<run-name>" + runName + "</run-name>";
+			if (extra == null) {
+				extra = runNameSetting;
+			} else {
+				extra += runNameSetting;
+			}
+		}
 		Configuration cfg1 = loadConfigFromResource(log, COASTAL_CONFIGURATION);
 		Configuration cfg2 = loadConfigFromFile(log, HOME_CONFIGURATION);
 		if (args.length < 1) {
@@ -1068,21 +1101,23 @@ public class COASTAL {
 			bn.display(log);
 			return null;
 		}
-		String filename = args[0];
-		if (filename.endsWith(".java")) {
-			filename = filename.substring(0, filename.length() - 4) + "xml";
-		}
-		Configuration cfg3 = loadConfigFromFile(log, filename);
-		if (cfg3 == null) {
-			cfg3 = loadConfigFromResource(log, filename);
-		}
-		if (cfg3 == null) {
-			Banner bn = new Banner('@');
-			bn.println("COASTAL PROBLEM\n");
-			bn.println("COULD NOT READ CONFIGURATION FILE \"" + filename + "\"");
-			bn.display(log);
-			return null;
-		}
+		Configuration cfg3 = null;
+		if (args.length > 0) {
+			String filename = args[0];
+			if (filename.endsWith(".java")) {
+				filename = filename.substring(0, filename.length() - 4) + "xml";
+			}
+			cfg3 = loadConfigFromFile(log, filename);
+			if (cfg3 == null) {
+				cfg3 = loadConfigFromResource(log, filename);
+			}
+			if (cfg3 == null) {
+				Banner bn = new Banner('@');
+				bn.println("COASTAL PROBLEM\n");
+				bn.println("COULD NOT READ CONFIGURATION FILE \"" + filename + "\"");
+				bn.display(log);
+			}
+		} 
 		Configuration cfg4 = loadConfigFromString(log, extra);
 		CombinedConfiguration config = new CombinedConfiguration(new OverrideCombiner());
 		if (cfg4 != null) {

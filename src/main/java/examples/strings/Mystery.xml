@@ -14,5 +14,6 @@
 		<!--
 		<strategy seed="2323212">za.ac.sun.cs.coastal.strategy.pathbased.RandomPathFactory</strategy>
 		-->
+		<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 	</coastal>
 </configuration>

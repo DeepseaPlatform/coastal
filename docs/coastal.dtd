@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!ELEMENT configuration (coastal,green?)>
+<!ELEMENT configuration (coastal,green?,run-name?)>
 <!ELEMENT coastal (jar|main|target|trigger|strategy|delegate|observer|bound|trace-all|echo-output|draw-paths|concrete-values|limits)*>
 <!ELEMENT jar (#PCDATA)>
 <!ATTLIST jar directory CDATA #IMPLIED>
@@ -28,3 +28,4 @@
 <!ELEMENT conjuncts (#PCDATA)>
 <!ELEMENT green (z3)>
 <!ELEMENT z3 (path)>
+<!ELEMENT run-name (#PCDATA)>

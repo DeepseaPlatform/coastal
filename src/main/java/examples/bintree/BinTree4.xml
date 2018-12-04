@@ -13,5 +13,6 @@
 		<bound name="v2" min="0" max="9"/>
 		<bound name="v3" min="0" max="9"/>
 		<bound name="v4" min="0" max="9"/>
+		<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 	</coastal>
 </configuration>
