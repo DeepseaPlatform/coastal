@@ -7,10 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- ...
+- Read class files from JAR files
+- New test structure
+- Divers and strategies run in separate threads
+- Log file includes thread ids
+- Generational path strategy
+- Min/max bounds for all data types -- no just integers
+- Reporting of queue waiting times
 
 ### Changed
-- ...
+- COASTAL now reads configuration from XML files
+- Listener mechanism replaced with publish-subscribe broker
+- Listeners changed to Observers
+- Version reporting made more robust
+- Path tree allows concurrent updates
+- Improved class loading
 
 ### Deprecated
 - ...
@@ -40,11 +51,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Setting `coastal.recordmarks` replaced with marker listener
 - Internally, (almost) all classes are made non-static
 
-### Deprecated
-- ...
-
 ### Removed
 - All `coastal.dump...` settings
-
-### Fixed
-- ...
