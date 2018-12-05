@@ -134,13 +134,13 @@ public class Banner {
 		long min = (dt / 60000) % 60;
 		long hr = dt / 3600000;
 		if (hr != 0) {
-			return String.format(" @%d:%02d:%02d.%02d", hr, min, sec, ms / 10);
+			return String.format("%d:%02d:%02d.%02d", hr, min, sec, ms / 10);
 		} else if (min != 0) {
-			return String.format(" @%02d:%02d.%02d", min, sec, ms / 10);
+			return String.format("%02d:%02d.%02d", min, sec, ms / 10);
 		} else if (sec != 0) {
-			return String.format(" @%d.%02d s", sec, ms / 10);
+			return String.format("%d.%02d s", sec, ms / 10);
 		} else {
-			return String.format(" @%d ms", ms);
+			return String.format("%d ms", ms);
 		}
 	}
 
