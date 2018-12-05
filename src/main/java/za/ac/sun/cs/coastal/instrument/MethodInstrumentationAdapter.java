@@ -22,6 +22,8 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicVM";
 
+	private static final String VERIFIER = "org/sosy_lab/sv_benchmarks/Verifier";
+	
 	private final COASTAL coastal;
 
 	private final Logger log;
@@ -276,13 +278,22 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn",
 					"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-			String className = owner.replace('/', '.');
-			if (useConcreteValues && !coastal.isTarget(className)
-					&& (coastal.findDelegate(owner, className, descriptor) == null)) {
-				char returnType = primitiveReturnType(descriptor);
-				if (returnType != 'X') {
-					mv.visitInsn(Opcodes.DUP);
-					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "returnValue", "(" + returnType + ")V", false);
+			if (owner.equals(VERIFIER)) {
+				if (name.equals("nondetInt")) {
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "creatSymbolicInt", "(II)I", false);
+				} else {
+					//TODO
+				}
+			} else {
+				String className = owner.replace('/', '.');
+				if (useConcreteValues && !coastal.isTarget(className)
+						&& (coastal.findDelegate(owner, className, descriptor) == null)) {
+					char returnType = primitiveReturnType(descriptor);
+					if (returnType != 'X') {
+						mv.visitInsn(Opcodes.DUP);
+						mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "returnValue", "(" + returnType + ")V", false);
+					}
 				}
 			}
 		}
