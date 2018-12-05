@@ -68,6 +68,8 @@ public class Trigger {
 				return char[].class;
 			} else if (arrayType.equals("byte")) {
 				return byte[].class;
+			}else if (arrayType.equals("String")) {
+				return String[].class;
 			} else {
 				return Object[].class;
 			}
