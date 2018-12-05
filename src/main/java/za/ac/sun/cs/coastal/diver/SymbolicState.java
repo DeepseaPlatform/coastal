@@ -61,6 +61,8 @@ public class SymbolicState implements State {
 	 */
 	public static final String NEW_VAR_PREFIX = "$"; // "U_D_"
 
+	public static final String CREATE_VAR_PREFIX = "N_D_"; // "@"
+	
 	private final COASTAL coastal;
 
 	private final Logger log;
@@ -299,6 +301,26 @@ public class SymbolicState implements State {
 	@Override
 	public String getNewVariableName() {
 		return NEW_VAR_PREFIX + newVariableCount++;
+	}
+	
+	public int createSymbolicInt(int currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return 0;
+		}
+		
+		String name = CREATE_VAR_PREFIX + uniqueId;
+		pop();
+		push(new IntVariable(name, 0, 255));
+		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
+		
+		if (concrete == null) {
+			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			return currentValue;
+		} else {
+			int newValue = concrete.getValue();
+			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
+			return newValue;
+		}
 	}
 
 	private void dumpFrames() {
