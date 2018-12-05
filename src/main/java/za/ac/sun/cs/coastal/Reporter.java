@@ -54,6 +54,7 @@ public class Reporter {
 			}
 			statMap.put(key, value);
 		}
+		((COASTAL) object).getBroker().publish("reporting-done", object);
 	}
 
 	public long getStatLong(String key) {
@@ -64,6 +65,24 @@ public class Reporter {
 			return (Integer) value;
 		} else {
 			return (Long) value;
+		}
+	}
+	
+	public boolean getStatBool(String key) {
+		Object value = statMap.get(key);
+		if (value == null) {
+			return false;
+		} else {
+			return (Boolean) value;
+		}
+	}
+	
+	public String getStatString(String key) {
+		Object value = statMap.get(key);
+		if (value == null) {
+			return "";
+		} else {
+			return (String) value;
 		}
 	}
 	

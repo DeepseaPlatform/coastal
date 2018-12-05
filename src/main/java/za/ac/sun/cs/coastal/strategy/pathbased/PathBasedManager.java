@@ -56,6 +56,10 @@ public class PathBasedManager implements StrategyManager {
 		infeasibleCount.incrementAndGet();		
 	}
 	
+	public long getInfeasibleCount() {
+		return infeasibleCount.get();		
+	}
+	
 	public boolean insertPath(SegmentedPC spc, boolean infeasible) {
 		long t = System.currentTimeMillis();
 		boolean revisited = pathTree.insertPath(spc, infeasible);

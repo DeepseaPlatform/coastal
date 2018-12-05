@@ -10,11 +10,16 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.Spring;
 import javax.swing.SpringLayout;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Reporter;
+import za.ac.sun.cs.coastal.strategy.StrategyManager;
+import za.ac.sun.cs.coastal.strategy.pathbased.PathBasedManager;
+import za.ac.sun.cs.coastal.strategy.pathbased.PathTree;
 
 public class GUIFactory implements ObserverFactory {
 
@@ -47,7 +52,7 @@ public class GUIFactory implements ObserverFactory {
 		private final COASTAL coastal;
 
 		private JFrame frame;
-		
+
 		GUIManager(COASTAL coastal) {
 			this.coastal = coastal;
 			coastal.getBroker().subscribe("coastal-start", this::start);
@@ -86,6 +91,10 @@ public class GUIFactory implements ObserverFactory {
 
 		private final COASTAL coastal;
 
+		private final StrategyManager manager;
+
+		private final PathTree pathTree;
+
 		private final JButton doneButton;
 
 		private final JPanel infoPanel;
@@ -95,13 +104,27 @@ public class GUIFactory implements ObserverFactory {
 		private final JTextField diveCountField;
 
 		private final JTextField modelCountField;
-		
+
 		private final JTextField pcCountField;
-		
-		public GUI(COASTAL coastal) {
+
+		private final JTextField pathCountField;
+
+		private final JTextField revisitCountField;
+
+		private final JTextField infeasibleCountField;
+
+		private final JTextArea messageArea;
+
+		GUI(COASTAL coastal) {
 			super(new BorderLayout());
 			this.coastal = coastal;
-			coastal.getBroker().subscribe("coastal-stop", this::isDone);
+			manager = coastal.getStrategyManager();
+			if (manager instanceof PathBasedManager) {
+				pathTree = ((PathBasedManager) manager).getPathTree();
+			} else {
+				pathTree = null;
+			}
+			coastal.getBroker().subscribe("reporting-done", this::isDone);
 			coastal.getBroker().subscribe("tick", this::tick);
 			coastal.getBroker().subscribe("tock", this::tick);
 			doneButton = new JButton("Done");
@@ -110,6 +133,8 @@ public class GUIFactory implements ObserverFactory {
 			doneButton.addActionListener(this);
 			add(doneButton, BorderLayout.PAGE_END);
 			infoPanel = new JPanel(new SpringLayout());
+			int infoFieldCount = 0;
+
 			// Elapsed time
 			JLabel elapsedLabel = new JLabel("Elapsed", JLabel.TRAILING);
 			infoPanel.add(elapsedLabel);
@@ -117,6 +142,8 @@ public class GUIFactory implements ObserverFactory {
 			elapsedField.setEditable(false);
 			elapsedLabel.setLabelFor(elapsedField);
 			infoPanel.add(elapsedField);
+			infoFieldCount++;
+
 			// Number of dives
 			JLabel diveCountLabel = new JLabel("#dives", JLabel.TRAILING);
 			infoPanel.add(diveCountLabel);
@@ -124,31 +151,83 @@ public class GUIFactory implements ObserverFactory {
 			diveCountField.setEditable(false);
 			diveCountLabel.setLabelFor(diveCountField);
 			infoPanel.add(diveCountField);
-			// Number of models
+			infoFieldCount++;
+
+			// Number of models in queue
 			JLabel modelCountLabel = new JLabel("#models", JLabel.TRAILING);
 			infoPanel.add(modelCountLabel);
 			modelCountField = new JTextField(20);
 			modelCountField.setEditable(false);
 			modelCountLabel.setLabelFor(modelCountField);
 			infoPanel.add(modelCountField);
-			// Number of path conditions
+			infoFieldCount++;
+
+			// Number of path conditions in queue
 			JLabel pcCountLabel = new JLabel("#pcs", JLabel.TRAILING);
 			infoPanel.add(pcCountLabel);
 			pcCountField = new JTextField(20);
 			pcCountField.setEditable(false);
 			pcCountLabel.setLabelFor(pcCountField);
 			infoPanel.add(pcCountField);
-			// Tidy up the labels and fields
-			makeCompactGrid(infoPanel, 4, 2, 6, 6, 6, 6);
-			// Add info to this frame
+			infoFieldCount++;
+
+			// Number of paths explored
+			if (pathTree != null) {
+				JLabel pathCountLabel = new JLabel("#paths", JLabel.TRAILING);
+				infoPanel.add(pathCountLabel);
+				pathCountField = new JTextField(20);
+				pathCountField.setEditable(false);
+				pathCountLabel.setLabelFor(pathCountField);
+				infoPanel.add(pathCountField);
+				infoFieldCount++;
+				JLabel revisitCountLabel = new JLabel("#revisit", JLabel.TRAILING);
+				infoPanel.add(revisitCountLabel);
+				revisitCountField = new JTextField(20);
+				revisitCountField.setEditable(false);
+				revisitCountLabel.setLabelFor(revisitCountField);
+				infoPanel.add(revisitCountField);
+				infoFieldCount++;
+				JLabel infeasibleCountLabel = new JLabel("#infeasible", JLabel.TRAILING);
+				infoPanel.add(infeasibleCountLabel);
+				infeasibleCountField = new JTextField(20);
+				infeasibleCountField.setEditable(false);
+				infeasibleCountLabel.setLabelFor(infeasibleCountField);
+				infoPanel.add(infeasibleCountField);
+				infoFieldCount++;
+			} else {
+				pathCountField = null;
+				revisitCountField = null;
+				infeasibleCountField = null;
+			}
+
+			// Special messages
+			JLabel messageLabel = new JLabel("Messages", JLabel.TRAILING);
+			infoPanel.add(messageLabel);
+			messageArea = new JTextArea(4, 20);
+			messageArea.setEditable(false);
+			messageLabel.setLabelFor(messageArea);
+			infoPanel.add(messageArea);
+			infoFieldCount++;
+
+			// Tidy up the labels and fields and add to frame
+			makeCompactGrid(infoPanel, infoFieldCount, 2, 6, 6, 6, 0);
 			add(infoPanel, BorderLayout.CENTER);
 		}
 
 		public void isDone(Object object) {
+			update(true);
 			doneButton.setEnabled(true);
 		}
 
 		public void tick(Object object) {
+			update();
+		}
+
+		private void update() {
+			update(false);
+		}
+
+		private void update(boolean lastUpdate) {
 			long t1 = System.currentTimeMillis() - coastal.getStartingTime();
 			long dc = coastal.getDiveCount();
 			long mc = coastal.getModelQueueLength();
@@ -157,6 +236,26 @@ public class GUIFactory implements ObserverFactory {
 			diveCountField.setText(String.format("%d (%.1f/sec)", dc, dc * 1000.0 / t1));
 			modelCountField.setText("" + mc);
 			pcCountField.setText("" + pc);
+			if (pathCountField != null) {
+				long pthc = pathTree.getPathCount();
+				long rc = pathTree.getRevisitCount();
+				long ic = ((PathBasedManager) manager).getInfeasibleCount();
+				pathCountField.setText("" + pthc);
+				revisitCountField.setText("" + rc);
+				infeasibleCountField.setText("" + ic);
+			}
+			if (lastUpdate) {
+				Reporter reporter = coastal.getReporter();
+				boolean stopped = reporter.getStatBool("StopController.was-stopped");
+				if (stopped) {
+					String message = reporter.getStatString("StopController.message");
+					if (message == null) {
+						messageArea.append("Analysis stopped\n");
+					} else {
+						messageArea.append("Analysis stopped: " + message + "\n");
+					}
+				}
+			}
 			repaint();
 		}
 
