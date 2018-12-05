@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Generational path strategy
 - Min/max bounds for all data types -- no just integers
 - Reporting of queue waiting times
+- Primitive GUI to show progress
 
 ### Changed
 - COASTAL now reads configuration from XML files
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Version reporting made more robust
 - Path tree allows concurrent updates
 - Improved class loading
+- Reduced console output
 
 ### Deprecated
 - ...
@@ -30,7 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - ...
 
 ### Fixed
-- ...
+- Travis CI docker setup
 
 ## [0.0.1]
 
