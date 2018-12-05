@@ -38,7 +38,7 @@ public class Diver implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
-		log.info("^^^ diver task starting");
+		log.trace("^^^ diver task starting");
 		for (Tuple observer : coastal.getObserversPerTask()) {
 			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 			ObserverManager observerManager = (ObserverManager) observer.get(1);
@@ -51,8 +51,8 @@ public class Diver implements Callable<Void> {
 				long t1 = System.currentTimeMillis();
 				coastal.recordDiveWaitTime(t1 - t0);
 				SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
-				String banner = "starting dive " + coastal.getNextDiveCount() + Banner.getElapsed(coastal);
-				log.info(Banner.getBannerLine(banner, '-'));
+				String banner = "starting dive " + coastal.getNextDiveCount() + " @" + Banner.getElapsed(coastal);
+				log.trace(Banner.getBannerLine(banner, '-'));
 				ClassLoader classLoader = coastal.getClassManager().createClassLoader(symbolicState);
 				// SymbolicVM.setState(symbolicState);
 				performRun(classLoader);
@@ -67,7 +67,7 @@ public class Diver implements Callable<Void> {
 			}
 		} catch (InterruptedException e) {
 			broker.publishThread("diver-task-end", this);
-			log.info("^^^ diver task canceled");
+			log.trace("^^^ diver task canceled");
 			throw e;
 		}
 	}

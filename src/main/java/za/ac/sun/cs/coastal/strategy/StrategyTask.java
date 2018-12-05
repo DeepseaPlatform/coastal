@@ -29,25 +29,25 @@ public class StrategyTask implements Callable<Void> {
 
 	@Override
 	public Void call() throws Exception {
-		log.info("^^^ strategy task starting");
+		log.trace("^^^ strategy task starting");
 		try {
 			while (true) {
 				long t0 = System.currentTimeMillis();
 				SegmentedPC spc = coastal.getNextPc();
 				long t1 = System.currentTimeMillis();
 				coastal.recordStrategyWaitTime(t1 - t0);
-				log.info("+++ starting refinement");
+				log.trace("+++ starting refinement");
 				List<Model> mdls = strategy.refine(spc);
 				int d = -1;
 				if (mdls != null) {
 					coastal.addModels(mdls);
 					d = mdls.size() - 1;
 				}
-				log.info("+++ added {} models", d);
+				log.trace("+++ added {} models", d);
 				coastal.updateWork(d);
 			}
 		} catch (InterruptedException e) {
-			log.info("^^^ strategy task canceled");
+			log.trace("^^^ strategy task canceled");
 			throw e;
 		}
 	}

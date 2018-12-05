@@ -805,7 +805,6 @@ public class COASTAL {
 				e.printStackTrace();
 			}
 		});
-		log.info("%%% {} models, {} pcs", models.size(), pcs.size());
 	}
 
 	/**
@@ -835,7 +834,6 @@ public class COASTAL {
 		} catch (InterruptedException e) {
 			// ignore silently
 		}
-		log.info("%%% {} pcs, {} models", pcs.size(), models.size());
 	}
 
 	/**
@@ -961,17 +959,14 @@ public class COASTAL {
 			observerFactory.createObserver(this, observerManager);
 		}
 		getBroker().publish("coastal-start", this);
+		getBroker().subscribe("tick", this::tick);
 		addFirstModel(new Model(0, null));
 		try {
 			addDiverTask();
-//			addDiverTask();
 			addStrategyTask();
-//			addStrategyTask();
 			while (!workDone.get()) {
 				idle(500);
 				getBroker().publish("tick", this);
-				// idle(10000);
-				// log.info("TICK-TOCK");
 				// TO DO ----> balance the threads
 			}
 		} catch (InterruptedException e) {
@@ -992,6 +987,13 @@ public class COASTAL {
 		if (showBanner) {
 			new Banner('~').println("COASTAL DONE").display(log);
 		}
+	}
+	
+	public void tick(Object object) {
+		String time = Banner.getElapsed(this);
+		String dives = String.format("dives:%d", getDiveCount());
+		String queue = String.format("[models:%d pcs:%d]", models.size(), pcs.size());
+		log.info("{} {} {}", time, dives, queue);
 	}
 
 	public void report(Object object) {

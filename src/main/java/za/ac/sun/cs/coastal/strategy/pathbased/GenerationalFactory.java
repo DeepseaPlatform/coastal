@@ -85,7 +85,7 @@ public class GenerationalFactory implements StrategyFactory {
 				return null;
 			}
 			List<Model> models = new ArrayList<>();
-			log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
+			log.trace("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 			PathTreeNode bottom = manager.insertPath0(spc, false);
 			if (bottom != null) {
 				List<SegmentedPC> altSpcs = new ArrayList<>();
@@ -99,26 +99,26 @@ public class GenerationalFactory implements StrategyFactory {
 				for (SegmentedPC altSpc : altSpcs) {
 					Expression pc = altSpc.getPathCondition();
 					String sig = altSpc.getSignature();
-					log.info("trying   <{}> {}", sig, pc.toString());
+					log.trace("trying   <{}> {}", sig, pc.toString());
 					Map<String, Constant> model = findModel(pc);
 					if (model == null) {
-						log.info("no model");
+						log.trace("no model");
 						log.trace("(The spc is {})", altSpc.getPathCondition().toString());
 						manager.insertPath(altSpc, true);
 						manager.incrementInfeasibleCount();
 					} else {
 						String modelString = model.toString();
-						log.info("new model: {}", modelString);
+						log.trace("new model: {}", modelString);
 						if (visitedModels.add(modelString)) {
 							models.add(new Model(priority, model));
 							priority += priorityDelta;
 						} else {
-							log.info("model {} has been visited before", modelString);
+							log.trace("model {} has been visited before", modelString);
 						}
 					}
 				}
 			} else {
-				log.info("revisited path -- no new models generated");
+				log.trace("revisited path -- no new models generated");
 			}
 			return models;
 		}
@@ -166,13 +166,12 @@ public class GenerationalFactory implements StrategyFactory {
 				return null;
 			}
 			List<Model> models = new ArrayList<>();
-			log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
+			log.trace("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 			PathTreeNode bottom = manager.insertPath0(spc, false);
 			if (bottom != null) {
 				List<SegmentedPC> altSpcs = new ArrayList<>();
 				bottom = bottom.getParent();
 				for (SegmentedPC pointer = spc; (pointer != null) && !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
-//				for (SegmentedPC pointer = spc; pointer != null; pointer = pointer.getParent()) {
 					altSpcs.add(generateAltSpc(pointer));
 					bottom.setGenerated();
 					bottom = bottom.getParent();
@@ -181,26 +180,26 @@ public class GenerationalFactory implements StrategyFactory {
 				for (SegmentedPC altSpc : altSpcs) {
 					Expression pc = altSpc.getPathCondition();
 					String sig = altSpc.getSignature();
-					log.info("trying   <{}> {}", sig, pc.toString());
+					log.trace("trying   <{}> {}", sig, pc.toString());
 					Map<String, Constant> model = findModel(pc);
 					if (model == null) {
-						log.info("no model");
+						log.trace("no model");
 						log.trace("(The spc is {})", altSpc.getPathCondition().toString());
 						manager.insertPath(altSpc, true);
 						manager.incrementInfeasibleCount();
 					} else {
 						String modelString = model.toString();
-						log.info("new model: {}", modelString);
+						log.trace("new model: {}", modelString);
 						if (visitedModels.add(modelString)) {
 							models.add(new Model(priority, model));
 							priority += priorityDelta;
 						} else {
-							log.info("model {} has been visited before", modelString);
+							log.trace("model {} has been visited before", modelString);
 						}
 					}
 				}
 			} else {
-				log.info("revisited path -- no new models generated");
+				log.trace("revisited path -- no new models generated");
 			}
 			return models;
 		}
