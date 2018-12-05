@@ -10,6 +10,7 @@ import za.ac.sun.cs.coastal.instrument.LightMethodAdapter;
 import za.ac.sun.cs.coastal.surfer.TraceState;
 import za.ac.sun.cs.coastal.symbolic.VM;
 
+<<<<<<< HEAD
 /**
  * Triggers describe the methods and their symbolic parameters that switch on
  * symbolic execution.
@@ -44,7 +45,7 @@ import za.ac.sun.cs.coastal.symbolic.VM;
  * </ol>
  */
 public final class Trigger {
-
+	
 	/**
 	 * The name of the method (e.g., {@code "routine"}).
 	 */
