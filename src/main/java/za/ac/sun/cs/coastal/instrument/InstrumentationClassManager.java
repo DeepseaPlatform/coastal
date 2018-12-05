@@ -271,6 +271,7 @@ public class InstrumentationClassManager {
 
 	private int instructionCounter = 0;
 	private int methodCounter = 0;
+	private int newVariableCounter = 0;
 	private Map<Integer, Integer> firstInstruction = new TreeMap<>();
 	private Map<Integer, Integer> lastInstruction = new TreeMap<>();
 	private Map<Integer, BitSet> branchInstructions = new TreeMap<>();
@@ -301,6 +302,14 @@ public class InstrumentationClassManager {
 	
 	public int getNextMethodCounter() {
 		return ++methodCounter;
+	}
+	
+	public int getNewVariableCounter() {
+		return newVariableCounter;
+	}
+	
+	public int getNextNewVariableCounter() {
+		return ++newVariableCounter;
 	}
 	
 	public void registerFirstInstruction() {

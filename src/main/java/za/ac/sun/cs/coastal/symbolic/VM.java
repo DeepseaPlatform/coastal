@@ -39,6 +39,10 @@ public class VM {
 	public static void pushExtraConjunct(Expression extraConjunct) {
 		state.pushExtraConjunct(extraConjunct);
 	}
+	
+	public static int createSymbolicInt(int oldValue, int uniqueId) {
+		return symbolicState.createSymbolicInt(oldValue, uniqueId);
+	}
 
 	// ======================================================================
 	//
