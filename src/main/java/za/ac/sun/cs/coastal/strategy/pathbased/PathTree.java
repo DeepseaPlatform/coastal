@@ -67,7 +67,7 @@ public class PathTree {
 		return revisitCount.get();
 	}
 
-	public boolean insertPath(SegmentedPC spc, boolean isInfeasible) {
+	public PathTreeNode insertPath(SegmentedPC spc, boolean isInfeasible) {
 		pathCount.incrementAndGet();
 		/*
 		 * Step 1: Deconstruct the path condition.
@@ -94,7 +94,7 @@ public class PathTree {
 				lock.writeLock().unlock();
 			}
 		}
-		boolean revisited = insert(path, isInfeasible);
+		PathTreeNode lastNode = insert(path, isInfeasible);
 		/*
 		 * Step 3: Dump the tree if required
 		 */
@@ -104,7 +104,7 @@ public class PathTree {
 				log.trace("::: {}", ll);
 			}
 		}
-		return revisited;
+		return lastNode;
 	}
 
 	private String getId(PathTreeNode node) {
@@ -125,8 +125,7 @@ public class PathTree {
 	 * | node{i_d-1} path[d].getActiveConjunct i_d=path[d].getOutcomeIndex() |
 	 * infeasble/leaf
 	 */
-	private boolean insert(SegmentedPC[] path, boolean isInfeasible) {
-		boolean revisited = false;
+	private PathTreeNode insert(SegmentedPC[] path, boolean isInfeasible) {
 		int depth = path.length;
 		PathTreeNode[] visitedNodes = new PathTreeNode[depth];
 		PathTreeNode parent = root;
@@ -157,14 +156,15 @@ public class PathTree {
 			parent.lock();
 			if (parent.getChild(i) == null) {
 				if (isInfeasible) {
-					parent.setChild(i, PathTreeNode.createInfeasible());
+					n = PathTreeNode.createInfeasible();
 				} else {
-					parent.setChild(i, PathTreeNode.createLeaf());
+					n = PathTreeNode.createLeaf();
 				}
+				parent.setChild(i, n);
 			}
 			parent.unlock();
 		} else {
-			revisited = true;
+			n = null;
 			revisitCount.incrementAndGet();
 			if (isInfeasible) {
 				assert true;
@@ -196,7 +196,7 @@ public class PathTree {
 				}
 			}
 		}
-		return revisited;
+		return n;
 	}
 
 	public String[] stringRepr() {

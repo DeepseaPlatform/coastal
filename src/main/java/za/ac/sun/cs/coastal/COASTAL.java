@@ -805,6 +805,7 @@ public class COASTAL {
 				e.printStackTrace();
 			}
 		});
+		log.info("%%% {} models, {} pcs", models.size(), pcs.size());
 	}
 
 	/**
@@ -834,6 +835,7 @@ public class COASTAL {
 		} catch (InterruptedException e) {
 			// ignore silently
 		}
+		log.info("%%% {} pcs, {} models", pcs.size(), models.size());
 	}
 
 	/**
@@ -962,7 +964,9 @@ public class COASTAL {
 		addFirstModel(new Model(0, null));
 		try {
 			addDiverTask();
+//			addDiverTask();
 			addStrategyTask();
+//			addStrategyTask();
 			while (!workDone.get()) {
 				idle(500);
 				getBroker().publish("tick", this);

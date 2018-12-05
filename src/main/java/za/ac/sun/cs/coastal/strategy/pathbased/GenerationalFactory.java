@@ -86,10 +86,14 @@ public class GenerationalFactory implements StrategyFactory {
 			}
 			List<Model> models = new ArrayList<>();
 			log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
-			if (!manager.insertPath(spc, false)) {
+			PathTreeNode bottom = manager.insertPath0(spc, false);
+			if (bottom != null) {
 				List<SegmentedPC> altSpcs = new ArrayList<>();
-				for (SegmentedPC pointer = spc; pointer != null; pointer = pointer.getParent()) {
+				bottom = bottom.getParent();
+				for (SegmentedPC pointer = spc; (pointer != null) && !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
 					altSpcs.add(generateAltSpc(spc, pointer));
+					bottom.setGenerated();
+					bottom = bottom.getParent();
 				}
 				int priority = priorityStart;
 				for (SegmentedPC altSpc : altSpcs) {
@@ -163,10 +167,15 @@ public class GenerationalFactory implements StrategyFactory {
 			}
 			List<Model> models = new ArrayList<>();
 			log.info("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
-			if (!manager.insertPath(spc, false)) {
+			PathTreeNode bottom = manager.insertPath0(spc, false);
+			if (bottom != null) {
 				List<SegmentedPC> altSpcs = new ArrayList<>();
-				for (SegmentedPC pointer = spc; pointer != null; pointer = pointer.getParent()) {
+				bottom = bottom.getParent();
+				for (SegmentedPC pointer = spc; (pointer != null) && !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
+//				for (SegmentedPC pointer = spc; pointer != null; pointer = pointer.getParent()) {
 					altSpcs.add(generateAltSpc(pointer));
+					bottom.setGenerated();
+					bottom = bottom.getParent();
 				}
 				int priority = priorityStart;
 				for (SegmentedPC altSpc : altSpcs) {

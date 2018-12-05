@@ -17,17 +17,22 @@ public final class PathTreeNode {
 
 	private final PathTreeNode[] children;
 
+	private PathTreeNode parent;
+
 	private final boolean leaf;
 
 	private final boolean infeasible;
 
 	private boolean fullyExplored = false;
 
+	private boolean isGenerated = false;
+
 	private final WriteLock lock = new ReentrantReadWriteLock(false).writeLock();
 
 	private PathTreeNode(SegmentedPC pc, int nrOfChildren, boolean isLeaf, boolean isInfeasible) {
 		this.pc = pc;
 		this.children = new PathTreeNode[nrOfChildren];
+		parent = null;
 		this.leaf = isLeaf;
 		this.infeasible = isInfeasible;
 	}
@@ -61,7 +66,12 @@ public final class PathTreeNode {
 	}
 
 	public void setChild(int index, PathTreeNode node) {
+		node.parent = this;
 		children[index] = node;
+	}
+
+	public PathTreeNode getParent() {
+		return parent;
 	}
 
 	public boolean isLeaf() {
@@ -84,6 +94,14 @@ public final class PathTreeNode {
 		return isFullyExplored() || isLeaf() || isInfeasible();
 	}
 
+	public boolean hasBeenGenerated() {
+		return isGenerated;
+	}
+	
+	public void setGenerated() {
+		isGenerated = true;
+	}
+	
 	public void lock() {
 		lock.lock();
 	}
@@ -131,11 +149,19 @@ public final class PathTreeNode {
 
 	public int stringFill(char[][] lines, int x, int y) {
 		if (isLeaf()) {
-			stringWrite(lines, x, y, "#" + id);
+			if (hasBeenGenerated()) {
+				stringWrite(lines, x, y, "#!" + id);
+			} else {
+				stringWrite(lines, x, y, "#" + id);
+			}
 			stringWrite(lines, x, y + 1, "LEAF");
 			return x;
 		} else if (isInfeasible()) {
-			stringWrite(lines, x, y, "#" + id);
+			if (hasBeenGenerated()) {
+				stringWrite(lines, x, y, "#!" + id);
+			} else {
+				stringWrite(lines, x, y, "#" + id);
+			}
 			stringWrite(lines, x, y + 1, "INFEAS");
 			return x;
 		} else {
@@ -173,7 +199,12 @@ public final class PathTreeNode {
 				lines[y + 3][lastx] = '|';
 			}
 			int cx = (firstx + lastx) / 2, mx = cx;
-			String n = "#" + Integer.toString(id);
+			String n = "#";
+			if (hasBeenGenerated()) {
+				n += "!" + Integer.toString(id);
+			} else {
+				n += Integer.toString(id);
+			}
 			String e = getPc().getExpression().toString();
 			mx -= Math.min(mx, Math.max(e.length(), n.length()) / 2);
 			stringWrite(lines, mx, y, n);

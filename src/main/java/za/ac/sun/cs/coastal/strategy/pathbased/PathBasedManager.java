@@ -60,11 +60,18 @@ public class PathBasedManager implements StrategyManager {
 		return infeasibleCount.get();		
 	}
 	
+	public PathTreeNode insertPath0(SegmentedPC spc, boolean infeasible) {
+		long t = System.currentTimeMillis();
+		PathTreeNode lastNode = pathTree.insertPath(spc, infeasible);
+		pathTreeTime.addAndGet(System.currentTimeMillis() - t);
+		return lastNode;
+	}
+	
 	public boolean insertPath(SegmentedPC spc, boolean infeasible) {
 		long t = System.currentTimeMillis();
-		boolean revisited = pathTree.insertPath(spc, infeasible);
+		PathTreeNode lastNode = pathTree.insertPath(spc, infeasible);
 		pathTreeTime.addAndGet(System.currentTimeMillis() - t);
-		return revisited;
+		return (lastNode == null);
 	}
 
 	public void recordSolverTime(long time) {
