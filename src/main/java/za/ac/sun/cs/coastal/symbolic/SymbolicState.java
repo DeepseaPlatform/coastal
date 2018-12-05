@@ -749,8 +749,26 @@ public class SymbolicState {
 			} else {
 				push(new Operation(Operator.DIV, pop(), e));
 			}
+			//TODO
 			assert noExceptionExpression == null;
 			noExceptionExpression = new Operation(Operator.NE, e, Operation.ZERO);
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = Operation.ZERO;
+			break;
+		case Opcodes.IREM:
+			e = pop();
+			if (e instanceof IntConstant) {
+				Expression f = pop();
+				if (f instanceof IntConstant) {
+					//TODO check if e == 0
+					push(new IntConstant(((IntConstant) f).getValue() % ((IntConstant)e).getValue()));
+				} else {
+					push(new Operation(Operator.MOD, f, e));
+				}
+			} else {
+				push(new Operation(Operator.MOD, pop(), e));
+			}
+			// Add ExceptionExpression to noExceptionExpressionList
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = Operation.ZERO;
 			break;
