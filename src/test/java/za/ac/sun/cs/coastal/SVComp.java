@@ -2,7 +2,6 @@ package za.ac.sun.cs.coastal;
 
 import static org.junit.Assert.*;
 
-<<<<<<< HEAD
 import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,15 +30,6 @@ public class SVComp {
 //		assertEquals(0, reporter.getStatLong("Strategy.infeasible-count"));
 //		assertEquals(4, reporter.getStatLong("Strategy.inserted-paths"));
 //		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
-	}
-=======
-import org.junit.Test;
-
-public class SVComp {
-
-	@Test
-	public void test() {
-		fail("Not yet implemented");
 	}
 
 }

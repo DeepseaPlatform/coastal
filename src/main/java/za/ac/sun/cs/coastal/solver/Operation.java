@@ -304,6 +304,27 @@ public class Operation extends Expression {
 		}
 		return new Operation(Operator.DIV, a, b);
 	}
+	
+	public static Expression rem(Expression a, Expression b) {
+		if (a instanceof IntegerConstant) {
+			if (b instanceof IntegerConstant) {
+				int z = Math.max(((IntegerConstant)a).getSize(), ((IntegerConstant) b).getSize());
+				return new IntegerConstant(((IntegerConstant) a).getValue() % ((IntegerConstant) b).getValue(), z);
+			} else if (b instanceof RealConstant) {
+				//should not happen
+				assert false;
+			}
+		} else if (a instanceof RealConstant) {
+			if (b instanceof IntegerConstant) {
+				//should not happen
+				assert false;
+			} else if (b instanceof RealConstant) {
+				int z = Math.max(((RealConstant) a).getSize(), ((RealConstant) b).getSize());
+				return new RealConstant(((RealConstant) a).getValue() % ((RealConstant) b).getValue(), z);
+			}
+		}
+		return new Operation(Operator.REM, a, b);
+	}
 
 	// ======================================================================
 	//
@@ -342,7 +363,8 @@ public class Operation extends Expression {
 		ADD("+", 2, Fix.INFIX, "bvadd", "fp.add RNE"),
 		SUB("-", 2, Fix.INFIX, "bvsub", "fp.sub RNE"),
 		MUL("*", 2, Fix.INFIX, "bvmul", "fp.mul RNE"),
-		DIV("/", 2, Fix.INFIX, "bvsdiv", "fp.div RNE");
+		DIV("/", 2, Fix.INFIX, "bvsdiv", "fp.div RNE"),
+		REM("%", 2, Fix.INFIX, "bvsrem", "fp.rem RNE");
 		// @formatter:on
 
 		private final String string;

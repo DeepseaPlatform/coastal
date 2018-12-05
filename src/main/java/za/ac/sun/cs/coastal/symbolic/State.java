@@ -66,6 +66,8 @@ public interface State {
 	
 	String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue);
 	
+	int createSymbolicInt(int currentValue, int uniqueId);
+	
 	void triggerMethod(int methodNumber);
 
 	void startMethod(int methodNumber, int argCount);

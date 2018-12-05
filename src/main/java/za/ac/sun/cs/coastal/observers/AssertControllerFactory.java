@@ -12,7 +12,6 @@ public class AssertControllerFactory implements ObserverFactory {
 	public AssertControllerFactory(COASTAL coastal) {
 	}
 
-	@Override
 	public int getFrequency() {
 		return ObserverFactory.ONCE_PER_RUN;
 	}
@@ -69,6 +68,30 @@ public class AssertControllerFactory implements ObserverFactory {
 			wasStopped = true;
 		}
 
+		@Override
+		public String getName() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Object[] getPropertyValues() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+	}
+
+	@Override
+	public int getFrequencyflags() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

@@ -310,14 +310,14 @@ public class SymbolicState implements State {
 		
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntVariable(name, 0, 255));
-		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
+		push(new IntegerVariable(name, 32, 0, 255));
+		IntegerConstant concrete = (IntegerConstant) (concreteValues == null ? null : concreteValues.get(name));
 		
 		if (concrete == null) {
 			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
 			return currentValue;
 		} else {
-			int newValue = concrete.getValue();
+			int newValue = (int) concrete.getValue();
 			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
@@ -946,6 +946,15 @@ public class SymbolicState implements State {
 			e = pop();
 			push(Operation.div(pop(), e));
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = IntegerConstant.ZERO32;
+			break;
+		case Opcodes.IREM:
+			e = pop();
+			//push(Operation.rem(a, b))
+			Operation.rem(pop(), e);
+			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
+			// Add ExceptionExpression to noExceptionExpressionList
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
