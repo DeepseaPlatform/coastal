@@ -18,7 +18,13 @@ public class String {
 
 	private static final Expression MONE = new IntConstant(-1);
 
+	private final int minChar;
+	
+	private final int maxChar;
+
 	public String(COASTAL coastal) {
+		minChar = coastal.getDefaultMinValue(char.class);
+		maxChar = coastal.getDefaultMaxValue(char.class);
 	}
 
 	public boolean length____I(SymbolicState state) {
@@ -36,12 +42,18 @@ public class String {
 		if (index instanceof IntConstant) {
 			state.push(state.getStringChar(thisAddress, ((IntConstant) index).getValue()));
 		} else {
-			Expression var = new IntVariable(state.getNewVariableName(), 0, 1);
+			Expression var = new IntVariable(state.getNewVariableName(), minChar, maxChar);
+			Expression subguard = null;
 			for (int i = 0; i < thisLength; i++) {
 				Expression eq = Operation.apply(Operator.AND, Operation.apply(Operator.EQ, index, new IntConstant(i)),
 						Operation.apply(Operator.EQ, var, state.getStringChar(thisAddress, i)));
-				guard = Operation.apply(Operator.AND, guard, eq);
+				if (subguard == null) {
+					subguard = eq;
+				} else {
+					subguard = Operation.apply(Operator.OR, subguard, eq);
+				}
 			}
+			guard = Operation.apply(Operator.AND, guard, subguard);
 			state.push(var);
 		}
 		state.pushExtraConjunct(guard);

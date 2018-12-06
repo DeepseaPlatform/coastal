@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Travis CI docker setup
+- Bug #15: new symbolic character bounds were incorrect (String.java::charAt__I__C) 
 
 ## [0.0.1]
 
