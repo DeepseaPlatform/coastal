@@ -12,6 +12,8 @@
 		<observer>za.ac.sun.cs.coastal.observers.StopControllerFactory</observer>
 		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.BreadthFirstFactory</strategy>
 		<!--
+		<strategy threads="2" full="false" topdown="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+		<diver threads="2"/>
 		<strategy seed="2323212">za.ac.sun.cs.coastal.strategy.pathbased.RandomPathFactory</strategy>
 		-->
 		<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>

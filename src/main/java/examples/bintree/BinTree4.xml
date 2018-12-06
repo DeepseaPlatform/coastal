@@ -13,9 +13,10 @@
 		<bound name="v2" min="0" max="9"/>
 		<bound name="v3" min="0" max="9"/>
 		<bound name="v4" min="0" max="9"/>
-		<strategy full="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
-		<!-- 
 		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+		<!-- 
+		<strategy threads="2" full="false" topdown="true">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+		<diver threads="2"/>
 		<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 		-->
 	</coastal>
