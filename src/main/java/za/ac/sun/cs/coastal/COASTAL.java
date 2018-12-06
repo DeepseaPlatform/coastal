@@ -6,6 +6,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -95,6 +97,62 @@ public class COASTAL {
 	private final List<Trigger> triggers = new ArrayList<>();
 
 	/**
+	 * A map from method names to delegate objects (which are instances of the
+	 * modelling classes).
+	 */
+	private final Map<String, Object> delegates = new HashMap<>();
+
+	/**
+	 * A list of observer factories and managers that must be started once per
+	 * run.
+	 */
+	private final List<Tuple> observersPerRun = new ArrayList<>();
+
+	/**
+	 * A list of observer factories and managers that must be started once per
+	 * task.
+	 */
+	private final List<Tuple> observersPerTask = new ArrayList<>();
+
+	/**
+	 * A list of observer factories and managers that must be started once per
+	 * dive.
+	 */
+	private final List<Tuple> observersPerDive = new ArrayList<>();
+
+	/**
+	 * The wall-clock-time that the analysis run was started.
+	 */
+	private Calendar startingTime;
+
+	/**
+	 * The wall-clock-time that the analysis run was stopped.
+	 */
+	private Calendar stoppingTime;
+
+	/**
+	 * The number of milliseconds of elapsed time when we next write a console
+	 * update.
+	 */
+	private long nextReportingTime = 0;
+
+	/**
+	 * The maximum number of SECONDS the coastal run is allowed to execute.
+	 */
+	private final long timeLimit;
+
+	/**
+	 * The maximum number of threads to use for divers and strategies.
+	 */
+	private final int maxThreads;
+
+	// ======================================================================
+	//
+	// VARIABLE BOUNDS
+	//
+	// ======================================================================
+
+	/**
 	 * The default minimum bound for integers.
 	 */
 	private final int defaultMinIntValue;
@@ -144,49 +202,37 @@ public class COASTAL {
 	 */
 	private final Map<String, Integer> maxBounds = new HashMap<>();
 
-	/**
-	 * A map from method names to delegate objects (which are instances of the
-	 * modelling classes).
-	 */
-	private final Map<String, Object> delegates = new HashMap<>();
+	// ======================================================================
+	//
+	// STANDARD OUT AND ERR
+	//
+	// ======================================================================
 
 	/**
-	 * A list of observer factories and managers that must be started once per
-	 * run.
+	 * The normal standard output.
 	 */
-	private final List<Tuple> observersPerRun = new ArrayList<>();
+	private final PrintStream systemOut = System.out;
 
 	/**
-	 * A list of observer factories and managers that must be started once per
-	 * task.
+	 * The normal standard error.
 	 */
-	private final List<Tuple> observersPerTask = new ArrayList<>();
+	private final PrintStream systemErr = System.err;
 
 	/**
-	 * A list of observer factories and managers that must be started once per
-	 * dive.
+	 * A null printstream for suppressing output and error.
 	 */
-	private final List<Tuple> observersPerDive = new ArrayList<>();
+	private static final PrintStream NUL = new PrintStream(new OutputStream() {
+		@Override
+		public void write(int b) throws IOException {
+			// do nothing
+		}
+	});
 
-	/**
-	 * The wall-clock-time that the analysis run was started.
-	 */
-	private Calendar startingTime;
-
-	/**
-	 * The wall-clock-time that the analysis run was stopped.
-	 */
-	private Calendar stoppingTime;
-
-	/**
-	 * The maximum number of SECONDS the coastal run is allowed to execute.
-	 */
-	private final long timeLimit;
-
-	/**
-	 * The maximum number of threads to use for divers and strategies.
-	 */
-	private final int maxThreads;
+	// ======================================================================
+	//
+	// SHARED VARIABLES
+	//
+	// ======================================================================
 
 	/**
 	 * Counter for the number of dives undertaken.
@@ -567,6 +613,12 @@ public class COASTAL {
 		return observersPerDive;
 	}
 
+	// ======================================================================
+	//
+	// VARIABLE BOUNDS
+	//
+	// ======================================================================
+
 	/**
 	 * Return the lower bound for symbolic variables without an explicit bound
 	 * of their own.
@@ -713,6 +765,32 @@ public class COASTAL {
 		return max;
 	}
 
+	// ======================================================================
+	//
+	// STANDARD OUT AND ERR
+	//
+	// ======================================================================
+
+	/**
+	 * Return the normal standard output. This is recorded at the start of the
+	 * run and (possibly) set to null to suppress the program's normal output.
+	 * 
+	 * @return the pre-recorded standard output
+	 */
+	public PrintStream getSystemOut() {
+		return systemOut;
+	}
+
+	/**
+	 * Return the normal standard error. This is recorded at the start of the
+	 * run and (possibly) set to null to suppress the program's normal output.
+	 * 
+	 * @return the pre-recorded standard error
+	 */
+	public PrintStream getSystemErr() {
+		return systemErr;
+	}
+
 	/**
 	 * Increment and return the dive counter.
 	 * 
@@ -738,7 +816,7 @@ public class COASTAL {
 	public int getPcQueueLength() {
 		return pcs.size();
 	}
-	
+
 	/**
 	 * Add a reported dive time to the accumulator that tracks how long the
 	 * dives took.
@@ -958,6 +1036,11 @@ public class COASTAL {
 			ObserverManager observerManager = (ObserverManager) observer.get(1);
 			observerFactory.createObserver(this, observerManager);
 		}
+		// Redirect System.out/System.err
+		if (!getConfig().getBoolean("coastal.echo-output", false)) {
+			System.setOut(NUL);
+			System.setErr(NUL);
+		}
 		getBroker().publish("coastal-start", this);
 		getBroker().subscribe("tick", this::tick);
 		addFirstModel(new Model(0, null));
@@ -984,6 +1067,8 @@ public class COASTAL {
 		stoppingTime = Calendar.getInstance();
 		getBroker().publish("coastal-stop", this);
 		getBroker().publish("coastal-report", this);
+		System.setOut(getSystemOut());
+		System.setErr(getSystemErr());
 		if (diveCount.get() < 2) {
 			Banner bn = new Banner('@');
 			bn.println("ONLY A SINGLE RUN EXECUTED\n");
@@ -994,12 +1079,31 @@ public class COASTAL {
 			new Banner('~').println("COASTAL DONE").display(log);
 		}
 	}
-	
+
 	public void tick(Object object) {
-		String time = Banner.getElapsed(this);
-		String dives = String.format("dives:%d", getDiveCount());
-		String queue = String.format("[models:%d pcs:%d]", models.size(), pcs.size());
-		log.info("{} {} {}", time, dives, queue);
+		long elapsedTime = System.currentTimeMillis() - getStartingTime();
+		if (elapsedTime > nextReportingTime) {
+			String time = Banner.getElapsed(this);
+			String dives = String.format("dives:%d", getDiveCount());
+			String queue = String.format("[models:%d pcs:%d]", models.size(), pcs.size());
+			log.info("{} {} {}", time, dives, queue);
+			if (elapsedTime > 3600000) {
+				// After 1 hour, we report every 5 minutes
+				nextReportingTime = elapsedTime + 300000;
+			} else if (elapsedTime > 900000) {
+				// After 15 minutes, we report every minute
+				nextReportingTime = elapsedTime + 60000;
+			} else if (elapsedTime > 300000) {
+				// After 5 minutes, we report every 30 seconds
+				nextReportingTime = elapsedTime + 30000;
+			} else if (elapsedTime > 60000) {
+				// After 1 minute, we report every 15 seconds
+				nextReportingTime = elapsedTime + 15000;
+			} else {
+				// Otherwise we report every five seconds
+				nextReportingTime = elapsedTime + 5000;
+			}
+		}
 	}
 
 	public void report(Object object) {
@@ -1094,7 +1198,7 @@ public class COASTAL {
 		String runName = (args.length > 0) ? FilenameUtils.getName(args[0]) : null;
 		return loadConfiguration(log, runName, args, extra);
 	}
-	
+
 	public static ImmutableConfiguration loadConfiguration(Logger log, String runName, String[] args, String extra) {
 		if (runName != null) {
 			String runNameSetting = "<run-name>" + runName + "</run-name>";
@@ -1129,7 +1233,7 @@ public class COASTAL {
 				bn.println("COULD NOT READ CONFIGURATION FILE \"" + filename + "\"");
 				bn.display(log);
 			}
-		} 
+		}
 		Configuration cfg4 = loadConfigFromString(log, extra);
 		CombinedConfiguration config = new CombinedConfiguration(new OverrideCombiner());
 		if (cfg4 != null) {

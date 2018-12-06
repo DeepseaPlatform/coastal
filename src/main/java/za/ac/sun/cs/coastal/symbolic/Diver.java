@@ -1,8 +1,5 @@
 package za.ac.sun.cs.coastal.symbolic;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -72,54 +69,19 @@ public class Diver implements Callable<Void> {
 		}
 	}
 
-	private static final PrintStream NUL = new PrintStream(new OutputStream() {
-		@Override
-		public void write(int b) throws IOException {
-			// do nothing
-		}
-	});
-
 	private void performRun(ClassLoader classLoader) {
 		for (Tuple observer : coastal.getObserversPerDive()) {
 			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 			ObserverManager observerManager = (ObserverManager) observer.get(1);
 			observerFactory.createObserver(coastal, observerManager);
 		}
-		PrintStream out = System.out, err = System.err;
 		try {
 			Class<?> clas = classLoader.loadClass(config.getString("coastal.main"));
 			Method meth = clas.getMethod("main", String[].class);
-			// Redirect System.out/System.err
-			if (!config.getBoolean("coastal.echo-output", false)) {
-				System.setOut(NUL);
-				System.setErr(NUL);
-			}
 			meth.invoke(null, new Object[] { new String[0] });
-			System.setOut(out);
-			System.setErr(err);
-		} catch (ClassNotFoundException x) {
-			System.setOut(out);
-			System.setErr(err);
-			x.printStackTrace();
-		} catch (NoSuchMethodException x) {
-			System.setOut(out);
-			System.setErr(err);
-			x.printStackTrace();
-		} catch (SecurityException x) {
-			System.setOut(out);
-			System.setErr(err);
-			x.printStackTrace();
-		} catch (IllegalAccessException x) {
-			System.setOut(out);
-			System.setErr(err);
-			x.printStackTrace();
-		} catch (IllegalArgumentException x) {
-			System.setOut(out);
-			System.setErr(err);
-			x.printStackTrace();
+		} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException x) {
+			x.printStackTrace(coastal.getSystemErr());
 		} catch (InvocationTargetException x) {
-			System.setOut(out);
-			System.setErr(err);
 			Throwable t = x.getCause();
 			if ((t == null) || !(t instanceof LimitConjunctException)) {
 				// x.printStackTrace();

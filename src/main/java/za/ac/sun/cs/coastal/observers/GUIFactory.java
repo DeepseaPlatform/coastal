@@ -124,9 +124,6 @@ public class GUIFactory implements ObserverFactory {
 			} else {
 				pathTree = null;
 			}
-			coastal.getBroker().subscribe("reporting-done", this::isDone);
-			coastal.getBroker().subscribe("tick", this::tick);
-			coastal.getBroker().subscribe("tock", this::tick);
 			doneButton = new JButton("Done");
 			doneButton.setEnabled(false);
 			doneButton.setActionCommand("closedown");
@@ -212,6 +209,11 @@ public class GUIFactory implements ObserverFactory {
 			// Tidy up the labels and fields and add to frame
 			makeCompactGrid(infoPanel, infoFieldCount, 2, 6, 6, 6, 0);
 			add(infoPanel, BorderLayout.CENTER);
+
+			// Register the observers for the GUI
+			coastal.getBroker().subscribe("reporting-done", this::isDone);
+			coastal.getBroker().subscribe("tick", this::tick);
+			coastal.getBroker().subscribe("tock", this::tick);
 		}
 
 		public void isDone(Object object) {
