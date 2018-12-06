@@ -47,7 +47,7 @@ public class PathBasedManager implements StrategyManager {
 		this.coastal = coastal;
 		broker = coastal.getBroker();
 		broker.subscribe("coastal-stop", this::report);
-		pathTree = new PathTree(coastal);
+		pathTree = coastal.getPathTree();
 	}
 
 	public PathTree getPathTree() {

@@ -44,6 +44,7 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverManager;
+import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.strategy.StrategyManager;
 import za.ac.sun.cs.coastal.strategy.StrategyTask;
@@ -80,6 +81,11 @@ public class COASTAL {
 	 * display at the end.
 	 */
 	private final Reporter reporter;
+
+	/**
+	 * The shared path tree for all strategies, divers, and surfers.
+	 */
+	private final PathTree pathTree;
 
 	/**
 	 * The manager of all classes loaded during the analysis run.
@@ -341,6 +347,7 @@ public class COASTAL {
 		broker = new Broker();
 		broker.subscribe("coastal-stop", this::report);
 		reporter = new Reporter(this);
+		pathTree = new PathTree(this);
 		classManager = new InstrumentationClassManager(this, System.getProperty("java.class.path"));
 		int intMin = Integer.MIN_VALUE, intMax = Integer.MAX_VALUE;
 		int charMin = Character.MIN_VALUE, charMax = Character.MAX_VALUE;
@@ -427,6 +434,15 @@ public class COASTAL {
 		return reporter;
 	}
 
+	/**
+	 * Return the path tree for this analysis run of COASTAL.
+	 * 
+	 * @return the path tree
+	 */
+	public PathTree getPathTree() {
+		return pathTree;
+	}
+	
 	/**
 	 * Return the starting time of the analysis run in milliseconds.
 	 * 
@@ -1041,6 +1057,8 @@ public class COASTAL {
 			System.setOut(NUL);
 			System.setErr(NUL);
 		}
+		//System.setSecurityManager(new SecurityManager());
+		//System.getSecurityManager();
 		getBroker().publish("coastal-start", this);
 		getBroker().subscribe("tick", this::tick);
 		addFirstModel(new Model(0, null));
