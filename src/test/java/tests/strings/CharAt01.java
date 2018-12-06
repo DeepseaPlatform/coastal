@@ -1,6 +1,6 @@
-package examples.strings;
+package tests.strings;
 
-public class CharAt {
+public class CharAt01 {
 
 	public static void main(String[] args) {
 		test("abc", 1);
