@@ -962,8 +962,14 @@ public class COASTAL {
 		getBroker().subscribe("tick", this::tick);
 		addFirstModel(new Model(0, null));
 		try {
-			addDiverTask();
-			addStrategyTask();
+			int dtc = getConfig().getInt("coastal.diver[@threads]", 1);
+			while (diverTaskCount < dtc) {
+				addDiverTask();
+			}
+			int stc = getConfig().getInt("coastal.strategy[@threads]", 1);
+			while (strategyTaskCount < stc) {
+				addStrategyTask();
+			}
 			while (!workDone.get()) {
 				idle(500);
 				getBroker().publish("tick", this);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!ELEMENT configuration (coastal,green?,run-name?)>
-<!ELEMENT coastal (jar|main|target|trigger|strategy|delegate|observer|bound|trace-all|echo-output|draw-paths|concrete-values|limits)*>
+<!ELEMENT coastal (jar|main|target|trigger|strategy|diver|delegate|observer|bound|trace-all|echo-output|draw-paths|concrete-values|limits)*>
 <!ELEMENT jar (#PCDATA)>
 <!ATTLIST jar directory CDATA #IMPLIED>
 <!ELEMENT main (#PCDATA)>
@@ -8,8 +8,11 @@
 <!ELEMENT trigger (#PCDATA)>
 <!ELEMENT strategy (#PCDATA)>
 <!ATTLIST strategy seed NMTOKEN #IMPLIED>
+<!ATTLIST strategy threads NMTOKEN #IMPLIED>
 <!ATTLIST strategy full CDATA #IMPLIED>
 <!ATTLIST strategy topdown CDATA #IMPLIED>
+<!ELEMENT diver EMPTY>
+<!ATTLIST diver threads NMTOKEN #REQUIRED>
 <!ELEMENT delegate (target,model)>
 <!ELEMENT model (#PCDATA)>
 <!ELEMENT observer (#PCDATA)>

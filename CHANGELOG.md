@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Min/max bounds for all data types -- no just integers
 - Reporting of queue waiting times
 - Primitive GUI to show progress
+- Allow users to specify number of initial threads
 
 ### Changed
 - COASTAL now reads configuration from XML files
