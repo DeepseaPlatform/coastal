@@ -5,9 +5,18 @@ import java.lang.reflect.Field;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.symbolic.State;
 import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
 public class InstrumentationClassLoader extends ClassLoader {
+
+	private static final String VM_NAME = "za.ac.sun.cs.coastal.symbolic.VM";
+
+	private static final String SYMBOLIC_STATE_NAME = "za.ac.sun.cs.coastal.symbolic.SymbolicState";
+	
+	private static final String STATE_NAME = "za.ac.sun.cs.coastal.symbolic.State";
+	
+	private static final String STATE_FIELD_NAME = "state";
 
 	private final COASTAL coastal;
 	
@@ -42,9 +51,12 @@ public class InstrumentationClassLoader extends ClassLoader {
 			log.trace("*** loading class {}, found in cache", name);
 			return clas;
 		}
-		if (name.equals("za.ac.sun.cs.coastal.symbolic.SymbolicState")) {
+		if (name.equals(SYMBOLIC_STATE_NAME)) {
 			log.trace("*** loading class {} from parent", name);
 			return symbolicState.getClass();
+		} else if (name.equals(STATE_NAME)) {
+			log.trace("*** loading class {} from parent", name);
+			return State.class;
 		}
 		if (coastal.isTarget(name)) {
 			log.trace("*** loading class {}, identified as target", name);
@@ -75,9 +87,9 @@ public class InstrumentationClassLoader extends ClassLoader {
 			log.trace("*** class {} not found", name);
 			throw new ClassNotFoundException(name);
 		}
-		if ((clas != null) && name.equals("za.ac.sun.cs.coastal.symbolic.VM")) {
+		if ((clas != null) && name.equals(VM_NAME)) {
 			try {
-				Field ss = clas.getDeclaredField("symbolicState");
+				Field ss = clas.getDeclaredField(STATE_FIELD_NAME);
 				ss.set(null, symbolicState);
 			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();

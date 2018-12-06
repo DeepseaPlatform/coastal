@@ -24,7 +24,7 @@ import za.ac.sun.cs.green.expr.IntVariable;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
 
-public class SymbolicState {
+public class SymbolicState implements State {
 
 	private static final String FIELD_SEPARATOR = "/";
 
@@ -103,6 +103,7 @@ public class SymbolicState {
 		return symbolicMode;
 	}
 
+	@Override
 	public boolean getRecordMode() {
 		return recordMode;
 	}
@@ -119,10 +120,12 @@ public class SymbolicState {
 		return spc;
 	}
 
+	@Override
 	public void push(Expression expr) {
 		frames.peek().push(expr);
 	}
 
+	@Override
 	public Expression pop() {
 		return frames.peek().pop();
 	}
@@ -197,6 +200,7 @@ public class SymbolicState {
 		return incrAndGetNewObjectId();
 	}
 
+	@Override
 	public Expression getStringLength(int stringId) {
 		return getField(stringId, "length");
 	}
@@ -205,6 +209,7 @@ public class SymbolicState {
 		putField(stringId, "length", length);
 	}
 
+	@Override
 	public Expression getStringChar(int stringId, int index) {
 		return getField(stringId, "" + index);
 	}
@@ -260,6 +265,7 @@ public class SymbolicState {
 		}
 	}
 
+	@Override
 	public void pushExtraConjunct(Expression extraConjunct) {
 		if (!isConstant(extraConjunct)) {
 			if (pendingExtraConjunct == null) {
@@ -288,6 +294,7 @@ public class SymbolicState {
 		return ++objectIdCount;
 	}
 
+	@Override
 	public String getNewVariableName() {
 		return NEW_VAR_PREFIX + newVariableCount++;
 	}
@@ -338,6 +345,7 @@ public class SymbolicState {
 	//
 	// ======================================================================
 
+	@Override
 	public void stop() {
 		if (!symbolicMode) {
 			return;
@@ -345,6 +353,7 @@ public class SymbolicState {
 		broker.publish("stop", new Tuple(this, null));
 	}
 
+	@Override
 	public void stop(String message) {
 		if (!symbolicMode) {
 			return;
@@ -352,6 +361,7 @@ public class SymbolicState {
 		broker.publish("stop", new Tuple(this, message));
 	}
 
+	@Override
 	public void mark(int marker) {
 		if (!symbolicMode) {
 			return;
@@ -359,6 +369,7 @@ public class SymbolicState {
 		broker.publishThread("mark", marker);
 	}
 
+	@Override
 	public void mark(String marker) {
 		if (!symbolicMode) {
 			return;
@@ -372,6 +383,7 @@ public class SymbolicState {
 	//
 	// ======================================================================
 
+	@Override
 	public int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -387,6 +399,7 @@ public class SymbolicState {
 		return (concrete == null) ? currentValue : concrete.getValue();
 	}
 
+	@Override
 	public char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -402,6 +415,7 @@ public class SymbolicState {
 		return (concrete == null) ? currentValue : (char) concrete.getValue();
 	}
 
+	@Override
 	public byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -417,6 +431,7 @@ public class SymbolicState {
 		return (concrete == null) ? currentValue : (byte) concrete.getValue();
 	}
 
+	@Override
 	public String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -447,6 +462,7 @@ public class SymbolicState {
 		}
 	}
 
+	@Override
 	public int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -480,6 +496,7 @@ public class SymbolicState {
 		return value;
 	}
 
+	@Override
 	public char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -513,6 +530,7 @@ public class SymbolicState {
 		return value;
 	}
 
+	@Override
 	public byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -546,6 +564,7 @@ public class SymbolicState {
 		return value;
 	}
 
+	@Override
 	public void triggerMethod(int methodNumber) {
 		if (!recordMode) {
 			recordMode = mayRecord;
@@ -560,6 +579,7 @@ public class SymbolicState {
 		broker.publishThread("enter-method", methodNumber);
 	}
 
+	@Override
 	public void startMethod(int methodNumber, int argCount) {
 		if (!symbolicMode) {
 			return;
@@ -610,6 +630,7 @@ public class SymbolicState {
 	 * RETURN SALOAD SASTORE
 	 */
 
+	@Override
 	public void linenumber(int instr, int line) {
 		if (!symbolicMode) {
 			return;
@@ -618,6 +639,7 @@ public class SymbolicState {
 		broker.publishThread("linenumber", new Tuple(instr, line));
 	}
 
+	@Override
 	public void insn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -777,6 +799,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void intInsn(int instr, int opcode, int operand) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -811,6 +834,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void varInsn(int instr, int opcode, int var) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -838,6 +862,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void typeInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -857,6 +882,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
 			throws LimitConjunctException {
 		if (!symbolicMode) {
@@ -890,6 +916,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
 			throws LimitConjunctException {
 		if (!symbolicMode) {
@@ -947,6 +974,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void returnValue(boolean returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
@@ -956,6 +984,7 @@ public class SymbolicState {
 		}
 	}
 
+	@Override
 	public void returnValue(char returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
@@ -965,16 +994,19 @@ public class SymbolicState {
 		}
 	}
 
+	@Override
 	public void returnValue(double returnValue) {
 		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE double");
 		System.exit(1);
 	}
 
+	@Override
 	public void returnValue(float returnValue) {
 		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE float");
 		System.exit(1);
 	}
 
+	@Override
 	public void returnValue(int returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
@@ -984,11 +1016,13 @@ public class SymbolicState {
 		}
 	}
 
+	@Override
 	public void returnValue(long returnValue) {
 		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE long");
 		System.exit(1);
 	}
 
+	@Override
 	public void returnValue(short returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
@@ -998,6 +1032,7 @@ public class SymbolicState {
 		}
 	}
 
+	@Override
 	public void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1015,6 +1050,7 @@ public class SymbolicState {
 	}
 
 	/* Missing offset because destination not yet known. */
+	@Override
 	public void jumpInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1129,6 +1165,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void postJumpInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1146,6 +1183,7 @@ public class SymbolicState {
 		}
 	}
 
+	@Override
 	public void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1176,6 +1214,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void iincInsn(int instr, int var, int increment) throws LimitConjunctException {
 		final int opcode = 132;
 		if (!symbolicMode) {
@@ -1190,6 +1229,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void tableSwitchInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1201,6 +1241,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void tableCaseInsn(int min, int max, int value) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1215,6 +1256,7 @@ public class SymbolicState {
 		}
 	}
 
+	@Override
 	public void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1230,6 +1272,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void multiANewArrayInsn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1309,6 +1352,13 @@ public class SymbolicState {
 				.replace(")", "__");
 	}
 
+	// ======================================================================
+	//
+	// EXCEPTION HANDLING
+	//
+	// ======================================================================
+
+	@Override
 	public void noException() throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
@@ -1322,6 +1372,7 @@ public class SymbolicState {
 		dumpFrames();
 	}
 
+	@Override
 	public void startCatch(int instr) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;
