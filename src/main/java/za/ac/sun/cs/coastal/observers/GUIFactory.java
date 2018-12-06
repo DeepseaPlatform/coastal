@@ -17,9 +17,9 @@ import javax.swing.SpringLayout;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.Reporter;
+import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.StrategyManager;
 import za.ac.sun.cs.coastal.strategy.pathbased.PathBasedManager;
-import za.ac.sun.cs.coastal.strategy.pathbased.PathTree;
 
 public class GUIFactory implements ObserverFactory {
 

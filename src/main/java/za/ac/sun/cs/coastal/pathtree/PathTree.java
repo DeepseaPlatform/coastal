@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.strategy.pathbased;
+package za.ac.sun.cs.coastal.pathtree;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;

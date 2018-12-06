@@ -1,6 +1,8 @@
 package za.ac.sun.cs.coastal.strategy.pathbased;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.pathtree.PathTree;
+import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.strategy.StrategyManager;

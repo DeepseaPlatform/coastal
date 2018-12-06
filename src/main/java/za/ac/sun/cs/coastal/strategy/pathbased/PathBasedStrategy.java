@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyManager;
 import za.ac.sun.cs.coastal.symbolic.Model;
