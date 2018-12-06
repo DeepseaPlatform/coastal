@@ -51,7 +51,6 @@ public class Diver implements Callable<Void> {
 				String banner = "starting dive " + coastal.getNextDiveCount() + " @" + Banner.getElapsed(coastal);
 				log.trace(Banner.getBannerLine(banner, '-'));
 				ClassLoader classLoader = coastal.getClassManager().createClassLoader(symbolicState);
-				// SymbolicVM.setState(symbolicState);
 				performRun(classLoader);
 				coastal.recordDiveTime(System.currentTimeMillis() - t1);
 				// ----> disposition.notifyPathListeners(symbolicState);
@@ -86,7 +85,7 @@ public class Diver implements Callable<Void> {
 			if ((t == null) || !(t instanceof LimitConjunctException)) {
 				// x.printStackTrace();
 				try {
-					SymbolicVM.startCatch(-1);
+					VM.startCatch(-1);
 				} catch (LimitConjunctException e) {
 					// ignore, since run is over in any case
 				}

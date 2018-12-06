@@ -20,7 +20,7 @@ public class MethodInstrumentationAdapter extends MethodVisitor {
 
 	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
 
-	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/SymbolicVM";
+	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/VM";
 
 	private final COASTAL coastal;
 

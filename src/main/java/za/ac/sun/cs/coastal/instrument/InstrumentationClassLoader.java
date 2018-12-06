@@ -75,7 +75,7 @@ public class InstrumentationClassLoader extends ClassLoader {
 			log.trace("*** class {} not found", name);
 			throw new ClassNotFoundException(name);
 		}
-		if ((clas != null) && name.equals("za.ac.sun.cs.coastal.symbolic.SymbolicVM")) {
+		if ((clas != null) && name.equals("za.ac.sun.cs.coastal.symbolic.VM")) {
 			try {
 				Field ss = clas.getDeclaredField("symbolicState");
 				ss.set(null, symbolicState);

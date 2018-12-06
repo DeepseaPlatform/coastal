@@ -1,7 +1,7 @@
 // CHECKSTYLE:OFF
 package examples.simple;
 
-import za.ac.sun.cs.coastal.symbolic.SymbolicVM;
+import za.ac.sun.cs.coastal.symbolic.VM;
 
 public class StateMachine {
 
@@ -19,7 +19,7 @@ public class StateMachine {
 			switch (inputs[inputIndex]) {
 			case 0:
 				if (offset > 3) {
-					SymbolicVM.stop("KA-CHING!");
+					VM.stop("KA-CHING!");
 					System.out.println("XXX");
 					return;
 				}

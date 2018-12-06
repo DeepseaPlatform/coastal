@@ -2,12 +2,12 @@ package za.ac.sun.cs.coastal.symbolic;
 
 import za.ac.sun.cs.green.expr.Expression;
 
-public class SymbolicVM {
+public class VM {
 
 	public static SymbolicState symbolicState = null;
 
 	public static void setState(SymbolicState symbolicState) {
-		SymbolicVM.symbolicState = symbolicState;
+		VM.symbolicState = symbolicState;
 	}
 
 	// ======================================================================
