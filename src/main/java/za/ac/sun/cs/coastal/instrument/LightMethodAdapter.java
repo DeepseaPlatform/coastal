@@ -1,13 +1,6 @@
 package za.ac.sun.cs.coastal.instrument;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
-
 import org.apache.logging.log4j.Logger;
-import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -31,20 +24,6 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	private final int argCount;
 
-	private static final class Tuple {
-		final int min, max, cur;
-
-		Tuple(int min, int max, int cur) {
-			this.min = min;
-			this.max = max;
-			this.cur = cur;
-		}
-	}
-
-	private static Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
-
-	private static Set<Label> catchLabels = new HashSet<>();
-	
 	public LightMethodAdapter(COASTAL coastal, MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.coastal = coastal;
@@ -127,21 +106,6 @@ public class LightMethodAdapter extends MethodVisitor {
 	}
 
 	@Override
-	public void visitEnd() {
-		log.trace("visitEnd()");
-		classManager.registerLastInstruction();
-		// branchInstructions.put(methodCounter, currentBranchInstructions);
-		mv.visitEnd();
-	}
-
-	@Override
-	public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-		log.trace("visitTryCatchBlock(start:{}, end:{}, handler:{}, type:{})", start, end, handler, type);
-		catchLabels.add(handler);
-		mv.visitTryCatchBlock(start, end, handler, type);
-	}
-	
-	@Override
 	public void visitCode() {
 		log.trace("visitCode()");
 		if (triggerIndex >= 0) {
@@ -177,51 +141,27 @@ public class LightMethodAdapter extends MethodVisitor {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 		}
 		classManager.registerFirstInstruction();
-		// currentBranchInstructions = new BitSet();
 		mv.visitCode();
 	}
 
 	@Override
 	public void visitInsn(int opcode) {
 		log.trace("visitInsn(opcode:{})", opcode);
-		mv.visitLdcInsn(classManager.getNextInstructionCounter());
-		mv.visitLdcInsn(opcode);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(II)V", false);
-		mv.visitInsn(opcode);
-		if (opcode == Opcodes.IDIV) {
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "noException", "()V", false);
+		switch (opcode) {
+		case Opcodes.IRETURN:
+		case Opcodes.ARETURN:
+		case Opcodes.RETURN:
+			mv.visitLdcInsn(classManager.getNextInstructionCounter());
+			mv.visitLdcInsn(opcode);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(II)V", false);
+			break;
+		default:
+			break;
 		}
-	}
-
-	@Override
-	public void visitIntInsn(int opcode, int operand) {
-		// do nothing
-	}
-
-	@Override
-	public void visitVarInsn(int opcode, int var) {
-		// do nothing
-	}
-
-	@Override
-	public void visitTypeInsn(int opcode, String type) {
-		// do nothing
-	}
-
-	@Override
-	public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-		// do nothing
-	}
-
-	@Override
-	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-		// do nothing
-	}
-
-	@Override
-	public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle,
-			Object... bootstrapMethodArguments) {
-		// do nothing
+		mv.visitInsn(opcode);
+//		if (opcode == Opcodes.IDIV) {
+//			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "noException", "()V", false);
+//		}
 	}
 
 	@Override
@@ -235,77 +175,7 @@ public class LightMethodAdapter extends MethodVisitor {
 			mv.visitLdcInsn(classManager.getInstructionCounter());
 			mv.visitLdcInsn(opcode);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "postJumpInsn", "(II)V", false);
-			// currentBranchInstructions.set(instructionCounter);
 		}
-	}
-
-	@Override
-	public void visitLdcInsn(Object value) {
-		// do nothing
-	}
-
-	@Override
-	public void visitIincInsn(int var, int increment) {
-		// do nothing
-	}
-
-	@Override
-	public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-		log.trace("visitTableSwitchInsn(min:{}, max:{}, dflt:{})", min, max, dflt);
-		mv.visitLdcInsn(classManager.getNextInstructionCounter());
-		mv.visitLdcInsn(170);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableSwitchInsn", "(II)V", false);
-		assert labels.length == (max - min + 1);
-		for (int value = min; value <= max; value++) {
-			Stack<Tuple> pending = caseLabels.get(labels[value - min]);
-			if (pending == null) {
-				pending = new Stack<>();
-				caseLabels.put(labels[value - min], pending);
-			}
-			pending.push(new Tuple(min, max, value));
-		}
-		Stack<Tuple> pending = caseLabels.get(dflt);
-		if (pending == null) {
-			pending = new Stack<>();
-			caseLabels.put(dflt, pending);
-		}
-		pending.push(new Tuple(min, max, min - 1));
-		mv.visitTableSwitchInsn(min, max, dflt, labels);
-	}
-
-	@Override
-	public void visitLabel(Label label) {
-		log.trace("visitLabel(label:{})", label);
-		mv.visitLabel(label);
-		if (catchLabels.contains(label)) {
-			mv.visitLdcInsn(classManager.getInstructionCounter());
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startCatch", "(I)V", false);
-		} else {
-			Stack<Tuple> pending = caseLabels.get(label);
-			if (pending != null) {
-				while (!pending.isEmpty()) {
-					Tuple t = pending.pop();
-					mv.visitLdcInsn(t.min);
-					mv.visitLdcInsn(t.max);
-					mv.visitLdcInsn(t.cur);
-					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableCaseInsn", "(III)V", false);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-		log.trace("visitLookupSwitchInsn(dflt:{})", dflt);
-		mv.visitLdcInsn(classManager.getNextInstructionCounter());
-		mv.visitLdcInsn(171);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "lookupSwitchInsn", "(II)V", false);
-		mv.visitLookupSwitchInsn(dflt, keys, labels);
-	}
-
-	@Override
-	public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
-		// do nothing
 	}
 
 }

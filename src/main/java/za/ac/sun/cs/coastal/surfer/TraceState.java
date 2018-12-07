@@ -439,7 +439,7 @@ public class TraceState implements State {
 		if (recordMode) {
 			log.trace("(POST) {}", Bytecodes.toString(opcode));
 			log.trace(">>> previous conjunct is false");
-//			assert trace instanceof SegmentedPCIf;
+			assert trace instanceof TraceIf;
 			trace = ((TraceIf) trace).negate();
 		}
 	}

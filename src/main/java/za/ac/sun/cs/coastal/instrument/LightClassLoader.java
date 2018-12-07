@@ -56,7 +56,7 @@ public class LightClassLoader extends ClassLoader {
 		}
 		if (coastal.isTarget(name)) {
 			log.trace("*** loading class {}, identified as target", name);
-			byte[] raw = manager.loadHeavyInstrumented(name);
+			byte[] raw = manager.loadLightInstrumented(name);
 			if (raw != null) {
 				log.trace("*** class {} instrumented", name);
 				clas = defineClass(name, raw, 0, raw.length);
