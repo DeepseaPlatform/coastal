@@ -142,8 +142,6 @@ public class SystemTestsObservers {
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
 		assertEquals(2, reporter.getStatLong("Instrumentation.cache-hit-count"));
 		assertEquals(1, reporter.getStatLong("Instrumentation.instrumented-count"));
-		long requestDelta = Math.abs(reporter.getStatLong("Instrumentation.requests-count") - 12);
-		assertTrue(requestDelta < 4);
 		assertEquals(0, reporter.getStatLong("Strategy.infeasible-count"));
 		assertEquals(1, reporter.getStatLong("Strategy.inserted-paths"));
 		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
