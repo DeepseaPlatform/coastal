@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.symbolic;
+package za.ac.sun.cs.coastal.diver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,6 +14,8 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverManager;
+import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
+import za.ac.sun.cs.coastal.symbolic.VM;
 import za.ac.sun.cs.green.expr.Constant;
 
 public class Diver implements Callable<Void> {
@@ -44,18 +46,16 @@ public class Diver implements Callable<Void> {
 		try {
 			while (true) {
 				long t0 = System.currentTimeMillis();
-				Map<String, Constant> concreteValues = coastal.getNextModel();
+				Map<String, Constant> concreteValues = coastal.getNextDiverModel();
 				long t1 = System.currentTimeMillis();
-				coastal.recordDiveWaitTime(t1 - t0);
+				coastal.recordDiverWaitTime(t1 - t0);
 				SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
 				String banner = "starting dive " + coastal.getNextDiveCount() + " @" + Banner.getElapsed(coastal);
 				log.trace(Banner.getBannerLine(banner, '-'));
-				ClassLoader classLoader = coastal.getClassManager().createClassLoader(symbolicState);
+				ClassLoader classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
 				performRun(classLoader);
-				coastal.recordDiveTime(System.currentTimeMillis() - t1);
-				// ----> disposition.notifyPathListeners(symbolicState);
-				SegmentedPC spc = symbolicState.getSegmentedPathCondition();
-				coastal.addPc(spc);
+				coastal.recordDiverTime(System.currentTimeMillis() - t1);
+				coastal.addPc(symbolicState.getSegmentedPathCondition());
 				broker.publishThread("dive-end", this);
 				if (!symbolicState.mayContinue()) {
 					coastal.stopWork();
@@ -69,7 +69,7 @@ public class Diver implements Callable<Void> {
 	}
 
 	private void performRun(ClassLoader classLoader) {
-		for (Tuple observer : coastal.getObserversPerDive()) {
+		for (Tuple observer : coastal.getObserversPerDiver()) {
 			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 			ObserverManager observerManager = (ObserverManager) observer.get(1);
 			observerFactory.createObserver(coastal, observerManager);

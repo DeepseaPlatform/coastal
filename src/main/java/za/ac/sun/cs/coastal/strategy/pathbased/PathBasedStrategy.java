@@ -13,13 +13,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.diver.SegmentedPC;
+import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyManager;
 import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.Constant;

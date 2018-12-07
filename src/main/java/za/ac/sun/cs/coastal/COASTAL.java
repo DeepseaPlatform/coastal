@@ -39,6 +39,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import za.ac.sun.cs.coastal.diver.Diver;
+import za.ac.sun.cs.coastal.diver.SegmentedPC;
+import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
@@ -48,10 +51,8 @@ import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.strategy.StrategyManager;
 import za.ac.sun.cs.coastal.strategy.StrategyTask;
-import za.ac.sun.cs.coastal.symbolic.Diver;
+import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 import za.ac.sun.cs.green.expr.Constant;
 
 /**
@@ -109,6 +110,17 @@ public class COASTAL {
 	private final Map<String, Object> delegates = new HashMap<>();
 
 	/**
+	 * The maximum number of threads to use for divers and strategies.
+	 */
+	private final int maxThreads;
+
+	// ======================================================================
+	//
+	// OBSERVERS
+	//
+	// ======================================================================
+
+	/**
 	 * A list of observer factories and managers that must be started once per
 	 * run.
 	 */
@@ -121,37 +133,17 @@ public class COASTAL {
 	private final List<Tuple> observersPerTask = new ArrayList<>();
 
 	/**
-	 * A list of observer factories and managers that must be started once per
-	 * dive.
+	 * A list of observer factories and managers that must be started once for each
+	 * diver.
 	 */
-	private final List<Tuple> observersPerDive = new ArrayList<>();
+	private final List<Tuple> observersPerDiver = new ArrayList<>();
 
 	/**
-	 * The wall-clock-time that the analysis run was started.
+	 * A list of observer factories and managers that must be started once for each
+	 * surfer.
 	 */
-	private Calendar startingTime;
-
-	/**
-	 * The wall-clock-time that the analysis run was stopped.
-	 */
-	private Calendar stoppingTime;
-
-	/**
-	 * The number of milliseconds of elapsed time when we next write a console
-	 * update.
-	 */
-	private long nextReportingTime = 0;
-
-	/**
-	 * The maximum number of SECONDS the coastal run is allowed to execute.
-	 */
-	private final long timeLimit;
-
-	/**
-	 * The maximum number of threads to use for divers and strategies.
-	 */
-	private final int maxThreads;
-
+	private final List<Tuple> observersPerSurfer = new ArrayList<>();
+	
 	// ======================================================================
 	//
 	// VARIABLE BOUNDS
@@ -236,30 +228,66 @@ public class COASTAL {
 
 	// ======================================================================
 	//
-	// SHARED VARIABLES
+	// QUEUES
 	//
 	// ======================================================================
 
 	/**
-	 * Counter for the number of dives undertaken.
+	 * A queue of models produced by strategies and consumed by divers.
 	 */
-	private final AtomicLong diveCount = new AtomicLong(0);
+	private final BlockingQueue<Model> diverModels;
+
+	/**
+	 * A queue of models produced by strategies and consumed by surfers.
+	 */
+	private final BlockingQueue<Model> surferModels;
+	
+	/**
+	 * A queue of path conditions produced by divers and consumed by strategies.
+	 */
+	private final BlockingQueue<SegmentedPC> pcs;
+
+	/**
+	 * A queue of traces produced by surfers and consumed by strategies.
+	 */
+	private final BlockingQueue<Trace> traces;
+	
+	// ======================================================================
+	//
+	// TIMING INFORMATION
+	//
+	// ======================================================================
 
 	/**
 	 * Accumulator of all the dive times.
 	 */
-	private final AtomicLong diveTime = new AtomicLong(0);
+	private final AtomicLong diverTime = new AtomicLong(0);
 
 	/**
 	 * Accumulator of all the dive waiting times.
 	 */
-	private final AtomicLong diveWaitTime = new AtomicLong(0);
+	private final AtomicLong diverWaitTime = new AtomicLong(0);
 
 	/**
 	 * Counter for the dive waiting times.
 	 */
-	private final AtomicLong diveWaitCount = new AtomicLong(0);
+	private final AtomicLong diverWaitCount = new AtomicLong(0);
 
+	/**
+	 * Accumulator of all the surf times.
+	 */
+	private final AtomicLong surferTime = new AtomicLong(0);
+	
+	/**
+	 * Accumulator of all the surf waiting times.
+	 */
+	private final AtomicLong surferWaitTime = new AtomicLong(0);
+	
+	/**
+	 * Counter for the surf waiting times.
+	 */
+	private final AtomicLong surferWaitCount = new AtomicLong(0);
+	
 	/**
 	 * Accumulator of all the strategy waiting times.
 	 */
@@ -271,10 +299,52 @@ public class COASTAL {
 	private final AtomicLong strategyWaitCount = new AtomicLong(0);
 
 	/**
+	 * The wall-clock-time that the analysis run was started.
+	 */
+	private Calendar startingTime;
+
+	/**
+	 * The wall-clock-time that the analysis run was stopped.
+	 */
+	private Calendar stoppingTime;
+
+	/**
+	 * The number of milliseconds of elapsed time when we next write a console
+	 * update.
+	 */
+	private long nextReportingTime = 0;
+
+	/**
+	 * The maximum number of SECONDS the coastal run is allowed to execute.
+	 */
+	private final long timeLimit;
+
+	// ======================================================================
+	//
+	// SHARED VARIABLES
+	//
+	// ======================================================================
+
+	/**
+	 * Counter for the number of dives undertaken.
+	 */
+	private final AtomicLong diverCount = new AtomicLong(0);
+
+	/**
+	 * Counter for the number of surfs undertaken.
+	 */
+	private final AtomicLong surferCount = new AtomicLong(0);
+	
+	/**
 	 * The number of diver tasks started (ever).
 	 */
 	private int diverTaskCount = 0;
 
+	/**
+	 * The number of surfer tasks started (ever).
+	 */
+	private int surferTaskCount = 0;
+	
 	/**
 	 * The number of strategy tasks started (ever).
 	 */
@@ -296,16 +366,6 @@ public class COASTAL {
 	 * A list of outstanding tasks.
 	 */
 	private final List<Future<Void>> futures;
-
-	/**
-	 * A queue of models produced by strategies and consumed by divers.
-	 */
-	private final BlockingQueue<Model> models;
-
-	/**
-	 * A queue of path conditions produced by divers and consumed by strategies.
-	 */
-	private final BlockingQueue<SegmentedPC> pcs;
 
 	/**
 	 * The one-and-only strategy factory for this analysis run.
@@ -378,8 +438,11 @@ public class COASTAL {
 		executor = Executors.newCachedThreadPool();
 		completionService = new ExecutorCompletionService<Void>(executor);
 		futures = new ArrayList<Future<Void>>(maxThreads);
-		models = new PriorityBlockingQueue<>(10, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
+		// Create the queues.
+		diverModels = new PriorityBlockingQueue<>(50, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
+		surferModels = new PriorityBlockingQueue<>(50, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
 		pcs = new LinkedBlockingQueue<>();
+		traces = new LinkedBlockingQueue<>();
 		StrategyFactory sf = null;
 		String strategyName = config.getString("coastal.strategy");
 		if (strategyName != null) {
@@ -610,13 +673,21 @@ public class COASTAL {
 					observersPerRun.add(new Tuple(observerFactory, manager));
 				} else if (frequency == ObserverFactory.ONCE_PER_TASK) {
 					observersPerTask.add(new Tuple(observerFactory, manager));
+				} else if (frequency == ObserverFactory.ONCE_PER_DIVER) {
+					observersPerDiver.add(new Tuple(observerFactory, manager));
 				} else {
-					observersPerDive.add(new Tuple(observerFactory, manager));
+					observersPerSurfer.add(new Tuple(observerFactory, manager));
 				}
 			}
 		}
 	}
 
+	// ======================================================================
+	//
+	// OBSERVERS
+	//
+	// ======================================================================
+	
 	public Iterable<Tuple> getObserversPerRun() {
 		return observersPerRun;
 	}
@@ -625,10 +696,14 @@ public class COASTAL {
 		return observersPerTask;
 	}
 
-	public Iterable<Tuple> getObserversPerDive() {
-		return observersPerDive;
+	public Iterable<Tuple> getObserversPerDiver() {
+		return observersPerDiver;
 	}
 
+	public Iterable<Tuple> getObserversPerSurfer() {
+		return observersPerSurfer;
+	}
+	
 	// ======================================================================
 	//
 	// VARIABLE BOUNDS
@@ -808,93 +883,68 @@ public class COASTAL {
 	}
 
 	/**
-	 * Increment and return the dive counter.
+	 * Increment and return the diver counter.
 	 * 
-	 * @return the incremented value of the dive counter
+	 * @return the incremented value of the diver counter
 	 */
 	public long getNextDiveCount() {
-		return diveCount.incrementAndGet();
+		return diverCount.incrementAndGet();
 	}
 
 	/**
-	 * Return the current value of the dive counter.
+	 * Return the current value of the diver counter.
 	 * 
-	 * @return the value of the dive counter
+	 * @return the value of the diver counter
 	 */
 	public long getDiveCount() {
-		return diveCount.get();
-	}
-
-	public int getModelQueueLength() {
-		return models.size();
-	}
-
-	public int getPcQueueLength() {
-		return pcs.size();
+		return diverCount.get();
 	}
 
 	/**
-	 * Add a reported dive time to the accumulator that tracks how long the
-	 * dives took.
+	 * Increment and return the surfer counter.
 	 * 
-	 * @param time
-	 *            the time for this dive
+	 * @return the incremented value of the surfer counter
 	 */
-	public void recordDiveTime(long time) {
-		diveTime.addAndGet(time);
+	public long getNextSurferCount() {
+		return surferCount.incrementAndGet();
 	}
-
+	
 	/**
-	 * Add a reported dive wait time. This is used to determine if it makes
-	 * sense to create additional threads (or destroy them).
+	 * Return the current value of the surfer counter.
 	 * 
-	 * @param time
-	 *            the wait time for this dive
+	 * @return the value of the surfer counter
 	 */
-	public void recordDiveWaitTime(long time) {
-		diveWaitTime.addAndGet(time);
-		diveWaitCount.incrementAndGet();
+	public long getSurferCount() {
+		return surferCount.get();
 	}
+	
+	// ======================================================================
+	//
+	// QUEUES
+	//
+	// ======================================================================
 
+	// DIVER MODEL QUEUE
+	
 	/**
-	 * Add a reported strategy wait time. This is used to determine if it makes
-	 * sense to create additional threads (or destroy them).
+	 * Return the length of the diver model queue.
 	 * 
-	 * @param time
-	 *            the wait time for this dive
+	 * @return the length of the diver model queue
 	 */
-	public void recordStrategyWaitTime(long time) {
-		strategyWaitTime.addAndGet(time);
-		strategyWaitCount.incrementAndGet();
+	public int getDiverModelQueueLength() {
+		return diverModels.size();
 	}
 
 	/**
-	 * Add the first model to the queue of models. This kicks off the analysis
-	 * run.
-	 * 
-	 * @param firstModel
-	 *            the very first model to add
-	 */
-	public void addFirstModel(Model firstModel) {
-		try {
-			models.put(firstModel);
-			work.incrementAndGet();
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
-	}
-
-	/**
-	 * Add a list of models to the queue.
+	 * Add a list of models to the diver model queue.
 	 * 
 	 * @param mdls
-	 *            the list of models
+	 *            the list of models to add
 	 */
-	public void addModels(List<Model> mdls) {
+	public void addDiverModels(List<Model> mdls) {
 		mdls.forEach(m -> {
 			try {
-				models.put(m);
-				// log.info(Banner.getBannerLine("added model " + m, '-'));
+				diverModels.put(m);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -902,14 +952,81 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the next available model.
+	 * Return the next available diver model.
 	 * 
 	 * @return the model as a variable-value mapping
 	 * @throws InterruptedException
-	 *             if the task requesting the model was interrupted
+	 *             if the action of removing the model was interrupted
 	 */
-	public Map<String, Constant> getNextModel() throws InterruptedException {
-		return models.take().getConcreteValues();
+	public Map<String, Constant> getNextDiverModel() throws InterruptedException {
+		return diverModels.take().getConcreteValues();
+	}
+
+	/**
+	 * Add the first model to the queue of models. This kicks off the analysis
+	 * run.
+	 * 
+	 * THIS METHOD IS A PART OF THE DESIGN THAT NEEDS TO BE REFACTORED!!
+	 * 
+	 * @param firstModel
+	 *            the very first model to add
+	 */
+	public void addFirstModel(Model firstModel) {
+		try {
+			diverModels.put(firstModel);
+			work.incrementAndGet();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+	}
+
+	// SURFER MODEL QUEUE
+	
+	/**
+	 * Return the length of the surfer model queue.
+	 * 
+	 * @return the length of the surfer model queue
+	 */
+	public int getSurferModelQueueLength() {
+		return surferModels.size();
+	}
+
+	/**
+	 * Add a list of models to the surfer model queue.
+	 * 
+	 * @param mdls
+	 *            the list of models to add
+	 */
+	public void addSurferModels(List<Model> mdls) {
+		mdls.forEach(m -> {
+			try {
+				surferModels.put(m);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+	/**
+	 * Return the next available surfer model.
+	 * 
+	 * @return the model as a variable-value mapping
+	 * @throws InterruptedException
+	 *             if the action of removing the model was interrupted
+	 */
+	public Map<String, Constant> getNextSurferModel() throws InterruptedException {
+		return surferModels.take().getConcreteValues();
+	}
+
+	// PATH CONDITION QUEUE
+	
+	/**
+	 * Return the length of the path condition queue.
+	 * 
+	 * @return the length of the path condition queue
+	 */
+	public int getPcQueueLength() {
+		return pcs.size();
 	}
 
 	/**
@@ -931,14 +1048,118 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the next available path condition
+	 * Return the next available path condition.
 	 * 
 	 * @return the next path condition
 	 * @throws InterruptedException
-	 *             if the task requesting the model was interrupted
+	 *             if the action of removing the path condition was interrupted
 	 */
 	public SegmentedPC getNextPc() throws InterruptedException {
 		return pcs.take();
+	}
+
+	// TRACE QUEUE
+	
+	/**
+	 * Return the length of the trace queue.
+	 * 
+	 * @return the length of the trace queue
+	 */
+	public int getTraceQueueLength() {
+		return traces.size();
+	}
+	
+	/**
+	 * Add a new entry to the queue of traces.
+	 * 
+	 * @param spc
+	 *            the trace to add
+	 */
+	public void addTrace(Trace trace) {
+		try {
+			if (trace == null) {
+				traces.put(Trace.NULL);
+			} else {
+				traces.put(trace);
+			}
+		} catch (InterruptedException e) {
+			// ignore silently
+		}
+	}
+	
+	/**
+	 * Return the next available trace.
+	 * 
+	 * @return the next trace
+	 * @throws InterruptedException
+	 *             if the action of removing the trace was interrupted
+	 */
+	public Trace getNextTrace() throws InterruptedException {
+		return traces.take();
+	}
+	
+	// ======================================================================
+	//
+	// TIMING INFORMATION
+	//
+	// ======================================================================
+
+	/**
+	 * Add a reported dive time to the accumulator that tracks how long the
+	 * dives took.
+	 * 
+	 * @param time
+	 *            the time for this dive
+	 */
+	public void recordDiverTime(long time) {
+		diverTime.addAndGet(time);
+	}
+
+	/**
+	 * Add a reported dive wait time. This is used to determine if it makes
+	 * sense to create additional threads (or destroy them).
+	 * 
+	 * @param time
+	 *            the wait time for this dive
+	 */
+	public void recordDiverWaitTime(long time) {
+		diverWaitTime.addAndGet(time);
+		diverWaitCount.incrementAndGet();
+	}
+
+	/**
+	 * Add a reported surf time to the accumulator that tracks how long the
+	 * surfers took.
+	 * 
+	 * @param time
+	 *            the time for this surfer
+	 */
+	public void recordSurferTime(long time) {
+		surferTime.addAndGet(time);
+	}
+	
+	/**
+	 * Add a reported surfer wait time. This is used to determine if it makes
+	 * sense to create additional threads (or destroy them).
+	 * 
+	 * @param time
+	 *            the wait time for this surfer
+	 */
+	public void recordSurferWaitTime(long time) {
+		surferWaitTime.addAndGet(time);
+		surferWaitCount.incrementAndGet();
+	}
+	
+	/**
+	 * Add a reported strategy wait time. This is used to determine if it makes
+	 * sense to create additional threads (or destroy them).
+	 * 
+	 * @param time
+	 *            the wait time for this dive
+	 */
+	public void recordStrategyWaitTime(long time) {
+		strategyWaitTime.addAndGet(time);
+		strategyWaitCount.incrementAndGet();
 	}
 
 	/**
@@ -1087,7 +1308,7 @@ public class COASTAL {
 		getBroker().publish("coastal-report", this);
 		System.setOut(getSystemOut());
 		System.setErr(getSystemErr());
-		if (diveCount.get() < 2) {
+		if (diverCount.get() < 2) {
 			Banner bn = new Banner('@');
 			bn.println("ONLY A SINGLE RUN EXECUTED\n");
 			bn.println("CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE");
@@ -1103,7 +1324,7 @@ public class COASTAL {
 		if (elapsedTime > nextReportingTime) {
 			String time = Banner.getElapsed(this);
 			String dives = String.format("dives:%d", getDiveCount());
-			String queue = String.format("[models:%d pcs:%d]", models.size(), pcs.size());
+			String queue = String.format("[models:%d pcs:%d]", diverModels.size(), pcs.size());
 			log.info("{} {} {}", time, dives, queue);
 			if (elapsedTime > 3600000) {
 				// After 1 hour, we report every 5 minutes
@@ -1129,14 +1350,19 @@ public class COASTAL {
 		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
 		long duration = stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis();
 		getBroker().publish("report", new Tuple("COASTAL.time", duration));
+		double dwt = diverWaitTime.get() / diverWaitCount.doubleValue();
 		getBroker().publish("report", new Tuple("COASTAL.diver-tasks", diverTaskCount));
-		getBroker().publish("report", new Tuple("COASTAL.dive-count", diveCount.get()));
-		getBroker().publish("report", new Tuple("COASTAL.dive-time", diveTime.get()));
-		getBroker().publish("report",
-				new Tuple("COASTAL.dive-wait-time", diveWaitTime.get() / diveWaitCount.doubleValue()));
+		getBroker().publish("report", new Tuple("COASTAL.diver-count", diverCount.get()));
+		getBroker().publish("report", new Tuple("COASTAL.diver-time", diverTime.get()));
+		getBroker().publish("report", new Tuple("COASTAL.diver-wait-time", dwt));
+		double swt = surferWaitTime.get() / surferWaitCount.doubleValue();
+		getBroker().publish("report", new Tuple("COASTAL.surfer-tasks", surferTaskCount));
+		getBroker().publish("report", new Tuple("COASTAL.surfer-count", surferCount.get()));
+		getBroker().publish("report", new Tuple("COASTAL.surfer-time", diverTime.get()));
+		getBroker().publish("report", new Tuple("COASTAL.surfer-wait-time", swt));
+		double stwt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
 		getBroker().publish("report", new Tuple("COASTAL.strategy-tasks", strategyTaskCount));
-		getBroker().publish("report",
-				new Tuple("COASTAL.strategy-wait-time", strategyWaitTime.get() / strategyWaitCount.doubleValue()));
+		getBroker().publish("report", new Tuple("COASTAL.strategy-wait-time", stwt));
 	}
 
 	// ======================================================================

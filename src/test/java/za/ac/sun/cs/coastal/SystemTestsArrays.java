@@ -18,7 +18,7 @@ public class SystemTestsArrays {
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
 		Reporter reporter = coastal.getReporter();
-		assertEquals(3, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(3, reporter.getStatLong("COASTAL.diver-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
 		assertEquals(4, reporter.getStatLong("Instrumentation.cache-hit-count"));
@@ -37,7 +37,7 @@ public class SystemTestsArrays {
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
 		Reporter reporter = coastal.getReporter();
-		assertEquals(3, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(3, reporter.getStatLong("COASTAL.diver-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
 		assertEquals(4, reporter.getStatLong("Instrumentation.cache-hit-count"));
@@ -56,7 +56,7 @@ public class SystemTestsArrays {
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
 		Reporter reporter = coastal.getReporter();
-		assertEquals(3, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(3, reporter.getStatLong("COASTAL.diver-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
 		assertEquals(4, reporter.getStatLong("Instrumentation.cache-hit-count"));
@@ -75,7 +75,7 @@ public class SystemTestsArrays {
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
 		Reporter reporter = coastal.getReporter();
-		assertEquals(3, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(3, reporter.getStatLong("COASTAL.diver-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
 		assertEquals(4, reporter.getStatLong("Instrumentation.cache-hit-count"));
@@ -94,7 +94,7 @@ public class SystemTestsArrays {
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
 		Reporter reporter = coastal.getReporter();
-		assertEquals(3, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(3, reporter.getStatLong("COASTAL.diver-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
 		assertEquals(4, reporter.getStatLong("Instrumentation.cache-hit-count"));
@@ -113,7 +113,7 @@ public class SystemTestsArrays {
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
 		Reporter reporter = coastal.getReporter();
-		assertEquals(3, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(3, reporter.getStatLong("COASTAL.diver-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
 		assertEquals(4, reporter.getStatLong("Instrumentation.cache-hit-count"));
@@ -132,7 +132,7 @@ public class SystemTestsArrays {
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
 		Reporter reporter = coastal.getReporter();
-		assertEquals(11, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(11, reporter.getStatLong("COASTAL.diver-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
 		assertEquals(20, reporter.getStatLong("Instrumentation.cache-hit-count"));
@@ -151,7 +151,7 @@ public class SystemTestsArrays {
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
 		Reporter reporter = coastal.getReporter();
-		assertEquals(11, reporter.getStatLong("COASTAL.dive-count"));
+		assertEquals(11, reporter.getStatLong("COASTAL.diver-count"));
 		assertEquals(1, reporter.getStatLong("COASTAL.diver-tasks"));
 		assertEquals(1, reporter.getStatLong("COASTAL.strategy-tasks"));
 		assertEquals(30, reporter.getStatLong("Instrumentation.cache-hit-count"));

@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.diver.SegmentedPC;
+import za.ac.sun.cs.coastal.diver.SegmentedPCIf;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.strategy.StrategyManager;
 import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
-import za.ac.sun.cs.coastal.symbolic.SegmentedPCIf;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 

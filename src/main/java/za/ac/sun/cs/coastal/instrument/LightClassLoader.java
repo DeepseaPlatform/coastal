@@ -5,14 +5,14 @@ import java.lang.reflect.Field;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.surfer.TraceState;
 import za.ac.sun.cs.coastal.symbolic.State;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
 
-public class InstrumentationClassLoader extends ClassLoader {
+public class LightClassLoader extends ClassLoader {
 
 	private static final String VM_NAME = "za.ac.sun.cs.coastal.symbolic.VM";
 
-	private static final String SYMBOLIC_STATE_NAME = "za.ac.sun.cs.coastal.symbolic.SymbolicState";
+	private static final String TRACE_STATE_NAME = "za.ac.sun.cs.coastal.symbolic.TraceState";
 	
 	private static final String STATE_NAME = "za.ac.sun.cs.coastal.symbolic.State";
 	
@@ -24,24 +24,20 @@ public class InstrumentationClassLoader extends ClassLoader {
 
 	private final InstrumentationClassManager manager;
 
-	private final SymbolicState symbolicState;
+	private final TraceState traceState;
 	
-	public InstrumentationClassLoader(COASTAL coastal, InstrumentationClassManager manager, SymbolicState symbolicState) {
+	public LightClassLoader(COASTAL coastal, InstrumentationClassManager manager, TraceState traceState) {
 		this.coastal = coastal;
 		this.log = coastal.getLog();
 		this.manager = manager;
-		this.symbolicState = symbolicState;
+		this.traceState = traceState;
 	}
 
 	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		// log.trace("##====## LOADCLASS({}, {})", name, resolve);
 		long t = System.currentTimeMillis();
 		manager.startLoad();
 		Class<?> clas = loadClass0(name, resolve);
 		manager.endLoad(t);
-		// String aa = (clas == null) ? "??" : clas.getName();
-		// ClassLoader bb = (clas == null) ? null : clas.getClassLoader();
-		// log.trace("#----# LOADING CLASS {} WITH LOADER {}", aa, bb);
 		return clas;
 	}
 
@@ -51,16 +47,16 @@ public class InstrumentationClassLoader extends ClassLoader {
 			log.trace("*** loading class {}, found in cache", name);
 			return clas;
 		}
-		if (name.equals(SYMBOLIC_STATE_NAME)) {
+		if (name.equals(TRACE_STATE_NAME)) {
 			log.trace("*** loading class {} from parent", name);
-			return symbolicState.getClass();
+			return traceState.getClass();
 		} else if (name.equals(STATE_NAME)) {
 			log.trace("*** loading class {} from parent", name);
 			return State.class;
 		}
 		if (coastal.isTarget(name)) {
 			log.trace("*** loading class {}, identified as target", name);
-			byte[] raw = manager.loadInstrumented(name);
+			byte[] raw = manager.loadHeavyInstrumented(name);
 			if (raw != null) {
 				log.trace("*** class {} instrumented", name);
 				clas = defineClass(name, raw, 0, raw.length);
@@ -90,7 +86,7 @@ public class InstrumentationClassLoader extends ClassLoader {
 		if ((clas != null) && name.equals(VM_NAME)) {
 			try {
 				Field ss = clas.getDeclaredField(STATE_FIELD_NAME);
-				ss.set(null, symbolicState);
+				ss.set(null, traceState);
 			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}

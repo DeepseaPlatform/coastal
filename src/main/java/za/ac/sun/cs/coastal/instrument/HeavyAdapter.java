@@ -14,7 +14,7 @@ import org.objectweb.asm.util.TraceMethodVisitor;
 
 import za.ac.sun.cs.coastal.COASTAL;
 
-public class InstrumentationAdapter extends ClassVisitor {
+public class HeavyAdapter extends ClassVisitor {
 
 	private final COASTAL coastal;
 	
@@ -24,7 +24,7 @@ public class InstrumentationAdapter extends ClassVisitor {
 
 	private final PrintWriter pwriter = new PrintWriter(swriter);
 
-	public InstrumentationAdapter(COASTAL coastal, String name, ClassVisitor cv) {
+	public HeavyAdapter(COASTAL coastal, String name, ClassVisitor cv) {
 		super(Opcodes.ASM6, cv);
 		this.coastal = coastal;
 		this.name = name;
@@ -51,7 +51,7 @@ public class InstrumentationAdapter extends ClassVisitor {
 			mv = new TraceMethodVisitor(mv, p);
 		}
 		if (mv != null) {
-			mv = new MethodInstrumentationAdapter(coastal, mv, triggerIndex, isStatic, argCount);
+			mv = new HeavyMethodAdapter(coastal, mv, triggerIndex, isStatic, argCount);
 		}
 		return mv;
 	}

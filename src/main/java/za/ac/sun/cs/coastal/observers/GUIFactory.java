@@ -232,7 +232,7 @@ public class GUIFactory implements ObserverFactory {
 		private void update(boolean lastUpdate) {
 			long t1 = System.currentTimeMillis() - coastal.getStartingTime();
 			long dc = coastal.getDiveCount();
-			long mc = coastal.getModelQueueLength();
+			long mc = coastal.getDiverModelQueueLength();
 			long pc = coastal.getPcQueueLength();
 			elapsedField.setText("" + t1 + " ms");
 			diveCountField.setText(String.format("%d (%.1f/sec)", dc, dc * 1000.0 / t1));

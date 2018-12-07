@@ -6,8 +6,8 @@ import java.util.concurrent.Callable;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.coastal.symbolic.SegmentedPC;
 
 public class StrategyTask implements Callable<Void> {
 
@@ -40,7 +40,7 @@ public class StrategyTask implements Callable<Void> {
 				List<Model> mdls = strategy.refine(spc);
 				int d = -1;
 				if (mdls != null) {
-					coastal.addModels(mdls);
+					coastal.addDiverModels(mdls);
 					d = mdls.size() - 1;
 				}
 				log.trace("+++ added {} models", d);

@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.symbolic;
+package za.ac.sun.cs.coastal.diver;
 
 import za.ac.sun.cs.green.expr.Expression;
 

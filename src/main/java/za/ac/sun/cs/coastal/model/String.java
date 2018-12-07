@@ -1,7 +1,7 @@
 package za.ac.sun.cs.coastal.model;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.symbolic.SymbolicState;
+import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;

@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.symbolic;
+package za.ac.sun.cs.coastal.diver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,6 +17,8 @@ import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
+import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
+import za.ac.sun.cs.coastal.symbolic.State;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;

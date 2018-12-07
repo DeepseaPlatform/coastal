@@ -8,8 +8,10 @@ public interface ObserverFactory {
 
 	int ONCE_PER_TASK = 1;
 
-	int ONCE_PER_DIVE = 2;
+	int ONCE_PER_DIVER = 2;
 
+	int ONCE_PER_SURFER = 3;
+	
 	int getFrequency();
 
 	ObserverManager createManager(COASTAL coastal);

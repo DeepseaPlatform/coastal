@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.symbolic;
+package za.ac.sun.cs.coastal.diver;
 
 import java.util.HashMap;
 import java.util.Map;
