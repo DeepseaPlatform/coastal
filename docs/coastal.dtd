@@ -1,34 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!ELEMENT configuration (coastal,green?,run-name?)>
-<!ELEMENT coastal (jar|main|target|trigger|strategy|diver|delegate|observer|bound|trace-all|echo-output|draw-paths|concrete-values|limits)*>
+<!ELEMENT configuration (coastal,green?)>
+<!ELEMENT coastal (target?,bounds?,settings?,divers?,surfers?,strategies?,observers?,delegates?)>
+
+<!-- settings for strategies, delegates, and observers -->
+<!ELEMENT options ANY>
+
+<!ELEMENT target (jar?,main?,entrypoint?,arg*,instrument*,trigger*)>
 <!ELEMENT jar (#PCDATA)>
 <!ATTLIST jar directory CDATA #IMPLIED>
 <!ELEMENT main (#PCDATA)>
-<!ELEMENT target (#PCDATA)>
+<!ELEMENT entrypoint (#PCDATA)>
+<!ELEMENT arg (#PCDATA)>
+<!ELEMENT instrument (#PCDATA)>
 <!ELEMENT trigger (#PCDATA)>
-<!ELEMENT strategy (#PCDATA)>
-<!ATTLIST strategy seed NMTOKEN #IMPLIED>
-<!ATTLIST strategy threads NMTOKEN #IMPLIED>
-<!ATTLIST strategy full CDATA #IMPLIED>
-<!ATTLIST strategy topdown CDATA #IMPLIED>
-<!ELEMENT diver EMPTY>
-<!ATTLIST diver threads NMTOKEN #REQUIRED>
-<!ELEMENT delegate (target,model)>
-<!ELEMENT model (#PCDATA)>
-<!ELEMENT observer (#PCDATA)>
+
+<!-- bounds on variables and types -->
+<!ELEMENT bounds (bound*)>
 <!ELEMENT bound EMPTY>
 <!ATTLIST bound name ID #REQUIRED>
-<!ATTLIST bound min NMTOKEN #REQUIRED>
-<!ATTLIST bound max NMTOKEN #REQUIRED>
+<!ATTLIST bound min CDATA #REQUIRED>
+<!ATTLIST bound max CDATA #REQUIRED>
+
+<!-- general settings -->
+<!ELEMENT settings (trace-all?,echo-output?,draw-paths?,concrete-values?,max-threads?,run-limit?,time-limit?,path-limit?,conjunct-limit?)>
 <!ELEMENT trace-all (#PCDATA)>
 <!ELEMENT echo-output (#PCDATA)>
 <!ELEMENT draw-paths (#PCDATA)>
 <!ELEMENT concrete-values (#PCDATA)>
-<!ELEMENT limits (runs|time|path|conjuncts)*>
-<!ELEMENT runs (#PCDATA)>
-<!ELEMENT time (#PCDATA)>
-<!ELEMENT path (#PCDATA)>
-<!ELEMENT conjuncts (#PCDATA)>
+<!--<!ELEMENT load-balance (#PCDATA)>-->
+<!ELEMENT max-threads (#PCDATA)>
+<!ELEMENT run-limit (#PCDATA)>
+<!ELEMENT time-limit (#PCDATA)>
+<!ELEMENT path-limit (#PCDATA)>
+<!ELEMENT conjunct-limit (#PCDATA)>
+
+<!ELEMENT divers EMPTY>
+<!ATTLIST divers threads NMTOKEN #IMPLIED>
+<!ATTLIST divers min-threads NMTOKEN #IMPLIED>
+<!ATTLIST divers max-threads NMTOKEN #IMPLIED>
+
+<!ELEMENT surfers EMPTY>
+<!ATTLIST surfers threads NMTOKEN #IMPLIED>
+<!ATTLIST surfers min-threads NMTOKEN #IMPLIED>
+<!ATTLIST surfers max-threads NMTOKEN #IMPLIED>
+
+<!-- strategies and their settings -->
+<!ELEMENT strategies (strategy+)>
+<!ELEMENT strategy (#PCDATA|options)*>
+<!ATTLIST strategy threads NMTOKEN #IMPLIED>
+<!ATTLIST strategy min-threads NMTOKEN #IMPLIED>
+<!ATTLIST strategy max-threads NMTOKEN #IMPLIED>
+<!ATTLIST strategy seed NMTOKEN #IMPLIED>
+<!ATTLIST strategy full CDATA #IMPLIED>
+<!ATTLIST strategy topdown CDATA #IMPLIED>
+
+<!-- observers and their settings -->
+<!ELEMENT observers (observer*)>
+<!ELEMENT observer (#PCDATA|options)*>
+
+<!-- delegates and their settings -->
+<!ELEMENT delegates (delegate*)>
+<!ELEMENT delegate (for,model)>
+<!ELEMENT for (#PCDATA)>
+<!ELEMENT model (#PCDATA|options)*>
+
+<!-- GREEN settings -->
 <!ELEMENT green (z3)>
 <!ELEMENT z3 (path)>
-<!ELEMENT run-name (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
