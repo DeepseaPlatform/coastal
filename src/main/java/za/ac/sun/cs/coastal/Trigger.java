@@ -1,14 +1,15 @@
 package za.ac.sun.cs.coastal;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.objectweb.asm.Type;
 
-public class Trigger {
+public final class Trigger {
+
+	private static final Map<String, Class<?>> NAMES = new HashMap<>();
 
 	public static Trigger createTrigger(String desc) {
-		final Set<String> names = new HashSet<>();
 		int s = desc.indexOf('('), e = desc.indexOf(')', s);
 		assert s != -1;
 		assert e != -1;
@@ -25,24 +26,27 @@ public class Trigger {
 			for (int i = 0; i < n; i++) {
 				String p = pz[i].trim();
 				int c = p.indexOf(':');
-				if (c != -1) {
+				if (c == -1) {
+					pn[i] = null;
+					pt[i] = parseType(p.substring(c + 1).trim());
+				} else {
 					pn[i] = p.substring(0, c).trim();
-					if (names.contains(pn[i])) {
+					pt[i] = parseType(p.substring(c + 1).trim());
+					if (NAMES.containsKey(pn[i]) && (NAMES.get(pn[i]) != pt[i])) {
 						Banner bn = new Banner('@');
 						bn.println("COASTAL PROBLEM\n");
 						bn.println("IGNORED TRIGGER WITH DUPLICATES \"" + desc + "\"");
 						bn.display(System.out);
 						return null;
 					}
-					names.add(pn[i]);
+					NAMES.put(pn[i], pt[i]);
 				}
-				pt[i] = parseType(p.substring(c + 1).trim());
 			}
 		} else {
 			pn = new String[0];
 			pt = new Class<?>[0];
 		}
-		if (names.size() == 0) {
+		if (NAMES.size() == 0) {
 			Banner bn = new Banner('@');
 			bn.println("COASTAL PROBLEM\n");
 			bn.println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"");
@@ -52,12 +56,18 @@ public class Trigger {
 		return new Trigger(m, pn, pt);
 	}
 
+	public static Class<?> getVariableType(String variableName) {
+		return NAMES.get(variableName);
+	}
+
 	// To implement a new type:
 	// (1) Add it here
 	// (2) Add a case to "toString()" method below
-	// (3) Add it to MethodInstrumentationAdapter.visitParameter(...)
-	// (4) Add a "getConcreteXXX(...)" method to SymbolicState.java
-	// (5) Add a "getConcreteXXX(...)" method to VM.java
+	// (3) Add it to HeavyMethodAdapter.visitParameter(...)
+	// (4) Add it to LightMethodAdapter.visitParameter(...)
+	// (5) Add a "getConcreteXXX(...)" method to SymbolicState.java
+	// (6) Add a "getConcreteXXX(...)" method to VM.java
+	// (7) Add it to COASTAL.parseConfigBounds()
 	private static Class<?> parseType(String type) {
 		int i = type.indexOf('[');
 		if (i > -1) {
@@ -94,7 +104,7 @@ public class Trigger {
 
 	private String stringRepr = null;
 
-	public Trigger(String methodName, String[] paramNames, Class<?>[] paramTypes) {
+	private Trigger(String methodName, String[] paramNames, Class<?>[] paramTypes) {
 		this.methodName = methodName;
 		assert paramNames.length == paramTypes.length;
 		this.paramNames = paramNames;

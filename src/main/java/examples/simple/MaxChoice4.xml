@@ -2,12 +2,16 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>examples.simple.MaxChoice4</main>
-		<target>examples.simple</target>
-		<trigger>examples.simple.MaxChoice4.compute(X:int, Y:int, Z:int)</trigger>
-		<trigger>examples.simple.MaxChoice4.compute2(X:int, Y:int, Z:int)</trigger>
-		<bound name="X" min="0" max="14" />
-		<bound name="Y" min="0" max="14" />
-		<bound name="Z" min="0" max="14" />
+		<target>
+			<main>examples.simple.MaxChoice4</main>
+			<instrument>examples.simple</instrument>
+			<trigger>examples.simple.MaxChoice4.compute(X:int, Y:int, Z:int)</trigger>
+			<trigger>examples.simple.MaxChoice4.compute2(X:int, Y:int, Z:int)</trigger>
+		</target>
+		<bounds>
+			<bound name="X" min="0" max="14" />
+			<bound name="Y" min="0" max="14" />
+			<bound name="Z" min="0" max="14" />
+		</bounds>
 	</coastal>
 </configuration>

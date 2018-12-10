@@ -15,8 +15,8 @@ public class Math {
 	private static int min, max;
 
 	public Math(COASTAL coastal) {
-		min = coastal.getDefaultMinValue(int.class);
-		max = coastal.getDefaultMaxValue(int.class);
+		min = (Integer) coastal.getDefaultMinValue(int.class);
+		max = (Integer) coastal.getDefaultMaxValue(int.class);
 	}
 
 	public boolean max__II__I(SymbolicState state) {

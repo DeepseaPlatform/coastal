@@ -9,9 +9,7 @@ import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.diver.SegmentedPCIf;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
-import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
-import za.ac.sun.cs.coastal.strategy.StrategyManager;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
@@ -27,21 +25,24 @@ public class GenerationalFactory implements StrategyFactory {
 	}
 
 	@Override
-	public Strategy createStrategy(COASTAL coastal, StrategyManager manager) {
+	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+		((GenerationalManager) manager).incrementTaskCount();
 		if (((GenerationalManager) manager).full) {
-			return new GenerationalFullStrategy(coastal, manager);
+			return new GenerationalFullStrategy(coastal, (StrategyManager) manager);
 		} else {
-			return new GenerationalStrategy(coastal, manager);
+			return new GenerationalStrategy(coastal, (StrategyManager) manager);
 		}
 	}
 
 	// ======================================================================
 	//
-	// SPECIFIC MANAGER
+	// MANAGER FOR GENERATIONAL SEARCH
 	//
 	// ======================================================================
 
 	private static class GenerationalManager extends PathBasedManager {
+
+		protected int taskCount = 0;
 
 		private final int priorityStart;
 
@@ -61,11 +62,25 @@ public class GenerationalFactory implements StrategyFactory {
 			full = coastal.getConfig().getBoolean("coastal.strategy[@full]", true);
 		}
 
+		protected void incrementTaskCount() {
+			taskCount++;
+		}
+
+		@Override
+		public String getName() {
+			return "GenerationalStrategy";
+		}
+
+		@Override
+		protected int getTaskCount() {
+			return taskCount;
+		}
+
 	}
 
 	// ======================================================================
 	//
-	// SPECIFIC STRATEGY FOR FULL PATH CONDITIONS
+	// STRATEGY THAT NEGATES EACH CONJUNCT ALONG PATH
 	//
 	// ======================================================================
 
@@ -92,7 +107,8 @@ public class GenerationalFactory implements StrategyFactory {
 			if (bottom != null) {
 				List<SegmentedPC> altSpcs = new ArrayList<>();
 				bottom = bottom.getParent();
-				for (SegmentedPC pointer = spc; (pointer != null) && !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
+				for (SegmentedPC pointer = spc; (pointer != null)
+						&& !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
 					altSpcs.add(generateAltSpc(spc, pointer));
 					bottom.setGenerated();
 					bottom = bottom.getParent();
@@ -107,7 +123,6 @@ public class GenerationalFactory implements StrategyFactory {
 						log.trace("no model");
 						log.trace("(The spc is {})", altSpc.getPathCondition().toString());
 						manager.insertPath(altSpc, true);
-						manager.incrementInfeasibleCount();
 					} else {
 						String modelString = model.toString();
 						log.trace("new model: {}", modelString);
@@ -146,7 +161,7 @@ public class GenerationalFactory implements StrategyFactory {
 
 	// ======================================================================
 	//
-	// SPECIFIC STRATEGY FOR TRUNCATED PATH CONDITIONS
+	// STRATEGY THAT NEGATES EACH CONJUNCT ALONG TRUNCATED PATH
 	//
 	// ======================================================================
 
@@ -173,7 +188,8 @@ public class GenerationalFactory implements StrategyFactory {
 			if (bottom != null) {
 				List<SegmentedPC> altSpcs = new ArrayList<>();
 				bottom = bottom.getParent();
-				for (SegmentedPC pointer = spc; (pointer != null) && !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
+				for (SegmentedPC pointer = spc; (pointer != null)
+						&& !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
 					altSpcs.add(generateAltSpc(pointer));
 					bottom.setGenerated();
 					bottom = bottom.getParent();
@@ -188,7 +204,6 @@ public class GenerationalFactory implements StrategyFactory {
 						log.trace("no model");
 						log.trace("(The spc is {})", altSpc.getPathCondition().toString());
 						manager.insertPath(altSpc, true);
-						manager.incrementInfeasibleCount();
 					} else {
 						String modelString = model.toString();
 						log.trace("new model: {}", modelString);

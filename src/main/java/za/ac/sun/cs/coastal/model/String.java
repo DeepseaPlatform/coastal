@@ -23,8 +23,8 @@ public class String {
 	private final int maxChar;
 
 	public String(COASTAL coastal) {
-		minChar = coastal.getDefaultMinValue(char.class);
-		maxChar = coastal.getDefaultMaxValue(char.class);
+		minChar = (Character) coastal.getDefaultMinValue(char.class);
+		maxChar = (Character) coastal.getDefaultMaxValue(char.class);
 	}
 
 	public boolean length____I(SymbolicState state) {

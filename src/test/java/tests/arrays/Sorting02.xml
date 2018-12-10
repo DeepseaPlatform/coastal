@@ -2,19 +2,10 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>tests.arrays.Sorting02</main>
-		<target>tests.arrays</target>
-		<trigger>tests.arrays.Sorting02.sort(A: int[])</trigger>
-		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
-		<trace-all>false</trace-all>
-		<echo-output>false</echo-output>
-		<draw-paths>false</draw-paths>
-		<concrete-values>true</concrete-values>
-		<limits>
-			<runs>0</runs>
-			<time>0</time>
-			<path>0</path>
-			<conjuncts>0</conjuncts>
-		</limits>
+		<target>
+			<main>tests.arrays.Sorting02</main>
+			<instrument>tests.arrays</instrument>
+			<trigger>tests.arrays.Sorting02.sort(A: int[])</trigger>
+		</target>
 	</coastal>
 </configuration>

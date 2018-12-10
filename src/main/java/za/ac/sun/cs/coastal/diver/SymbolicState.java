@@ -95,8 +95,8 @@ public class SymbolicState implements State {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();
-		limitConjuncts = Conversion.limitLong(coastal.getConfig(), "coastal.limit.conjuncts");
-		traceAll = coastal.getConfig().getBoolean("coastal.trace-all", false);
+		limitConjuncts = Conversion.limitLong(coastal.getConfig(), "coastal.settings.conjunct-limit");
+		traceAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		this.concreteValues = concreteValues;
 		symbolicMode = traceAll;
 	}
@@ -164,8 +164,8 @@ public class SymbolicState implements State {
 			// THIS int.class ASSUMPTION IS SOMETIMES WRONG
 			// WE MUST INSTEAD ALSO STORE THE TYPE OF THE ARRAY ELEMS
 			// THIS PROBABLY REQUIRES A SECOND MAP LIKE instanceData
-			int min = coastal.getDefaultMinValue(int.class);
-			int max = coastal.getDefaultMaxValue(int.class);
+			int min = (Integer) coastal.getDefaultMinValue(int.class);
+			int max = (Integer) coastal.getDefaultMaxValue(int.class);
 			value = new IntVariable(getNewVariableName(), min, max);
 			instanceData.put(fullFieldName, value);
 		}
@@ -394,8 +394,8 @@ public class SymbolicState implements State {
 			return currentValue;
 		}
 		Class<?> type = trigger.getParamType(index);
-		int min = coastal.getMinBound(name, type);
-		int max = coastal.getMaxBound(name, type);
+		int min = (Integer) coastal.getMinBound(name, type);
+		int max = (Integer) coastal.getMaxBound(name, type);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : concrete.getValue();
@@ -410,8 +410,8 @@ public class SymbolicState implements State {
 			return currentValue;
 		}
 		Class<?> type = trigger.getParamType(index);
-		int min = coastal.getMinBound(name, type);
-		int max = coastal.getMaxBound(name, type);
+		int min = (Character) coastal.getMinBound(name, type);
+		int max = (Character) coastal.getMaxBound(name, type);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : (char) concrete.getValue();
@@ -426,8 +426,8 @@ public class SymbolicState implements State {
 			return currentValue;
 		}
 		Class<?> type = trigger.getParamType(index);
-		int min = coastal.getMinBound(name, type);
-		int max = coastal.getMaxBound(name, type);
+		int min = (Byte) coastal.getMinBound(name, type);
+		int max = (Byte) coastal.getMaxBound(name, type);
 		setLocal(address, new IntVariable(name, min, max));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : (byte) concrete.getValue();
@@ -488,8 +488,8 @@ public class SymbolicState implements State {
 					value[i] = currentValue[i];
 				}
 				Class<?> type = trigger.getParamType(index);
-				int min = coastal.getMinBound(entryName, name, type);
-				int max = coastal.getMaxBound(entryName, name, type);
+				int min = (Integer) coastal.getMinBound(entryName, name, type);
+				int max = (Integer) coastal.getMaxBound(entryName, name, type);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}
@@ -522,8 +522,8 @@ public class SymbolicState implements State {
 					value[i] = currentValue[i];
 				}
 				Class<?> type = trigger.getParamType(index);
-				int min = coastal.getMinBound(entryName, name, type);
-				int max = coastal.getMaxBound(entryName, name, type);
+				int min = (Character) coastal.getMinBound(entryName, name, type);
+				int max = (Character) coastal.getMaxBound(entryName, name, type);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}
@@ -556,8 +556,8 @@ public class SymbolicState implements State {
 					value[i] = currentValue[i];
 				}
 				Class<?> type = trigger.getParamType(index);
-				int min = coastal.getMinBound(entryName, name, type);
-				int max = coastal.getMaxBound(entryName, name, type);
+				int min = (Byte) coastal.getMinBound(entryName, name, type);
+				int max = (Byte) coastal.getMaxBound(entryName, name, type);
 				Expression entryExpr = new IntVariable(entryName, min, max);
 				setArrayValue(arrayId, i, entryExpr);
 			}

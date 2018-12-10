@@ -69,7 +69,7 @@ public class InstrumentationClassManager {
 		}
 		classPaths.add(".");
 		for (int i = 0; true; i++) {
-			String key = "coastal.jar(" + i + ")";
+			String key = "coastal.target.jar(" + i + ")";
 			String jar = coastal.getConfig().getString(key);
 			if (jar == null) {
 				break;

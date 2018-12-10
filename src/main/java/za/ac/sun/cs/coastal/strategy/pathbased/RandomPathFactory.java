@@ -6,9 +6,7 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
-import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
-import za.ac.sun.cs.coastal.strategy.StrategyManager;
 
 public class RandomPathFactory implements StrategyFactory {
 
@@ -17,17 +15,48 @@ public class RandomPathFactory implements StrategyFactory {
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new PathBasedManager(coastal);
+		return new RandomStrategyManager(coastal);
 	}
 
 	@Override
-	public Strategy createStrategy(COASTAL coastal, StrategyManager manager) {
-		return new RandomPathStrategy(coastal, manager);
+	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+		((RandomStrategyManager) manager).incrementTaskCount();
+		return new RandomPathStrategy(coastal, (StrategyManager) manager);
 	}
 
 	// ======================================================================
 	//
-	// SPECIFIC FACTORY
+	// RANDOM SEARCH STRATEGY MANAGER
+	//
+	// ======================================================================
+
+	private static class RandomStrategyManager extends PathBasedManager {
+
+		protected int taskCount = 0;
+
+		RandomStrategyManager(COASTAL coastal) {
+			super(coastal);
+		}
+
+		protected void incrementTaskCount() {
+			taskCount++;
+		}
+
+		@Override
+		public String getName() {
+			return "RandomStrategy";
+		}
+
+		@Override
+		protected int getTaskCount() {
+			return taskCount;
+		}
+
+	}
+
+	// ======================================================================
+	//
+	// STRATEGY THAT FINDS NEW PATHS WITH RANDOM SEARCH
 	//
 	// ======================================================================
 

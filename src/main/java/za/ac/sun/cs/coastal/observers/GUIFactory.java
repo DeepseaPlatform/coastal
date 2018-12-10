@@ -18,8 +18,6 @@ import javax.swing.SpringLayout;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.Reporter;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
-import za.ac.sun.cs.coastal.strategy.StrategyManager;
-import za.ac.sun.cs.coastal.strategy.pathbased.PathBasedManager;
 
 public class GUIFactory implements ObserverFactory {
 
@@ -91,8 +89,6 @@ public class GUIFactory implements ObserverFactory {
 
 		private final COASTAL coastal;
 
-		private final StrategyManager manager;
-
 		private final PathTree pathTree;
 
 		private final JButton doneButton;
@@ -118,12 +114,7 @@ public class GUIFactory implements ObserverFactory {
 		GUI(COASTAL coastal) {
 			super(new BorderLayout());
 			this.coastal = coastal;
-			manager = coastal.getStrategyManager();
-			if (manager instanceof PathBasedManager) {
-				pathTree = ((PathBasedManager) manager).getPathTree();
-			} else {
-				pathTree = null;
-			}
+			pathTree = coastal.getPathTree();
 			doneButton = new JButton("Done");
 			doneButton.setEnabled(false);
 			doneButton.setActionCommand("closedown");
@@ -231,7 +222,7 @@ public class GUIFactory implements ObserverFactory {
 
 		private void update(boolean lastUpdate) {
 			long t1 = System.currentTimeMillis() - coastal.getStartingTime();
-			long dc = coastal.getDiveCount();
+			long dc = 0; // coastal.getDiveCount();
 			long mc = coastal.getDiverModelQueueLength();
 			long pc = coastal.getPcQueueLength();
 			elapsedField.setText("" + t1 + " ms");
@@ -239,9 +230,9 @@ public class GUIFactory implements ObserverFactory {
 			modelCountField.setText("" + mc);
 			pcCountField.setText("" + pc);
 			if (pathCountField != null) {
-				long pthc = pathTree.getPathCount();
-				long rc = pathTree.getRevisitCount();
-				long ic = ((PathBasedManager) manager).getInfeasibleCount();
+				long pthc = 0; // pathTree.getPathCount();
+				long rc = 0; // pathTree.getRevisitCount();
+				long ic = 0; // ((PathBasedManager) manager).getInfeasibleCount();
 				pathCountField.setText("" + pthc);
 				revisitCountField.setText("" + rc);
 				infeasibleCountField.setText("" + ic);

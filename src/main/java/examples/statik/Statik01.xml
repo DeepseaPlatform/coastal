@@ -2,10 +2,14 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>examples.statik.Statik01</main>
-		<target>examples.statik</target>
-		<trigger>examples.statik.Statik01.run(X: int)</trigger>
-		<trace-all>true</trace-all>
-		<draw-paths>true</draw-paths>
+		<target>
+			<main>examples.statik.Statik01</main>
+			<instrument>examples.statik</instrument>
+			<trigger>examples.statik.Statik01.run(X: int)</trigger>
+		</target>
+		<settings>
+			<trace-all>true</trace-all>
+			<draw-paths>true</draw-paths>
+		</settings>
 	</coastal>
 </configuration>

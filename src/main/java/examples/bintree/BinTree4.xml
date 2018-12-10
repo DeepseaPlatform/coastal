@@ -2,22 +2,28 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>examples.bintree.BinTree4</main>
-		<target>examples.bintree</target>
-		<trigger>examples.bintree.BinTree4.runExplicit4(o1: int, o2: int, o3: int, o4: int, v1: int, v2: int, v3: int, v4: int)</trigger>
-		<bound name="o1" min="0" max="1"/>
-		<bound name="o2" min="0" max="1"/>
-		<bound name="o3" min="0" max="1"/>
-		<bound name="o4" min="0" max="1"/>
-		<bound name="v1" min="0" max="9"/>
-		<bound name="v2" min="0" max="9"/>
-		<bound name="v3" min="0" max="9"/>
-		<bound name="v4" min="0" max="9"/>
-		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+		<target>
+			<main>examples.bintree.BinTree4</main>
+			<instrument>examples.bintree</instrument>
+			<trigger>examples.bintree.BinTree4.runExplicit4(o1: int, o2: int, o3: int, o4: int, v1: int, v2: int, v3: int, v4: int)</trigger>
+		</target>
+		<bounds>
+			<bound name="o1" min="0" max="1"/>
+			<bound name="o2" min="0" max="1"/>
+			<bound name="o3" min="0" max="1"/>
+			<bound name="o4" min="0" max="1"/>
+			<bound name="v1" min="0" max="9"/>
+			<bound name="v2" min="0" max="9"/>
+			<bound name="v3" min="0" max="9"/>
+			<bound name="v4" min="0" max="9"/>
+		</bounds>
+		<strategies>
+			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+		</strategies>
 		<!-- 
-		<strategy threads="2" full="false" topdown="true">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
-		<diver threads="2"/>
-		<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
+		</observers>
 		-->
 	</coastal>
 </configuration>

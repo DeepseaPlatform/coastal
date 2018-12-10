@@ -2,9 +2,13 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>examples.simple.MaxChoice2</main>
-		<target>examples.simple</target>
-		<trigger>examples.simple.MaxChoice2.compute(X:int, Y:int, Z:int)</trigger>
-		<strategy full="false" topdown="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+		<target>
+			<main>examples.simple.MaxChoice2</main>
+			<instrument>examples.simple</instrument>
+			<trigger>examples.simple.MaxChoice2.compute(X:int, Y:int, Z:int)</trigger>
+		</target>
+		<strategies>
+			<strategy full="false" topdown="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+		</strategies>
 	</coastal>
 </configuration>

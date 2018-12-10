@@ -2,7 +2,7 @@ package tests.arrays;
 
 public class Sorting01 {
 
-	private static final int N = 3;
+	private static final int N = 4;
 
 	public static int minOf(int x, int y) {
 		if (x < y) {

@@ -1,67 +1,188 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<!--
+
+This is the COASTAL default configuration file.
+
+It also serves as documentation for the configuration format.
+
+The configuration consists of 8 sections, all of them optional:
+(Note that the order is important!)
+
+1. <target>      ... the system under test
+2. <bounds>      ... bounds on variables
+3. <settings>    ... flags and integer settings
+4. <divers>      ... configuration of divers
+5. <surfers>     ... configuration of surfers
+6. <strategies>  ... configuration of strategies
+7. <observers>   ... all observers to start
+8. <delegates>   ... all delegates to use
+
+-->
 <configuration>
 	<coastal>
-	
-		<!-- ======================================================================
-		The strategy that is used to refine newly explored paths.
-		======================================================================= -->
-		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
-		<!--
-		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.BreadthFirstFactory</strategy>
-		<strategy seed="12348765">za.ac.sun.cs.coastal.strategy.pathbased.RandomFactory</strategy>
-		<strategy full="true" topdown="true">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
-		<strategy full="true" topdown="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
-		<strategy full="false" topdown="true">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
-		<strategy full="false" topdown="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
-		-->
-		
-		<!-- ======================================================================
-		Delegates are specified as follows:
-		======================================================================= -->
-		<!--
-		<delegate>
-			<target>java.lang.String</target>
-			<model>za.ac.sun.cs.coastal.model.String</model>
-		</delegate>
-		-->
 
-	<!-- ====================================================================== 
-		Whether or not COASTAL keeps track (updates the symbolic state) of the entire 
-		run of the program. This is necessary when, for example, a class contains 
-		static fields.
-		======================================================================= -->
-		<trace-all>false</trace-all>
-		
-		<!-- ======================================================================
-		Whether or not the program's original output is shown.
-		======================================================================= -->
-		<echo-output>false</echo-output>
-		
-		<!-- ======================================================================
-		Whether or not the path tree is drawn (crudely) after each insertion.
-		======================================================================= -->
-		<draw-paths>false</draw-paths>
-		
-		<!-- ======================================================================
-		Whether or not the concrete return values of uninstrumented functions are
-		used, or whether they are replaced with fresh symbolic variables.
-		======================================================================= -->
-		<concrete-values>true</concrete-values>
-		
-		<!-- ======================================================================
-		Limits on the number of runs, total running time, the number of paths, and
-		the number of conjuncts per path.
-		======================================================================= -->
-		<limits>
-			<runs>0</runs>
-			<time>0</time>
-			<path>0</path>
-			<conjuncts>0</conjuncts>
-		</limits>
+		<target>
+			<!--
+			Read SUT class files from JARFILE or some directory inside it.
+			-->
+			<!--
+			<jar>NAME OF JARFILE</jar>
+			<jar directory="DIR">JARFILE</jar>
+			-->
+
+			<!--
+			Specify the fully qualified name of main class file.  COASTAL will
+			start the analysis by invoking CLASSNAME.Main(String[]).
+			-->
+			<!--
+			<main>CLASSNAME</main>
+			-->
+
+			<!--
+			Alternatively, you can specify another method to invoke to start
+			the analysis.
+			-->
+			<!--
+			<entrypoint>METHOD</entrypoint>
+			-->
+
+			<!--
+			You can specifiy a number of arguments to pass to "Main" or
+			"METHOD".  If no arguments are specified, "null" or "false" or "0"
+			is passed to the arguments.
+			-->
+			<!--
+			<arg>ARG1</arg>
+			<arg>ARG2</arg>
+			-->
+
+			<!--
+			Any class whose fully qualified name starts with one of these
+			prefixes will be instrumented.
+			-->
+			<!--
+			<instrument>PREFIX1</instrument>
+			<instrument>PREFIX2</instrument>
+			-->
+
+			<!--
+			List of triggers that will kick of symbolic mode.
+			-->
+			<!--
+			<trigger>TRIGGER1</trigger>
+			<trigger>TRIGGER2</trigger>
+			-->
+		</target>
+
+		<bounds>
+			<!--
+			The bounds section will be merged with other bounds sections.  This
+			means that these settings will updated, not overwritten by later
+			configuration files.
+			-->
+			<!--
+			<bound name="VAR1" min="MIN1" max="MAX1"/>
+			<bound name="VAR2" min="MIN2" max="MAX2"/>
+			-->
+		</bounds>
+
+		<settings>
+			<!--
+			Whether or not COASTAL keeps track (updates the symbolic state) of
+			the entire run of the program. This is necessary when, for example,
+			a class contains static fields.
+			-->
+			<trace-all>false</trace-all>
+
+			<!--
+			Whether or not the program's original output is shown.
+			-->
+			<echo-output>false</echo-output>
+
+			<!--
+			Whether or not the path tree is drawn (crudely) after each
+			insertion.
+			-->
+			<draw-paths>false</draw-paths>
+
+			<!--
+			Whether or not the concrete return values of uninstrumented
+			functions are used, or whether they are replaced with fresh
+			symbolic variables.
+			-->
+			<concrete-values>true</concrete-values>
+
+			<!--
+			Maximum number of threads created.
+			-->
+			<max-threads>128</max-threads>
+
+			<!--
+			Limits on the number of runs, total running time, the number of
+			paths, and the number of conjuncts per path.  A value of 0 means
+			that there is no limit.
+			-->
+			<run-limit>0</run-limit>
+			<time-limit>0</time-limit>
+			<path-limit>0</path-limit>
+			<conjunct-limit>0</conjunct-limit>
+		</settings>
+
+		<!--
+		If no divers and no surfers are specified, COASTAL defaults to creating
+		one diver.
+		-->
+		<divers threads="0" min-threads="0" max-threads="128"/>
+		<surfers threads="0" min-threads="0" max-threads="128"/>
+
+		<strategies>
+			<strategy threads="1">za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+			<!--
+			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.BreadthFirstFactory</strategy>
+			<strategy seed="12348765">za.ac.sun.cs.coastal.strategy.pathbased.RandomFactory</strategy>
+			<strategy full="true" topdown="true">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+			<strategy full="true" topdown="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+			<strategy full="false" topdown="true">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+			<strategy full="false" topdown="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+			-->
+		</strategies>
+
+		<observers>
+			<!--
+			<observer>
+				FULLY QUALIFIED OBSERVER
+				<settings>
+					ANY SETTING WE WANT
+				</settings>
+			</observer>
+			-->
+			<!--
+			<observer>za.ac.sun.cs.coastal.observers.InstructionCoverage</observer>
+			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverage</observer>
+			<observer>za.ac.sun.cs.coastal.observers.StopController</observer>
+			<observer>za.ac.sun.cs.coastal.observers.GUI</observer>
+			-->
+		</observers>
+
+		<delegates>
+			<!--
+			<delegate>
+				<for>java.lang.String</for>
+				<model>za.ac.sun.cs.coastal.model.String</model>
+			</delegate>
+			<delegate>
+				<for>java.lang.Math</for>
+				<model>za.ac.sun.cs.coastal.model.Math</model>
+			</delegate>
+			-->
+		</delegates>
 
 	</coastal>
 
+	<!--
+	The following setting is passed to the GREEN constraint solver.
+	-->
 	<green>
 		<z3>
 			<path>/usr/local/bin/z3</path>

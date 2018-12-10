@@ -2,22 +2,15 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>tests.simple.Choice03</main>
-		<target>tests.simple</target>
-		<trigger>tests.simple.Choice03.run(X: int, Y: int, Z: int)</trigger>
-		<bound name="X" min="-1000" max="1000"/>
-		<bound name="Y" min="-1000" max="1000"/>
-		<bound name="Z" min="-1000" max="1000"/>
-		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
-		<trace-all>false</trace-all>
-		<echo-output>false</echo-output>
-		<draw-paths>false</draw-paths>
-		<concrete-values>true</concrete-values>
-		<limits>
-			<runs>0</runs>
-			<time>0</time>
-			<path>0</path>
-			<conjuncts>0</conjuncts>
-		</limits>
+		<target>
+			<main>tests.simple.Choice03</main>
+			<instrument>tests.simple</instrument>
+			<trigger>tests.simple.Choice03.run(X: int, Y: int, Z: int)</trigger>
+		</target>
+		<bounds>
+			<bound name="X" min="-1000" max="1000"/>
+			<bound name="Y" min="-1000" max="1000"/>
+			<bound name="Z" min="-1000" max="1000"/>
+		</bounds>
 	</coastal>
 </configuration>

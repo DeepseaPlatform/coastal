@@ -7,9 +7,7 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
-import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
-import za.ac.sun.cs.coastal.strategy.StrategyManager;
 
 public class BreadthFirstFactory implements StrategyFactory {
 
@@ -18,17 +16,48 @@ public class BreadthFirstFactory implements StrategyFactory {
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new PathBasedManager(coastal);
+		return new BreadthFirstStrategyManager(coastal);
 	}
 
 	@Override
-	public Strategy createStrategy(COASTAL coastal, StrategyManager manager) {
-		return new BreadthFirstStrategy(coastal, manager);
+	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+		((BreadthFirstStrategyManager) manager).incrementTaskCount();
+		return new BreadthFirstStrategy(coastal, (StrategyManager) manager);
 	}
 
 	// ======================================================================
 	//
-	// SPECIFIC FACTORY
+	// BREADTH-FIRST SEARCH STRATEGY MANAGER
+	//
+	// ======================================================================
+
+	private static class BreadthFirstStrategyManager extends PathBasedManager {
+
+		protected int taskCount = 0;
+
+		BreadthFirstStrategyManager(COASTAL coastal) {
+			super(coastal);
+		}
+
+		protected void incrementTaskCount() {
+			taskCount++;
+		}
+
+		@Override
+		public String getName() {
+			return "BreadthFirstStrategy";
+		}
+
+		@Override
+		protected int getTaskCount() {
+			return taskCount;
+		}
+
+	}
+
+	// ======================================================================
+	//
+	// STRATEGY THAT FINDS NEW PATHS WITH BREADTH-FIRST SEARCH
 	//
 	// ======================================================================
 

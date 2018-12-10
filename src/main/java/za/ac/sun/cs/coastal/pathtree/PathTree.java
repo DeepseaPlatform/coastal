@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
+import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.Tuple;
 
 /**
  * Representation of all execution paths in a single tree.
@@ -18,6 +20,11 @@ public class PathTree {
 	 */
 	protected final Logger log;
 
+	/**
+	 * The message broker.
+	 */
+	protected final Broker broker;
+	
 	/**
 	 * Flag to indicate whether paths should be drawn after updates.
 	 */
@@ -31,13 +38,23 @@ public class PathTree {
 	/**
 	 * The number of paths inserted.
 	 */
-	private final AtomicLong pathCount = new AtomicLong(0);
+	private final AtomicLong insertedCount = new AtomicLong(0);
 
 	/**
 	 * The number of paths whose insertion was unnecessary because they
 	 * constitute a revisit of an already-inserted path.
 	 */
 	private final AtomicLong revisitCount = new AtomicLong(0);
+
+	/**
+	 * Accumulator of all the path tree insertion times.
+	 */
+	protected final AtomicLong insertTime = new AtomicLong(0);
+	
+	/**
+	 * A count of the number of infeasible paths.
+	 */
+	protected final AtomicLong infeasibleCount = new AtomicLong(0);
 
 	/**
 	 * A lock for updating the root of the tree.
@@ -52,23 +69,28 @@ public class PathTree {
 	 */
 	public PathTree(COASTAL coastal) {
 		log = coastal.getLog();
-		drawPaths = coastal.getConfig().getBoolean("coastal.draw-paths", false);
+		this.broker = coastal.getBroker();
+		broker.subscribe("coastal-stop", this::report);
+		drawPaths = coastal.getConfig().getBoolean("coastal.settings.draw-paths", false);
 	}
 
 	public PathTreeNode getRoot() {
 		return root;
 	}
 
-	public long getPathCount() {
-		return pathCount.get();
-	}
-
-	public long getRevisitCount() {
-		return revisitCount.get();
+	public void report(Object object) {
+		broker.publish("report", new Tuple("PathTree.inserted-count", insertedCount.get()));
+		broker.publish("report", new Tuple("PathTree.revisit-count", revisitCount.get()));
+		broker.publish("report", new Tuple("PathTree.infeasible-count", infeasibleCount.get()));
+		broker.publish("report", new Tuple("PathTree.insert-time", insertTime.get()));
 	}
 
 	public PathTreeNode insertPath(SegmentedPC spc, boolean isInfeasible) {
-		pathCount.incrementAndGet();
+		long t = System.currentTimeMillis();
+		insertedCount.incrementAndGet();
+		if (isInfeasible) {
+			infeasibleCount.incrementAndGet();
+		}
 		/*
 		 * Step 1: Deconstruct the path condition.
 		 */
@@ -104,6 +126,7 @@ public class PathTree {
 				log.trace("::: {}", ll);
 			}
 		}
+		insertTime.addAndGet(System.currentTimeMillis() - t);
 		return lastNode;
 	}
 
@@ -115,16 +138,6 @@ public class PathTree {
 		}
 	}
 
-	/*
-	 * d == depth - 1
-	 * 
-	 * ROOT path[0].getActiveConjunct i_0=path[0].getOutcomeIndex() | node{i_0}
-	 * path[1].getActiveConjunct i_1=path[1].getOutcomeIndex() | node{i_1}
-	 * path[2].getActiveConjunct i_2=path[2].getOutcomeIndex() | ... |
-	 * node{i_j-1} path[j].getActiveConjunct i_j=path[j].getOutcomeIndex() | ...
-	 * | node{i_d-1} path[d].getActiveConjunct i_d=path[d].getOutcomeIndex() |
-	 * infeasble/leaf
-	 */
 	private PathTreeNode insert(SegmentedPC[] path, boolean isInfeasible) {
 		int depth = path.length;
 		PathTreeNode[] visitedNodes = new PathTreeNode[depth];

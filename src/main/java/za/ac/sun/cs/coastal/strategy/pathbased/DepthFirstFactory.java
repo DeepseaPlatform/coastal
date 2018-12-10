@@ -4,9 +4,7 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
-import za.ac.sun.cs.coastal.strategy.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
-import za.ac.sun.cs.coastal.strategy.StrategyManager;
 
 public class DepthFirstFactory implements StrategyFactory {
 
@@ -15,17 +13,48 @@ public class DepthFirstFactory implements StrategyFactory {
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new PathBasedManager(coastal);
+		return new DepthFirstStrategyManager(coastal);
 	}
 
 	@Override
-	public Strategy createStrategy(COASTAL coastal, StrategyManager manager) {
-		return new DepthFirstStrategy(coastal, manager);
+	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+		((DepthFirstStrategyManager) manager).incrementTaskCount();
+		return new DepthFirstStrategy(coastal, (StrategyManager) manager);
 	}
 
 	// ======================================================================
 	//
-	// SPECIFIC FACTORY
+	// DEPTH-FIRST SEARCH STRATEGY MANAGER
+	//
+	// ======================================================================
+
+	private static class DepthFirstStrategyManager extends PathBasedManager {
+
+		protected int taskCount = 0;
+
+		DepthFirstStrategyManager(COASTAL coastal) {
+			super(coastal);
+		}
+
+		protected void incrementTaskCount() {
+			taskCount++;
+		}
+
+		@Override
+		public String getName() {
+			return "DepthFirstStrategy";
+		}
+
+		@Override
+		protected int getTaskCount() {
+			return taskCount;
+		}
+
+	}
+
+	// ======================================================================
+	//
+	// STRATEGY THAT FINDS NEW PATHS WITH DEPTH-FIRST SEARCH
 	//
 	// ======================================================================
 

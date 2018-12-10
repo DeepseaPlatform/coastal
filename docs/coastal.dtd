@@ -27,7 +27,7 @@
 <!ELEMENT echo-output (#PCDATA)>
 <!ELEMENT draw-paths (#PCDATA)>
 <!ELEMENT concrete-values (#PCDATA)>
-<!--<!ELEMENT load-balance (#PCDATA)>-->
+<!--<! E LEMENT load-balance (#PCDATA)>-->
 <!ELEMENT max-threads (#PCDATA)>
 <!ELEMENT run-limit (#PCDATA)>
 <!ELEMENT time-limit (#PCDATA)>

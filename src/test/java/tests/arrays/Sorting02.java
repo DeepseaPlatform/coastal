@@ -2,7 +2,7 @@ package tests.arrays;
 
 public class Sorting02 {
 
-	private static final int N = 3;
+	private static final int N = 4;
 
 	public static void sort(int[] arr) {
 		boolean sorted = false;

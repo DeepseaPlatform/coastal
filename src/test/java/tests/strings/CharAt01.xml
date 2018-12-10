@@ -2,24 +2,16 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>tests.strings.CharAt01</main>
-		<target>tests.strings</target>
-		<trigger>tests.strings.CharAt01.test(S: String, X: int)</trigger>
-		<delegate>
-			<target>java.lang.String</target>
-			<model>za.ac.sun.cs.coastal.model.String</model>
-		</delegate>
-		<strategy threads="1">za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
-		<diver threads="1"/>
-		<trace-all>false</trace-all>
-		<echo-output>false</echo-output>
-		<draw-paths>false</draw-paths>
-		<concrete-values>true</concrete-values>
-		<limits>
-			<runs>0</runs>
-			<time>0</time>
-			<path>0</path>
-			<conjuncts>0</conjuncts>
-		</limits>
+		<target>
+			<main>tests.strings.CharAt01</main>
+			<instrument>tests.strings</instrument>
+			<trigger>tests.strings.CharAt01.test(S: String, X: int)</trigger>
+		</target>
+		<delegates>
+			<delegate>
+				<for>java.lang.String</for>
+				<model>za.ac.sun.cs.coastal.model.String</model>
+			</delegate>
+		</delegates>
 	</coastal>
 </configuration>

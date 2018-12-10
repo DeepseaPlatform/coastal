@@ -34,12 +34,15 @@ import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.io.FileHandler;
-import org.apache.commons.configuration2.tree.OverrideCombiner;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.diver.Diver;
+import za.ac.sun.cs.coastal.Conversion.ConfigCombiner;
+import za.ac.sun.cs.coastal.TaskFactory.TaskManager;
+import za.ac.sun.cs.coastal.TaskFactory.Task;
+import za.ac.sun.cs.coastal.diver.DiverFactory;
+import za.ac.sun.cs.coastal.diver.DiverFactory.DiverManager;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
@@ -49,8 +52,8 @@ import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverManager;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
-import za.ac.sun.cs.coastal.strategy.StrategyManager;
-import za.ac.sun.cs.coastal.strategy.StrategyTask;
+import za.ac.sun.cs.coastal.surfer.SurferFactory;
+// import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.green.expr.Constant;
@@ -93,26 +96,109 @@ public class COASTAL {
 	 */
 	private final InstrumentationClassManager classManager;
 
+	// ======================================================================
+	//
+	// TARGET INFORMATION
+	//
+	// ======================================================================
+
 	/**
-	 * A list of all targets (prefixes of classes that will be instrumented).
+	 * A list of all prefixes of classes that will be instrumented.
 	 */
-	private final List<String> targets = new ArrayList<>();
+	private final List<String> prefixes = new ArrayList<>();
 
 	/**
 	 * A list of all triggers that switch on symbolic execution.
 	 */
 	private final List<Trigger> triggers = new ArrayList<>();
 
-	/**
-	 * A map from method names to delegate objects (which are instances of the
-	 * modelling classes).
-	 */
-	private final Map<String, Object> delegates = new HashMap<>();
+	// ======================================================================
+	//
+	// VARIABLE BOUNDS
+	//
+	// ======================================================================
 
 	/**
-	 * The maximum number of threads to use for divers and strategies.
+	 * The default minimum bound for various types.
 	 */
-	private final int maxThreads;
+	private final Map<Class<?>, Object> defaultMinBounds = new HashMap<>();
+
+	/**
+	 * The default maximum bound for various types.
+	 */
+	private final Map<Class<?>, Object> defaultMaxBounds = new HashMap<>();
+
+	/**
+	 * A map from variable names to their lower bounds.
+	 */
+	private final Map<String, Object> minBounds = new HashMap<>();
+
+	/**
+	 * A map from variable names to their lower bounds.
+	 */
+	private final Map<String, Object> maxBounds = new HashMap<>();
+
+	// ======================================================================
+	//
+	// DIVERS, SURFERS, STRATEGIES
+	//
+	// ======================================================================
+
+	public static class TaskInfo {
+
+		private final TaskFactory factory;
+
+		private final TaskManager manager;
+
+		private final int initThreads;
+
+		private final int minThreads;
+
+		private final int maxThreads;
+
+		private int threadCount = 0;
+
+		TaskInfo(final COASTAL coastal, final TaskFactory factory, final int initThreads, final int minThreads,
+				final int maxThreads) {
+			this.factory = factory;
+			this.manager = factory.createManager(coastal);
+			this.initThreads = initThreads;
+			this.minThreads = minThreads;
+			this.maxThreads = maxThreads;
+		}
+
+		public Task create(COASTAL coastal) {
+			threadCount++;
+			return factory.createTask(coastal, manager);
+		}
+
+		public TaskManager getManager() {
+			return manager;
+		}
+
+		public int getInitThreads() {
+			return initThreads;
+		}
+
+		public int getMinThreads() {
+			return minThreads;
+		}
+
+		public int getMaxThreads() {
+			return maxThreads;
+		}
+
+		public int getThreadCount() {
+			return threadCount;
+		}
+
+	}
+
+	private final List<TaskInfo> tasks = new ArrayList<>();
+
+	private DiverManager diverManager;
+
+	// private SurferManager surferManager;
 
 	// ======================================================================
 	//
@@ -133,72 +219,28 @@ public class COASTAL {
 	private final List<Tuple> observersPerTask = new ArrayList<>();
 
 	/**
-	 * A list of observer factories and managers that must be started once for each
-	 * diver.
+	 * A list of observer factories and managers that must be started once for
+	 * each diver.
 	 */
 	private final List<Tuple> observersPerDiver = new ArrayList<>();
 
 	/**
-	 * A list of observer factories and managers that must be started once for each
-	 * surfer.
+	 * A list of observer factories and managers that must be started once for
+	 * each surfer.
 	 */
 	private final List<Tuple> observersPerSurfer = new ArrayList<>();
-	
+
 	// ======================================================================
 	//
-	// VARIABLE BOUNDS
+	// DELEGATES
 	//
 	// ======================================================================
 
 	/**
-	 * The default minimum bound for integers.
+	 * A map from method names to delegate objects (which are instances of the
+	 * modelling classes).
 	 */
-	private final int defaultMinIntValue;
-
-	/**
-	 * The default maximum bound for integers.
-	 */
-	private final int defaultMaxIntValue;
-
-	/**
-	 * The default minimum bound for characters.
-	 */
-	private final int defaultMinCharValue;
-
-	/**
-	 * The default maximum bound for characters.
-	 */
-	private final int defaultMaxCharValue;
-
-	/**
-	 * The default minimum bound for booleans.
-	 */
-	private final int defaultMinBooleanValue;
-
-	/**
-	 * The default maximum bound for booleans.
-	 */
-	private final int defaultMaxBooleanValue;
-
-	/**
-	 * The default minimum bound for bytes.
-	 */
-	private final int defaultMinByteValue;
-
-	/**
-	 * The default maximum bound for bytes.
-	 */
-	private final int defaultMaxByteValue;
-
-	/**
-	 * A map from variable names to their lower bounds.
-	 */
-	private final Map<String, Integer> minBounds = new HashMap<>();
-
-	/**
-	 * A map from variable names to their lower bounds.
-	 */
-	private final Map<String, Integer> maxBounds = new HashMap<>();
+	private final Map<String, Object> delegates = new HashMap<>();
 
 	// ======================================================================
 	//
@@ -235,68 +277,28 @@ public class COASTAL {
 	/**
 	 * A queue of models produced by strategies and consumed by divers.
 	 */
-	private final BlockingQueue<Model> diverModels;
+	private final BlockingQueue<Model> diverModelQueue;
 
 	/**
 	 * A queue of models produced by strategies and consumed by surfers.
 	 */
-	private final BlockingQueue<Model> surferModels;
-	
+	private final BlockingQueue<Model> surferModelQueue;
+
 	/**
 	 * A queue of path conditions produced by divers and consumed by strategies.
 	 */
-	private final BlockingQueue<SegmentedPC> pcs;
+	private final BlockingQueue<SegmentedPC> pcQueue;
 
 	/**
 	 * A queue of traces produced by surfers and consumed by strategies.
 	 */
-	private final BlockingQueue<Trace> traces;
-	
+	private final BlockingQueue<Trace> traceQueue;
+
 	// ======================================================================
 	//
 	// TIMING INFORMATION
 	//
 	// ======================================================================
-
-	/**
-	 * Accumulator of all the dive times.
-	 */
-	private final AtomicLong diverTime = new AtomicLong(0);
-
-	/**
-	 * Accumulator of all the dive waiting times.
-	 */
-	private final AtomicLong diverWaitTime = new AtomicLong(0);
-
-	/**
-	 * Counter for the dive waiting times.
-	 */
-	private final AtomicLong diverWaitCount = new AtomicLong(0);
-
-	/**
-	 * Accumulator of all the surf times.
-	 */
-	private final AtomicLong surferTime = new AtomicLong(0);
-	
-	/**
-	 * Accumulator of all the surf waiting times.
-	 */
-	private final AtomicLong surferWaitTime = new AtomicLong(0);
-	
-	/**
-	 * Counter for the surf waiting times.
-	 */
-	private final AtomicLong surferWaitCount = new AtomicLong(0);
-	
-	/**
-	 * Accumulator of all the strategy waiting times.
-	 */
-	private final AtomicLong strategyWaitTime = new AtomicLong(0);
-
-	/**
-	 * Counter for the strategy waiting times.
-	 */
-	private final AtomicLong strategyWaitCount = new AtomicLong(0);
 
 	/**
 	 * The wall-clock-time that the analysis run was started.
@@ -321,34 +323,14 @@ public class COASTAL {
 
 	// ======================================================================
 	//
-	// SHARED VARIABLES
+	// TASK MANAGEMENT
 	//
 	// ======================================================================
 
 	/**
-	 * Counter for the number of dives undertaken.
+	 * The maximum number of threads to use for divers and strategies.
 	 */
-	private final AtomicLong diverCount = new AtomicLong(0);
-
-	/**
-	 * Counter for the number of surfs undertaken.
-	 */
-	private final AtomicLong surferCount = new AtomicLong(0);
-	
-	/**
-	 * The number of diver tasks started (ever).
-	 */
-	private int diverTaskCount = 0;
-
-	/**
-	 * The number of surfer tasks started (ever).
-	 */
-	private int surferTaskCount = 0;
-	
-	/**
-	 * The number of strategy tasks started (ever).
-	 */
-	private int strategyTaskCount = 0;
+	private final int maxThreads;
 
 	/**
 	 * The task manager for concurrent divers and strategies.
@@ -367,15 +349,11 @@ public class COASTAL {
 	 */
 	private final List<Future<Void>> futures;
 
-	/**
-	 * The one-and-only strategy factory for this analysis run.
-	 */
-	private final StrategyFactory strategyFactory;
-
-	/**
-	 * The one-and-only strategy manager for this analysis run.
-	 */
-	private final StrategyManager strategyManager;
+	// ======================================================================
+	//
+	// SHARED VARIABLES
+	//
+	// ======================================================================
 
 	/**
 	 * The outstanding number of models that have not been processed by divers,
@@ -393,6 +371,95 @@ public class COASTAL {
 	 */
 	private final AtomicBoolean workDone = new AtomicBoolean(false);
 
+	// ======================================================================
+	//
+	// CONSTRUCTOR
+	//
+	// ======================================================================
+
+	/* @formatter:off
+	 * 
+	 * private final Logger log;
+	 * private final ImmutableConfiguration config;
+	 * private final Broker broker;
+	 * private final Reporter reporter;
+	 * private final PathTree pathTree;
+	 * private final InstrumentationClassManager classManager;
+	 * 
+	 * // TARGET INFORMATION
+	 * 
+	 * private final List<String> prefixes = new ArrayList<>();
+	 * private final List<Trigger> triggers = new ArrayList<>();
+	 * 
+	 * // VARIABLE BOUNDS
+	 * 
+	 * private final Map<Class<?>, Object> defaultMinValue = new HashMap<>();
+	 * private final Map<Class<?>, Object> defaultMaxValue = new HashMap<>();
+	 * private final Map<String, Integer> minBounds = new HashMap<>();
+	 * private final Map<String, Integer> maxBounds = new HashMap<>();
+	 * 
+	 * // DIVERS, SURFERS, STRATEGIES
+	 *
+	 * private final List<TaskInfo> tasks = new ArrayList<>();
+	 * private DiverManager diverManager;
+	 *
+	 * // OBSERVERS
+	 * 
+	 * private final List<Tuple> observersPerRun = new ArrayList<>();
+	 * private final List<Tuple> observersPerTask = new ArrayList<>();
+	 * private final List<Tuple> observersPerDiver = new ArrayList<>();
+	 * private final List<Tuple> observersPerSurfer = new ArrayList<>();
+	 * 
+	 * // DELEGATES
+	 * 
+	 * private final Map<String, Object> delegates = new HashMap<>();
+	 * 
+	 * // STANDARD OUT AND ERR
+	 * 
+	 * private final PrintStream systemOut = System.out;
+	 * private final PrintStream systemErr = System.err;
+	 * private static final PrintStream NUL = new PrintStream(...)
+	 * 
+	 * // QUEUES
+	 * 
+	 * private final BlockingQueue<Model> diverModels;
+	 * private final BlockingQueue<Model> surferModels;
+	 * private final BlockingQueue<SegmentedPC> pcs;
+	 * private final BlockingQueue<Trace> traces;
+	 * 
+	 * // TIMING INFORMATION
+	 * 
+	 * private final AtomicLong diverTime = new AtomicLong(0);
+	 * private final AtomicLong diverWaitTime = new AtomicLong(0);
+	 * private final AtomicLong diverWaitCount = new AtomicLong(0);
+	 * private final AtomicLong surferTime = new AtomicLong(0);
+	 * private final AtomicLong surferWaitTime = new AtomicLong(0);
+	 * private final AtomicLong surferWaitCount = new AtomicLong(0);
+	 * private final AtomicLong strategyWaitTime = new AtomicLong(0);
+	 * private final AtomicLong strategyWaitCount = new AtomicLong(0);
+	 * private Calendar startingTime;
+	 * private Calendar stoppingTime;
+	 * private long nextReportingTime = 0;
+	 * private final long timeLimit;
+	 * 
+	 * // TASK MANAGEMENT
+	 * 
+	 * private final int maxThreads;
+	 * private int diverTaskCount = 0;
+	 * private int surferTaskCount = 0;
+	 * private int strategyTaskCount = 0;
+	 * private final ExecutorService executor;
+	 * private final CompletionService<Void> completionService;
+	 * private final List<Future<Void>> futures;
+	 * 
+	 * // SHARED VARIABLES
+	 * 
+	 * private final AtomicLong work = new AtomicLong(0);
+	 * private final AtomicBoolean workDone = new AtomicBoolean(false);
+	 *
+	 * @formatter:on
+	 */
+
 	/**
 	 * Initialize the final fields for this analysis run of COASTAL.
 	 * 
@@ -409,55 +476,274 @@ public class COASTAL {
 		reporter = new Reporter(this);
 		pathTree = new PathTree(this);
 		classManager = new InstrumentationClassManager(this, System.getProperty("java.class.path"));
-		int intMin = Integer.MIN_VALUE, intMax = Integer.MAX_VALUE;
-		int charMin = Character.MIN_VALUE, charMax = Character.MAX_VALUE;
-		for (int i = 0; true; i++) {
-			String key = "coastal.bound(" + i + ")";
-			String var = getConfig().getString(key + "[@name]");
-			if (var == null) {
-				break;
-			} else if (var.equals("int")) {
-				intMin = getConfig().getInt(key + "[@min]", Integer.MIN_VALUE);
-				intMax = getConfig().getInt(key + "[@max]", Integer.MAX_VALUE);
-			} else if (var.equals("char")) {
-				charMin = getConfig().getInt(key + "[@min]", Character.MIN_VALUE);
-				charMax = getConfig().getInt(key + "[@max]", Character.MAX_VALUE);
-			}
-		}
-		defaultMinIntValue = Conversion.minmax(intMin, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1);
-		defaultMaxIntValue = Conversion.minmax(intMax, Integer.MIN_VALUE + 2, Integer.MAX_VALUE);
-		defaultMinCharValue = Conversion.minmax(charMin, Character.MIN_VALUE, Character.MAX_VALUE - 1);
-		defaultMaxCharValue = Conversion.minmax(charMax, Character.MIN_VALUE + 1, Character.MAX_VALUE);
-		defaultMinBooleanValue = 0;
-		defaultMaxBooleanValue = 1;
-		defaultMinByteValue = Conversion.minmax(charMin, Byte.MIN_VALUE, Byte.MAX_VALUE - 1);
-		defaultMaxByteValue = Conversion.minmax(charMax, Byte.MIN_VALUE + 1, Byte.MAX_VALUE);
 		parseConfig();
-		timeLimit = Conversion.limitLong(getConfig(), "coastal.limits.time");
-		maxThreads = Conversion.minmax(getConfig().getInt("coastal.max-threads", 2), 2, Short.MAX_VALUE);
+		// QUEUES
+		diverModelQueue = new PriorityBlockingQueue<>(50, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
+		surferModelQueue = new PriorityBlockingQueue<>(50, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
+		pcQueue = new LinkedBlockingQueue<>();
+		traceQueue = new LinkedBlockingQueue<>();
+		// TIMING INFORMATION
+		timeLimit = Conversion.limitLong(getConfig(), "coastal.settings.time-limit");
+		// TASK MANAGEMENT
+		maxThreads = Conversion.minmax(getConfig().getInt("coastal.settings.max-threads", 2), 2, Short.MAX_VALUE);
 		executor = Executors.newCachedThreadPool();
 		completionService = new ExecutorCompletionService<Void>(executor);
 		futures = new ArrayList<Future<Void>>(maxThreads);
-		// Create the queues.
-		diverModels = new PriorityBlockingQueue<>(50, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
-		surferModels = new PriorityBlockingQueue<>(50, (Model m1, Model m2) -> m1.getPriority() - m2.getPriority());
-		pcs = new LinkedBlockingQueue<>();
-		traces = new LinkedBlockingQueue<>();
-		StrategyFactory sf = null;
-		String strategyName = config.getString("coastal.strategy");
-		if (strategyName != null) {
-			Object sfObject = Conversion.createInstance(this, strategyName);
-			if ((sfObject != null) && (sfObject instanceof StrategyFactory)) {
-				sf = (StrategyFactory) sfObject;
+	}
+
+	/**
+	 * Parse the COASTAL configuration and extract the targets, triggers,
+	 * delegates, bounds, and observers.
+	 */
+	private void parseConfig() {
+		// TARGET INFORMATION
+		parseConfigTarget();
+		// VARIABLE BOUNDS
+		parseConfigBounds();
+		// STRATEGIES
+		parseConfigStrategies();
+		// OBSERVERS
+		parseConfigObservers();
+		// DELEGATES
+		parseConfigDelegates();
+	}
+
+	/**
+	 * Parse the COASTAL configuration to extract the target information.
+	 */
+	private void parseConfigTarget() {
+		prefixes.addAll(getConfig().getList(String.class, "coastal.target.instrument"));
+		String[] triggerNames = getConfig().getStringArray("coastal.target.trigger");
+		for (int i = 0; i < triggerNames.length; i++) {
+			triggers.add(Trigger.createTrigger(triggerNames[i].trim()));
+		}
+	}
+
+	/**
+	 * Parse the COASTAL configuration to extract the type and variable bounds.
+	 */
+	private void parseConfigBounds() {
+		defaultMinBounds.put(boolean.class, 0);
+		defaultMinBounds.put(byte.class, Byte.MIN_VALUE);
+		defaultMinBounds.put(short.class, Short.MIN_VALUE);
+		defaultMinBounds.put(char.class, Character.MIN_VALUE);
+		defaultMinBounds.put(int.class, Integer.MIN_VALUE + 1);
+		defaultMinBounds.put(long.class, Integer.MIN_VALUE + 1L);
+		defaultMinBounds.put(boolean[].class, 0);
+		defaultMinBounds.put(byte[].class, Byte.MIN_VALUE);
+		defaultMinBounds.put(short[].class, Short.MIN_VALUE);
+		defaultMinBounds.put(char[].class, Character.MIN_VALUE);
+		defaultMinBounds.put(int[].class, Integer.MIN_VALUE + 1);
+		defaultMinBounds.put(long[].class, Integer.MIN_VALUE + 1L);
+		defaultMaxBounds.put(boolean.class, 1);
+		defaultMaxBounds.put(byte.class, Byte.MAX_VALUE);
+		defaultMaxBounds.put(short.class, Short.MAX_VALUE);
+		defaultMaxBounds.put(char.class, Character.MAX_VALUE);
+		defaultMaxBounds.put(int.class, Integer.MAX_VALUE);
+		defaultMaxBounds.put(long.class, (long) Integer.MAX_VALUE);
+		defaultMaxBounds.put(boolean[].class, 1);
+		defaultMaxBounds.put(byte[].class, Byte.MAX_VALUE);
+		defaultMaxBounds.put(short[].class, Short.MAX_VALUE);
+		defaultMaxBounds.put(char[].class, Character.MAX_VALUE);
+		defaultMaxBounds.put(int[].class, Integer.MAX_VALUE);
+		defaultMaxBounds.put(long[].class, (long) Integer.MAX_VALUE);
+		for (int i = 0; true; i++) {
+			String key = "coastal.bounds.bound(" + i + ")";
+			String var = getConfig().getString(key + "[@name]");
+			if (var == null) {
+				break;
+			} else if (var.equals("boolean")) {
+				int l = (Integer) defaultMinBounds.get(boolean.class);
+				int u = (Integer) defaultMaxBounds.get(boolean.class);
+				defaultMinBounds.put(boolean.class, new Integer(getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(boolean.class, new Integer(getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("boolean[]")) {
+				int l = (Integer) defaultMinBounds.get(boolean[].class);
+				int u = (Integer) defaultMaxBounds.get(boolean[].class);
+				defaultMinBounds.put(boolean[].class, new Integer(getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(boolean[].class, new Integer(getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("byte")) {
+				byte l = (Byte) defaultMinBounds.get(byte.class);
+				byte u = (Byte) defaultMaxBounds.get(byte.class);
+				defaultMinBounds.put(byte.class, new Byte((byte) getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(byte.class, new Byte((byte) getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("byte[]")) {
+				byte l = (Byte) defaultMinBounds.get(byte[].class);
+				byte u = (Byte) defaultMaxBounds.get(byte[].class);
+				defaultMinBounds.put(byte[].class, new Byte((byte) getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(byte[].class, new Byte((byte) getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("short")) {
+				short l = (Short) defaultMinBounds.get(short.class);
+				short u = (Short) defaultMaxBounds.get(short.class);
+				defaultMinBounds.put(short.class, new Short((short) getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(short.class, new Short((short) getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("short[]")) {
+				short l = (Short) defaultMinBounds.get(short[].class);
+				short u = (Short) defaultMaxBounds.get(short[].class);
+				defaultMinBounds.put(short[].class, new Short((short) getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(short[].class, new Short((short) getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("char")) {
+				char l = (Character) defaultMinBounds.get(char.class);
+				char u = (Character) defaultMaxBounds.get(char.class);
+				defaultMinBounds.put(char.class, new Character((char) getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(char.class, new Character((char) getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("char[]")) {
+				char l = (Character) defaultMinBounds.get(char[].class);
+				char u = (Character) defaultMaxBounds.get(char[].class);
+				defaultMinBounds.put(char[].class, new Character((char) getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(char[].class, new Character((char) getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("int")) {
+				int l = (Integer) defaultMinBounds.get(int.class);
+				int u = (Integer) defaultMaxBounds.get(int.class);
+				defaultMinBounds.put(int.class, new Integer((int) getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(int.class, new Integer((int) getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("int[]")) {
+				int l = (Integer) defaultMinBounds.get(int[].class);
+				int u = (Integer) defaultMaxBounds.get(int[].class);
+				defaultMinBounds.put(int[].class, new Integer((int) getConfig().getInt(key + "[@min]", l)));
+				defaultMaxBounds.put(int[].class, new Integer((int) getConfig().getInt(key + "[@max]", u)));
+			} else if (var.equals("long")) {
+				long l = (Long) defaultMinBounds.get(long.class);
+				long u = (Long) defaultMaxBounds.get(long.class);
+				defaultMinBounds.put(long.class, new Long((long) getConfig().getLong(key + "[@min]", l)));
+				defaultMaxBounds.put(long.class, new Long((long) getConfig().getLong(key + "[@max]", u)));
+			} else if (var.equals("long[]")) {
+				long l = (Long) defaultMinBounds.get(long[].class);
+				long u = (Long) defaultMaxBounds.get(long[].class);
+				defaultMinBounds.put(long[].class, new Long((long) getConfig().getLong(key + "[@min]", l)));
+				defaultMaxBounds.put(long[].class, new Long((long) getConfig().getLong(key + "[@max]", u)));
+			} else {
+				addBound(minBounds, key + "[@min]", var);
+				addBound(maxBounds, key + "[@max]", var);
 			}
 		}
-		if (sf == null) {
+	}
+
+	private void addBound(Map<String, Object> bounds, String key, String var) {
+		if (getConfig().containsKey(key)) {
+			Class<?> type = Trigger.getVariableType(var);
+			long value = getConfig().getLong(key);
+			if (type == boolean.class) {
+				bounds.put(var, (int) value);
+			} else if (type == byte.class) {
+				bounds.put(var, (byte) value);
+			} else if (type == short.class) {
+				bounds.put(var, (short) value);
+			} else if (type == char.class) {
+				bounds.put(var, (char) value);
+			} else if (type == int.class) {
+				bounds.put(var, (int) value);
+			} else if (type == long.class) {
+				bounds.put(var, value);
+			} else {
+				bounds.put(var, (int) value);
+			}
+		}
+	}
+
+	/**
+	 * Parse the COASTAL configuration to extract the strategies.
+	 */
+	private void parseConfigStrategies() {
+		DiverFactory diverFactory = new DiverFactory();
+		int dt = getConfig().getInt("coastal.divers[@threads]", 0);
+		int dl = getConfig().getInt("coastal.divers[@min-threads]", 0);
+		int du = getConfig().getInt("coastal.divers[@max-threads]", 128);
+		SurferFactory surferFactory = new SurferFactory();
+		int st = getConfig().getInt("coastal.surfers[@threads]", 0);
+		int sl = getConfig().getInt("coastal.surfers[@min-threads]", 0);
+		int su = getConfig().getInt("coastal.surfers[@max-threads]", 128);
+		if (dt + st == 0) {
+			dt = 1;
+		}
+		TaskInfo dti = new TaskInfo(this, diverFactory, dt, dl, du);
+		diverManager = (DiverManager) dti.getManager();
+		tasks.add(dti);
+		TaskInfo sti = new TaskInfo(this, surferFactory, st, sl, su);
+		// surferManager = (SurferManager) sti.getManager();
+		tasks.add(sti);
+		int sfCount = 0;
+		for (int i = 0; true; i++) {
+			String key = "coastal.strategies.strategy(" + i + ")";
+			String sfClass = getConfig().getString(key);
+			if (sfClass == null) {
+				break;
+			}
+			Object sfObject = Conversion.createInstance(this, sfClass);
+			if ((sfObject == null) || !(sfObject instanceof StrategyFactory)) {
+				Banner bn = new Banner('@');
+				bn.println("UNKNOWN STRATEGY IGNORED:\n" + sfClass);
+				bn.display(log);
+				continue;
+			}
+			int sft = getConfig().getInt(key + "[@threads]", 0);
+			int sfl = getConfig().getInt(key + "[@min-threads]", 0);
+			int sfu = getConfig().getInt(key + "[@max-threads]", 128);
+			StrategyFactory sf = (StrategyFactory) sfObject;
+			tasks.add(new TaskInfo(this, sf, sft, sfl, sfu));
+			sfCount += sft;
+		}
+		if (sfCount == 0) {
 			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
 			System.exit(1);
 		}
-		strategyFactory = sf;
-		strategyManager = strategyFactory.createManager(this);
 	}
+
+	/**
+	 * Parse the COASTAL configuration to extract the observers.
+	 */
+	private void parseConfigObservers() {
+		for (int i = 0; true; i++) {
+			String key = "coastal.observers.observer(" + i + ")";
+			String observerName = getConfig().getString(key);
+			if (observerName == null) {
+				break;
+			}
+			Object observerFactory = Conversion.createInstance(this, observerName.trim());
+			if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
+				ObserverFactory factory = (ObserverFactory) observerFactory;
+				ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
+				switch (factory.getFrequency()) {
+				case ObserverFactory.ONCE_PER_RUN:
+					observersPerRun.add(new Tuple(observerFactory, manager));
+					break;
+				case ObserverFactory.ONCE_PER_TASK:
+					observersPerTask.add(new Tuple(observerFactory, manager));
+					break;
+				case ObserverFactory.ONCE_PER_DIVER:
+					observersPerDiver.add(new Tuple(observerFactory, manager));
+					break;
+				default:
+					observersPerSurfer.add(new Tuple(observerFactory, manager));
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Parse the COASTAL configuration to extract the delegates.
+	 */
+	private void parseConfigDelegates() {
+		for (int i = 0; true; i++) {
+			String key = "coastal.delegates.delegate(" + i + ")";
+			String target = getConfig().getString(key + ".for");
+			if (target == null) {
+				break;
+			}
+			String model = getConfig().getString(key + ".model");
+			Object modelObject = Conversion.createInstance(this, model.trim());
+			if (modelObject != null) {
+				delegates.put(target.trim(), modelObject);
+			}
+		}
+	}
+
+	// ======================================================================
+	//
+	// GETTERS
+	//
+	// ======================================================================
 
 	/**
 	 * Return the logger for this run of COASTAL.
@@ -505,7 +791,7 @@ public class COASTAL {
 	public PathTree getPathTree() {
 		return pathTree;
 	}
-	
+
 	/**
 	 * Return the starting time of the analysis run in milliseconds.
 	 * 
@@ -535,7 +821,7 @@ public class COASTAL {
 	 *         target
 	 */
 	public boolean isTarget(String potentialTarget) {
-		for (String target : targets) {
+		for (String target : prefixes) {
 			if (potentialTarget.startsWith(target)) {
 				return true;
 			}
@@ -622,72 +908,12 @@ public class COASTAL {
 		return delegateMethod;
 	}
 
-	/**
-	 * Parse the COASTAL configuration and extract the targets, triggers,
-	 * delegates, bounds, and observers.
-	 */
-	public void parseConfig() {
-		// PARSE TARGETS
-		targets.addAll(getConfig().getList(String.class, "coastal.target"));
-		// PARSE TRIGGERS
-		String[] triggerNames = getConfig().getStringArray("coastal.trigger");
-		for (int i = 0; i < triggerNames.length; i++) {
-			triggers.add(Trigger.createTrigger(triggerNames[i].trim()));
-		}
-		// PARSE DELEGATES
-		for (int i = 0; true; i++) {
-			String key = "coastal.delegate(" + i + ")";
-			String target = getConfig().getString(key + ".target");
-			if (target == null) {
-				break;
-			}
-			String model = getConfig().getString(key + ".model");
-			Object modelObject = Conversion.createInstance(this, model.trim());
-			if (modelObject != null) {
-				delegates.put(target.trim(), modelObject);
-			}
-		}
-		// PARSE BOUNDS
-		for (int i = 0; true; i++) {
-			String key = "coastal.bound(" + i + ")";
-			String var = getConfig().getString(key + "[@name]");
-			if (var == null) {
-				break;
-			}
-			minBounds.put(var, getConfig().getInt(key + "[@min]", defaultMinIntValue));
-			maxBounds.put(var, getConfig().getInt(key + "[@max]", defaultMaxIntValue));
-		}
-		// PARSE OBSERVERS
-		for (int i = 0; true; i++) {
-			String key = "coastal.observer(" + i + ")";
-			String observerName = getConfig().getString(key);
-			if (observerName == null) {
-				break;
-			}
-			Object observerFactory = Conversion.createInstance(this, observerName.trim());
-			if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
-				ObserverFactory factory = (ObserverFactory) observerFactory;
-				ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
-				int frequency = factory.getFrequency();
-				if (frequency == ObserverFactory.ONCE_PER_RUN) {
-					observersPerRun.add(new Tuple(observerFactory, manager));
-				} else if (frequency == ObserverFactory.ONCE_PER_TASK) {
-					observersPerTask.add(new Tuple(observerFactory, manager));
-				} else if (frequency == ObserverFactory.ONCE_PER_DIVER) {
-					observersPerDiver.add(new Tuple(observerFactory, manager));
-				} else {
-					observersPerSurfer.add(new Tuple(observerFactory, manager));
-				}
-			}
-		}
-	}
-
 	// ======================================================================
 	//
 	// OBSERVERS
 	//
 	// ======================================================================
-	
+
 	public Iterable<Tuple> getObserversPerRun() {
 		return observersPerRun;
 	}
@@ -703,7 +929,7 @@ public class COASTAL {
 	public Iterable<Tuple> getObserversPerSurfer() {
 		return observersPerSurfer;
 	}
-	
+
 	// ======================================================================
 	//
 	// VARIABLE BOUNDS
@@ -718,18 +944,8 @@ public class COASTAL {
 	 *            the type of the variable
 	 * @return the lower bound for symbolic variables
 	 */
-	public int getDefaultMinValue(Class<?> type) {
-		if ((type == boolean.class) || (type == boolean[].class)) {
-			return defaultMinBooleanValue;
-		} else if ((type == int.class) || (type == int[].class)) {
-			return defaultMinIntValue;
-		} else if ((type == byte.class) || (type == byte[].class)) {
-			return defaultMinByteValue;
-		} else if ((type == char.class) || (type == char[].class)) {
-			return defaultMinCharValue;
-		} else {
-			return defaultMinIntValue;
-		}
+	public Object getDefaultMinValue(Class<?> type) {
+		return defaultMinBounds.get(type);
 	}
 
 	/**
@@ -741,7 +957,7 @@ public class COASTAL {
 	 *            the type of the variable
 	 * @return the lower bound for the variable
 	 */
-	public int getMinBound(String variable, Class<?> type) {
+	public Object getMinBound(String variable, Class<?> type) {
 		return getMinBound(variable, getDefaultMinValue(type));
 	}
 
@@ -761,7 +977,7 @@ public class COASTAL {
 	 *            the type of the variables
 	 * @return the lower bound for either variable
 	 */
-	public int getMinBound(String variable1, String variable2, Class<?> type) {
+	public Object getMinBound(String variable1, String variable2, Class<?> type) {
 		return getMinBound(variable1, getMinBound(variable2, type));
 	}
 
@@ -775,8 +991,8 @@ public class COASTAL {
 	 *            the default lower bound
 	 * @return the lower bound for the variable
 	 */
-	public int getMinBound(String variable, int defaultValue) {
-		Integer min = minBounds.get(variable);
+	public Object getMinBound(String variable, Object defaultValue) {
+		Object min = minBounds.get(variable);
 		if (min == null) {
 			min = defaultValue;
 		}
@@ -791,18 +1007,8 @@ public class COASTAL {
 	 *            the type of the variable
 	 * @return the upper bound for symbolic variables
 	 */
-	public int getDefaultMaxValue(Class<?> type) {
-		if ((type == boolean.class) || (type == boolean[].class)) {
-			return defaultMaxBooleanValue;
-		} else if ((type == int.class) || (type == int[].class)) {
-			return defaultMaxIntValue;
-		} else if ((type == byte.class) || (type == byte[].class)) {
-			return defaultMaxByteValue;
-		} else if ((type == char.class) || (type == char[].class)) {
-			return defaultMaxCharValue;
-		} else {
-			return defaultMaxIntValue;
-		}
+	public Object getDefaultMaxValue(Class<?> type) {
+		return defaultMaxBounds.get(type);
 	}
 
 	/**
@@ -814,7 +1020,7 @@ public class COASTAL {
 	 *            the type of the variable
 	 * @return the upper bound for the variable
 	 */
-	public int getMaxBound(String variable, Class<?> type) {
+	public Object getMaxBound(String variable, Class<?> type) {
 		return getMaxBound(variable, getDefaultMaxValue(type));
 	}
 
@@ -834,7 +1040,7 @@ public class COASTAL {
 	 *            the type of the variables
 	 * @return the upper bound for either variable
 	 */
-	public int getMaxBound(String variable1, String variable2, Class<?> type) {
+	public Object getMaxBound(String variable1, String variable2, Class<?> type) {
 		return getMaxBound(variable1, getMaxBound(variable2, type));
 	}
 
@@ -848,8 +1054,8 @@ public class COASTAL {
 	 *            the default upper bound
 	 * @return the upper bound for the variable
 	 */
-	public int getMaxBound(String variable, int defaultValue) {
-		Integer max = maxBounds.get(variable);
+	public Object getMaxBound(String variable, Object defaultValue) {
+		Object max = maxBounds.get(variable);
 		if (max == null) {
 			max = defaultValue;
 		}
@@ -882,42 +1088,6 @@ public class COASTAL {
 		return systemErr;
 	}
 
-	/**
-	 * Increment and return the diver counter.
-	 * 
-	 * @return the incremented value of the diver counter
-	 */
-	public long getNextDiveCount() {
-		return diverCount.incrementAndGet();
-	}
-
-	/**
-	 * Return the current value of the diver counter.
-	 * 
-	 * @return the value of the diver counter
-	 */
-	public long getDiveCount() {
-		return diverCount.get();
-	}
-
-	/**
-	 * Increment and return the surfer counter.
-	 * 
-	 * @return the incremented value of the surfer counter
-	 */
-	public long getNextSurferCount() {
-		return surferCount.incrementAndGet();
-	}
-	
-	/**
-	 * Return the current value of the surfer counter.
-	 * 
-	 * @return the value of the surfer counter
-	 */
-	public long getSurferCount() {
-		return surferCount.get();
-	}
-	
 	// ======================================================================
 	//
 	// QUEUES
@@ -925,14 +1095,14 @@ public class COASTAL {
 	// ======================================================================
 
 	// DIVER MODEL QUEUE
-	
+
 	/**
 	 * Return the length of the diver model queue.
 	 * 
 	 * @return the length of the diver model queue
 	 */
 	public int getDiverModelQueueLength() {
-		return diverModels.size();
+		return diverModelQueue.size();
 	}
 
 	/**
@@ -944,7 +1114,7 @@ public class COASTAL {
 	public void addDiverModels(List<Model> mdls) {
 		mdls.forEach(m -> {
 			try {
-				diverModels.put(m);
+				diverModelQueue.put(m);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -959,7 +1129,7 @@ public class COASTAL {
 	 *             if the action of removing the model was interrupted
 	 */
 	public Map<String, Constant> getNextDiverModel() throws InterruptedException {
-		return diverModels.take().getConcreteValues();
+		return diverModelQueue.take().getConcreteValues();
 	}
 
 	/**
@@ -973,7 +1143,7 @@ public class COASTAL {
 	 */
 	public void addFirstModel(Model firstModel) {
 		try {
-			diverModels.put(firstModel);
+			diverModelQueue.put(firstModel);
 			work.incrementAndGet();
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
@@ -981,14 +1151,14 @@ public class COASTAL {
 	}
 
 	// SURFER MODEL QUEUE
-	
+
 	/**
 	 * Return the length of the surfer model queue.
 	 * 
 	 * @return the length of the surfer model queue
 	 */
 	public int getSurferModelQueueLength() {
-		return surferModels.size();
+		return surferModelQueue.size();
 	}
 
 	/**
@@ -1000,7 +1170,7 @@ public class COASTAL {
 	public void addSurferModels(List<Model> mdls) {
 		mdls.forEach(m -> {
 			try {
-				surferModels.put(m);
+				surferModelQueue.put(m);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -1015,18 +1185,18 @@ public class COASTAL {
 	 *             if the action of removing the model was interrupted
 	 */
 	public Map<String, Constant> getNextSurferModel() throws InterruptedException {
-		return surferModels.take().getConcreteValues();
+		return surferModelQueue.take().getConcreteValues();
 	}
 
 	// PATH CONDITION QUEUE
-	
+
 	/**
 	 * Return the length of the path condition queue.
 	 * 
 	 * @return the length of the path condition queue
 	 */
 	public int getPcQueueLength() {
-		return pcs.size();
+		return pcQueue.size();
 	}
 
 	/**
@@ -1038,9 +1208,9 @@ public class COASTAL {
 	public void addPc(SegmentedPC spc) {
 		try {
 			if (spc == null) {
-				pcs.put(SegmentedPC.NULL);
+				pcQueue.put(SegmentedPC.NULL);
 			} else {
-				pcs.put(spc);
+				pcQueue.put(spc);
 			}
 		} catch (InterruptedException e) {
 			// ignore silently
@@ -1055,20 +1225,20 @@ public class COASTAL {
 	 *             if the action of removing the path condition was interrupted
 	 */
 	public SegmentedPC getNextPc() throws InterruptedException {
-		return pcs.take();
+		return pcQueue.take();
 	}
 
 	// TRACE QUEUE
-	
+
 	/**
 	 * Return the length of the trace queue.
 	 * 
 	 * @return the length of the trace queue
 	 */
 	public int getTraceQueueLength() {
-		return traces.size();
+		return traceQueue.size();
 	}
-	
+
 	/**
 	 * Add a new entry to the queue of traces.
 	 * 
@@ -1078,15 +1248,15 @@ public class COASTAL {
 	public void addTrace(Trace trace) {
 		try {
 			if (trace == null) {
-				traces.put(Trace.NULL);
+				traceQueue.put(Trace.NULL);
 			} else {
-				traces.put(trace);
+				traceQueue.put(trace);
 			}
 		} catch (InterruptedException e) {
 			// ignore silently
 		}
 	}
-	
+
 	/**
 	 * Return the next available trace.
 	 * 
@@ -1095,106 +1265,14 @@ public class COASTAL {
 	 *             if the action of removing the trace was interrupted
 	 */
 	public Trace getNextTrace() throws InterruptedException {
-		return traces.take();
+		return traceQueue.take();
 	}
-	
+
 	// ======================================================================
 	//
 	// TIMING INFORMATION
 	//
 	// ======================================================================
-
-	/**
-	 * Add a reported dive time to the accumulator that tracks how long the
-	 * dives took.
-	 * 
-	 * @param time
-	 *            the time for this dive
-	 */
-	public void recordDiverTime(long time) {
-		diverTime.addAndGet(time);
-	}
-
-	/**
-	 * Add a reported dive wait time. This is used to determine if it makes
-	 * sense to create additional threads (or destroy them).
-	 * 
-	 * @param time
-	 *            the wait time for this dive
-	 */
-	public void recordDiverWaitTime(long time) {
-		diverWaitTime.addAndGet(time);
-		diverWaitCount.incrementAndGet();
-	}
-
-	/**
-	 * Add a reported surf time to the accumulator that tracks how long the
-	 * surfers took.
-	 * 
-	 * @param time
-	 *            the time for this surfer
-	 */
-	public void recordSurferTime(long time) {
-		surferTime.addAndGet(time);
-	}
-	
-	/**
-	 * Add a reported surfer wait time. This is used to determine if it makes
-	 * sense to create additional threads (or destroy them).
-	 * 
-	 * @param time
-	 *            the wait time for this surfer
-	 */
-	public void recordSurferWaitTime(long time) {
-		surferWaitTime.addAndGet(time);
-		surferWaitCount.incrementAndGet();
-	}
-	
-	/**
-	 * Add a reported strategy wait time. This is used to determine if it makes
-	 * sense to create additional threads (or destroy them).
-	 * 
-	 * @param time
-	 *            the wait time for this dive
-	 */
-	public void recordStrategyWaitTime(long time) {
-		strategyWaitTime.addAndGet(time);
-		strategyWaitCount.incrementAndGet();
-	}
-
-	/**
-	 * Return the strategy factory.
-	 * 
-	 * @return the strategy factory
-	 */
-	public StrategyFactory getStrategyFactory() {
-		return strategyFactory;
-	}
-
-	/**
-	 * Return the strategy manager.
-	 * 
-	 * @return the strategy manager
-	 */
-	public StrategyManager getStrategyManager() {
-		return strategyManager;
-	}
-
-	/**
-	 * Create and add a new diver task.
-	 */
-	public void addDiverTask() {
-		futures.add(completionService.submit(new Diver(this)));
-		diverTaskCount++;
-	}
-
-	/**
-	 * Create and add a new strategy task.
-	 */
-	public void addStrategyTask() {
-		futures.add(completionService.submit(new StrategyTask(this)));
-		strategyTaskCount++;
-	}
 
 	/**
 	 * Wait for a change in the status of the workDone flag or until a specified
@@ -1274,24 +1352,15 @@ public class COASTAL {
 			observerFactory.createObserver(this, observerManager);
 		}
 		// Redirect System.out/System.err
-		if (!getConfig().getBoolean("coastal.echo-output", false)) {
+		if (!getConfig().getBoolean("coastal.settings.echo-output", false)) {
 			System.setOut(NUL);
 			System.setErr(NUL);
 		}
-		//System.setSecurityManager(new SecurityManager());
-		//System.getSecurityManager();
 		getBroker().publish("coastal-start", this);
 		getBroker().subscribe("tick", this::tick);
 		addFirstModel(new Model(0, null));
 		try {
-			int dtc = getConfig().getInt("coastal.diver[@threads]", 1);
-			while (diverTaskCount < dtc) {
-				addDiverTask();
-			}
-			int stc = getConfig().getInt("coastal.strategy[@threads]", 1);
-			while (strategyTaskCount < stc) {
-				addStrategyTask();
-			}
+			startTasks();
 			while (!workDone.get()) {
 				idle(500);
 				getBroker().publish("tick", this);
@@ -1308,7 +1377,7 @@ public class COASTAL {
 		getBroker().publish("coastal-report", this);
 		System.setOut(getSystemOut());
 		System.setErr(getSystemErr());
-		if (diverCount.get() < 2) {
+		if (diverManager.getDiveCount() < 2) {
 			Banner bn = new Banner('@');
 			bn.println("ONLY A SINGLE RUN EXECUTED\n");
 			bn.println("CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE");
@@ -1319,12 +1388,20 @@ public class COASTAL {
 		}
 	}
 
+	private void startTasks() {
+		for (TaskInfo task : tasks) {
+			for (int i = 0; i < task.getInitThreads(); i++) {
+				futures.add(completionService.submit(task.create(this)));
+			}
+		}
+	}
+
 	public void tick(Object object) {
 		long elapsedTime = System.currentTimeMillis() - getStartingTime();
 		if (elapsedTime > nextReportingTime) {
 			String time = Banner.getElapsed(this);
-			String dives = String.format("dives:%d", getDiveCount());
-			String queue = String.format("[models:%d pcs:%d]", diverModels.size(), pcs.size());
+			String dives = String.format("dives:%d", diverManager.getDiveCount());
+			String queue = String.format("[models:%d pcs:%d]", diverModelQueue.size(), pcQueue.size());
 			log.info("{} {} {}", time, dives, queue);
 			if (elapsedTime > 3600000) {
 				// After 1 hour, we report every 5 minutes
@@ -1350,19 +1427,6 @@ public class COASTAL {
 		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
 		long duration = stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis();
 		getBroker().publish("report", new Tuple("COASTAL.time", duration));
-		double dwt = diverWaitTime.get() / diverWaitCount.doubleValue();
-		getBroker().publish("report", new Tuple("COASTAL.diver-tasks", diverTaskCount));
-		getBroker().publish("report", new Tuple("COASTAL.diver-count", diverCount.get()));
-		getBroker().publish("report", new Tuple("COASTAL.diver-time", diverTime.get()));
-		getBroker().publish("report", new Tuple("COASTAL.diver-wait-time", dwt));
-		double swt = surferWaitTime.get() / surferWaitCount.doubleValue();
-		getBroker().publish("report", new Tuple("COASTAL.surfer-tasks", surferTaskCount));
-		getBroker().publish("report", new Tuple("COASTAL.surfer-count", surferCount.get()));
-		getBroker().publish("report", new Tuple("COASTAL.surfer-time", diverTime.get()));
-		getBroker().publish("report", new Tuple("COASTAL.surfer-wait-time", swt));
-		double stwt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
-		getBroker().publish("report", new Tuple("COASTAL.strategy-tasks", strategyTaskCount));
-		getBroker().publish("report", new Tuple("COASTAL.strategy-wait-time", stwt));
 	}
 
 	// ======================================================================
@@ -1461,17 +1525,18 @@ public class COASTAL {
 			bn.display(log);
 			return null;
 		}
-		Configuration cfg3 = null;
-		if (args.length > 0) {
-			String filename = args[0];
+		Configuration[] cfg3 = new Configuration[args.length];
+		int cfgIndex = -1;
+		for (String arg : args) {
+			String filename = arg;
 			if (filename.endsWith(".java")) {
 				filename = filename.substring(0, filename.length() - 4) + "xml";
 			}
-			cfg3 = loadConfigFromFile(log, filename);
-			if (cfg3 == null) {
-				cfg3 = loadConfigFromResource(log, filename);
+			cfg3[++cfgIndex] = loadConfigFromFile(log, filename);
+			if (cfg3[cfgIndex] == null) {
+				cfg3[cfgIndex] = loadConfigFromResource(log, filename);
 			}
-			if (cfg3 == null) {
+			if (cfg3[cfgIndex] == null) {
 				Banner bn = new Banner('@');
 				bn.println("COASTAL PROBLEM\n");
 				bn.println("COULD NOT READ CONFIGURATION FILE \"" + filename + "\"");
@@ -1479,12 +1544,16 @@ public class COASTAL {
 			}
 		}
 		Configuration cfg4 = loadConfigFromString(log, extra);
-		CombinedConfiguration config = new CombinedConfiguration(new OverrideCombiner());
+		ConfigCombiner combiner = new ConfigCombiner();
+		combiner.addJoinNode("bounds", "name");
+		CombinedConfiguration config = new CombinedConfiguration(combiner);
 		if (cfg4 != null) {
 			config.addConfiguration(cfg4);
 		}
-		if (cfg3 != null) {
-			config.addConfiguration(cfg3);
+		for (Configuration cfg : cfg3) {
+			if (cfg != null) {
+				config.addConfiguration(cfg);
+			}
 		}
 		if (cfg2 != null) {
 			config.addConfiguration(cfg2);
@@ -1492,7 +1561,7 @@ public class COASTAL {
 		if (cfg1 != null) {
 			config.addConfiguration(cfg1);
 		}
-		if (config.getString("coastal.main") == null) {
+		if (config.getString("coastal.target.trigger") == null) {
 			Banner bn = new Banner('@');
 			bn.println("SUSPICIOUS PROPERTIES FILE\n");
 			bn.println("ARE YOU SURE THAT THE ARGUMENT IS A .xml FILE?");
@@ -1518,11 +1587,12 @@ public class COASTAL {
 			Configuration cfg = loadConfigFromStream(log, inputStream);
 			log.trace("loaded configuration from {}", filename);
 			return cfg;
-		} catch (FileNotFoundException | ConfigurationException x) {
+		} catch (ConfigurationException x) {
+			if (x.getCause() != null) {
+				log.trace("configuration error: " + x.getCause().getMessage());
+			}
+		} catch (FileNotFoundException x) {
 			log.trace("failed to load configuration from {}", filename);
-			// We used to do the following, but showing the exception
-			// looks pretty ugly in the log.
-			// log.trace("tried to load configuration from " + filename + " but failed", x);
 		}
 		return null;
 	}
@@ -1545,11 +1615,12 @@ public class COASTAL {
 				log.trace("loaded configuration from {}", resourceName);
 				return cfg;
 			}
-		} catch (IOException | ConfigurationException x) {
+		} catch (ConfigurationException x) {
+			if (x.getCause() != null) {
+				log.trace("configuration error: " + x.getCause().getMessage());
+			}
+		} catch (IOException x) {
 			log.trace("failed to load configuration from {}", resourceName);
-			// We used to do the following, but showing the exception
-			// looks pretty ugly in the log.
-			// log.trace("tried to load configuration from " + resourceName + " but failed", x);
 		}
 		return null;
 	}
@@ -1568,6 +1639,8 @@ public class COASTAL {
 	 */
 	private static Configuration loadConfigFromStream(Logger log, InputStream inputStream)
 			throws ConfigurationException {
+		//		XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class)
+		//				.configure(new Parameters().xml().setValidating(true)).getConfiguration();
 		XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class).configure(new Parameters().xml())
 				.getConfiguration();
 		FileHandler fh = new FileHandler(cfg);
@@ -1575,20 +1648,26 @@ public class COASTAL {
 		return cfg;
 	}
 
+	/**
+	 * Load a COASTAL configuration from a string.
+	 * 
+	 * @param log
+	 *            the logger to which to report
+	 * @param configString
+	 *            the stirng that contains the configuration
+	 * @return an immutable configuration
+	 */
 	private static Configuration loadConfigFromString(Logger log, String configString) {
 		if (configString == null) {
 			return null;
 		}
 		try {
-			XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class)
-					.configure(new Parameters().xml()).getConfiguration();
-			FileHandler fh = new FileHandler(cfg);
 			String finalString = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>"
 					+ "<!DOCTYPE configuration PUBLIC \"-//DEEPSEA//COASTAL configuration//EN\" "
 					+ "\"https://deepseaplatform.github.io/coastal/coastal.dtd\">" + "<configuration>" + configString
 					+ "</configuration>";
-			fh.load(new ByteArrayInputStream(finalString.getBytes()));
-			return cfg;
+			InputStream in = new ByteArrayInputStream(finalString.getBytes());
+			return loadConfigFromStream(log, in);
 		} catch (ConfigurationException x) {
 			// ignore
 		}

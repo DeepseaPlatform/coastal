@@ -56,7 +56,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		super(Opcodes.ASM6, cv);
 		this.coastal = coastal;
 		this.log = coastal.getLog();
-		this.useConcreteValues = coastal.getConfig().getBoolean("coastal.use-concrete-values", false);
+		this.useConcreteValues = coastal.getConfig().getBoolean("coastal.settings.concrete-values", false);
 		this.classManager = coastal.getClassManager();
 		this.triggerIndex = triggerIndex;
 		this.isStatic = isStatic;
@@ -133,7 +133,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(II)V", false);
 		mv.visitLineNumber(line, start);
 	}
-
+	
 	@Override
 	public void visitEnd() {
 		log.trace("visitEnd()");
@@ -172,8 +172,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			mv.visitLabel(label);
 			//--- } else {
 			//---   startMethod()
-			mv.visitLdcInsn(classManager.getMethodCounter());
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+			mv.visitLdcInsn(classManager.getMethodCounter());
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 			//--- }

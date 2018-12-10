@@ -2,18 +2,30 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>examples.bintree.BinTree2</main>
-		<target>examples.bintree</target>
-		<trigger>examples.bintree.BinTree2.runExplicit2(o1: int, o2: int, v1: int, v2: int)</trigger>
-		<bound name="o1" min="0" max="1"/>
-		<bound name="o2" min="0" max="1"/>
-		<bound name="v1" min="0" max="9"/>
-		<bound name="v2" min="0" max="9"/>
-		<strategy full="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
-		<draw-paths>true</draw-paths>
+		<target>
+			<main>examples.bintree.BinTree2</main>
+			<instrument>examples.bintree</instrument>
+			<trigger>examples.bintree.BinTree2.runExplicit2(o1: int, o2: int, v1: int, v2: int)</trigger>
+		</target>
+		<bounds>
+			<bound name="o1" min="0" max="1"/>
+			<bound name="o2" min="0" max="1"/>
+			<bound name="v1" min="0" max="9"/>
+			<bound name="v2" min="0" max="9"/>
+		</bounds>
+		<settings>
+			<draw-paths>true</draw-paths>
+		</settings>
+		<strategies>
+			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+			<!-- 
+			<strategy full="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
+			-->
+		</strategies>
 		<!-- 
-		<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
-		<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
+		</observers>
 		-->
 	</coastal>
 </configuration>

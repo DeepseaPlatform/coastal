@@ -10,15 +10,14 @@ import java.util.Set;
 
 import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
-import za.ac.sun.cs.coastal.strategy.Strategy;
-import za.ac.sun.cs.coastal.strategy.StrategyManager;
+import za.ac.sun.cs.coastal.strategy.StrategyFactory.Strategy;
+import za.ac.sun.cs.coastal.strategy.StrategyFactory.StrategyManager;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
@@ -27,11 +26,7 @@ import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
 
-public abstract class PathBasedStrategy implements Strategy {
-
-	protected final COASTAL coastal;
-	
-	protected final Logger log;
+public abstract class PathBasedStrategy extends Strategy {
 
 	protected final PathBasedManager manager;
 	
@@ -42,9 +37,8 @@ public abstract class PathBasedStrategy implements Strategy {
     protected final Set<String> visitedModels = new HashSet<>();
 
     public PathBasedStrategy(COASTAL coastal, StrategyManager manager) {
-		this.coastal = coastal;
+    	super(coastal, manager);
 		this.manager = (PathBasedManager) manager;
-		log = coastal.getLog();
 		broker = coastal.getBroker(); 
 		green = new Green("COASTAL", LogManager.getLogger("GREEN"));
 		Properties greenProperties = new Properties();
@@ -87,7 +81,6 @@ public abstract class PathBasedStrategy implements Strategy {
 				log.trace("... no model");
 				log.trace("(The spc is {})", spc.getPathCondition().toString());
 				manager.insertPath(spc, true);
-				manager.incrementInfeasibleCount();
 			} else {
 				String modelString = model.toString();
 				log.trace("... new model: {}", modelString);

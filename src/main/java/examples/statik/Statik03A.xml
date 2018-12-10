@@ -2,12 +2,18 @@
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
-		<main>examples.statik.Statik03A</main>
-		<target>examples.statik.Statik03A</target>
-		<trigger>examples.statik.Statik03A.run(X: int)</trigger>
-		<bound name="X" max="10" min="0"/>
-		<trace-all>true</trace-all>
-		<draw-paths>true</draw-paths>
-		<echo-output>true</echo-output>
+		<target>
+			<main>examples.statik.Statik03A</main>
+			<instrument>examples.statik</instrument>
+			<trigger>examples.statik.Statik03A.run(X: int)</trigger>
+		</target>
+		<bounds>
+			<bound name="X" max="10" min="0"/>
+		</bounds>
+		<settings>
+			<trace-all>true</trace-all>
+			<echo-output>true</echo-output>
+			<draw-paths>true</draw-paths>
+		</settings>
 	</coastal>
 </configuration>

@@ -6,28 +6,73 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+/**
+ * Utility class for creating more visible banners in the log output.
+ */
 public class Banner {
 
+	/**
+	 * The line separator used on this system.
+	 */
 	private static final String LS = System.getProperty("line.separator");
 
+	/**
+	 * The maximum width of banners.
+	 */
 	private static final int WIDTH = 70;
 
+	/**
+	 * The number of banner characters in the left and right borders.
+	 */
 	private static final int SIDE_WIDTH = 4;
 
+	/**
+	 * The number of spaces between the border and the banner content.
+	 */
 	private static final int SIDE_SPACE = 2;
 
+	/**
+	 * A writer used for recording the banner.
+	 */
 	protected final StringWriter bannerWriter = new StringWriter();
 
+	/**
+	 * A full border line for the top and bottom of the banner.
+	 */
 	private final String borderLine;
 
+	/**
+	 * The left-hand border.
+	 */
 	private final String borderLeft;
 
+	/**
+	 * The right-hand border.
+	 */
 	private final String borderRight;
 
+	/**
+	 * An empty line in the border for creating space between the top border and
+	 * the content, or the content and the bottom border.
+	 */
 	private final String borderEmpty;
 
+	/**
+	 * A string builder that is used over and over for constructing the banner
+	 * borders and content.
+	 */
 	private final StringBuilder sb = new StringBuilder();
 
+	/**
+	 * Construct a new banner. The main task of this routine is to create the
+	 * border elements. It would be possible to cache constructed banners so
+	 * that the borders do not have to be created every time. But banners are
+	 * used infrequently, mostly during startup or termination, and it is not
+	 * worth the effort.
+	 * 
+	 * @param borderChar
+	 *            the character used for forming the border
+	 */
 	public Banner(char borderChar) {
 		// Construct "====================="
 		sb.setLength(0);
@@ -63,6 +108,14 @@ public class Banner {
 		borderEmpty = sb.toString();
 	}
 
+	/**
+	 * Add content to the banner.
+	 * 
+	 * @param message
+	 *            the content to add
+	 * @return the same instance of the banner so that these calls can be
+	 *         chained
+	 */
 	public Banner println(String message) {
 		for (String line : message.split("\n")) {
 			sb.setLength(0);
@@ -78,6 +131,12 @@ public class Banner {
 		return this;
 	}
 
+	/**
+	 * Display the banner to the given log
+	 * 
+	 * @param log
+	 *            the log
+	 */
 	public void display(Logger log) {
 		log.info(borderLine);
 		log.info(borderLine);
@@ -90,6 +149,12 @@ public class Banner {
 		log.info(borderLine);
 	}
 
+	/**
+	 * Display the banner to the given writer.
+	 * 
+	 * @param out
+	 *            the writer
+	 */
 	public void display(PrintWriter out) {
 		out.println(borderLine + "\n" + borderLine + "\n" + borderEmpty);
 		for (String line : bannerWriter.toString().split(LS)) {
@@ -98,6 +163,12 @@ public class Banner {
 		out.println(borderEmpty + "\n" + borderLine + "\n" + borderLine);
 	}
 
+	/**
+	 * Display the banner to the given stream.
+	 * 
+	 * @param out
+	 *            the stream
+	 */
 	public void display(PrintStream out) {
 		out.println(borderLine + "\n" + borderLine + "\n" + borderEmpty);
 		for (String line : bannerWriter.toString().split(LS)) {
@@ -106,6 +177,15 @@ public class Banner {
 		out.println(borderEmpty + "\n" + borderLine + "\n" + borderLine);
 	}
 
+	/**
+	 * Produce a short, one-line banner.
+	 * 
+	 * @param string
+	 *            the content of the banner
+	 * @param bannerChar
+	 *            the character to place around the content
+	 * @return a one-line banner
+	 */
 	public static String getBannerLine(String string, char bannerChar) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < SIDE_WIDTH; i++) {
@@ -126,6 +206,14 @@ public class Banner {
 		return sb.toString();
 	}
 
+	/**
+	 * Format the elapsed time in human-readable form. It checks the duration
+	 * and decides which units to include.
+	 * 
+	 * @param coastal
+	 *            the instance of COASTAL for which to compute the elapsed time
+	 * @return the nicely-formatted elapsed time
+	 */
 	public static String getElapsed(COASTAL coastal) {
 		long t0 = coastal.getStartingTime();
 		long dt = System.currentTimeMillis() - t0;
