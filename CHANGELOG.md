@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Divers and strategies run in separate threads
 - Log file includes thread ids
 - Generational path strategy
-- Min/max bounds for all data types -- no just integers
+- Min/max bounds for all data types -- not just integers
 - Reporting of queue waiting times
 - Primitive GUI to show progress
 - Allow users to specify number of initial threads
@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Path tree allows concurrent updates
 - Improved class loading
 - Reduced console output
+- Significant refactoring to allow for lightweight testing and fuzzing
 
 ### Deprecated
 - ...

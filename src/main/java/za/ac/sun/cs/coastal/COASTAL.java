@@ -112,6 +112,11 @@ public class COASTAL {
 	 */
 	private final List<Trigger> triggers = new ArrayList<>();
 
+	/**
+	 * Mapping from parameter names (of all triggers) to their types.
+	 */
+	private final Map<String, Class<?>> parameters = new HashMap<>();
+
 	// ======================================================================
 	//
 	// VARIABLE BOUNDS
@@ -422,21 +427,13 @@ public class COASTAL {
 	 * 
 	 * // QUEUES
 	 * 
-	 * private final BlockingQueue<Model> diverModels;
-	 * private final BlockingQueue<Model> surferModels;
-	 * private final BlockingQueue<SegmentedPC> pcs;
-	 * private final BlockingQueue<Trace> traces;
+	 * private final BlockingQueue<Model> diverModelQueue;
+	 * private final BlockingQueue<Model> surferModelQueue;
+	 * private final BlockingQueue<SegmentedPC> pcQueue;
+	 * private final BlockingQueue<Trace> traceQueue;
 	 * 
 	 * // TIMING INFORMATION
 	 * 
-	 * private final AtomicLong diverTime = new AtomicLong(0);
-	 * private final AtomicLong diverWaitTime = new AtomicLong(0);
-	 * private final AtomicLong diverWaitCount = new AtomicLong(0);
-	 * private final AtomicLong surferTime = new AtomicLong(0);
-	 * private final AtomicLong surferWaitTime = new AtomicLong(0);
-	 * private final AtomicLong surferWaitCount = new AtomicLong(0);
-	 * private final AtomicLong strategyWaitTime = new AtomicLong(0);
-	 * private final AtomicLong strategyWaitCount = new AtomicLong(0);
 	 * private Calendar startingTime;
 	 * private Calendar stoppingTime;
 	 * private long nextReportingTime = 0;
@@ -445,9 +442,6 @@ public class COASTAL {
 	 * // TASK MANAGEMENT
 	 * 
 	 * private final int maxThreads;
-	 * private int diverTaskCount = 0;
-	 * private int surferTaskCount = 0;
-	 * private int strategyTaskCount = 0;
 	 * private final ExecutorService executor;
 	 * private final CompletionService<Void> completionService;
 	 * private final List<Future<Void>> futures;
@@ -515,7 +509,7 @@ public class COASTAL {
 		prefixes.addAll(getConfig().getList(String.class, "coastal.target.instrument"));
 		String[] triggerNames = getConfig().getStringArray("coastal.target.trigger");
 		for (int i = 0; i < triggerNames.length; i++) {
-			triggers.add(Trigger.createTrigger(triggerNames[i].trim()));
+			triggers.add(Trigger.createTrigger(parameters, triggerNames[i].trim()));
 		}
 	}
 
@@ -621,7 +615,7 @@ public class COASTAL {
 
 	private void addBound(Map<String, Object> bounds, String key, String var) {
 		if (getConfig().containsKey(key)) {
-			Class<?> type = Trigger.getVariableType(var);
+			Class<?> type = parameters.get(var);
 			long value = getConfig().getLong(key);
 			if (type == boolean.class) {
 				bounds.put(var, (int) value);

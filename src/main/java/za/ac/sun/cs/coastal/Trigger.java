@@ -1,15 +1,12 @@
 package za.ac.sun.cs.coastal;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.asm.Type;
 
 public final class Trigger {
 
-	private static final Map<String, Class<?>> NAMES = new HashMap<>();
-
-	public static Trigger createTrigger(String desc) {
+	public static Trigger createTrigger(Map<String, Class<?>> parameters, String desc) {
 		int s = desc.indexOf('('), e = desc.indexOf(')', s);
 		assert s != -1;
 		assert e != -1;
@@ -18,6 +15,7 @@ public final class Trigger {
 		int n = 0;
 		String[] pn;
 		Class<?>[] pt;
+		int symbolicCount = 0;
 		if (ps.length() > 0) {
 			String[] pz = ps.split(",");
 			n = pz.length;
@@ -30,23 +28,24 @@ public final class Trigger {
 					pn[i] = null;
 					pt[i] = parseType(p.substring(c + 1).trim());
 				} else {
+					symbolicCount++;
 					pn[i] = p.substring(0, c).trim();
 					pt[i] = parseType(p.substring(c + 1).trim());
-					if (NAMES.containsKey(pn[i]) && (NAMES.get(pn[i]) != pt[i])) {
+					if (parameters.containsKey(pn[i]) && (parameters.get(pn[i]) != pt[i])) {
 						Banner bn = new Banner('@');
 						bn.println("COASTAL PROBLEM\n");
 						bn.println("IGNORED TRIGGER WITH DUPLICATES \"" + desc + "\"");
 						bn.display(System.out);
 						return null;
 					}
-					NAMES.put(pn[i], pt[i]);
+					parameters.put(pn[i], pt[i]);
 				}
 			}
 		} else {
 			pn = new String[0];
 			pt = new Class<?>[0];
 		}
-		if (NAMES.size() == 0) {
+		if (symbolicCount == 0) {
 			Banner bn = new Banner('@');
 			bn.println("COASTAL PROBLEM\n");
 			bn.println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"");
@@ -54,10 +53,6 @@ public final class Trigger {
 			return null;
 		}
 		return new Trigger(m, pn, pt);
-	}
-
-	public static Class<?> getVariableType(String variableName) {
-		return NAMES.get(variableName);
 	}
 
 	// To implement a new type:
