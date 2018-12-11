@@ -172,13 +172,13 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			mv.visitLabel(label);
 			//--- } else {
 			//---   startMethod()
-			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+			// mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 			mv.visitLdcInsn(classManager.getMethodCounter());
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 			//--- }
 			mv.visitLabel(end);
-			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+			// mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		} else {
 			mv.visitLdcInsn(classManager.getNextMethodCounter());
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));

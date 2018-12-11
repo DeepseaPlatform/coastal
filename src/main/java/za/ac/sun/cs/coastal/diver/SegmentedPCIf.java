@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal.diver;
 
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.green.expr.Expression;
 
 public class SegmentedPCIf extends SegmentedPC {
@@ -67,11 +68,11 @@ public class SegmentedPCIf extends SegmentedPC {
 	}
 
 	@Override
-	public SegmentedPC getChild(int index, SegmentedPC parent) {
+	public SegmentedPC getChild(int index, Execution parent) {
 		if (getValue() == (index == 1)) {
 			return this;
 		} else {
-			return new SegmentedPCIf(parent, getExpression(), getPassiveConjunct(), index == 1);
+			return new SegmentedPCIf((SegmentedPC) parent, getExpression(), getPassiveConjunct(), index == 1);
 		}
 	}
 

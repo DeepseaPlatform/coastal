@@ -82,7 +82,7 @@ public class RandomPathFactory implements StrategyFactory {
 				for (int j = 0; j < n; j++, i = (i + 1) % n) {
 					PathTreeNode ch = cur.getChild(i);
 					if ((ch != null) && !ch.isComplete()) {
-						pc = cur.getPcForChild(i, pc);
+						pc = (SegmentedPC) cur.getExecutionForChild(i, pc);
 						cur = ch;
 						continue outer;
 					}
@@ -90,7 +90,7 @@ public class RandomPathFactory implements StrategyFactory {
 				for (int j = 0; j < n; j++, i = (i + 1) % n) {
 					PathTreeNode ch = cur.getChild(i);
 					if (ch == null) {
-						return cur.getPcForChild(i, pc);
+						return (SegmentedPC) cur.getExecutionForChild(i, pc);
 					}
 				}
 				return null;

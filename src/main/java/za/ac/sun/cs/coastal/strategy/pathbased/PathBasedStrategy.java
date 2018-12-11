@@ -18,6 +18,7 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory.Strategy;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory.StrategyManager;
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
@@ -53,9 +54,34 @@ public abstract class PathBasedStrategy extends Strategy {
 	}
 
 	@Override
-	public List<Model> refine(SegmentedPC spc) {
+	public Void call() throws Exception {
+		log.trace("^^^ strategy task starting");
+		try {
+			while (true) {
+				long t0 = System.currentTimeMillis();
+				SegmentedPC spc = coastal.getNextPc();
+				long t1 = System.currentTimeMillis();
+				manager.recordWaitTime(t1 - t0);
+				log.trace("+++ starting refinement");
+				List<Model> mdls = refine(spc);
+				int d = -1;
+				if (mdls != null) {
+					coastal.addDiverModels(mdls);
+					d = mdls.size() - 1;
+				}
+				log.trace("+++ added {} models", d);
+				coastal.updateWork(d);
+			}
+		} catch (InterruptedException e) {
+			log.trace("^^^ strategy task canceled");
+			throw e;
+		}
+	}
+
+	@Override
+	public List<Model> refine(Execution execution) {
 		long t0 = System.currentTimeMillis();
-		List<Model> newModels = refine0(spc);
+		List<Model> newModels = refine0((SegmentedPC) execution);
 		manager.recordRefineTime(System.currentTimeMillis() - t0);
 		return newModels;
 	}

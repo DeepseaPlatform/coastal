@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal.diver;
 
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.Operation;
@@ -75,13 +76,14 @@ public class SegmentedPCSwitch extends SegmentedPC {
 	}
 
 	@Override
-	public SegmentedPC getChild(int index, SegmentedPC parent) {
+	public SegmentedPC getChild(int index, Execution parent) {
+		SegmentedPC p = (SegmentedPC) parent;
 		if (min + index == cur) {
 			return this;
 		} else if (index > max - min) {
-			return new SegmentedPCSwitch(parent, expression, getPassiveConjunct(), min, max, min - 1);
+			return new SegmentedPCSwitch(p, expression, getPassiveConjunct(), min, max, min - 1);
 		} else {
-			return new SegmentedPCSwitch(parent, expression, getPassiveConjunct(), min, max, min + index);
+			return new SegmentedPCSwitch(p, expression, getPassiveConjunct(), min, max, min + index);
 		}
 	}
 

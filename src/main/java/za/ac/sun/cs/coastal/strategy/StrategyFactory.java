@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.TaskFactory;
-import za.ac.sun.cs.coastal.diver.SegmentedPC;
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Model;
 
 public interface StrategyFactory extends TaskFactory {
@@ -47,32 +47,7 @@ public interface StrategyFactory extends TaskFactory {
 			this.manager = manager;
 		}
 
-		@Override
-		public Void call() throws Exception {
-			log.trace("^^^ strategy task starting");
-			try {
-				while (true) {
-					long t0 = System.currentTimeMillis();
-					SegmentedPC spc = coastal.getNextPc();
-					long t1 = System.currentTimeMillis();
-					manager.recordWaitTime(t1 - t0);
-					log.trace("+++ starting refinement");
-					List<Model> mdls = refine(spc);
-					int d = -1;
-					if (mdls != null) {
-						coastal.addDiverModels(mdls);
-						d = mdls.size() - 1;
-					}
-					log.trace("+++ added {} models", d);
-					coastal.updateWork(d);
-				}
-			} catch (InterruptedException e) {
-				log.trace("^^^ strategy task canceled");
-				throw e;
-			}
-		}
-
-		protected abstract List<Model> refine(SegmentedPC spc);
+		protected abstract List<Model> refine(Execution execution);
 
 	}
 

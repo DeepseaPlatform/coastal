@@ -1,5 +1,7 @@
 package za.ac.sun.cs.coastal.surfer;
 
+import za.ac.sun.cs.coastal.symbolic.Execution;
+
 public class TraceIf extends Trace {
 
 	private final boolean value;
@@ -49,11 +51,11 @@ public class TraceIf extends Trace {
 	}
 
 	@Override
-	public Trace getChild(int index, Trace parent) {
+	public Trace getChild(int index, Execution parent) {
 		if (getValue() == (index == 1)) {
 			return this;
 		} else {
-			return new TraceIf(parent, index == 1);
+			return new TraceIf((Trace) parent, index == 1);
 		}
 	}
 

@@ -79,9 +79,9 @@ public class BreadthFirstFactory implements StrategyFactory {
 				for (int i = 0; i < n; i++) {
 					PathTreeNode ch = node.getChild(i);
 					if (ch == null) {
-						return node.getPcForChild(i, parent);
+						return (SegmentedPC) node.getExecutionForChild(i, parent);
 					} else if (!ch.isComplete()) {
-						workingPCs.add(node.getPcForChild(i, parent));
+						workingPCs.add((SegmentedPC) node.getExecutionForChild(i, parent));
 						workingSet.add(ch);
 					}
 				}

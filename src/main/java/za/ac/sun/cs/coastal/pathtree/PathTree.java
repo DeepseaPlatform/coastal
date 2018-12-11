@@ -9,6 +9,9 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
+import za.ac.sun.cs.coastal.surfer.Trace;
+import za.ac.sun.cs.coastal.symbolic.Execution;
+import za.ac.sun.cs.green.expr.Expression;
 
 /**
  * Representation of all execution paths in a single tree.
@@ -85,7 +88,13 @@ public class PathTree {
 		broker.publish("report", new Tuple("PathTree.insert-time", insertTime.get()));
 	}
 
-	public PathTreeNode insertPath(SegmentedPC spc, boolean isInfeasible) {
+	// ======================================================================
+	//
+	// PATH INSERTION
+	//
+	// ======================================================================
+	
+	public PathTreeNode insertPath(Execution execution, boolean isInfeasible) {
 		long t = System.currentTimeMillis();
 		insertedCount.incrementAndGet();
 		if (isInfeasible) {
@@ -94,23 +103,23 @@ public class PathTree {
 		/*
 		 * Step 1: Deconstruct the path condition.
 		 */
-		final int depth = spc.getDepth();
-		final SegmentedPC[] path = new SegmentedPC[depth];
+		final int depth = execution.getDepth();
+		final Execution[] path = new Execution[depth];
 		int idx = depth;
-		for (SegmentedPC s = spc; s != null; s = s.getParent()) {
-			path[--idx] = s;
+		for (Execution e = execution; e != null; e = e.getParent()) {
+			path[--idx] = e;
 		}
 		assert idx == 0;
 		log.trace("::: depth:{}", depth);
 		/*
-		 * Step 2: Add the new path (spc) to the path tree
+		 * Step 2: Add the new path to the path tree
 		 */
 		if (root == null) {
 			lock.writeLock().lock();
 			try {
 				if (root == null) {
 					log.trace("::: creating root");
-					root = PathTreeNode.createNode(path[0], path[0].getNrOfOutcomes());
+					root = PathTreeNode.createNode(path[0]);
 				}
 			} finally {
 				lock.writeLock().unlock();
@@ -129,29 +138,25 @@ public class PathTree {
 		insertTime.addAndGet(System.currentTimeMillis() - t);
 		return lastNode;
 	}
-
-	private String getId(PathTreeNode node) {
-		if (node == null) {
-			return "NUL";
-		} else {
-			return "#" + node.getId();
-		}
-	}
-
-	private PathTreeNode insert(SegmentedPC[] path, boolean isInfeasible) {
+	
+	private PathTreeNode insert(Execution[] path, boolean isInfeasible) {
 		int depth = path.length;
 		PathTreeNode[] visitedNodes = new PathTreeNode[depth];
 		PathTreeNode parent = root;
 		visitedNodes[0] = root;
 		int i = path[0].getOutcomeIndex();
 		for (int j = 1; j < depth; j++) {
-			log.trace("::: insert(parent:{}, conjunct:{}, cur/depth:{}/{})", getId(parent), path[j].getActiveConjunct(),
-					j, depth);
+			if (path[j] instanceof Trace) {
+				log.trace("::: insert(parent:{}, cur/depth:{}/{})", getId(parent), j, depth);
+			} else {
+				Expression conjunct = ((SegmentedPC) path[j]).getActiveConjunct();
+				log.trace("::: insert(parent:{}, conjunct:{}, cur/depth:{}/{})", getId(parent), conjunct, j, depth);
+			}
 			PathTreeNode n = parent.getChild(i);
 			if (n == null) {
 				parent.lock();
 				if (parent.getChild(i) == null) {
-					n = PathTreeNode.createNode(path[j], path[j].getNrOfOutcomes());
+					n = PathTreeNode.createNode(path[j]);
 					parent.setChild(i, n);
 				} else {
 					n = parent.getChild(i);
@@ -210,6 +215,20 @@ public class PathTree {
 			}
 		}
 		return n;
+	}
+	
+	// ======================================================================
+	//
+	// STRING REPRESENTATION
+	//
+	// ======================================================================
+
+	private String getId(PathTreeNode node) {
+		if (node == null) {
+			return "NUL";
+		} else {
+			return "#" + node.getId();
+		}
 	}
 
 	public String[] stringRepr() {

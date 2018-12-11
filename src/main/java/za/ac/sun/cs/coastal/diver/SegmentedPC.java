@@ -1,10 +1,11 @@
 package za.ac.sun.cs.coastal.diver;
 
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.green.expr.Expression;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
 
-public abstract class SegmentedPC {
+public abstract class SegmentedPC implements Execution {
 
 	public static final SegmentedPC NULL = new SegmentedPCIf(null, null, null, true);
 	
@@ -22,6 +23,7 @@ public abstract class SegmentedPC {
 		this.depth = (parent == null) ? 1 : (1 + parent.getDepth());
 	}
 
+	@Override
 	public SegmentedPC getParent() {
 		return parent;
 	}
@@ -30,6 +32,7 @@ public abstract class SegmentedPC {
 		return passiveConjunct;
 	}
 
+	@Override
 	public int getDepth() {
 		return depth;
 	}
@@ -63,16 +66,6 @@ public abstract class SegmentedPC {
 	public abstract Expression getExpression();
 
 	public abstract Expression getActiveConjunct();
-
-	public abstract String getSignature();
-
-	public abstract int getNrOfOutcomes();
-
-	public abstract int getOutcomeIndex();
-
-	public abstract String getOutcome(int index);
-
-	public abstract SegmentedPC getChild(int index, SegmentedPC parent);
 
 	protected static Expression negate(Expression expression) {
 		if (expression instanceof Operation) {

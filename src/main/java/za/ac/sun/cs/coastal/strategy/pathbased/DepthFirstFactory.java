@@ -73,7 +73,7 @@ public class DepthFirstFactory implements StrategyFactory {
 				for (int i = 0; i < n; i++) {
 					PathTreeNode ch = cur.getChild(i);
 					if ((ch != null) && !ch.isComplete()) {
-						pc = cur.getPcForChild(i, pc);
+						pc = (SegmentedPC) cur.getExecutionForChild(i, pc);
 						cur = ch;
 						continue outer;
 					}
@@ -81,7 +81,7 @@ public class DepthFirstFactory implements StrategyFactory {
 				for (int i = 0; i < n; i++) {
 					PathTreeNode ch = cur.getChild(i);
 					if (ch == null) {
-						return cur.getPcForChild(i, pc);
+						return (SegmentedPC) cur.getExecutionForChild(i, pc);
 					}
 				}
 				return null;
