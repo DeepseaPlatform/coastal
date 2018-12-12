@@ -560,10 +560,6 @@ public class COASTAL {
 	 * @formatter:on
 	 */
 
-	/**
-	 * A flag to indicate that an assertion failed
-	 */
-	private final AtomicBoolean assertFailed = new AtomicBoolean(false);
 	
 	
 	/**
