@@ -455,17 +455,6 @@ public class COASTAL {
 	 *
 	 * @formatter:on
 	 */
-
-	/**
-	 * A flag to indicate that an assertion failed
-	 */
-	private final AtomicBoolean assertFailed = new AtomicBoolean(false);
-	
-	
-	/**
-	 * A flag to indicate that an assertion failed
-	 */
-	private final AtomicBoolean assertFailed = new AtomicBoolean(false);
 	
 	
 	/**
@@ -1357,14 +1346,6 @@ public class COASTAL {
 		synchronized (workDone) {
 			workDone.notifyAll();
 		}
-	}
-
-	/**
-	 * Set the flag to indicate that an assertion was thrown
-	 */
-	public void failAssert() {
-		assertFailed.set(true);
-		stopWork();
 	}
 	
 	/**
