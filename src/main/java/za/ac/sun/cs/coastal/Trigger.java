@@ -45,13 +45,6 @@ public final class Trigger {
 			pn = new String[0];
 			pt = new Class<?>[0];
 		}
-		if (symbolicCount == 0) {
-			Banner bn = new Banner('@');
-			bn.println("COASTAL PROBLEM\n");
-			bn.println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"");
-			bn.display(System.out);
-			return null;
-		}
 		return new Trigger(m, pn, pt);
 	}
 
