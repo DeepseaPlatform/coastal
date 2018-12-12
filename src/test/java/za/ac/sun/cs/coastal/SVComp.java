@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal;
 
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -10,6 +11,7 @@ import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -20,19 +22,19 @@ public class SVComp {
 	@Parameters
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
-//			{ "jpf-regression", "ExLazy_true", true },
-//			{ "jpf-regression", "ExLazy_false", false },
-//			{ "jpf-regression", "ExSymExe1_true", true },
-//			{ "jpf-regression", "ExSymExe1_false", false },
-//			{ "jpf-regression", "ExSymExe2_true", true },
-//			{ "jpf-regression", "ExSymExe2_false", false },
-//			{ "jpf-regression", "ExSymExe3_true", true },
-//			{ "jpf-regression", "ExSymExe3_false", false },
-//			{ "jpf-regression", "ExSymExe4_true", true },
-//			{ "jpf-regression", "ExSymExe4_false", false },
-//			{ "jpf-regression", "ExSymExe5_true", true },
-//			{ "jpf-regression", "ExSymExe5_false", false },
-//			{ "jpf-regression", "ExSymExe6_true", true },
+			{ "jpf-regression", "ExLazy_true", true },
+			{ "jpf-regression", "ExLazy_false", false },
+			{ "jpf-regression", "ExSymExe1_true", true },
+			{ "jpf-regression", "ExSymExe1_false", false },
+			{ "jpf-regression", "ExSymExe2_true", true },
+			{ "jpf-regression", "ExSymExe2_false", false },
+			{ "jpf-regression", "ExSymExe3_true", true },
+			{ "jpf-regression", "ExSymExe3_false", false },
+			{ "jpf-regression", "ExSymExe4_true", true },
+			{ "jpf-regression", "ExSymExe4_false", false },
+			{ "jpf-regression", "ExSymExe5_true", true },
+			{ "jpf-regression", "ExSymExe5_false", false },
+			{ "jpf-regression", "ExSymExe6_true", true },
 //			{ "jpf-regression", "ExSymExe6_false", false }, // Divide by zero
 //			{ "jpf-regression", "ExSymExe7_true", true },
 //			{ "jpf-regression", "ExSymExe7_false", false },
