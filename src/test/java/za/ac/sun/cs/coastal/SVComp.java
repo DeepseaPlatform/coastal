@@ -31,5 +31,5 @@ public class SVComp {
 //		assertEquals(4, reporter.getStatLong("Strategy.inserted-paths"));
 //		assertEquals(0, reporter.getStatLong("Strategy.revisited-paths"));
 	}
-
 }
+
