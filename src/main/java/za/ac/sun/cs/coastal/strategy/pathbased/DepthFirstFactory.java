@@ -4,9 +4,8 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
-import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 
-public class DepthFirstFactory implements StrategyFactory {
+public class DepthFirstFactory extends PathBasedFactory {
 
 	public DepthFirstFactory(COASTAL coastal) {
 	}

@@ -9,12 +9,11 @@ import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.diver.SegmentedPCIf;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
-import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.green.expr.Constant;
 import za.ac.sun.cs.green.expr.Expression;
 
-public class GenerationalFactory implements StrategyFactory {
+public class GenerationalFactory extends PathBasedFactory {
 
 	public GenerationalFactory(COASTAL coastal) {
 	}

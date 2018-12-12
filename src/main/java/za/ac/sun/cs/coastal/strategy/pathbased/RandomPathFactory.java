@@ -6,9 +6,8 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
-import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 
-public class RandomPathFactory implements StrategyFactory {
+public class RandomPathFactory extends PathBasedFactory {
 
 	public RandomPathFactory(COASTAL coastal) {
 	}
