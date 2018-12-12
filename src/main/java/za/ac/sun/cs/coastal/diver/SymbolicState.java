@@ -1,6 +1,8 @@
 package za.ac.sun.cs.coastal.diver;
 
+
 import java.lang.reflect.Array;
+import java.util.List;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -984,6 +986,7 @@ public class SymbolicState implements State {
 			noExceptionExpression.add(Operation.FALSE);
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = pop();
+			broker.publish("assert-failed", new Tuple(this, null));
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);

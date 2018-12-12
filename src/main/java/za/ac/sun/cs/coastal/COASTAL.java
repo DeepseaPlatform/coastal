@@ -561,6 +561,12 @@ public class COASTAL {
 	 */
 
 	/**
+	 * A flag to indicate that an assertion failed
+	 */
+	private final AtomicBoolean assertFailed = new AtomicBoolean(false);
+	
+	
+	/**
 	 * Initialize the final fields for this analysis run of COASTAL.
 	 * 
 	 * @param log

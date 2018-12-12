@@ -10,7 +10,6 @@ import za.ac.sun.cs.coastal.instrument.LightMethodAdapter;
 import za.ac.sun.cs.coastal.surfer.TraceState;
 import za.ac.sun.cs.coastal.symbolic.VM;
 
-<<<<<<< HEAD
 /**
  * Triggers describe the methods and their symbolic parameters that switch on
  * symbolic execution.
@@ -307,13 +306,13 @@ public final class Trigger {
 			pn = new String[0];
 			pt = new Class<?>[0];
 		}
-		if (symbolicCount == 0) {
-			Banner bn = new Banner('@');
-			bn.println("COASTAL PROBLEM\n");
-			bn.println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"");
-			bn.display(System.out);
-			return null;
-		}
+//		if (symbolicCount == 0) {
+//			Banner bn = new Banner('@');
+//			bn.println("COASTAL PROBLEM\n");
+//			bn.println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"");
+//			bn.display(System.out);
+//			return null;
+//		}
 		String tm = "", tc = "";
 		int dot = m.lastIndexOf('.');
 		if (dot != -1) {
