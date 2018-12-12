@@ -2,6 +2,8 @@ package za.ac.sun.cs.coastal;
 
 import java.util.concurrent.Callable;
 
+import za.ac.sun.cs.coastal.Reporter.Reportable;
+
 public interface TaskFactory {
 
 	TaskManager createManager(COASTAL coastal);
@@ -14,9 +16,7 @@ public interface TaskFactory {
 	//
 	// ======================================================================
 
-	public interface TaskManager {
-
-		String getName();
+	public interface TaskManager extends Reportable {
 
 	}
 

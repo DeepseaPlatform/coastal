@@ -77,10 +77,27 @@ public class PathTree {
 		drawPaths = coastal.getConfig().getBoolean("coastal.settings.draw-paths", false);
 	}
 
+	/**
+	 * Return the root of the path tree.
+	 * 
+	 * @return the path tree root node
+	 */
 	public PathTreeNode getRoot() {
 		return root;
 	}
 
+	public long getInsertedCount() {
+		return insertedCount.get();
+	}
+
+	public long getRevisitCount() {
+		return revisitCount.get();
+	}
+	
+	public long getInfeasibleCount() {
+		return infeasibleCount.get();
+	}
+	
 	public void report(Object object) {
 		broker.publish("report", new Tuple("PathTree.inserted-count", insertedCount.get()));
 		broker.publish("report", new Tuple("PathTree.revisit-count", revisitCount.get()));

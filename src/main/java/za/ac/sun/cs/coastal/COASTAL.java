@@ -24,6 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import org.apache.commons.configuration2.CombinedConfiguration;
 import org.apache.commons.configuration2.Configuration;
@@ -39,6 +40,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Conversion.ConfigCombiner;
+import za.ac.sun.cs.coastal.Reporter.Reportable;
 import za.ac.sun.cs.coastal.TaskFactory.TaskManager;
 import za.ac.sun.cs.coastal.TaskFactory.Task;
 import za.ac.sun.cs.coastal.diver.DiverFactory;
@@ -786,6 +788,32 @@ public class COASTAL {
 		return pathTree;
 	}
 
+	public Reportable getPathTreeReportable() {
+		return new Reportable() {
+
+			private final String[] propertyNames = new String[] { "#inserted", "#revisited", "#infeasible" };
+
+			@Override
+			public Object[] getPropertyValues() {
+				Object[] propertyValues = new Object[3];
+				propertyValues[0] = pathTree.getInsertedCount();
+				propertyValues[1] = pathTree.getRevisitCount();
+				propertyValues[2] = pathTree.getInfeasibleCount();
+				return propertyValues;
+			}
+
+			@Override
+			public String[] getPropertyNames() {
+				return propertyNames;
+			}
+
+			@Override
+			public String getName() {
+				return "PathTree";
+			}
+		};
+	}
+
 	/**
 	 * Return the starting time of the analysis run in milliseconds.
 	 * 
@@ -1054,6 +1082,16 @@ public class COASTAL {
 			max = defaultValue;
 		}
 		return max;
+	}
+
+	// ======================================================================
+	//
+	// TASKS
+	//
+	// ======================================================================
+
+	public List<TaskManager> getTasks() {
+		return tasks.stream().map(t -> t.getManager()).collect(Collectors.toList());
 	}
 
 	// ======================================================================

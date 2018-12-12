@@ -43,6 +43,8 @@ public class DiverFactory implements TaskFactory {
 	//
 	// ======================================================================
 
+	private static final String[] PROPERTY_NAMES = new String[] { "#tasks", "#dives", "waiting time", "total time" };
+
 	public class DiverManager implements TaskManager {
 
 		protected final Broker broker;
@@ -124,6 +126,22 @@ public class DiverFactory implements TaskFactory {
 		@Override
 		public String getName() {
 			return "Diver";
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+			return PROPERTY_NAMES;
+		}
+
+		@Override
+		public Object[] getPropertyValues() {
+			Object[] propertyValues = new Object[4];
+			double dwt = diverWaitTime.get() / diverWaitCount.doubleValue();
+			propertyValues[0] = diverTaskCount;
+			propertyValues[1] = getDiveCount();
+			propertyValues[2] =  dwt;
+			propertyValues[3] = diverTime.get();
+			return propertyValues;
 		}
 
 	}

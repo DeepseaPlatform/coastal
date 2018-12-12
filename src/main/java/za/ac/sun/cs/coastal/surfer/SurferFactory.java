@@ -43,6 +43,8 @@ public class SurferFactory implements TaskFactory {
 	//
 	// ======================================================================
 
+	private static final String[] PROPERTY_NAMES = new String[] { "#tasks", "#surfs", "waiting time", "total time" };
+
 	public class SurferManager implements TaskManager {
 
 		protected final Broker broker;
@@ -124,6 +126,22 @@ public class SurferFactory implements TaskFactory {
 		@Override
 		public String getName() {
 			return "Surfer";
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+			return PROPERTY_NAMES;
+		}
+
+		@Override
+		public Object[] getPropertyValues() {
+			Object[] propertyValues = new Object[4];
+			double swt = surferWaitTime.get() / surferWaitCount.doubleValue();
+			propertyValues[0] = surferTaskCount;
+			propertyValues[1] = getSurfCount();
+			propertyValues[2] = swt;
+			propertyValues[3] = surferTime.get();
+			return propertyValues;
 		}
 
 	}

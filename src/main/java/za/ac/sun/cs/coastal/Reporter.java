@@ -86,4 +86,20 @@ public class Reporter {
 		}
 	}
 	
+	// ======================================================================
+	//
+	// REPORTABLE INTERFACE
+	//
+	// ======================================================================
+
+	public interface Reportable {
+
+		String getName();
+
+		String[] getPropertyNames();
+
+		Object[] getPropertyValues();
+
+	}
+
 }

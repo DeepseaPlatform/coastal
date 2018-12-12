@@ -17,13 +17,17 @@
 			<bound name="v3" min="0" max="9"/>
 			<bound name="v4" min="0" max="9"/>
 		</bounds>
+		<divers threads="3"/>
 		<strategies>
+			<!--
 			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+			-->
+			<strategy threads="2">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
 		</strategies>
-		<!-- 
 		<observers>
 			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 		</observers>
+		<!-- 
 		-->
 	</coastal>
 </configuration>

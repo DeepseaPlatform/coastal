@@ -18,11 +18,6 @@ public abstract class PathBasedManager implements StrategyManager {
 
 	protected final PathTree pathTree;
 	
-//	/**
-//	 * A count of the number of infeasible paths.
-//	 */
-//	protected final AtomicLong infeasibleCount = new AtomicLong(0);
-
 	/**
 	 * Accumulator of all the solver times.
 	 */
@@ -82,14 +77,6 @@ public abstract class PathBasedManager implements StrategyManager {
 		return pathTree;
 	}
 
-//	public void incrementInfeasibleCount() {
-//		infeasibleCount.incrementAndGet();		
-//	}
-//	
-//	public long getInfeasibleCount() {
-//		return infeasibleCount.get();		
-//	}
-	
 	public PathTreeNode insertPath0(SegmentedPC spc, boolean infeasible) {
 		return pathTree.insertPath(spc, infeasible);
 	}
@@ -114,7 +101,6 @@ public abstract class PathBasedManager implements StrategyManager {
 		String name = getName();
 		double swt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
 		broker.publish("report", new Tuple(name + ".tasks", getTaskCount()));
-//		broker.publish("report", new Tuple(name + ".infeasible-count", infeasibleCount.get()));
 		broker.publish("report", new Tuple(name + ".solver-time", solverTime.get()));
 		broker.publish("report", new Tuple(name + ".extraction-time", extractionTime.get()));
 		broker.publish("report", new Tuple(name + ".wait-time", swt));
@@ -122,5 +108,32 @@ public abstract class PathBasedManager implements StrategyManager {
 	}
 
 	protected abstract int getTaskCount();
+
+	private static final String[] PROPERTY_NAMES = new String[] { "#tasks", "#refinements",
+			/* "#inserted" */
+			/* "#revisited" */
+			/* "#infeasible" */
+			"waiting time", "total time" };
+
+	@Override
+	public String[] getPropertyNames() {
+		return PROPERTY_NAMES;
+	}
+
+
+	@Override
+	public Object[] getPropertyValues() {
+		Object[] propertyValues = new Object[4];
+		int index = 0;
+		double swt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
+		propertyValues[index++] = getTaskCount();
+		propertyValues[index++] = 0;
+//		propertyValues.set(index++, pathTree.getInsertedCount());
+//		propertyValues.set(index++, pathTree.getRevisitCount());
+//		propertyValues.set(index++, pathTree.getInfeasibleCount());
+		propertyValues[index++] = swt;
+		propertyValues[index++] = strategyTime.get();
+		return propertyValues;
+	}
 
 }
