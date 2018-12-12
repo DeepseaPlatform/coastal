@@ -281,9 +281,10 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			if (owner.equals(VERIFIER)) {
 				if (name.equals("nondetInt")) {
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
-					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "creatSymbolicInt", "(II)I", false);
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicInt", "(II)I", false);
 				} else {
 					//TODO
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
 				}
 			} else {
 				String className = owner.replace('/', '.');

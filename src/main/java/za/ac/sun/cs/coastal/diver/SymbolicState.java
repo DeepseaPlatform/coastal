@@ -309,12 +309,12 @@ public class SymbolicState implements State {
 		if (!symbolicMode) {
 			return 0;
 		}
-		
+
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntVariable(name, 0, 255));
+		push(new IntVariable(name, -255, 255));
 		IntConstant concrete = (IntConstant) (concreteValues == null ? null : concreteValues.get(name));
-		
+
 		if (concrete == null) {
 			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
 			return currentValue;
@@ -786,7 +786,7 @@ public class SymbolicState implements State {
 				Expression f = pop();
 				if (f instanceof IntConstant) {
 					//TODO check if e == 0
-					push(new IntConstant(((IntConstant) f).getValue() % ((IntConstant)e).getValue()));
+					push(new IntConstant(((IntConstant) f).getValue() % ((IntConstant) e).getValue()));
 				} else {
 					push(new Operation(Operator.MOD, f, e));
 				}

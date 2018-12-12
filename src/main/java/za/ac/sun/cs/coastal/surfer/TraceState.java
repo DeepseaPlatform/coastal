@@ -536,4 +536,9 @@ public class TraceState implements State {
 		return null;
 	}
 
+	@Override
+	public int createSymbolicInt(int oldValue, int uniqueId) {
+		return 0;
+	}
+
 }

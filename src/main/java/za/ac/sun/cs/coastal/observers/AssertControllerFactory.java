@@ -52,13 +52,14 @@ public class AssertControllerFactory implements ObserverFactory {
 			broker.subscribe("assert-failed", this::stop);
 			broker.subscribe("coastal-stop", this::report);
 		}
-		
+
 		public void report(Object object) {
 			broker.publish("report", new Tuple("AssertController.assert-failed", wasStopped));
 		}
 
 		public void stop(Object object) {
 			Tuple tuple = (Tuple) object;
+			wasStopped = true;
 			coastal.stopWork();
 			stopMessage = (String) tuple.get(1);
 			if (stopMessage == null) {
@@ -66,7 +67,6 @@ public class AssertControllerFactory implements ObserverFactory {
 			} else {
 				new Banner('!').println("PROGRAM TERMINATION POINT REACHED").println(stopMessage).display(log);
 			}
-			wasStopped = true;
 		}
 
 	}

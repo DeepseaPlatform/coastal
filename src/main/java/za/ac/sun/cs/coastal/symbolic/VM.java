@@ -41,7 +41,7 @@ public class VM {
 	}
 	
 	public static int createSymbolicInt(int oldValue, int uniqueId) {
-		return symbolicState.createSymbolicInt(oldValue, uniqueId);
+		return state.createSymbolicInt(oldValue, uniqueId);
 	}
 
 	// ======================================================================
