@@ -44,22 +44,22 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		protected final Broker broker;
 
 		protected final PathTree pathTree;
-		
+
 		/**
 		 * Accumulator of all the solver times.
 		 */
 		protected final AtomicLong solverTime = new AtomicLong(0);
-		
+
 		/**
 		 * Accumulator of all the model extraction times.
 		 */
 		protected final AtomicLong extractionTime = new AtomicLong(0);
-		
+
 		/**
 		 * Accumulator of all the refinement times.
 		 */
 		protected final AtomicLong strategyTime = new AtomicLong(0);
-		
+
 		/**
 		 * Accumulator of all the strategy waiting times.
 		 */
@@ -82,8 +82,8 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		}
 
 		/**
-		 * Add a reported strategy wait time. This is used to determine if it makes
-		 * sense to create additional threads (or destroy them).
+		 * Add a reported strategy wait time. This is used to determine if it
+		 * makes sense to create additional threads (or destroy them).
 		 * 
 		 * @param time
 		 *            the wait time for this strategy
@@ -107,7 +107,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		public PathTreeNode insertPath0(SegmentedPC spc, boolean infeasible) {
 			return pathTree.insertPath(spc, infeasible);
 		}
-		
+
 		public boolean insertPath(SegmentedPC spc, boolean infeasible) {
 			return (pathTree.insertPath(spc, infeasible) == null);
 		}
@@ -115,11 +115,11 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		public void recordSolverTime(long time) {
 			solverTime.addAndGet(time);
 		}
-		
+
 		public void recordExtractionTime(long time) {
 			extractionTime.addAndGet(time);
 		}
-		
+
 		public void recordRefineTime(long time) {
 			strategyTime.addAndGet(time);
 		}
@@ -147,7 +147,6 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			return PROPERTY_NAMES;
 		}
 
-
 		@Override
 		public Object[] getPropertyValues() {
 			Object[] propertyValues = new Object[4];
@@ -155,9 +154,9 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			double swt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
 			propertyValues[index++] = getTaskCount();
 			propertyValues[index++] = 0;
-//			propertyValues.set(index++, pathTree.getInsertedCount());
-//			propertyValues.set(index++, pathTree.getRevisitCount());
-//			propertyValues.set(index++, pathTree.getInfeasibleCount());
+			//			propertyValues.set(index++, pathTree.getInsertedCount());
+			//			propertyValues.set(index++, pathTree.getRevisitCount());
+			//			propertyValues.set(index++, pathTree.getInfeasibleCount());
 			propertyValues[index++] = swt;
 			propertyValues[index++] = strategyTime.get();
 			return propertyValues;
@@ -167,24 +166,24 @@ public abstract class PathBasedFactory implements StrategyFactory {
 
 	// ======================================================================
 	//
-	// PATH-BASED SEARCH STRATEGY MANAGER
+	// PATH-BASED SEARCH STRATEGY
 	//
 	// ======================================================================
 
 	public abstract static class PathBasedStrategy extends Strategy {
 
 		protected final PathBasedManager manager;
-		
+
 		protected final Broker broker;
-		
+
 		protected final Green green;
 
-	    protected final Set<String> visitedModels = new HashSet<>();
+		protected final Set<String> visitedModels = new HashSet<>();
 
-	    public PathBasedStrategy(COASTAL coastal, StrategyManager manager) {
-	    	super(coastal, manager);
+		public PathBasedStrategy(COASTAL coastal, StrategyManager manager) {
+			super(coastal, manager);
 			this.manager = (PathBasedManager) manager;
-			broker = coastal.getBroker(); 
+			broker = coastal.getBroker();
 			green = new Green("COASTAL", LogManager.getLogger("GREEN"));
 			Properties greenProperties = new Properties();
 			ImmutableConfiguration config = coastal.getConfig();
@@ -192,7 +191,8 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			greenProperties.setProperty("green.log.level", "ALL");
 			greenProperties.setProperty("green.services", "model");
 			greenProperties.setProperty("green.service.model", "(bounder modeller)");
-			greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
+			greenProperties.setProperty("green.service.model.bounder",
+					"za.ac.sun.cs.green.service.bounder.BounderService");
 			greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3Service");
 			new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
 		}
@@ -288,7 +288,6 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			manager.recordExtractionTime(System.currentTimeMillis() - t);
 			return newModel;
 		}
-
 
 	}
 
