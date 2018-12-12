@@ -306,12 +306,11 @@ public class SymbolicState implements State {
 		if (!symbolicMode) {
 			return 0;
 		}
-		
+
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new IntegerVariable(name, 32, 0, 255));
 		IntegerConstant concrete = (IntegerConstant) (concreteValues == null ? null : concreteValues.get(name));
-		
 		if (concrete == null) {
 			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
 			return currentValue;
