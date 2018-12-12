@@ -33,6 +33,8 @@ public class StopControllerFactory implements ObserverFactory {
 	//
 	// ======================================================================
 
+	private static final String[] PROPERTY_NAMES = new String[] { "was-stopped", "message" };
+
 	private static class StopManager implements ObserverManager {
 
 		private final Logger log;
@@ -70,6 +72,24 @@ public class StopControllerFactory implements ObserverFactory {
 				new Banner('!').println("PROGRAM TERMINATION POINT REACHED").println(stopMessage).display(log);
 			}
 			wasStopped = true;
+		}
+
+		@Override
+		public String getName() {
+			return "StopController";
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+			return PROPERTY_NAMES;
+		}
+
+		@Override
+		public Object[] getPropertyValues() {
+			Object[] propertyValues = new Object[2];
+			propertyValues[0] = wasStopped;
+			propertyValues[1] = stopMessage;
+			return propertyValues;
 		}
 
 	}

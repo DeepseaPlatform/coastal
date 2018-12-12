@@ -14,7 +14,7 @@ import za.ac.sun.cs.coastal.TaskFactory;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
-import za.ac.sun.cs.coastal.observers.ObserverManager;
+import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.VM;
 import za.ac.sun.cs.green.expr.Constant;

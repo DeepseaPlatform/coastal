@@ -35,6 +35,7 @@ import javafx.stage.Stage;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.Reporter.Reportable;
 import za.ac.sun.cs.coastal.TaskFactory.TaskManager;
+import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class GUIFactory implements ObserverFactory {
 
@@ -68,9 +69,28 @@ public class GUIFactory implements ObserverFactory {
 			new Thread(new GUI(coastal)).start();
 		}
 
+		@Override
+		public String getName() {
+			return null;
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+			return null;
+		}
+
+		@Override
+		public Object[] getPropertyValues() {
+			return null;
+		}
+
 	}
 
 	public static class GUI extends Application implements Runnable {
+
+		private static final int INITIAL_WIDTH = 1000;
+
+		private static final int INITIAL_HEIGHT = 600;
 
 		private static COASTAL coastal;
 
@@ -213,15 +233,27 @@ public class GUIFactory implements ObserverFactory {
 			tile.setHgap(0);
 			tile.setPrefColumns(2);
 			tile.setStyle("-fx-background-color:#ddddff");
+			// Create a reportable for COASTAL
+			TaskPanel tp = new TaskPanel(coastal.getCoastalReportable());
+			tasks.add(tp);
+			tile.getChildren().add(tp);
+			// Create a reportable for the path tree
+			tp = new TaskPanel(coastal.getPathTreeReportable());
+			tasks.add(tp);
+			tile.getChildren().add(tp);
 			for (TaskManager tm : coastal.getTasks()) {
-				TaskPanel tp = new TaskPanel(tm);
+				tp = new TaskPanel(tm);
 				tasks.add(tp);
 				tile.getChildren().add(tp);
 			}
-			// Create a reportable for the path tree
-			TaskPanel tp = new TaskPanel(coastal.getPathTreeReportable());
-			tasks.add(tp);
-			tile.getChildren().add(tp);
+			for (Tuple fm : coastal.getAllObservers()) {
+				ObserverManager m = (ObserverManager) fm.get(1);
+				if (m.getName() != null) {
+					tp = new TaskPanel(m);
+					tasks.add(tp);
+					tile.getChildren().add(tp);
+				}
+			}
 
 			doneButton = new Button("Done");
 			doneButton.setOnAction((ActionEvent e) -> {
@@ -244,8 +276,8 @@ public class GUIFactory implements ObserverFactory {
 			root.getChildren().addAll(border);
 
 			primaryStage.setScene(scene);
-			primaryStage.setWidth(600);
-			primaryStage.setHeight(500);
+			primaryStage.setWidth(INITIAL_WIDTH);
+			primaryStage.setHeight(INITIAL_HEIGHT);
 			primaryStage.show();
 			coastal.getBroker().subscribe("tick", this::tick);
 			coastal.getBroker().subscribe("reporting-done", this::isDone);

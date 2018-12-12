@@ -1,6 +1,7 @@
 package za.ac.sun.cs.coastal.observers;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Reporter.Reportable;
 
 public interface ObserverFactory {
 
@@ -17,5 +18,23 @@ public interface ObserverFactory {
 	ObserverManager createManager(COASTAL coastal);
 
 	Observer createObserver(COASTAL coastal, ObserverManager manager);
+
+	// ======================================================================
+	//
+	// OBSERVER MANAGER INTERFACE
+	//
+	// ======================================================================
+
+	public interface ObserverManager extends Reportable {
+	}
+
+	// ======================================================================
+	//
+	// OBSERVER INTERFACE
+	//
+	// ======================================================================
+
+	public interface Observer {
+	}
 
 }

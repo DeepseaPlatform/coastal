@@ -51,7 +51,7 @@ import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
-import za.ac.sun.cs.coastal.observers.ObserverManager;
+import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.SurferFactory;
@@ -212,6 +212,11 @@ public class COASTAL {
 	// OBSERVERS
 	//
 	// ======================================================================
+
+	/**
+	 * A list of all observer factories and managers.
+	 */
+	private final List<Tuple> allObservers = new ArrayList<>();
 
 	/**
 	 * A list of observer factories and managers that must be started once per
@@ -699,18 +704,20 @@ public class COASTAL {
 			if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
 				ObserverFactory factory = (ObserverFactory) observerFactory;
 				ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
+				Tuple fm = new Tuple(observerFactory, manager);
+				allObservers.add(fm);
 				switch (factory.getFrequency()) {
 				case ObserverFactory.ONCE_PER_RUN:
-					observersPerRun.add(new Tuple(observerFactory, manager));
+					observersPerRun.add(fm);
 					break;
 				case ObserverFactory.ONCE_PER_TASK:
-					observersPerTask.add(new Tuple(observerFactory, manager));
+					observersPerTask.add(fm);
 					break;
 				case ObserverFactory.ONCE_PER_DIVER:
-					observersPerDiver.add(new Tuple(observerFactory, manager));
+					observersPerDiver.add(fm);
 					break;
 				default:
-					observersPerSurfer.add(new Tuple(observerFactory, manager));
+					observersPerSurfer.add(fm);
 					break;
 				}
 			}
@@ -810,6 +817,35 @@ public class COASTAL {
 			@Override
 			public String getName() {
 				return "PathTree";
+			}
+		};
+	}
+
+	public Reportable getCoastalReportable() {
+		return new Reportable() {
+
+			private final String[] propertyNames = new String[] { "#elapsed", "diverModelQueue", "surferModelQueue",
+					"pcQueue", "traceQueue" };
+
+			@Override
+			public Object[] getPropertyValues() {
+				Object[] propertyValues = new Object[5];
+				propertyValues[0] = System.currentTimeMillis() - startingTime.getTimeInMillis();
+				propertyValues[1] = diverModelQueue.size();
+				propertyValues[2] = surferModelQueue.size();
+				propertyValues[3] = pcQueue.size();
+				propertyValues[4] = traceQueue.size();
+				return propertyValues;
+			}
+
+			@Override
+			public String[] getPropertyNames() {
+				return propertyNames;
+			}
+
+			@Override
+			public String getName() {
+				return "COASTAL";
 			}
 		};
 	}
@@ -950,6 +986,10 @@ public class COASTAL {
 
 	public Iterable<Tuple> getObserversPerSurfer() {
 		return observersPerSurfer;
+	}
+
+	public Iterable<Tuple> getAllObservers() {
+		return allObservers;
 	}
 
 	// ======================================================================

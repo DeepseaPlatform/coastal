@@ -69,6 +69,21 @@ public class MarkerCoverageFactory implements ObserverFactory {
 			}
 		}
 
+		@Override
+		public String getName() {
+			return null;
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+			return null;
+		}
+
+		@Override
+		public Object[] getPropertyValues() {
+			return null;
+		}
+
 	}
 
 	// ======================================================================
