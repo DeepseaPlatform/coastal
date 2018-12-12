@@ -1,13 +1,10 @@
 package za.ac.sun.cs.coastal.strategy;
 
-import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.TaskFactory;
-import za.ac.sun.cs.coastal.symbolic.Execution;
-import za.ac.sun.cs.coastal.symbolic.Model;
 
 public interface StrategyFactory extends TaskFactory {
 
@@ -46,8 +43,6 @@ public interface StrategyFactory extends TaskFactory {
 			log = coastal.getLog();
 			this.manager = manager;
 		}
-
-		protected abstract List<Model> refine(Execution execution);
 
 	}
 

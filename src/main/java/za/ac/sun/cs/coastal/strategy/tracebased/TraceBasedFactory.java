@@ -32,14 +32,9 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 		protected final PathTree pathTree;
 
 		/**
-		 * Accumulator of all the solver times.
+		 * Counter of number of refinements.
 		 */
-		protected final AtomicLong solverTime = new AtomicLong(0);
-
-		/**
-		 * Accumulator of all the model extraction times.
-		 */
-		protected final AtomicLong extractionTime = new AtomicLong(0);
+		protected final AtomicLong refineCount = new AtomicLong(0);
 
 		/**
 		 * Accumulator of all the refinement times.
@@ -55,6 +50,32 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 		 * Counter for the strategy waiting times.
 		 */
 		private final AtomicLong strategyWaitCount = new AtomicLong(0);
+
+		public TraceBasedManager(COASTAL coastal) {
+			this.coastal = coastal;
+			broker = coastal.getBroker();
+			broker.subscribe("coastal-stop", this::report);
+			pathTree = coastal.getPathTree();
+		}
+
+		public PathTree getPathTree() {
+			return pathTree;
+		}
+
+		public PathTreeNode insertPath0(Trace trace, boolean infeasible) {
+			return pathTree.insertPath(trace, infeasible);
+		}
+
+		public boolean insertPath(Trace trace, boolean infeasible) {
+			return (pathTree.insertPath(trace, infeasible) == null);
+		}
+
+		/**
+		 * Increment the number of refinements.
+		 */
+		public void incrementRefinements() {
+			refineCount.incrementAndGet();
+		}
 
 		/**
 		 * Add a reported dive time to the accumulator that tracks how long the
@@ -79,48 +100,35 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 			strategyWaitCount.incrementAndGet();
 		}
 
-		public TraceBasedManager(COASTAL coastal) {
-			this.coastal = coastal;
-			broker = coastal.getBroker();
-			broker.subscribe("coastal-stop", this::report);
-			pathTree = coastal.getPathTree();
-		}
-
-		public PathTree getPathTree() {
-			return pathTree;
-		}
-
-		public PathTreeNode insertPath0(Trace trace, boolean infeasible) {
-			return pathTree.insertPath(trace, infeasible);
-		}
-
-		public boolean insertPath(Trace trace, boolean infeasible) {
-			return (pathTree.insertPath(trace, infeasible) == null);
-		}
-
-		public void recordSolverTime(long time) {
-			solverTime.addAndGet(time);
-		}
-
-		public void recordExtractionTime(long time) {
-			extractionTime.addAndGet(time);
-		}
-
-		public void recordRefineTime(long time) {
-			strategyTime.addAndGet(time);
-		}
-
 		public void report(Object object) {
 			String name = getName();
 			double swt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
 			broker.publish("report", new Tuple(name + ".tasks", getTaskCount()));
-			broker.publish("report", new Tuple(name + ".solver-time", solverTime.get()));
-			broker.publish("report", new Tuple(name + ".extraction-time", extractionTime.get()));
 			broker.publish("report", new Tuple(name + ".wait-time", swt));
 			broker.publish("report", new Tuple(name + ".total-time", strategyTime.get()));
 		}
 
 		protected abstract int getTaskCount();
+
+		private static final String[] PROPERTY_NAMES = new String[] { "#tasks", "#refinements", "waiting time",
+				"total time" };
+
+		@Override
+		public String[] getPropertyNames() {
+			return PROPERTY_NAMES;
+		}
+
+		@Override
+		public Object[] getPropertyValues() {
+			Object[] propertyValues = new Object[4];
+			int index = 0;
+			double swt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
+			propertyValues[index++] = getTaskCount();
+			propertyValues[index++] = refineCount.get();
+			propertyValues[index++] = swt;
+			propertyValues[index++] = strategyTime.get();
+			return propertyValues;
+		}
 
 	}
 
@@ -145,47 +153,39 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 		}
 
 		@Override
-		public List<Model> refine(Execution execution) {
+		public Void call() throws Exception {
+			log.trace("^^^ strategy task starting");
+			try {
+				while (true) {
+					long t0 = System.currentTimeMillis();
+					Trace trace = coastal.getNextTrace();
+					long t1 = System.currentTimeMillis();
+					manager.recordWaitTime(t1 - t0);
+					manager.incrementRefinements();
+					log.trace("+++ starting refinement");
+					List<Model> mdls = refine(trace);
+					int d = -1;
+					if (mdls != null) {
+						coastal.addSurferModels(mdls);
+						d = mdls.size() - 1;
+					}
+					log.trace("+++ added {} surfer models", d);
+					coastal.updateWork(d);
+				}
+			} catch (InterruptedException e) {
+				log.trace("^^^ strategy task canceled");
+				throw e;
+			}
+		}
+
+		protected List<Model> refine(Execution execution) {
 			long t0 = System.currentTimeMillis();
 			List<Model> newModels = refine0((Trace) execution);
-			manager.recordRefineTime(System.currentTimeMillis() - t0);
+			manager.recordTime(System.currentTimeMillis() - t0);
 			return newModels;
 		}
 
-		protected List<Model> refine0(Trace trace) {
-			if ((trace == null) || (trace == Trace.NULL)) {
-				return null;
-			}
-			return null;
-			//			log.trace("... explored <{}>", trace.getSignature());
-			//			manager.insertPath(trace, false); // ignore revisited return value
-			//			while (true) {
-			//				trace = findNewPath(manager.getPathTree());
-			//				if (trace == null) {
-			//					log.trace("... no further paths");
-			//					return null;
-			//					// log.trace("...Tree shape: {}", pathTree.getShape());
-			//				}
-			//				Expression pc = trace.getPathCondition();
-			//				String sig = trace.getSignature();
-			//				log.trace("... trying   <{}> {}", sig, pc.toString());
-			//				Map<String, Constant> model = findModel(pc);
-			//				if (model == null) {
-			//					log.trace("... no model");
-			//					log.trace("(The spc is {})", trace.getPathCondition().toString());
-			//					manager.insertPath(trace, true);
-			//				} else {
-			//					String modelString = model.toString();
-			//					log.trace("... new model: {}", modelString);
-			//					if (visitedModels.add(modelString)) {
-			//						return Collections.singletonList(new Model(0, model));
-			//					} else {
-			//						manager.insertPath(trace, false);
-			//						log.trace("... model {} has been visited before, retrying", modelString);
-			//					}
-			//				}
-			//			}
-		}
+		protected abstract List<Model> refine0(Trace trace);
 
 	}
 

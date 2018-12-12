@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal.instrument;
 
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,6 +51,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	private static Set<Label> catchLabels = new HashSet<>();
 	
+	private BitSet currentLinenumbers;
+
 	// private static BitSet currentBranchInstructions;
 
 	public HeavyMethodAdapter(COASTAL coastal, MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
@@ -132,12 +135,14 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		mv.visitLdcInsn(line);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(II)V", false);
 		mv.visitLineNumber(line, start);
+		currentLinenumbers.set(line);
 	}
 	
 	@Override
 	public void visitEnd() {
 		log.trace("visitEnd()");
 		classManager.registerLastInstruction();
+		classManager.registerLinenumbers(currentLinenumbers);
 		// branchInstructions.put(methodCounter, currentBranchInstructions);
 		mv.visitEnd();
 	}
@@ -185,6 +190,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 		}
 		classManager.registerFirstInstruction();
+		currentLinenumbers = new BitSet();
 		// currentBranchInstructions = new BitSet();
 		mv.visitCode();
 	}

@@ -57,6 +57,7 @@ import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.SurferFactory;
 // import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
 import za.ac.sun.cs.coastal.surfer.Trace;
+import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.green.expr.Constant;
 
@@ -205,7 +206,7 @@ public class COASTAL {
 
 	private DiverManager diverManager;
 
-	// private SurferManager surferManager;
+	private SurferManager surferManager;
 
 	// ======================================================================
 	//
@@ -414,6 +415,7 @@ public class COASTAL {
 	 *
 	 * private final List<TaskInfo> tasks = new ArrayList<>();
 	 * private DiverManager diverManager;
+	 * private SurferManager surferManager;
 	 *
 	 * // OBSERVERS
 	 * 
@@ -661,7 +663,7 @@ public class COASTAL {
 		diverManager = (DiverManager) dti.getManager();
 		tasks.add(dti);
 		TaskInfo sti = new TaskInfo(this, surferFactory, st, sl, su);
-		// surferManager = (SurferManager) sti.getManager();
+		surferManager = (SurferManager) sti.getManager();
 		tasks.add(sti);
 		int sfCount = 0;
 		for (int i = 0; true; i++) {
@@ -918,6 +920,10 @@ public class COASTAL {
 	 */
 	public Trigger getTrigger(int index) {
 		return triggers.get(index);
+	}
+
+	public Map<String, Class<?>> getParameters() {
+		return parameters;
 	}
 
 	/**
@@ -1215,6 +1221,7 @@ public class COASTAL {
 	 */
 	public void addFirstModel(Model firstModel) {
 		try {
+			surferModelQueue.put(firstModel);
 			diverModelQueue.put(firstModel);
 			work.incrementAndGet();
 		} catch (InterruptedException e1) {
@@ -1473,8 +1480,9 @@ public class COASTAL {
 		if (elapsedTime > nextReportingTime) {
 			String time = Banner.getElapsed(this);
 			String dives = String.format("dives:%d", diverManager.getDiveCount());
+			String surfs = String.format("surfs:%d", surferManager.getSurfCount());
 			String queue = String.format("[models:%d pcs:%d]", diverModelQueue.size(), pcQueue.size());
-			log.info("{} {} {}", time, dives, queue);
+			log.info("{} {} {} {}", time, dives, surfs, queue);
 			if (elapsedTime > 3600000) {
 				// After 1 hour, we report every 5 minutes
 				nextReportingTime = elapsedTime + 300000;

@@ -2,6 +2,7 @@ package za.ac.sun.cs.coastal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -168,6 +169,60 @@ public class Conversion {
 			return null;
 		}
 
+	}
+
+	// ======================================================================
+	//
+	// BITSET PRINTING
+	//
+	// ======================================================================
+
+	public static final String toString(BitSet bs) {
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		boolean isFirst = true;
+		Integer previousStart = null, previousEnd = null;
+		for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i + 1)) {
+			if (previousStart == null) {
+				previousStart = i;
+				previousEnd = i;
+			} else if (i == previousEnd + 1) {
+				previousEnd = i;
+			} else if (previousStart == previousEnd) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					sb.append(", ");
+				}
+				sb.append(previousStart);
+				previousStart = i;
+				previousEnd = i;
+			} else {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					sb.append(", ");
+				}
+				sb.append(previousStart).append('-').append(previousEnd);
+				previousStart = i;
+				previousEnd = i;
+			}
+			if (i == Integer.MAX_VALUE) {
+				break;
+			}
+		}
+		if (previousStart == previousEnd) {
+			if (!isFirst) {
+				sb.append(", ");
+			}
+			sb.append(previousStart);
+		} else {
+			if (!isFirst) {
+				sb.append(", ");
+			}
+			sb.append(previousStart).append('-').append(previousEnd);
+		}
+		return sb.append('}').toString();
 	}
 
 }

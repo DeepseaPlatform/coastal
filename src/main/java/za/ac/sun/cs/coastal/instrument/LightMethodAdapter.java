@@ -1,5 +1,7 @@
 package za.ac.sun.cs.coastal.instrument;
 
+import java.util.BitSet;
+
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -23,6 +25,8 @@ public class LightMethodAdapter extends MethodVisitor {
 	private final boolean isStatic;
 
 	private final int argCount;
+
+	private BitSet currentLinenumbers;
 
 	public LightMethodAdapter(COASTAL coastal, MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
@@ -103,6 +107,14 @@ public class LightMethodAdapter extends MethodVisitor {
 		mv.visitLdcInsn(line);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(II)V", false);
 		mv.visitLineNumber(line, start);
+		currentLinenumbers.set(line);
+	}
+
+	@Override
+	public void visitEnd() {
+		log.trace("visitEnd()");
+		classManager.registerLinenumbers(currentLinenumbers);
+		mv.visitEnd();
 	}
 
 	@Override
@@ -141,6 +153,7 @@ public class LightMethodAdapter extends MethodVisitor {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 		}
 		classManager.registerFirstInstruction();
+		currentLinenumbers = new BitSet();
 		mv.visitCode();
 	}
 

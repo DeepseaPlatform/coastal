@@ -78,6 +78,7 @@ public class TraceState implements State {
 	private boolean methodReturn() {
 		assert traceMode;
 		assert frameCount > 0;
+		frameCount--;
 		if ((frameCount == 0) && recordMode) {
 			log.trace(">>> symbolic record mode switched off");
 			recordMode = false;

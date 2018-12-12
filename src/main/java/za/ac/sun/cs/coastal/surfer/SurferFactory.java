@@ -110,7 +110,7 @@ public class SurferFactory implements TaskFactory {
 		 * @param time
 		 *            the wait time for this surf
 		 */
-		public void recordSurferWaitTime(long time) {
+		public void recordWaitTime(long time) {
 			surferWaitTime.addAndGet(time);
 			surferWaitCount.incrementAndGet();
 		}
@@ -185,7 +185,7 @@ public class SurferFactory implements TaskFactory {
 					long t0 = System.currentTimeMillis();
 					Map<String, Constant> concreteValues = coastal.getNextSurferModel();
 					long t1 = System.currentTimeMillis();
-					manager.recordSurferTime(t1 - t0);
+					manager.recordWaitTime(t1 - t0);
 					TraceState traceState = new TraceState(coastal, concreteValues);
 					String banner = "starting surf " + manager.getNextSurfCount() + " @" + Banner.getElapsed(coastal);
 					log.trace(Banner.getBannerLine(banner, '-'));

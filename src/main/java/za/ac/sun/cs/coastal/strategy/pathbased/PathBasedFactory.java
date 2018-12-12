@@ -46,6 +46,11 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		protected final PathTree pathTree;
 
 		/**
+		 * Counter of number of refinements.
+		 */
+		protected final AtomicLong refineCount = new AtomicLong(0);
+
+		/**
 		 * Accumulator of all the solver times.
 		 */
 		protected final AtomicLong solverTime = new AtomicLong(0);
@@ -70,6 +75,40 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		 */
 		private final AtomicLong strategyWaitCount = new AtomicLong(0);
 
+		public PathBasedManager(COASTAL coastal) {
+			this.coastal = coastal;
+			broker = coastal.getBroker();
+			broker.subscribe("coastal-stop", this::report);
+			pathTree = coastal.getPathTree();
+		}
+
+		public PathTree getPathTree() {
+			return pathTree;
+		}
+
+		public PathTreeNode insertPath0(SegmentedPC spc, boolean infeasible) {
+			return pathTree.insertPath(spc, infeasible);
+		}
+
+		public boolean insertPath(SegmentedPC spc, boolean infeasible) {
+			return (pathTree.insertPath(spc, infeasible) == null);
+		}
+
+		/**
+		 * Increment the number of refinements.
+		 */
+		public void incrementRefinements() {
+			refineCount.incrementAndGet();
+		}
+
+		public void recordSolverTime(long time) {
+			solverTime.addAndGet(time);
+		}
+
+		public void recordExtractionTime(long time) {
+			extractionTime.addAndGet(time);
+		}
+
 		/**
 		 * Add a reported dive time to the accumulator that tracks how long the
 		 * dives took.
@@ -93,37 +132,6 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			strategyWaitCount.incrementAndGet();
 		}
 
-		public PathBasedManager(COASTAL coastal) {
-			this.coastal = coastal;
-			broker = coastal.getBroker();
-			broker.subscribe("coastal-stop", this::report);
-			pathTree = coastal.getPathTree();
-		}
-
-		public PathTree getPathTree() {
-			return pathTree;
-		}
-
-		public PathTreeNode insertPath0(SegmentedPC spc, boolean infeasible) {
-			return pathTree.insertPath(spc, infeasible);
-		}
-
-		public boolean insertPath(SegmentedPC spc, boolean infeasible) {
-			return (pathTree.insertPath(spc, infeasible) == null);
-		}
-
-		public void recordSolverTime(long time) {
-			solverTime.addAndGet(time);
-		}
-
-		public void recordExtractionTime(long time) {
-			extractionTime.addAndGet(time);
-		}
-
-		public void recordRefineTime(long time) {
-			strategyTime.addAndGet(time);
-		}
-
 		public void report(Object object) {
 			String name = getName();
 			double swt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
@@ -136,11 +144,8 @@ public abstract class PathBasedFactory implements StrategyFactory {
 
 		protected abstract int getTaskCount();
 
-		private static final String[] PROPERTY_NAMES = new String[] { "#tasks", "#refinements",
-				/* "#inserted" */
-				/* "#revisited" */
-				/* "#infeasible" */
-				"waiting time", "total time" };
+		private static final String[] PROPERTY_NAMES = new String[] { "#tasks", "#refinements", "waiting time",
+				"total time" };
 
 		@Override
 		public String[] getPropertyNames() {
@@ -153,10 +158,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			int index = 0;
 			double swt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
 			propertyValues[index++] = getTaskCount();
-			propertyValues[index++] = 0;
-			//			propertyValues.set(index++, pathTree.getInsertedCount());
-			//			propertyValues.set(index++, pathTree.getRevisitCount());
-			//			propertyValues.set(index++, pathTree.getInfeasibleCount());
+			propertyValues[index++] = refineCount.get();
 			propertyValues[index++] = swt;
 			propertyValues[index++] = strategyTime.get();
 			return propertyValues;
@@ -206,6 +208,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 					SegmentedPC spc = coastal.getNextPc();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
+					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
 					List<Model> mdls = refine(spc);
 					int d = -1;
@@ -222,11 +225,10 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			}
 		}
 
-		@Override
-		public List<Model> refine(Execution execution) {
+		protected List<Model> refine(Execution execution) {
 			long t0 = System.currentTimeMillis();
 			List<Model> newModels = refine0((SegmentedPC) execution);
-			manager.recordRefineTime(System.currentTimeMillis() - t0);
+			manager.recordTime(System.currentTimeMillis() - t0);
 			return newModels;
 		}
 

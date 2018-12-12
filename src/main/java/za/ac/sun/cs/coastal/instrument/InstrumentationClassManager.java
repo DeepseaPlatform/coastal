@@ -273,6 +273,7 @@ public class InstrumentationClassManager {
 	private int methodCounter = 0;
 	private Map<Integer, Integer> firstInstruction = new TreeMap<>();
 	private Map<Integer, Integer> lastInstruction = new TreeMap<>();
+	private Map<Integer, BitSet> linenumbers = new TreeMap<>();
 	private Map<Integer, BitSet> branchInstructions = new TreeMap<>();
 	
 	public Integer getFirstInstruction(int methodNumber) {
@@ -283,6 +284,10 @@ public class InstrumentationClassManager {
 		return lastInstruction.get(methodNumber);
 	}
 
+	public BitSet getLineNumbers(int methodNumber) {
+		return linenumbers.get(methodNumber);
+	}
+	
 	public BitSet getJumpPoints(int methodNumber) {
 		return branchInstructions.get(methodNumber);
 	}
@@ -309,6 +314,10 @@ public class InstrumentationClassManager {
 	
 	public void registerLastInstruction() {
 		lastInstruction.put(methodCounter, instructionCounter);
+	}
+	
+	public void registerLinenumbers(BitSet linenumbers) {
+		this.linenumbers.put(methodCounter, linenumbers);
 	}
 	
 }
