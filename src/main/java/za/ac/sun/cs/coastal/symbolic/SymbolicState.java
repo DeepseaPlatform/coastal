@@ -1,7 +1,9 @@
 package za.ac.sun.cs.coastal.symbolic;
 
+import java.util.List;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,7 +71,7 @@ public class SymbolicState {
 
 	private Expression pendingExtraConjunct = null;
 
-	private Expression noExceptionExpression = null;
+	private final List<Expression> noExceptionExpression = new ArrayList<>();
 
 	private int exceptionDepth = 0;
 
@@ -750,8 +752,7 @@ public class SymbolicState {
 				push(new Operation(Operator.DIV, pop(), e));
 			}
 			//TODO
-			assert noExceptionExpression == null;
-			noExceptionExpression = new Operation(Operator.NE, e, Operation.ZERO);
+			noExceptionExpression.add(new Operation(Operator.NE, e, Operation.ZERO));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = Operation.ZERO;
 			break;
@@ -768,7 +769,7 @@ public class SymbolicState {
 			} else {
 				push(new Operation(Operator.MOD, pop(), e));
 			}
-			// Add ExceptionExpression to noExceptionExpressionList
+			noExceptionExpression.add(new Operation(Operator.NE, e, Operation.ZERO));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = Operation.ZERO;
 			break;
@@ -805,10 +806,10 @@ public class SymbolicState {
 			push(getField(id, "length"));
 			break;
 		case Opcodes.ATHROW:
-			assert noExceptionExpression == null;
-			noExceptionExpression = new Operation(Operator.NE, Operation.ZERO, Operation.ZERO);
+			noExceptionExpression.add(new Operation(Operator.NE, Operation.ZERO, Operation.ZERO));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = pop();
+			broker.publish("assert-failed", new Tuple(this, null));
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
@@ -1354,9 +1355,10 @@ public class SymbolicState {
 			return;
 		}
 		log.trace(">>> no exception");
-		assert noExceptionExpression != null;
-		pushConjunct(noExceptionExpression);
-		noExceptionExpression = null;
+		for (Expression e : noExceptionExpression) {
+			pushConjunct(e);
+		}
+		noExceptionExpression.clear();
 		checkLimitConjuncts();
 		log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 		dumpFrames();
@@ -1381,9 +1383,10 @@ public class SymbolicState {
 			frames.peek().clear();
 			push(throwable);
 		}
-		assert noExceptionExpression != null;
-		pushConjunct(noExceptionExpression, false);
-		noExceptionExpression = null;
+		for (Expression e : noExceptionExpression) {
+			pushConjunct(e, false);
+		}
+		noExceptionExpression.clear();
 		checkLimitConjuncts();
 		log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 		dumpFrames();
