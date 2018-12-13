@@ -1,41 +1,29 @@
-FROM ubuntu:bionic
+FROM ubuntu:bionic AS base
+RUN apt-get -y update && apt-get -y upgrade && apt-get -y install wget m4 git make python g++ perl openjdk-8-jdk 
 
-RUN apt-get update -y
-RUN apt-get upgrade -y
-RUN apt-get install -y apt-utils
-RUN apt-get install -y wget g++ make m4 git python
-RUN apt-get install -y openjdk-8-jdk
-
-#RUN wget https://www.math.ucdavis.edu/~latte/software/packages/latte_current/latte-integrale-1.7.3b.tar.gz
-RUN wget https://github.com/latte-int/latte/releases/download/version_1_7_5/latte-integrale-1.7.5.tar.gz
-RUN tar xzf latte-integrale-1.7.5.tar.gz
-WORKDIR /latte-integrale-1.7.5/
-RUN ./configure --prefix=/usr/local
-RUN make
-RUN make check
-RUN make install
-RUN make installcheck
-
-WORKDIR /
-RUN wget http://barvinok.gforge.inria.fr/barvinok-0.41.tar.gz
-RUN tar xzf barvinok-0.41.tar.gz
-WORKDIR barvinok-0.41/
-RUN ./configure --prefix=/usr/local --with-gmp-prefix=/usr/local --without-pic --with-gnu-ld --disable-gold --enable-shared=no
-RUN make
-RUN make check
-RUN make install
-
-WORKDIR /
+#--- Z3 ---
 RUN git clone https://github.com/Z3Prover/z3.git
 WORKDIR /z3/
 RUN python scripts/mk_make.py --java --prefix=/usr/local
 WORKDIR /z3/build/
-RUN make
-RUN make test
-RUN make install
-
+RUN make && make test && make install
 WORKDIR /
-RUN rm -rf latte* barvinok* z3*
 
+#--- LATTE ---
+##RUN wget --no-check-certificate https://github.com/latte-int/latte/releases/download/version_1_7_5/latte-integrale-1.7.5.tar.gz && tar xzf latte-integrale-1.7.5.tar.gz
+#RUN wget https://github.com/latte-int/latte/releases/download/version_1_7_5/latte-integrale-1.7.5.tar.gz && tar xzf latte-integrale-1.7.5.tar.gz
+#WORKDIR /latte-integrale-1.7.5/
+#RUN ./configure --prefix=/usr/local && make
+#WORKDIR /
+
+#--- BARVINOK ---
+#RUN wget http://barvinok.gforge.inria.fr/barvinok-0.41.tar.gz && tar xzf barvinok-0.41.tar.gz
+#WORKDIR /barvinok-0.41/
+#RUN ./configure --prefix=/usr/local --with-gmp-prefix=/usr/local --without-pic --with-gnu-ld --disable-gold --enable-shared=no && make && make check && make install
+#WORKDIR /
+
+#--- FINAL ---
+FROM ubuntu:bionic
+RUN apt-get -y update && apt-get -y upgrade && apt-get -y install openjdk-8-jdk openjfx git
+COPY --from=base /usr/local /usr/local
 CMD [ "/bin/bash" ]
-
