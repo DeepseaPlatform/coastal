@@ -3,9 +3,7 @@ package za.ac.sun.cs.coastal.diver;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import org.apache.logging.log4j.Logger;
@@ -76,12 +74,6 @@ public class SymbolicState implements State {
 	private int exceptionDepth = 0;
 
 	private Expression throwable = null;
-
-	private boolean isPreviousConstant = false;
-
-	private boolean isPreviousDuplicate = false;
-
-	private final Set<String> conjunctSet = new HashSet<>();
 
 	private final Map<String, Constant> concreteValues;
 
@@ -224,23 +216,10 @@ public class SymbolicState implements State {
 
 	private void pushConjunct(Expression conjunct, boolean truthValue) {
 		String c = conjunct.toString();
-		/*
-		 * Set "isPreviousConstant" and "isPreviousDuplicate" so that if we
-		 * encounter the corresponding else, we know to ignore it.
-		 */
-		isPreviousConstant = isConstant(conjunct);
-		isPreviousDuplicate = false;
-		if (isPreviousConstant) {
-			log.trace(">>> constant conjunct ignored: {}", c);
-		} else if (conjunctSet.add(c)) {
-			spc = new SegmentedPCIf(spc, conjunct, pendingExtraConjunct, truthValue);
-			pendingExtraConjunct = null;
-			log.trace(">>> adding conjunct: {}", c);
-			log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
-		} else {
-			log.trace(">>> duplicate conjunct ignored: {}", c);
-			isPreviousDuplicate = true;
-		}
+		spc = new SegmentedPCIf(spc, conjunct, pendingExtraConjunct, truthValue);
+		pendingExtraConjunct = null;
+		log.trace(">>> adding conjunct: {}", c);
+		log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 	}
 
 	private void pushConjunct(Expression conjunct) {
@@ -257,21 +236,15 @@ public class SymbolicState implements State {
 			conjunct = new Operation(Operator.EQ, expression, new IntConstant(cur));
 		}
 		String c = conjunct.toString();
-		if (isConstant(conjunct)) {
-			log.trace(">>> constant (switch) conjunct ignored: {}", c);
-		} else if (conjunctSet.add(c)) {
-			spc = new SegmentedPCSwitch(spc, expression, pendingExtraConjunct, min, max, cur);
-			pendingExtraConjunct = null;
-			log.trace(">>> adding (switch) conjunct: {}", c);
-			log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
-		} else {
-			log.trace(">>> duplicate (switch) conjunct ignored: {}", c);
-		}
+		spc = new SegmentedPCSwitch(spc, expression, pendingExtraConjunct, min, max, cur);
+		pendingExtraConjunct = null;
+		log.trace(">>> adding (switch) conjunct: {}", c);
+		log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 	}
 
 	@Override
 	public void pushExtraConjunct(Expression extraConjunct) {
-		if (!isConstant(extraConjunct)) {
+		if (!SegmentedPC.isConstant(extraConjunct)) {
 			if (pendingExtraConjunct == null) {
 				pendingExtraConjunct = extraConjunct;
 			} else {
@@ -1176,14 +1149,12 @@ public class SymbolicState implements State {
 		}
 		if (recordMode) {
 			log.trace("(POST) {}", Bytecodes.toString(opcode));
-			if (!isPreviousConstant && !isPreviousDuplicate) {
-				log.trace(">>> previous conjunct is false");
-				broker.publishThread("post-jump-insn", new Tuple(instr, opcode));
-				assert spc instanceof SegmentedPCIf;
-				spc = ((SegmentedPCIf) spc).negate();
-				checkLimitConjuncts();
-				log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
-			}
+			log.trace(">>> previous conjunct is false");
+			broker.publishThread("post-jump-insn", new Tuple(instr, opcode));
+			assert spc instanceof SegmentedPCIf;
+			spc = ((SegmentedPCIf) spc).negate();
+			checkLimitConjuncts();
+			log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
 		}
 	}
 
@@ -1297,21 +1268,6 @@ public class SymbolicState implements State {
 	// UTILITIES
 	//
 	// ======================================================================
-
-	private static boolean isConstant(Expression conjunct) {
-		if (conjunct instanceof Operation) {
-			Operation operation = (Operation) conjunct;
-			int n = operation.getOperatandCount();
-			for (int i = 0; i < n; i++) {
-				if (!isConstant(operation.getOperand(i))) {
-					return false;
-				}
-			}
-			return true;
-		} else {
-			return (conjunct instanceof Constant);
-		}
-	}
 
 	private static int getArgumentCount(String descriptor) {
 		int count = 0;

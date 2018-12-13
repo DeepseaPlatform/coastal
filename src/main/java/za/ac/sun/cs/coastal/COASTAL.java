@@ -686,7 +686,8 @@ public class COASTAL {
 			if (observerName == null) {
 				break;
 			}
-			Object observerFactory = ConfigHelper.createInstance(this, getConfig().immutableSubset(key + ".options"), observerName.trim());
+			Object observerFactory = ConfigHelper.createInstance(this, getConfig().immutableSubset(key + ".options"),
+					observerName.trim());
 			if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
 				ObserverFactory factory = (ObserverFactory) observerFactory;
 				ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
@@ -721,7 +722,8 @@ public class COASTAL {
 				break;
 			}
 			String model = getConfig().getString(key + ".model");
-			Object modelObject = ConfigHelper.createInstance(this, getConfig().immutableSubset(key + ".options"), model.trim());
+			Object modelObject = ConfigHelper.createInstance(this, getConfig().immutableSubset(key + ".options"),
+					model.trim());
 			if (modelObject != null) {
 				delegates.put(target.trim(), modelObject);
 			}

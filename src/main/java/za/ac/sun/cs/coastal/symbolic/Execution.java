@@ -2,9 +2,9 @@ package za.ac.sun.cs.coastal.symbolic;
 
 public interface Execution {
 
-	Execution getParent();
-
 	int getDepth();
+	
+	Execution getParent();
 
 	String getSignature();
 
