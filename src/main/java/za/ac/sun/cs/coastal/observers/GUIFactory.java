@@ -3,6 +3,8 @@ package za.ac.sun.cs.coastal.observers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -39,7 +41,7 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class GUIFactory implements ObserverFactory {
 
-	public GUIFactory(COASTAL coastal) {
+	public GUIFactory(COASTAL coastal, ImmutableConfiguration options) {
 	}
 
 	@Override

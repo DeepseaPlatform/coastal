@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
+
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.diver.SegmentedPCIf;
@@ -15,7 +17,7 @@ import za.ac.sun.cs.green.expr.Expression;
 
 public class GenerationalFactory extends PathBasedFactory {
 
-	public GenerationalFactory(COASTAL coastal) {
+	public GenerationalFactory(COASTAL coastal, ImmutableConfiguration options) {
 	}
 
 	@Override

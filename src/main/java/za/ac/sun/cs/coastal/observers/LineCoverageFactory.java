@@ -2,6 +2,7 @@ package za.ac.sun.cs.coastal.observers;
 
 import java.util.BitSet;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
@@ -12,7 +13,7 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class LineCoverageFactory implements ObserverFactory {
 
-	public LineCoverageFactory(COASTAL coastal) {
+	public LineCoverageFactory(COASTAL coastal, ImmutableConfiguration options) {
 	}
 
 	@Override

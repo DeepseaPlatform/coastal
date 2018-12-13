@@ -21,7 +21,12 @@
 		<!--
 		-->
 		<strategies>
-			<strategy>za.ac.sun.cs.coastal.strategy.tracebased.RandomTestingFactory</strategy>
+			<strategy>
+				za.ac.sun.cs.coastal.strategy.tracebased.RandomTestingFactory
+				<options>
+					<max-models>2500</max-models>
+				</options>
+			</strategy>
 			<!-- 
 			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
 			<strategy full="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>

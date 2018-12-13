@@ -65,6 +65,37 @@ public class ConfigHelper {
 		return null;
 	}
 
+	public static Object createInstance(COASTAL coastal, ImmutableConfiguration options, String className) {
+		Logger log = coastal.getLog();
+		Class<?> clas = loadClass(coastal, className);
+		if (clas == null) {
+			return null;
+		}
+		try {
+			Constructor<?> constructor = null;
+			try {
+				constructor = clas.getConstructor(COASTAL.class, ImmutableConfiguration.class);
+				if (constructor == null) {
+					return null;
+				}
+				return constructor.newInstance(coastal, options);
+			} catch (NoSuchMethodException x) {
+				log.info("CONSTRUCTOR NOT FOUND: " + className, x);
+			}
+		} catch (SecurityException x) {
+			log.warn("CONSTRUCTOR SECURITY ERROR: " + className, x);
+		} catch (IllegalArgumentException x) {
+			log.warn("CONSTRUCTOR ARGUMENT ERROR: " + className, x);
+		} catch (InstantiationException x) {
+			log.warn("CONSTRUCTOR INSTANTIATION ERROR: " + className, x);
+		} catch (IllegalAccessException x) {
+			log.warn("CONSTRUCTOR ACCESS ERROR: " + className, x);
+		} catch (InvocationTargetException x) {
+			log.warn("CONSTRUCTOR INVOCATION ERROR: " + className, x);
+		}
+		return null;
+	}
+	
 	public static Class<?> loadClass(COASTAL coastal, String className) {
 		Logger log = coastal.getLog();
 		Class<?> clas = null;

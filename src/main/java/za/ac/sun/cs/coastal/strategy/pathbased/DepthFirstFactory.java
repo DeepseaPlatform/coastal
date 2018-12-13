@@ -1,5 +1,7 @@
 package za.ac.sun.cs.coastal.strategy.pathbased;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
+
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
@@ -7,7 +9,7 @@ import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 
 public class DepthFirstFactory extends PathBasedFactory {
 
-	public DepthFirstFactory(COASTAL coastal) {
+	public DepthFirstFactory(COASTAL coastal, ImmutableConfiguration options) {
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package za.ac.sun.cs.coastal.model;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
+
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.green.expr.Expression;
@@ -14,7 +16,7 @@ public class Math {
 
 	private static int min, max;
 
-	public Math(COASTAL coastal) {
+	public Math(COASTAL coastal, ImmutableConfiguration options) {
 		min = (Integer) coastal.getDefaultMinValue(int.class);
 		max = (Integer) coastal.getDefaultMaxValue(int.class);
 	}

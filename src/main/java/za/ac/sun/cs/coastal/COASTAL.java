@@ -656,7 +656,7 @@ public class COASTAL {
 			if (sfClass == null) {
 				break;
 			}
-			Object sfObject = ConfigHelper.createInstance(this, sfClass);
+			Object sfObject = ConfigHelper.createInstance(this, getConfig().immutableSubset(key + ".options"), sfClass);
 			if ((sfObject == null) || !(sfObject instanceof StrategyFactory)) {
 				Banner bn = new Banner('@');
 				bn.println("UNKNOWN STRATEGY IGNORED:\n" + sfClass);
@@ -686,7 +686,7 @@ public class COASTAL {
 			if (observerName == null) {
 				break;
 			}
-			Object observerFactory = ConfigHelper.createInstance(this, observerName.trim());
+			Object observerFactory = ConfigHelper.createInstance(this, getConfig().immutableSubset(key + ".options"), observerName.trim());
 			if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
 				ObserverFactory factory = (ObserverFactory) observerFactory;
 				ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
@@ -721,7 +721,7 @@ public class COASTAL {
 				break;
 			}
 			String model = getConfig().getString(key + ".model");
-			Object modelObject = ConfigHelper.createInstance(this, model.trim());
+			Object modelObject = ConfigHelper.createInstance(this, getConfig().immutableSubset(key + ".options"), model.trim());
 			if (modelObject != null) {
 				delegates.put(target.trim(), modelObject);
 			}

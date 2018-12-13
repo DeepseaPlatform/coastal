@@ -1,5 +1,7 @@
 package za.ac.sun.cs.coastal.model;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
+
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.green.expr.Expression;
@@ -22,7 +24,7 @@ public class String {
 	
 	private final int maxChar;
 
-	public String(COASTAL coastal) {
+	public String(COASTAL coastal, ImmutableConfiguration options) {
 		minChar = (Character) coastal.getDefaultMinValue(char.class);
 		maxChar = (Character) coastal.getDefaultMaxValue(char.class);
 	}

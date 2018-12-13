@@ -3,6 +3,8 @@ package za.ac.sun.cs.coastal.strategy.pathbased;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
+
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
@@ -10,7 +12,7 @@ import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 
 public class BreadthFirstFactory extends PathBasedFactory {
 
-	public BreadthFirstFactory(COASTAL coastal) {
+	public BreadthFirstFactory(COASTAL coastal, ImmutableConfiguration options) {
 	}
 
 	@Override

@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
+
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.symbolic.Model;
@@ -15,12 +18,15 @@ import za.ac.sun.cs.green.expr.IntConstant;
 
 public class RandomTestingFactory extends TraceBasedFactory {
 
-	public RandomTestingFactory(COASTAL coastal) {
+	protected final ImmutableConfiguration options;
+
+	public RandomTestingFactory(COASTAL coastal, ImmutableConfiguration options) {
+		this.options = options;
 	}
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new RandomTestingManager(coastal);
+		return new RandomTestingManager(coastal, options);
 	}
 
 	@Override
@@ -39,12 +45,19 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 		protected int taskCount = 0;
 
-		public RandomTestingManager(COASTAL coastal) {
+		protected final int maxNumberOfModels;
+
+		public RandomTestingManager(COASTAL coastal, ImmutableConfiguration options) {
 			super(coastal);
+			maxNumberOfModels = ConfigHelper.zero(options.getInt("max-models", 1000), Integer.MAX_VALUE - 1);
 		}
 
 		protected void incrementTaskCount() {
 			taskCount++;
+		}
+
+		protected int getMaxNumberOfModels() {
+			return maxNumberOfModels;
 		}
 
 		@Override
@@ -73,16 +86,19 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 		private final Map<String, Constant> concreteValues = new HashMap<>();
 
-		private int limit = 1000;
+		private final int maxNumberOfModels;
+
+		private int numberOfModels = 0;
 
 		public RandomTestingStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 			pathTree = coastal.getPathTree();
+			maxNumberOfModels = ((RandomTestingManager) manager).getMaxNumberOfModels();
 		}
 
 		@Override
 		protected List<Model> refine0(Trace trace) {
-			if (limit-- < 0) {
+			if (numberOfModels++ >= maxNumberOfModels) {
 				return null;
 			}
 			if ((trace == null) || (trace == Trace.NULL)) {
