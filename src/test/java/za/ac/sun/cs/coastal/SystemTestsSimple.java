@@ -12,8 +12,10 @@ public class SystemTestsSimple extends SystemTests {
 	/*
 	 * NOTE: Tests previously included
 	 * 
-	 * assertEquals(abc, reporter.getStatLong("Instrumentation.pre-instrumented-size"));
-	 * assertEquals(xyz, reporter.getStatLong("Instrumentation.post-instrumented-size"));
+	 * assertEquals(abc,
+	 * reporter.getStatLong("Instrumentation.pre-instrumented-size"));
+	 * assertEquals(xyz,
+	 * reporter.getStatLong("Instrumentation.post-instrumented-size"));
 	 * 
 	 * but Eclipse and gradle uses different compilers that cause such tests to
 	 * fail in one or the other.
@@ -22,7 +24,8 @@ public class SystemTestsSimple extends SystemTests {
 	@Test
 	public void testStraight01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Straight01.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
+				new String[] { "tests/Test01.xml", "tests/simple/Straight01.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -37,7 +40,8 @@ public class SystemTestsSimple extends SystemTests {
 	@Test
 	public void testChoice01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice01.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
+				new String[] { "tests/Test01.xml", "tests/simple/Choice01.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -52,7 +56,8 @@ public class SystemTestsSimple extends SystemTests {
 	@Test
 	public void testChoice02() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice02.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
+				new String[] { "tests/Test01.xml", "tests/simple/Choice02.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -63,11 +68,12 @@ public class SystemTestsSimple extends SystemTests {
 		checkPathTree(reporter, 4, 0, 0);
 		checkInstrumentation(reporter, 28, 6, 1);
 	}
-	
+
 	@Test
 	public void testChoice03() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice03.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
+				new String[] { "tests/Test01.xml", "tests/simple/Choice03.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -78,11 +84,12 @@ public class SystemTestsSimple extends SystemTests {
 		checkPathTree(reporter, 8, 0, 0);
 		checkInstrumentation(reporter, 56, 14, 1);
 	}
-	
+
 	@Test
 	public void testChoice04() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice04.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
+				new String[] { "tests/Test01.xml", "tests/simple/Choice04.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -93,5 +100,5 @@ public class SystemTestsSimple extends SystemTests {
 		checkPathTree(reporter, 6, 0, 1);
 		checkInstrumentation(reporter, 35, 8, 1);
 	}
-	
+
 }
