@@ -10,6 +10,7 @@ import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
+import za.ac.sun.cs.coastal.surfer.Trace.TraceIf;
 import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.State;
 import za.ac.sun.cs.green.expr.Constant;

@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Travis CI docker setup [dd9bca9](https://github.com/DeepseaPlatform/coastal/commit/dd9bca9ced9369f31dd21c7d82d8701cb4468791)
 - [Bug #15](https://github.com/DeepseaPlatform/coastal/issues/15): new symbolic character bounds were incorrect (String.java::charAt__I__C) [8d9b5ba](https://github.com/DeepseaPlatform/coastal/commit/8d9b5ba7da9d0d5b79210fbce9df8957e349ce0b)
 - [Bug #19](https://github.com/DeepseaPlatform/coastal/issues/19): COASTAL incorrectly complained about too few runs when only surfers executed [032346f](https://github.com/DeepseaPlatform/coastal/commit/032346f4d9a12a54a59a660c26b95e959872ca07)
-- [Bug #20](https://github.com/DeepseaPlatform/coastal/issues/20): Options in XML are now pased to the strategy/observer/delegate they are intended for.  They are also correctly accessed.
+- [Bug #20](https://github.com/DeepseaPlatform/coastal/issues/20): Options in XML are now pased to the strategy/observer/delegate they are intended for.  They are also correctly accessed. [2bfa3e1](https://github.com/DeepseaPlatform/coastal/commit/2bfa3e1c1ef8ca761be6746a01f64fee3916ca84)
 
 ## [0.0.1] - 2018.11.27
 

@@ -8,7 +8,7 @@ import org.apache.commons.configuration2.ImmutableConfiguration;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
-import za.ac.sun.cs.coastal.diver.SegmentedPCIf;
+import za.ac.sun.cs.coastal.diver.SegmentedPC.SegmentedPCIf;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.symbolic.Model;

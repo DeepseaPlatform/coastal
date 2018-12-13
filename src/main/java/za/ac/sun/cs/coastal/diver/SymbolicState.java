@@ -14,6 +14,8 @@ import org.objectweb.asm.Opcodes;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.Trigger;
+import za.ac.sun.cs.coastal.diver.SegmentedPC.SegmentedPCIf;
+import za.ac.sun.cs.coastal.diver.SegmentedPC.SegmentedPCSwitch;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;

@@ -2,13 +2,14 @@ package za.ac.sun.cs.coastal.diver;
 
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.green.expr.Expression;
+import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.Operation;
 import za.ac.sun.cs.green.expr.Operation.Operator;
 
 public abstract class SegmentedPC implements Execution {
 
 	public static final SegmentedPC NULL = new SegmentedPCIf(null, null, null, true);
-	
+
 	private final SegmentedPC parent;
 
 	private final Expression passiveConjunct;
@@ -111,5 +112,213 @@ public abstract class SegmentedPC implements Execution {
 	}
 
 	public abstract String toString0();
+
+	// ======================================================================
+	//
+	// BINARY CHOICES
+	//
+	// ======================================================================
+
+	public static class SegmentedPCIf extends SegmentedPC {
+
+		private final Expression expression;
+
+		private final boolean value;
+
+		private final Expression activeConjunct;
+
+		private final String signature;
+
+		private SegmentedPC negated = null;
+
+		public SegmentedPCIf(SegmentedPC parent, Expression expression, Expression passiveConjunct, boolean value) {
+			super(parent, passiveConjunct);
+			this.expression = expression;
+			this.value = value;
+			this.activeConjunct = this.value ? this.expression : negate(this.expression);
+			if (this.value) {
+				SegmentedPC p = getParent();
+				this.signature = (p == null) ? "1" : (p.getSignature() + "1");
+			} else {
+				SegmentedPC p = getParent();
+				this.signature = (p == null) ? "0" : (p.getSignature() + "0");
+			}
+		}
+
+		@Override
+		public Expression getExpression() {
+			return expression;
+		}
+
+		public boolean getValue() {
+			return value;
+		}
+
+		@Override
+		public Expression getActiveConjunct() {
+			return activeConjunct;
+		}
+
+		@Override
+		public String getSignature() {
+			return signature;
+		}
+
+		@Override
+		public int getNrOfOutcomes() {
+			return 2;
+		}
+
+		@Override
+		public int getOutcomeIndex() {
+			return value ? 1 : 0;
+		}
+
+		@Override
+		public String getOutcome(int index) {
+			if (index == 0) {
+				return "F";
+			} else {
+				return "T";
+			}
+		}
+
+		@Override
+		public SegmentedPC getChild(int index, Execution parent) {
+			if (getValue() == (index == 1)) {
+				return this;
+			} else {
+				return new SegmentedPCIf((SegmentedPC) parent, getExpression(), getPassiveConjunct(), index == 1);
+			}
+		}
+
+		public SegmentedPC negate() {
+			if (negated == null) {
+				negated = new SegmentedPCIf(getParent(), getExpression(), getPassiveConjunct(), !getValue());
+			}
+			return negated;
+		}
+
+		@Override
+		public String toString0() {
+			if (this == SegmentedPC.NULL) {
+				return "Null-SPC";
+			}
+			Expression e = getPassiveConjunct();
+			StringBuilder sb = new StringBuilder();
+			sb.append(String.format("%-7s ", getValue() ? "TRUE" : "FALSE"));
+			sb.append(String.format("%-30s ", getExpression().toString()));
+			sb.append(String.format("%s", (e == null) ? "NULL" : e.toString()));
+			SegmentedPC p = getParent();
+			if (p != null) {
+				sb.append('\n').append(p.toString());
+			}
+			return sb.toString();
+		}
+
+	}
+
+	// ======================================================================
+	//
+	// N-ARY CHOICES
+	//
+	// ======================================================================
+
+	public static class SegmentedPCSwitch extends SegmentedPC {
+
+		private final Expression expression;
+
+		private final int min;
+
+		private final int max;
+
+		private final int cur;
+
+		private final Expression activeConjunct;
+
+		private final String signature;
+
+		public SegmentedPCSwitch(SegmentedPC parent, Expression expression, Expression passiveConjunct, int min,
+				int max, int cur) {
+			super(parent, passiveConjunct);
+			this.expression = expression;
+			this.min = min;
+			this.max = max;
+			this.cur = cur;
+			if (this.cur < this.min) {
+				Operation lo = new Operation(Operator.LT, expression, new IntConstant(this.min));
+				Operation hi = new Operation(Operator.GT, expression, new IntConstant(this.max));
+				this.activeConjunct = new Operation(Operator.OR, lo, hi);
+				SegmentedPC p = getParent();
+				this.signature = (p == null) ? "X" : (p.getSignature() + "X");
+			} else {
+				this.activeConjunct = new Operation(Operator.EQ, expression, new IntConstant(this.cur));
+				String q = Integer.toString(this.cur) + ".";
+				SegmentedPC p = getParent();
+				this.signature = (p == null) ? q : (p.getSignature() + "." + q);
+			}
+		}
+
+		@Override
+		public Expression getExpression() {
+			return expression;
+		}
+
+		@Override
+		public Expression getActiveConjunct() {
+			return activeConjunct;
+		}
+
+		@Override
+		public String getSignature() {
+			return signature;
+		}
+
+		@Override
+		public int getNrOfOutcomes() {
+			return max - min + 2;
+		}
+
+		@Override
+		public int getOutcomeIndex() {
+			return (cur < min) ? (max - min + 1) : (cur - min);
+		}
+
+		@Override
+		public String getOutcome(int index) {
+			if ((index >= 0) && (index < max - min + 1)) {
+				return Integer.toString(index + min);
+			} else {
+				return "DF";
+			}
+		}
+
+		@Override
+		public SegmentedPC getChild(int index, Execution parent) {
+			SegmentedPC p = (SegmentedPC) parent;
+			if (min + index == cur) {
+				return this;
+			} else if (index > max - min) {
+				return new SegmentedPCSwitch(p, expression, getPassiveConjunct(), min, max, min - 1);
+			} else {
+				return new SegmentedPCSwitch(p, expression, getPassiveConjunct(), min, max, min + index);
+			}
+		}
+
+		@Override
+		public String toString0() {
+			Expression e = getPassiveConjunct();
+			StringBuilder sb = new StringBuilder();
+			sb.append(String.format("%-7s ", (cur < min) ? "DEFAULT" : Integer.toString(cur)));
+			sb.append(String.format("%-30s ", getExpression().toString()));
+			sb.append(String.format("%s", (e == null) ? "NULL" : e.toString()));
+			SegmentedPC p = getParent();
+			if (p != null) {
+				sb.append('\n').append(p.toString());
+			}
+			return sb.toString();
+		}
+
+	}
 
 }
