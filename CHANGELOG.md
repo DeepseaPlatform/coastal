@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Travis CI docker setup [dd9bca9](https://github.com/DeepseaPlatform/coastal/commit/dd9bca9ced9369f31dd21c7d82d8701cb4468791)
 - [Bug #15](https://github.com/DeepseaPlatform/coastal/issues/15): new symbolic character bounds were incorrect (String.java::charAt__I__C) [8d9b5ba](https://github.com/DeepseaPlatform/coastal/commit/8d9b5ba7da9d0d5b79210fbce9df8957e349ce0b)
+- [Bug #19](https://github.com/DeepseaPlatform/coastal/issues/19): COASTAL incorrectly complained about too few runs when only surfers executed
 
 ## [0.0.1] - 2018.11.27
 

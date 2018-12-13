@@ -1440,7 +1440,7 @@ public class COASTAL {
 		getBroker().publish("coastal-report", this);
 		System.setOut(getSystemOut());
 		System.setErr(getSystemErr());
-		if (diverManager.getDiveCount() < 2) {
+		if ((diverManager.getDiveCount() + surferManager.getSurfCount()) < 2) {
 			Banner bn = new Banner('@');
 			bn.println("ONLY A SINGLE RUN EXECUTED\n");
 			bn.println("CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE");
