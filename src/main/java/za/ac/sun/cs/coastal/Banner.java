@@ -177,6 +177,12 @@ public class Banner {
 		out.println(borderEmpty + "\n" + borderLine + "\n" + borderLine);
 	}
 
+	// ======================================================================
+	//
+	// ONE LINE BANNER
+	//
+	// ======================================================================
+
 	/**
 	 * Produce a short, one-line banner.
 	 * 
@@ -205,6 +211,12 @@ public class Banner {
 		}
 		return sb.toString();
 	}
+
+	// ======================================================================
+	//
+	// FORMAT TIMES
+	//
+	// ======================================================================
 
 	/**
 	 * Format the elapsed time in human-readable form. It checks the duration

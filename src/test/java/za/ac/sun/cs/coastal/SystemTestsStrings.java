@@ -12,7 +12,7 @@ public class SystemTestsStrings extends SystemTests {
 	@Test
 	public void testCharAt01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/strings/CharAt01.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/strings/CharAt01.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);

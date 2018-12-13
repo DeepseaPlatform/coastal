@@ -14,7 +14,7 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testInstructionCoverage01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log,
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
 				new String[] { "tests/Test01.xml", "tests/observers/InstructionCoverage01.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
@@ -32,7 +32,7 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testMarkerCoverage01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log,
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
 				new String[] { "tests/Test01.xml", "tests/observers/MarkerCoverage01.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
@@ -56,7 +56,7 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testMarkerCoverage02() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log,
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
 				new String[] { "tests/Test01.xml", "tests/observers/MarkerCoverage02.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
@@ -88,7 +88,7 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testMarkerCoverage03() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log,
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
 				new String[] { "tests/Test01.xml", "tests/observers/MarkerCoverage03.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
@@ -120,7 +120,7 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testStopController01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log,
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
 				new String[] { "tests/Test01.xml", "tests/observers/StopController01.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);

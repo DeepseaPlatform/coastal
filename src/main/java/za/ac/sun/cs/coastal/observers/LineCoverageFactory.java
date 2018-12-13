@@ -5,7 +5,7 @@ import java.util.BitSet;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.Conversion;
+import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
@@ -68,7 +68,7 @@ public class LineCoverageFactory implements ObserverFactory {
 				BitSet uncovered = new BitSet();
 				uncovered.or(potentials);
 				uncovered.andNot(covered);
-				broker.publish("report", new Tuple("LineCoverage.uncovered", Conversion.toString(uncovered)));
+				broker.publish("report", new Tuple("LineCoverage.uncovered", ConfigHelper.toString(uncovered)));
 				//broker.publish("report", new Tuple("LineCoverage.covered", Conversion.toString(covered)));
 				//broker.publish("report", new Tuple("LineCoverage.potentials", Conversion.toString(potentials)));
 			}

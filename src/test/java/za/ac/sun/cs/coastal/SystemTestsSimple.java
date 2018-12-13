@@ -22,7 +22,7 @@ public class SystemTestsSimple extends SystemTests {
 	@Test
 	public void testStraight01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Straight01.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Straight01.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -37,7 +37,7 @@ public class SystemTestsSimple extends SystemTests {
 	@Test
 	public void testChoice01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice01.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice01.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -52,7 +52,7 @@ public class SystemTestsSimple extends SystemTests {
 	@Test
 	public void testChoice02() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice02.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice02.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -67,7 +67,7 @@ public class SystemTestsSimple extends SystemTests {
 	@Test
 	public void testChoice03() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice03.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice03.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -82,7 +82,7 @@ public class SystemTestsSimple extends SystemTests {
 	@Test
 	public void testChoice04() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice04.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/simple/Choice04.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);

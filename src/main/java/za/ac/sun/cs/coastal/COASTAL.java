@@ -1,11 +1,6 @@
 package za.ac.sun.cs.coastal;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
@@ -26,23 +21,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import org.apache.commons.configuration2.CombinedConfiguration;
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableConfiguration;
-import org.apache.commons.configuration2.XMLConfiguration;
-import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Parameters;
-import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.configuration2.io.FileHandler;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import za.ac.sun.cs.coastal.Conversion.ConfigCombiner;
 import za.ac.sun.cs.coastal.Reporter.Reportable;
-import za.ac.sun.cs.coastal.TaskFactory.TaskManager;
 import za.ac.sun.cs.coastal.TaskFactory.Task;
+import za.ac.sun.cs.coastal.TaskFactory.TaskManager;
 import za.ac.sun.cs.coastal.diver.DiverFactory;
 import za.ac.sun.cs.coastal.diver.DiverFactory.DiverManager;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
@@ -55,9 +40,8 @@ import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.SurferFactory;
-// import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
-import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
+import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.green.expr.Constant;
 
@@ -486,9 +470,9 @@ public class COASTAL {
 		pcQueue = new LinkedBlockingQueue<>();
 		traceQueue = new LinkedBlockingQueue<>();
 		// TIMING INFORMATION
-		timeLimit = Conversion.limitLong(getConfig(), "coastal.settings.time-limit");
+		timeLimit = ConfigHelper.limitLong(getConfig(), "coastal.settings.time-limit");
 		// TASK MANAGEMENT
-		maxThreads = Conversion.minmax(getConfig().getInt("coastal.settings.max-threads", 2), 2, Short.MAX_VALUE);
+		maxThreads = ConfigHelper.minmax(getConfig().getInt("coastal.settings.max-threads", 2), 2, Short.MAX_VALUE);
 		executor = Executors.newCachedThreadPool();
 		completionService = new ExecutorCompletionService<Void>(executor);
 		futures = new ArrayList<Future<Void>>(maxThreads);
@@ -672,7 +656,7 @@ public class COASTAL {
 			if (sfClass == null) {
 				break;
 			}
-			Object sfObject = Conversion.createInstance(this, sfClass);
+			Object sfObject = ConfigHelper.createInstance(this, sfClass);
 			if ((sfObject == null) || !(sfObject instanceof StrategyFactory)) {
 				Banner bn = new Banner('@');
 				bn.println("UNKNOWN STRATEGY IGNORED:\n" + sfClass);
@@ -702,7 +686,7 @@ public class COASTAL {
 			if (observerName == null) {
 				break;
 			}
-			Object observerFactory = Conversion.createInstance(this, observerName.trim());
+			Object observerFactory = ConfigHelper.createInstance(this, observerName.trim());
 			if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
 				ObserverFactory factory = (ObserverFactory) observerFactory;
 				ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
@@ -737,7 +721,7 @@ public class COASTAL {
 				break;
 			}
 			String model = getConfig().getString(key + ".model");
-			Object modelObject = Conversion.createInstance(this, model.trim());
+			Object modelObject = ConfigHelper.createInstance(this, model.trim());
 			if (modelObject != null) {
 				delegates.put(target.trim(), modelObject);
 			}
@@ -1524,234 +1508,11 @@ public class COASTAL {
 	public static void main(String[] args) {
 		final Logger log = LogManager.getLogger("COASTAL");
 		new Banner('~').println("COASTAL version " + Version.read()).display(log);
-		ImmutableConfiguration config = loadConfiguration(log, args);
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, args);
 		if (config != null) {
 			new COASTAL(log, config).start(false);
 		}
 		new Banner('~').println("COASTAL DONE (" + config.getString("run-name", "?") + ")").display(log);
-	}
-
-	/**
-	 * The name of COASTAL configuration file, both the resource (part of the
-	 * project, providing sensible defaults), and the user's own configuration
-	 * file (providing overriding personalizations).
-	 */
-	private static final String COASTAL_CONFIGURATION = "coastal.xml";
-
-	/**
-	 * The subdirectory in the user's home directory where the personal coastal
-	 * file is searched for.
-	 */
-	private static final String COASTAL_DIRECTORY = ".coastal";
-
-	/**
-	 * The user's home directory.
-	 */
-	private static final String HOME_DIRECTORY = System.getProperty("user.home");
-
-	/**
-	 * The full name of the subdirectory where the personal file is searched
-	 * for.
-	 */
-	private static final String HOME_COASTAL_DIRECTORY = HOME_DIRECTORY + File.separator + COASTAL_DIRECTORY;
-
-	/**
-	 * The full name of the personal configuration file.
-	 */
-	private static final String HOME_CONFIGURATION = HOME_COASTAL_DIRECTORY + File.separator + COASTAL_CONFIGURATION;
-
-	/**
-	 * Load the COASTAL configuration. Three sources are consulted:
-	 * 
-	 * <ul>
-	 * <li>a project resource</li>
-	 * <li>the user's personal configuration file</li>
-	 * <li>the configuration file specified on the command line</li>
-	 * </ul>
-	 * 
-	 * The second source overrides the first, and the third source overrides the
-	 * first two sources.
-	 * 
-	 * @param log
-	 *            the logger to which to report
-	 * @param args
-	 *            the command-line arguments
-	 * @return an immutable configuration
-	 */
-	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args) {
-		return loadConfiguration(log, args, null);
-	}
-
-	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args, String extra) {
-		String runName = (args.length > 0) ? FilenameUtils.getName(args[0]) : null;
-		return loadConfiguration(log, runName, args, extra);
-	}
-
-	public static ImmutableConfiguration loadConfiguration(Logger log, String runName, String[] args, String extra) {
-		if (runName != null) {
-			String runNameSetting = "<run-name>" + runName + "</run-name>";
-			if (extra == null) {
-				extra = runNameSetting;
-			} else {
-				extra += runNameSetting;
-			}
-		}
-		Configuration cfg1 = loadConfigFromResource(log, COASTAL_CONFIGURATION);
-		Configuration cfg2 = loadConfigFromFile(log, HOME_CONFIGURATION);
-		if (args.length < 1) {
-			Banner bn = new Banner('@');
-			bn.println("MISSING PROPERTIES FILE\n");
-			bn.println("USAGE: coastal <properties file>");
-			bn.display(log);
-			return null;
-		}
-		Configuration[] cfg3 = new Configuration[args.length];
-		int cfgIndex = -1;
-		for (String arg : args) {
-			String filename = arg;
-			if (filename.endsWith(".java")) {
-				filename = filename.substring(0, filename.length() - 4) + "xml";
-			}
-			cfg3[++cfgIndex] = loadConfigFromFile(log, filename);
-			if (cfg3[cfgIndex] == null) {
-				cfg3[cfgIndex] = loadConfigFromResource(log, filename);
-			}
-			if (cfg3[cfgIndex] == null) {
-				Banner bn = new Banner('@');
-				bn.println("COASTAL PROBLEM\n");
-				bn.println("COULD NOT READ CONFIGURATION FILE \"" + filename + "\"");
-				bn.display(log);
-			}
-		}
-		Configuration cfg4 = loadConfigFromString(log, extra);
-		ConfigCombiner combiner = new ConfigCombiner();
-		combiner.addJoinNode("bounds", "name");
-		CombinedConfiguration config = new CombinedConfiguration(combiner);
-		if (cfg4 != null) {
-			config.addConfiguration(cfg4);
-		}
-		for (Configuration cfg : cfg3) {
-			if (cfg != null) {
-				config.addConfiguration(cfg);
-			}
-		}
-		if (cfg2 != null) {
-			config.addConfiguration(cfg2);
-		}
-		if (cfg1 != null) {
-			config.addConfiguration(cfg1);
-		}
-		if (config.getString("coastal.target.trigger") == null) {
-			Banner bn = new Banner('@');
-			bn.println("SUSPICIOUS PROPERTIES FILE\n");
-			bn.println("ARE YOU SURE THAT THE ARGUMENT IS A .xml FILE?");
-			bn.display(log);
-			return null;
-		}
-		return ConfigurationUtils.unmodifiableConfiguration(config);
-	}
-
-	/**
-	 * Load a COASTAL configuration from a file.
-	 * 
-	 * @param log
-	 *            the logger to which to report
-	 * @param filename
-	 *            the name of the file
-	 * @return an immutable configuration or {@code null} if the file was not
-	 *         found
-	 */
-	private static Configuration loadConfigFromFile(Logger log, String filename) {
-		try {
-			InputStream inputStream = new FileInputStream(filename);
-			Configuration cfg = loadConfigFromStream(log, inputStream);
-			log.trace("loaded configuration from {}", filename);
-			return cfg;
-		} catch (ConfigurationException x) {
-			if (x.getCause() != null) {
-				log.trace("configuration error: " + x.getCause().getMessage());
-			}
-		} catch (FileNotFoundException x) {
-			log.trace("failed to load configuration from {}", filename);
-		}
-		return null;
-	}
-
-	/**
-	 * Load a COASTAL configuration from a Java resource.
-	 * 
-	 * @param log
-	 *            the logger to which to report
-	 * @param resourceName
-	 *            the name of the resource
-	 * @return an immutable configuration or {@code null} if the resource was
-	 *         not found
-	 */
-	private static Configuration loadConfigFromResource(Logger log, String resourceName) {
-		final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
-			if (resourceStream != null) {
-				Configuration cfg = loadConfigFromStream(log, resourceStream);
-				log.trace("loaded configuration from {}", resourceName);
-				return cfg;
-			}
-		} catch (ConfigurationException x) {
-			if (x.getCause() != null) {
-				log.trace("configuration error: " + x.getCause().getMessage());
-			}
-		} catch (IOException x) {
-			log.trace("failed to load configuration from {}", resourceName);
-		}
-		return null;
-	}
-
-	/**
-	 * Load a COASTAL configuration from an input stream.
-	 * 
-	 * @param log
-	 *            the logger to which to report
-	 * @param inputStream
-	 *            the stream from which to read
-	 * @return an immutable configuration
-	 * @throws ConfigurationException
-	 *             if anything went wrong during the loading of the
-	 *             configuration
-	 */
-	private static Configuration loadConfigFromStream(Logger log, InputStream inputStream)
-			throws ConfigurationException {
-		//		XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class)
-		//				.configure(new Parameters().xml().setValidating(true)).getConfiguration();
-		XMLConfiguration cfg = new BasicConfigurationBuilder<>(XMLConfiguration.class).configure(new Parameters().xml())
-				.getConfiguration();
-		FileHandler fh = new FileHandler(cfg);
-		fh.load(inputStream);
-		return cfg;
-	}
-
-	/**
-	 * Load a COASTAL configuration from a string.
-	 * 
-	 * @param log
-	 *            the logger to which to report
-	 * @param configString
-	 *            the stirng that contains the configuration
-	 * @return an immutable configuration
-	 */
-	private static Configuration loadConfigFromString(Logger log, String configString) {
-		if (configString == null) {
-			return null;
-		}
-		try {
-			String finalString = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>"
-					+ "<!DOCTYPE configuration PUBLIC \"-//DEEPSEA//COASTAL configuration//EN\" "
-					+ "\"https://deepseaplatform.github.io/coastal/coastal.dtd\">" + "<configuration>" + configString
-					+ "</configuration>";
-			InputStream in = new ByteArrayInputStream(finalString.getBytes());
-			return loadConfigFromStream(log, in);
-		} catch (ConfigurationException x) {
-			// ignore
-		}
-		return null;
 	}
 
 }

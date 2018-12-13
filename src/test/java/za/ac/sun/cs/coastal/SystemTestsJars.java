@@ -12,7 +12,7 @@ public class SystemTestsJars extends SystemTests {
 	@Test
 	public void testJar00() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar00.xml" },
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar00.xml" },
 				"<coastal><target><jar directory=\"ZZ\">tests/jars/testJar.jar</jar></target></coastal>");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
@@ -28,7 +28,7 @@ public class SystemTestsJars extends SystemTests {
 	@Test
 	public void testJar01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar01.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar01.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -43,7 +43,7 @@ public class SystemTestsJars extends SystemTests {
 	@Test
 	public void testJar02() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar02.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar02.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -58,7 +58,7 @@ public class SystemTestsJars extends SystemTests {
 	@Test
 	public void testJar03() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar03.xml" });
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar03.xml" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);

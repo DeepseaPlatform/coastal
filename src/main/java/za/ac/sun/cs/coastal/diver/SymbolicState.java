@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.Conversion;
+import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.messages.Broker;
@@ -95,7 +95,7 @@ public class SymbolicState implements State {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();
-		limitConjuncts = Conversion.limitLong(coastal.getConfig(), "coastal.settings.conjunct-limit");
+		limitConjuncts = ConfigHelper.limitLong(coastal.getConfig(), "coastal.settings.conjunct-limit");
 		traceAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		this.concreteValues = concreteValues;
 		symbolicMode = traceAll;
