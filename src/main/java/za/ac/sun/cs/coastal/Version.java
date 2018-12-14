@@ -9,14 +9,33 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryBuilder;
 
+/**
+ * Static methods to compute the current version of COASTAL.
+ */
 public class Version {
 
+	/**
+	 * Name of the Java properties file that gradle uses to store the version
+	 * number.
+	 */
 	protected static final String DEFAULT_APP_PROPERTIES = "app.properties";
 
+	/**
+	 * The version string used when the version cannot be computed in any other
+	 * way.
+	 */
 	protected static final String DEFAULT_VERSION = "unspecified";
 
+	/**
+	 * The computed version for this run of COASTAL.
+	 */
 	protected static String version = null;
 
+	/**
+	 * Read and return the version.
+	 * 
+	 * @return the current version of COASTAL
+	 */
 	public static String read() {
 		if (version == null) {
 			version = read(DEFAULT_APP_PROPERTIES);
@@ -24,10 +43,27 @@ public class Version {
 		return version;
 	}
 
+	/**
+	 * Read the version from the given resource.
+	 * 
+	 * @param resourceName
+	 *            the name of the resource to read
+	 * @return the current version of COASTAL as specified in the resource
+	 */
 	protected static String read(String resourceName) {
 		return read(resourceName, true);
 	}
-	
+
+	/**
+	 * Read the version from a given resource or use Jgit if the second
+	 * parameter is true.
+	 * 
+	 * @param resourceName
+	 *            the name of the resource to read
+	 * @param tryJgit
+	 *            whether or not to use Jgit is the resource is not available
+	 * @return the current version of COASTAL as specified in the resource
+	 */
 	protected static String read(String resourceName, boolean tryJgit) {
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		try (InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
@@ -43,11 +79,28 @@ public class Version {
 			return DEFAULT_VERSION;
 		}
 	}
-	
+
+	/**
+	 * Read the version from the given input stream.
+	 * 
+	 * @param inputStream
+	 *            the input stream to read
+	 * @return the current version of COASTAL as it appears in the input stream
+	 */
 	protected static String read(InputStream inputStream) {
 		return read(inputStream, true);
 	}
 
+	/**
+	 * Read the version from the given input stream or use Jgit if the second
+	 * parameter is true.
+	 * 
+	 * @param inputStream
+	 *            the input stream to read
+	 * @param tryJgit
+	 *            whether or not to use Jgit is the resource is not available
+	 * @return the current version of COASTAL as it appears in the input stream
+	 */
 	protected static String read(InputStream inputStream, boolean tryJgit) {
 		Properties properties = new Properties();
 		try {
@@ -58,10 +111,27 @@ public class Version {
 		return read(properties, tryJgit);
 	}
 
+	/**
+	 * Read the version from the given Java properties.
+	 * 
+	 * @param properties
+	 *            the Java properties object to read
+	 * @return the current version of COASTAL as it appears in the properties
+	 */
 	protected static String read(Properties properties) {
 		return read(properties, true);
 	}
 
+	/**
+	 * Read the version from the given Java properties or use Jgit if the second
+	 * parameter is true.
+	 * 
+	 * @param properties
+	 *            the Java properties object to read
+	 * @param tryJgit
+	 *            whether or not to use Jgit is the resource is not available
+	 * @return the current version of COASTAL as it appears in the properties
+	 */
 	protected static String read(Properties properties, boolean tryJgit) {
 		String v = properties.getProperty("version");
 		if ((v != null) && (v.charAt(0) != '%')) {
@@ -74,6 +144,11 @@ public class Version {
 		}
 	}
 
+	/**
+	 * Use Jgit to compute the current version of COASTAL.
+	 * 
+	 * @return the current version of COASTAL as computed by Jgit
+	 */
 	private static String readJgitVersion() {
 		try {
 			Repository repo = new RepositoryBuilder().readEnvironment().findGitDir().build();
