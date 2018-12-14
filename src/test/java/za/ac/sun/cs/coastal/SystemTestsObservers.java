@@ -30,6 +30,25 @@ public class SystemTestsObservers extends SystemTests {
 	}
 
 	@Test
+	public void testLineCoverage01() {
+		final Logger log = LogManager.getLogger("COASTAL-TEST");
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
+				new String[] { "tests/Test01.xml", "tests/observers/LineCoverage01.xml" });
+		assertNotNull(config);
+		COASTAL coastal = new COASTAL(log, config);
+		coastal.start(false);
+		Reporter reporter = coastal.getReporter();
+		checkDivers(reporter, 1, 5);
+		checkSurfers(reporter, 0, 0);
+		checkStrategy(reporter, 1);
+		checkPathTree(reporter, 8, 0, 3);
+		checkInstrumentation(reporter, 35, 8, 1);
+		assertEquals(9, reporter.getStatLong("LineCoverage.covered-count"));
+		assertEquals(10, reporter.getStatLong("LineCoverage.potential-total"));
+		assertEquals("{21}", reporter.getStatString("LineCoverage.uncovered"));
+	}
+	
+	@Test
 	public void testMarkerCoverage01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
 		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,

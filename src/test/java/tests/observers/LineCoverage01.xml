@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>tests.observers.InstructionCoverage01</main>
+			<instrument>tests.observers</instrument>
+			<trigger>tests.observers.InstructionCoverage01.compute(X: int, Y: int, Z: int)</trigger>
+		</target>
+		<bounds>
+			<bound name="X" min="1" max="3"/>
+			<bound name="Y" min="1" max="3"/>
+			<bound name="Z" min="1" max="3"/>
+		</bounds>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
+		</observers>
+	</coastal>
+</configuration>
