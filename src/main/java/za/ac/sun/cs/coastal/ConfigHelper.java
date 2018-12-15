@@ -26,14 +26,29 @@ import org.apache.commons.configuration2.tree.NodeCombiner;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * A collection of routines to aid in loading the COASTAL configuration.
+ */
 public class ConfigHelper {
 
 	// ======================================================================
 	//
-	// 
+	// INSTANCE CREATION
 	//
 	// ======================================================================
 
+	/**
+	 * Create an instance of the class with the given name if it has a
+	 * constructor that takes a single parameter: an instance of COASTAL. The
+	 * given instance of COASTAL is passed to the constructor.
+	 * 
+	 * @param coastal
+	 *            the instance of COASTAL to pass to the constructor
+	 * @param className
+	 *            the name of the class to create
+	 * @return a new instance of the class (or {@code null} if it could not be
+	 *         instantiated)
+	 */
 	public static Object createInstance(COASTAL coastal, String className) {
 		Logger log = coastal.getLog();
 		Class<?> clas = loadClass(coastal, className);
@@ -65,6 +80,22 @@ public class ConfigHelper {
 		return null;
 	}
 
+	/**
+	 * Create an instance of the class with the given name if it has a
+	 * constructor that takes a two parameters: an instance of COASTAL and a
+	 * (sub)configuration. The given instance of COASTAL and the configuration
+	 * are passed to the constructor. This is used for components that may read
+	 * additional options from the configuration.
+	 * 
+	 * @param coastal
+	 *            the instance of COASTAL to pass to the constructor
+	 * @param options
+	 *            the (sub)configuration relevant to the instance
+	 * @param className
+	 *            the name of the class to create
+	 * @return a new instance of the class (or {@code null} if it could not be
+	 *         instantiated)
+	 */
 	public static Object createInstance(COASTAL coastal, ImmutableConfiguration options, String className) {
 		Logger log = coastal.getLog();
 		Class<?> clas = loadClass(coastal, className);
@@ -95,7 +126,16 @@ public class ConfigHelper {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Load the class specified by the class name.
+	 * 
+	 * @param coastal
+	 *            instance of COASTAL
+	 * @param className
+	 *            the name of the class
+	 * @return the class (or {@code null} if it could not be loaded)
+	 */
 	public static Class<?> loadClass(COASTAL coastal, String className) {
 		Logger log = coastal.getLog();
 		Class<?> clas = null;
@@ -114,56 +154,186 @@ public class ConfigHelper {
 
 	// ======================================================================
 	//
-	// 
+	// CONFIGURATION VALUE UTILITIES
 	//
 	// ======================================================================
 
-	public static long minmax(long value, long min, long max) {
-		return (value < min) ? min : (value > max) ? max : value;
-	}
-
-	public static long zero(long value, long zero) {
-		return (value == 0) ? zero : value;
-	}
-
-	public static long limitLong(ImmutableConfiguration config, String key) {
-		return zero(minmax(config.getLong(key, Long.MAX_VALUE), 0, Long.MAX_VALUE), Long.MAX_VALUE);
-	}
-
+	/**
+	 * Return the {@code int} value "clamped" to lie between the minimum and
+	 * maximum values.
+	 * 
+	 * @param value
+	 *            the original value
+	 * @param min
+	 *            the minimum value allowed
+	 * @param max
+	 *            the maximum value allowed
+	 * @return the clamped {@code int} value
+	 */
 	public static int minmax(int value, int min, int max) {
 		return (value < min) ? min : (value > max) ? max : value;
 	}
 
+	/**
+	 * Return the {@code long} value "clamped" to lie between the minimum and
+	 * maximum values.
+	 * 
+	 * @param value
+	 *            the original value
+	 * @param min
+	 *            the minimum value allowed
+	 * @param max
+	 *            the maximum value allowed
+	 * @return the clamped {@code long} value
+	 */
+	public static long minmax(long value, long min, long max) {
+		return (value < min) ? min : (value > max) ? max : value;
+	}
+
+	/**
+	 * Return the {@code int} value or, if it is equal to zero, a replacement
+	 * value.
+	 * 
+	 * @param value
+	 *            the original value
+	 * @param zero
+	 *            the replacement value if the first parameter is equal to zero
+	 * @return the original {@code int} value or its zero replacement
+	 */
 	public static int zero(int value, int zero) {
 		return (value == 0) ? zero : value;
 	}
 
+	/**
+	 * Return the {@code long} value or, if it is equal to zero, a replacement
+	 * value.
+	 * 
+	 * @param value
+	 *            the original value
+	 * @param zero
+	 *            the replacement value if the first parameter is equal to zero
+	 * @return the original {@code long} value or its zero replacement
+	 */
+	public static long zero(long value, long zero) {
+		return (value == 0) ? zero : value;
+	}
+
+	/**
+	 * The {@code int} value associated with the key in the supplied
+	 * configuration. The value is clamped to minimum and maximum {@code int}
+	 * values. If the key is not present, the maximum {@code int} value is
+	 * returned.
+	 * 
+	 * @param config
+	 *            the configuration to consult
+	 * @param key
+	 *            the key of the value
+	 * @return the {@code int} value associated with the key
+	 */
 	public static int limitInt(ImmutableConfiguration config, String key) {
 		return zero(minmax(config.getInt(key, Integer.MAX_VALUE), 0, Integer.MAX_VALUE), Integer.MAX_VALUE);
 	}
 
+	/**
+	 * The {@code long} value associated with the key in the supplied
+	 * configuration. The value is clamped to minimum and maximum {@code long}
+	 * values. If the key is not present, the maximum {@code long} value is
+	 * returned.
+	 * 
+	 * @param config
+	 *            the configuration to consult
+	 * @param key
+	 *            the key of the value
+	 * @return the {@code long} value associated with the key
+	 */
+	public static long limitLong(ImmutableConfiguration config, String key) {
+		return zero(minmax(config.getLong(key, Long.MAX_VALUE), 0, Long.MAX_VALUE), Long.MAX_VALUE);
+	}
+
 	// ======================================================================
 	//
-	// 
+	// XML NODE COMBINER
 	//
 	// ======================================================================
 
+	/**
+	 * Special combiner that merge (not overwrite) selected nodes in an Apache
+	 * XML configuration.
+	 */
 	public static class ConfigCombiner extends NodeCombiner {
 
+		/**
+		 * Mapping from node tags to key attributes. The children of nodes whose
+		 * names (tags) appear in this mapping are merged if and only if they
+		 * agree on the value of the key attribute. If they disagree on the key
+		 * attribute they are combined.
+		 * 
+		 * For example, if this mapping contains the pair
+		 * {@code "elems" -> "name"}, then the two {@code "elems"} elements
+		 * 
+		 * <pre>
+		 * &lt;elems&gt;
+		 *   &lt;elem name="aaa" max=5/&gt;
+		 *   &lt;elem name="bbb" max=7/&gt;
+		 * &lt;/elems&gt;
+		 * 
+		 * &lt;elems&gt;
+		 *   &lt;elem name="ccc" min=1/&gt;
+		 *   &lt;elem name="bbb" min=3/&gt;
+		 * &lt;/elems&gt;
+		 * </pre>
+		 * 
+		 * are merged as
+		 * 
+		 * <pre>
+		 * &lt;elems&gt;
+		 *   &lt;elem name="aaa" max=5/&gt;
+		 *   &lt;elem name="bbb" max=7 min=3/&gt;
+		 *   &lt;elem name="ccc" min=1/&gt;
+		 * &lt;/elems&gt;
+		 * </pre>
+		 */
 		private final Map<String, String> joinNodes;
 
+		/**
+		 * Construct a COASTAL configuration node combiner.
+		 */
 		public ConfigCombiner() {
 			joinNodes = new HashMap<>();
 		}
 
+		/**
+		 * Add a node name and key attribute to the mapping of "special" nodes.
+		 * 
+		 * @param nodeName
+		 *            the name of the node
+		 * @param key
+		 *            the key attribute
+		 */
 		public void addJoinNode(final String nodeName, final String key) {
 			joinNodes.put(nodeName, key);
 		}
 
+		/**
+		 * Return the key attribute associated with the given node. If there is
+		 * no such attribute, {@code null} is returned.
+		 * 
+		 * @param node
+		 *            the node whose key attribute is searched for
+		 * @return the key attribute or {@code null} if the node has no
+		 *         registered key attribute
+		 */
 		public String getJoinKey(final ImmutableNode node) {
-			return joinNodes.get(node.getNodeName());
+			return (node == null) ? null : joinNodes.get(node.getNodeName());
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.apache.commons.configuration2.tree.NodeCombiner#combine(org.
+		 * apache.commons.configuration2.tree.ImmutableNode,
+		 * org.apache.commons.configuration2.tree.ImmutableNode)
+		 */
 		@Override
 		public ImmutableNode combine(final ImmutableNode node1, final ImmutableNode node2) {
 			final ImmutableNode.Builder result = new ImmutableNode.Builder();
@@ -214,6 +384,17 @@ public class ConfigHelper {
 			return result.create();
 		}
 
+		/**
+		 * Merge the attributes of {@code node1} and {@code node2} into
+		 * attributes for {@code result}.
+		 * 
+		 * @param result
+		 *            the target node for the attributes
+		 * @param node1
+		 *            the first source node for attributes
+		 * @param node2
+		 *            the second source node for attributes
+		 */
 		protected void addAttributes(final ImmutableNode.Builder result, final ImmutableNode node1,
 				final ImmutableNode node2) {
 			result.addAttributes(node1.getAttributes());
@@ -224,6 +405,20 @@ public class ConfigHelper {
 			}
 		}
 
+		/**
+		 * Check whether the child of node1 corresponds to (= can be combined
+		 * with) some child of node2 (which is then returned) or whether it is
+		 * unique (in which case it is added on its own).
+		 * 
+		 * @param node1
+		 *            the first parent node
+		 * @param node2
+		 *            the second parent node
+		 * @param child
+		 *            some child of the first parent node
+		 * @return the corresponding child of the second parent node or
+		 *         {@code null}
+		 */
 		protected ImmutableNode canCombine(final ImmutableNode node1, final ImmutableNode node2,
 				final ImmutableNode child) {
 			if (HANDLER.getChildrenCount(node2, child.getNodeName()) == 1
@@ -241,6 +436,16 @@ public class ConfigHelper {
 	//
 	// ======================================================================
 
+	/**
+	 * Convert a Java {@link java.util.BitSet} instance to a {@link String}.
+	 * This is somewhat out of place, but not entirely. A bit set such as
+	 * {@code {1, 3, 4, 5, 7, 9, 10}} is formatted as {@code "{1, 3-5, 7,
+	 * 9-10}"}.
+	 * 
+	 * @param bs
+	 *            the bit set to format
+	 * @return a string representation of the bit set
+	 */
 	public static final String toString(BitSet bs) {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
@@ -291,7 +496,7 @@ public class ConfigHelper {
 
 	// ======================================================================
 	//
-	// 
+	// LOAD COASTAL CONFIGURATION (WITHOUT PARSING IT)
 	//
 	// ======================================================================
 
@@ -325,6 +530,20 @@ public class ConfigHelper {
 	private static final String HOME_CONFIGURATION = HOME_COASTAL_DIRECTORY + File.separator + COASTAL_CONFIGURATION;
 
 	/**
+	 * Load a COASTAL configuration from a configuration file.
+	 * 
+	 * @param log
+	 *            the logger to which to report
+	 * @param arg
+	 *            the name of the configuration file
+	 * @return an immutable configuration or {@code null} if some configuration
+	 *         error occurred
+	 */
+	public static ImmutableConfiguration loadConfiguration(Logger log, String arg) {
+		return loadConfiguration(log, new String[] { arg }, null);
+	}
+
+	/**
 	 * Load the COASTAL configuration. Three sources are consulted:
 	 * 
 	 * <ul>
@@ -344,6 +563,23 @@ public class ConfigHelper {
 	 */
 	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args) {
 		return loadConfiguration(log, args, null);
+	}
+
+	/**
+	 * Load a COASTAL configuration from a configuration file and a
+	 * configuration string.
+	 * 
+	 * @param log
+	 *            the logger to which to report
+	 * @param arg
+	 *            the name of the configuration file
+	 * @param extra
+	 *            additional configuration settings (in XML)
+	 * @return an immutable configuration or {@code null} if some configuration
+	 *         error occurred
+	 */
+	public static ImmutableConfiguration loadConfiguration(Logger log, String arg, String extra) {
+		return loadConfiguration(log, new String[] { arg }, extra);
 	}
 
 	/**

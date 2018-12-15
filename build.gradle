@@ -31,7 +31,7 @@ dependencies {
 
 // So that XML files in src/test/java/tests/* are copied
 // to the test resources directory.
-sourceSets.test.resources.srcDirs += [ "src/test/java" ]
+sourceSets.test.resources.srcDirs += [ 'src/test/java' ]
 
 // Enforce gradle version for Travis CI
 task wrapper(type: Wrapper) {
@@ -40,6 +40,11 @@ task wrapper(type: Wrapper) {
 	 
 checkstyle {
 	toolVersion '8.1'
+}
+
+javadoc {
+	// options.memberLevel = JavadocMemberLevel.PRIVATE
+	options.noQualifiers = [ 'java.lang.*', 'java.io.*', 'java.util.*', 'org.apache.*' ]
 }
 
 version = gitVersion()

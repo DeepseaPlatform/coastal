@@ -8,6 +8,25 @@ import java.io.StringWriter;
 
 /**
  * Utility class for creating more visible banners in the log output.
+ * 
+ * <p>
+ * Typical usage for a one-line banner:
+ * </p>
+ * 
+ * <pre>
+ *   log.info((Banner.getBannerLine("some error occurred", '*'));
+ * </pre>
+ * 
+ * <p>
+ * Typical usage for a larger banner:
+ * </p>
+ * 
+ * <pre>
+ *   Banner bn = new Banner('@');
+ *   bn.println("SOME SERIOUS ERROR:");
+ *   bn.println(exception.getMessage());
+ *   bn.display(log);
+ * </pre>
  */
 public class Banner {
 

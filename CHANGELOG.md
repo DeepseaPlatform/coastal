@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- Tests for line coverage [e5f6236](https://github.com/DeepseaPlatform/coastal/commit/e5f623608a2f62a6e79f94029ced39e7db9e58d2)
+- Javadoc for ```za.ac.sun.cs.coastal``` package
+
+### Changed
+- ...
+
+### Deprecated
+- ...
+
+### Removed
+- ...
+
+### Fixed
+- ...
+
+## [0.0.2] - 2018.12.14
+
+### Added
 - Divers and strategies run in separate threads
 - Allow users to specify number of initial threads
 - Introduce lightweight instrumentation for fuzzing
@@ -30,12 +48,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Reduced console output [e1cc755](https://github.com/DeepseaPlatform/coastal/commit/e1cc7557e6c8e4317a3a307046dae0ed615f241d)
 - Significant refactoring to allow for lightweight testing and fuzzing
 - [Issue #17](https://github.com/DeepseaPlatform/coastal/issues/17) Duplicate and constant conjuncts now appear in the path tree [d44d531](https://github.com/DeepseaPlatform/coastal/commit/d44d531309d9ffdb66a8af752e01f35f53e2df91)
-
-### Deprecated
-- ...
-
-### Removed
-- ...
 
 ### Fixed
 - Travis CI docker setup [dd9bca9](https://github.com/DeepseaPlatform/coastal/commit/dd9bca9ced9369f31dd21c7d82d8701cb4468791)

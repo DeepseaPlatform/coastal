@@ -25,8 +25,8 @@ public class SystemTestsObservers extends SystemTests {
 		checkStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
 		checkInstrumentation(reporter, 56, 14, 1);
-		assertEquals(38, reporter.getStatLong("InstructionCoverage.covered-count"));
-		assertEquals(38, reporter.getStatLong("InstructionCoverage.potential-total"));
+		assertEquals(38, reporter.getLong("InstructionCoverage.covered-count"));
+		assertEquals(38, reporter.getLong("InstructionCoverage.potential-total"));
 	}
 
 	@Test
@@ -43,9 +43,9 @@ public class SystemTestsObservers extends SystemTests {
 		checkStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 3);
 		checkInstrumentation(reporter, 35, 8, 1);
-		assertEquals(9, reporter.getStatLong("LineCoverage.covered-count"));
-		assertEquals(10, reporter.getStatLong("LineCoverage.potential-total"));
-		assertEquals("{21}", reporter.getStatString("LineCoverage.uncovered"));
+		assertEquals(9, reporter.getLong("LineCoverage.covered-count"));
+		assertEquals(10, reporter.getLong("LineCoverage.potential-total"));
+		assertEquals("{21}", reporter.getString("LineCoverage.uncovered"));
 	}
 	
 	@Test
@@ -62,14 +62,14 @@ public class SystemTestsObservers extends SystemTests {
 		checkStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
 		checkInstrumentation(reporter, 56, 14, 1);
-		assertEquals(0, reporter.getStatLong("MarkerCoverage.marker[0]"));
-		assertEquals(8, reporter.getStatLong("MarkerCoverage.marker[1]"));
-		assertEquals(4, reporter.getStatLong("MarkerCoverage.marker[10]"));
-		assertEquals(4, reporter.getStatLong("MarkerCoverage.marker[11]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[100]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[101]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[110]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[111]"));
+		assertEquals(0, reporter.getLong("MarkerCoverage.marker[0]"));
+		assertEquals(8, reporter.getLong("MarkerCoverage.marker[1]"));
+		assertEquals(4, reporter.getLong("MarkerCoverage.marker[10]"));
+		assertEquals(4, reporter.getLong("MarkerCoverage.marker[11]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[100]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[101]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[110]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[111]"));
 	}
 
 	@Test
@@ -86,22 +86,22 @@ public class SystemTestsObservers extends SystemTests {
 		checkStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
 		checkInstrumentation(reporter, 56, 14, 1);
-		assertEquals(0, reporter.getStatLong("MarkerCoverage.marker[0]"));
-		assertEquals(8, reporter.getStatLong("MarkerCoverage.marker[1]"));
-		assertEquals(4, reporter.getStatLong("MarkerCoverage.marker[10]"));
-		assertEquals(4, reporter.getStatLong("MarkerCoverage.marker[11]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[100]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[101]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[110]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[111]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[1000]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[1001]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[1010]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[1011]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[1100]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[1101]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[1110]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[1111]"));
+		assertEquals(0, reporter.getLong("MarkerCoverage.marker[0]"));
+		assertEquals(8, reporter.getLong("MarkerCoverage.marker[1]"));
+		assertEquals(4, reporter.getLong("MarkerCoverage.marker[10]"));
+		assertEquals(4, reporter.getLong("MarkerCoverage.marker[11]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[100]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[101]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[110]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[111]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[1000]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[1001]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[1010]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[1011]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[1100]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[1101]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[1110]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[1111]"));
 	}
 
 	@Test
@@ -118,22 +118,22 @@ public class SystemTestsObservers extends SystemTests {
 		checkStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
 		checkInstrumentation(reporter, 56, 14, 1);
-		assertEquals(0, reporter.getStatLong("MarkerCoverage.marker[never]"));
-		assertEquals(8, reporter.getStatLong("MarkerCoverage.marker[compute-8]"));
-		assertEquals(4, reporter.getStatLong("MarkerCoverage.marker[<5-4]"));
-		assertEquals(4, reporter.getStatLong("MarkerCoverage.marker[>=5-4]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[<5<7-2]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[<5>=7-2]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[>=5<7-2]"));
-		assertEquals(2, reporter.getStatLong("MarkerCoverage.marker[>=5>=7-2]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[<5<7==9-1]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[<5<7!=9-1]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[<5>=7==9-1]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[<5>=7!=9-1]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[>=5<7==9-1]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[>=5<7!=9-1]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[>=5>=7==9-1]"));
-		assertEquals(1, reporter.getStatLong("MarkerCoverage.marker[>=5>=7!=9-1]"));
+		assertEquals(0, reporter.getLong("MarkerCoverage.marker[never]"));
+		assertEquals(8, reporter.getLong("MarkerCoverage.marker[compute-8]"));
+		assertEquals(4, reporter.getLong("MarkerCoverage.marker[<5-4]"));
+		assertEquals(4, reporter.getLong("MarkerCoverage.marker[>=5-4]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[<5<7-2]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[<5>=7-2]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[>=5<7-2]"));
+		assertEquals(2, reporter.getLong("MarkerCoverage.marker[>=5>=7-2]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[<5<7==9-1]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[<5<7!=9-1]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[<5>=7==9-1]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[<5>=7!=9-1]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[>=5<7==9-1]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[>=5<7!=9-1]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[>=5>=7==9-1]"));
+		assertEquals(1, reporter.getLong("MarkerCoverage.marker[>=5>=7!=9-1]"));
 	}
 
 	@Test
@@ -150,7 +150,7 @@ public class SystemTestsObservers extends SystemTests {
 		checkStrategy(reporter, 1);
 		checkPathTree(reporter, 1, 0, 0);
 		checkInstrumentation(reporter, 2, 1);
-		assertTrue(reporter.getStatBool("StopController.was-stopped"));
+		assertTrue(reporter.getBool("StopController.was-stopped"));
 	}
 
 }

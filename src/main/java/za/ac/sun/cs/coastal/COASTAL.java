@@ -136,20 +136,55 @@ public class COASTAL {
 	//
 	// ======================================================================
 
+	/**
+	 * Summary of information about task kinds.
+	 */
 	public static class TaskInfo {
 
+		/**
+		 * The factory that corresponds to this task.
+		 */
 		private final TaskFactory factory;
 
+		/**
+		 * The task manager.
+		 */
 		private final TaskManager manager;
 
+		/**
+		 * The number of initial threads.
+		 */
 		private final int initThreads;
 
+		/**
+		 * The minimum number of threads.
+		 */
 		private final int minThreads;
 
+		/**
+		 * The maximum number of threads.
+		 */
 		private final int maxThreads;
 
+		/**
+		 * The current number of threads.
+		 */
 		private int threadCount = 0;
 
+		/**
+		 * Construct a new task summary.
+		 * 
+		 * @param coastal
+		 *            instance of COASTAL
+		 * @param factory
+		 *            the task factory
+		 * @param initThreads
+		 *            initial number of threads
+		 * @param minThreads
+		 *            minimum number of threads
+		 * @param maxThreads
+		 *            maximum number of threads
+		 */
 		TaskInfo(final COASTAL coastal, final TaskFactory factory, final int initThreads, final int minThreads,
 				final int maxThreads) {
 			this.factory = factory;
@@ -159,37 +194,82 @@ public class COASTAL {
 			this.maxThreads = maxThreads;
 		}
 
+		/**
+		 * Create a new task of this kind.
+		 * 
+		 * @param coastal
+		 *            instance of COASTAL
+		 * @return the new task
+		 */
 		public Task create(COASTAL coastal) {
 			threadCount++;
 			return factory.createTask(coastal, manager);
 		}
 
+		/**
+		 * Return the manager for this kind of task.
+		 * 
+		 * @return the task manager
+		 */
 		public TaskManager getManager() {
 			return manager;
 		}
 
+		/**
+		 * Return the initial number of threads.
+		 * 
+		 * @return initial number of threads
+		 */
 		public int getInitThreads() {
 			return initThreads;
 		}
 
+		/**
+		 * Return the minimum number of threads.
+		 * 
+		 * @return minimum number of threads
+		 */
 		public int getMinThreads() {
 			return minThreads;
 		}
 
+		/**
+		 * Return the maximum number of threads.
+		 * 
+		 * @return maximum number of threads
+		 */
 		public int getMaxThreads() {
 			return maxThreads;
 		}
 
+		/**
+		 * Return the current number of threads.
+		 * 
+		 * @return current number of threads
+		 */
 		public int getThreadCount() {
 			return threadCount;
 		}
 
 	}
 
+	/**
+	 * Collection of task summaries.
+	 */
 	private final List<TaskInfo> tasks = new ArrayList<>();
 
+	/**
+	 * The manager for all divers. Divers are also included in the task
+	 * summaries ({@link #tasks}), but it is handy to have direct access to
+	 * their manager.
+	 */
 	private DiverManager diverManager;
 
+	/**
+	 * The manager for all surfers. Surfers are also included in the task
+	 * summaries ({@link #tasks}), but it is handy to have direct access to
+	 * their manager.
+	 */
 	private SurferManager surferManager;
 
 	// ======================================================================
@@ -256,7 +336,7 @@ public class COASTAL {
 	private final PrintStream systemErr = System.err;
 
 	/**
-	 * A null printstream for suppressing output and error.
+	 * A null {@link PrintStream} for suppressing output and error.
 	 */
 	private static final PrintStream NUL = new PrintStream(new OutputStream() {
 		@Override
@@ -502,7 +582,7 @@ public class COASTAL {
 		prefixes.addAll(getConfig().getList(String.class, "coastal.target.instrument"));
 		String[] triggerNames = getConfig().getStringArray("coastal.target.trigger");
 		for (int i = 0; i < triggerNames.length; i++) {
-			triggers.add(Trigger.createTrigger(parameters, triggerNames[i].trim()));
+			triggers.add(Trigger.createTrigger(triggerNames[i].trim(), parameters));
 		}
 	}
 
@@ -606,21 +686,31 @@ public class COASTAL {
 		}
 	}
 
+	/**
+	 * Add a minimum/maximum bounds for a variable.
+	 * 
+	 * @param bounds
+	 *            the mapping of variable names to bounds
+	 * @param key
+	 *            the configuration key that stores the bound
+	 * @param var
+	 *            the name of the variable
+	 */
 	private void addBound(Map<String, Object> bounds, String key, String var) {
 		if (getConfig().containsKey(key)) {
 			Class<?> type = parameters.get(var);
 			long value = getConfig().getLong(key);
-			if (type == boolean.class) {
+			if ((type == boolean.class) || (type == boolean[].class)) {
 				bounds.put(var, (int) value);
-			} else if (type == byte.class) {
+			} else if ((type == byte.class) || (type == byte[].class)) {
 				bounds.put(var, (byte) value);
-			} else if (type == short.class) {
+			} else if ((type == short.class) || (type == short[].class)) {
 				bounds.put(var, (short) value);
-			} else if (type == char.class) {
+			} else if ((type == char.class) || (type == char[].class)) {
 				bounds.put(var, (char) value);
-			} else if (type == int.class) {
+			} else if ((type == int.class) || (type == int[].class)) {
 				bounds.put(var, (int) value);
-			} else if (type == long.class) {
+			} else if ((type == long.class) || (type == long[].class)) {
 				bounds.put(var, value);
 			} else {
 				bounds.put(var, (int) value);
@@ -783,6 +873,12 @@ public class COASTAL {
 		return pathTree;
 	}
 
+	/**
+	 * Return an instance of {@link Reportable} that reports information about
+	 * the path tree.
+	 * 
+	 * @return a reporter for path tree properties
+	 */
 	public Reportable getPathTreeReportable() {
 		return new Reportable() {
 
@@ -809,6 +905,12 @@ public class COASTAL {
 		};
 	}
 
+	/**
+	 * Return an instance of {@link Reportable} that reports information about
+	 * the COASTAL analysis run.
+	 * 
+	 * @return a reporter for analysis run properties
+	 */
 	public Reportable getCoastalReportable() {
 		return new Reportable() {
 
@@ -908,6 +1010,13 @@ public class COASTAL {
 		return triggers.get(index);
 	}
 
+	/**
+	 * Return the mapping of variable names to types. This contains all the
+	 * symbolic parameters mentioned in triggers (as well as any additional
+	 * symbolic variables created during some previous run of the program).
+	 * 
+	 * @return the variable/type mapping
+	 */
 	public Map<String, Class<?>> getParameters() {
 		return parameters;
 	}
@@ -964,22 +1073,52 @@ public class COASTAL {
 	//
 	// ======================================================================
 
+	/**
+	 * Return an iterable collection of observers that are flagged to be
+	 * instantiated once for the entire analysis run.
+	 * 
+	 * @return collection of observers started once for the analysis run
+	 */
 	public Iterable<Tuple> getObserversPerRun() {
 		return observersPerRun;
 	}
 
+	/**
+	 * Return an iterable collection of observers that are flagged to be
+	 * instantiated once for each task (strategy), ecluding the divers and
+	 * surfers.
+	 * 
+	 * @return collection of observers started once for each task
+	 */
 	public Iterable<Tuple> getObserversPerTask() {
 		return observersPerTask;
 	}
 
+	/**
+	 * Return an iterable collection of observers that are flagged to be
+	 * instantiated once for each diver.
+	 * 
+	 * @return collection of observers started once for each diver
+	 */
 	public Iterable<Tuple> getObserversPerDiver() {
 		return observersPerDiver;
 	}
 
+	/**
+	 * Return an iterable collection of observers that are flagged to be
+	 * instantiated once for each surfer.
+	 * 
+	 * @return collection of observers started once for each surfer
+	 */
 	public Iterable<Tuple> getObserversPerSurfer() {
 		return observersPerSurfer;
 	}
 
+	/**
+	 * Return an iterable collection of all loaded observers.
+	 * 
+	 * @return collection of all observers
+	 */
 	public Iterable<Tuple> getAllObservers() {
 		return allObservers;
 	}
@@ -1122,6 +1261,12 @@ public class COASTAL {
 	//
 	// ======================================================================
 
+	/**
+	 * Return the collection of task managers (extracted from the task summaries
+	 * {@link #tasks}) as a list.
+	 * 
+	 * @return a list of task managers
+	 */
 	public List<TaskManager> getTasks() {
 		return tasks.stream().map(t -> t.getManager()).collect(Collectors.toList());
 	}
@@ -1307,7 +1452,7 @@ public class COASTAL {
 	/**
 	 * Add a new entry to the queue of traces.
 	 * 
-	 * @param spc
+	 * @param trace
 	 *            the trace to add
 	 */
 	public void addTrace(Trace trace) {
@@ -1345,8 +1490,10 @@ public class COASTAL {
 	 * 
 	 * @param delay
 	 *            time to wait in milliseconds
+	 * @throws InterruptedException
+	 *             if the thread was interrupted while delaying
 	 */
-	public void idle(long delay) throws InterruptedException {
+	private void idle(long delay) throws InterruptedException {
 		if ((System.currentTimeMillis() - startingTime.getTimeInMillis()) / 1000 > timeLimit) {
 			log.warn("time limit reached");
 			stopWork();
@@ -1453,6 +1600,10 @@ public class COASTAL {
 		}
 	}
 
+	/**
+	 * Start the tasks described by the task summaries {@link #tasks}, as read
+	 * from the configuration.
+	 */
 	private void startTasks() {
 		for (TaskInfo task : tasks) {
 			for (int i = 0; i < task.getInitThreads(); i++) {
@@ -1461,7 +1612,13 @@ public class COASTAL {
 		}
 	}
 
-	public void tick(Object object) {
+	/**
+	 * Perform periodic reporting to the console.
+	 * 
+	 * @param object
+	 *            dummy object
+	 */
+	private void tick(Object object) {
 		long elapsedTime = System.currentTimeMillis() - getStartingTime();
 		if (elapsedTime > nextReportingTime) {
 			String time = Banner.getElapsed(this);
@@ -1481,14 +1638,23 @@ public class COASTAL {
 			} else if (elapsedTime > 60000) {
 				// After 1 minute, we report every 15 seconds
 				nextReportingTime = elapsedTime + 15000;
-			} else {
-				// Otherwise we report every five seconds
+			} else if (elapsedTime > 2000) {
+				// After 2 seconds, we report every five seconds
 				nextReportingTime = elapsedTime + 5000;
+			} else {
+				// Otherwise we report every 500 milliseconds
+				nextReportingTime = elapsedTime + 500;
 			}
 		}
 	}
 
-	public void report(Object object) {
+	/**
+	 * Reports some statistics about the analysis run at the end of the run.
+	 * 
+	 * @param object
+	 *            dummy object
+	 */
+	private void report(Object object) {
 		getBroker().publish("report", new Tuple("COASTAL.start", startingTime));
 		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
 		long duration = stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis();
