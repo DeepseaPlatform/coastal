@@ -212,9 +212,13 @@ public abstract class PathBasedFactory implements StrategyFactory {
 					log.trace("+++ starting refinement");
 					List<Model> mdls = refine(spc);
 					int d = -1;
-					if (mdls != null) {
-						coastal.addDiverModels(mdls);
-						d = mdls.size() - 1;
+					while (mdls != null) {
+						int m = coastal.addDiverModels(mdls);
+						d += m;
+						if (m > 0) {
+							break;
+						}
+						mdls = refine1();
 					}
 					log.trace("+++ added {} models", d);
 					coastal.updateWork(d);
@@ -238,8 +242,12 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			}
 			log.trace("... explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
 			manager.insertPath(spc, false); // ignore revisited return value
+			return refine1();
+		}
+
+		protected List<Model> refine1() {
 			while (true) {
-				spc = findNewPath(manager.getPathTree());
+				SegmentedPC spc = findNewPath(manager.getPathTree());
 				if (spc == null) {
 					log.trace("... no further paths");
 					return null;

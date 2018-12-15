@@ -6,9 +6,12 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
@@ -352,9 +355,19 @@ public class COASTAL {
 	// ======================================================================
 
 	/**
+	 * Cache of all diver models that have been enqueued.
+	 */
+	protected final Set<String> visitedDiverModels = Collections.synchronizedSet(new HashSet<>());
+
+	/**
 	 * A queue of models produced by strategies and consumed by divers.
 	 */
 	private final BlockingQueue<Model> diverModelQueue;
+
+	/**
+	 * Cache of all surfer models that have been enqueued.
+	 */
+	protected final Set<String> visitedSurferModels = Collections.synchronizedSet(new HashSet<>());
 
 	/**
 	 * A queue of models produced by strategies and consumed by surfers.
@@ -1315,19 +1328,26 @@ public class COASTAL {
 	}
 
 	/**
-	 * Add a list of models to the diver model queue.
+	 * Add a list of models to the diver model queue. Only those models that
+	 * have not been enqueued before are added to the queue.
 	 * 
 	 * @param mdls
 	 *            the list of models to add
+	 * @return the number of models actually added to the queue
 	 */
-	public void addDiverModels(List<Model> mdls) {
-		mdls.forEach(m -> {
-			try {
-				diverModelQueue.put(m);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+	public int addDiverModels(List<Model> mdls) {
+		int n = 0;
+		try {
+			for (Model m : mdls) {
+				if (visitedDiverModels.add(m.getConcreteValues().toString())) {
+					diverModelQueue.put(m);
+					n++;
+				}
 			}
-		});
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return n;
 	}
 
 	/**
@@ -1372,19 +1392,26 @@ public class COASTAL {
 	}
 
 	/**
-	 * Add a list of models to the surfer model queue.
+	 * Add a list of models to the surfer model queue. Only those models that
+	 * have not been enqueued before are added to the queue.
 	 * 
 	 * @param mdls
 	 *            the list of models to add
+	 * @return the number of models actually added to the queue
 	 */
-	public void addSurferModels(List<Model> mdls) {
-		mdls.forEach(m -> {
-			try {
-				surferModelQueue.put(m);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+	public int addSurferModels(List<Model> mdls) {
+		int n = 0;
+		try {
+			for (Model m : mdls) {
+				if (visitedSurferModels.add(m.getConcreteValues().toString())) {
+					surferModelQueue.put(m);
+					n++;
+				}
 			}
-		});
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return n;
 	}
 
 	/**
