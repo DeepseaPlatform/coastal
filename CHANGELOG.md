@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Tests for line coverage [e5f6236](https://github.com/DeepseaPlatform/coastal/commit/e5f623608a2f62a6e79f94029ced39e7db9e58d2)
-- Javadoc for ```za.ac.sun.cs.coastal``` package
+- Javadoc for ```za.ac.sun.cs.coastal``` package [dba5ce3](https://github.com/DeepseaPlatform/coastal/commit/dba5ce3acfe230c4d6942cf4cc011a5231462bef)
 
 ### Changed
 - ...

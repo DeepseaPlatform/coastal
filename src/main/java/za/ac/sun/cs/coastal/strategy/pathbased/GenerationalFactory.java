@@ -166,12 +166,33 @@ public class GenerationalFactory extends PathBasedFactory {
 	//
 	// ======================================================================
 
+	/**
+	 * A generational strategy: a path condition such as
+	 * {@code A && B && C && D} is negated and truncated conjunct by conjunct to
+	 * produce {@code A && B && C && !D}, {@code A && B && !C}, {@code A && !B},
+	 * {@code !A}.
+	 */
 	private static class GenerationalStrategy extends PathBasedStrategy {
 
+		/**
+		 * The priority of the longest generated new path condition.
+		 */
 		private final int priorityStart;
 
+		/**
+		 * The change in priority for shorter and shorter generated path
+		 * conditions.
+		 */
 		private final int priorityDelta;
 
+		/**
+		 * Construct a new task that implements the generational strategy.
+		 * 
+		 * @param coastal
+		 *            instance of COASTAL
+		 * @param manager
+		 *            a generational task manager
+		 */
 		GenerationalStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 			priorityStart = ((GenerationalManager) manager).priorityStart;
