@@ -136,10 +136,12 @@ public class SurferFactory implements TaskFactory {
 		public Object[] getPropertyValues() {
 			Object[] propertyValues = new Object[4];
 			double swt = surferWaitTime.get() / surferWaitCount.doubleValue();
+			long c = getSurfCount();
+			long t = surferTime.get();
 			propertyValues[0] = surferTaskCount;
-			propertyValues[1] = getSurfCount();
+			propertyValues[1] = String.format("%d (%.1f/sec)", c, c / (0.001 * t));
 			propertyValues[2] = swt;
-			propertyValues[3] = surferTime.get();
+			propertyValues[3] = t;
 			return propertyValues;
 		}
 

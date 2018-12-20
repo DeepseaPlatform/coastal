@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Improved text-based drawing of path trees [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
 - Better handling of exceptions [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
-- Improved support for random testing
+- Improved support for random testing [60eccd2](https://github.com/DeepseaPlatform/coastal/commit/60eccd27562304b69a991f6ecb14b65dd6e8ce84)
 
 ### Deprecated
 - ...

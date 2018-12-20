@@ -136,10 +136,12 @@ public class DiverFactory implements TaskFactory {
 		public Object[] getPropertyValues() {
 			Object[] propertyValues = new Object[4];
 			double dwt = diverWaitTime.get() / diverWaitCount.doubleValue();
+			long c = getDiveCount();
+			long t = diverTime.get();
 			propertyValues[0] = diverTaskCount;
-			propertyValues[1] = getDiveCount();
-			propertyValues[2] =  dwt;
-			propertyValues[3] = diverTime.get();
+			propertyValues[1] = String.format("%d (%.1f/sec)", c, c / (0.001 * t));
+			propertyValues[2] = dwt;
+			propertyValues[3] = t;
 			return propertyValues;
 		}
 

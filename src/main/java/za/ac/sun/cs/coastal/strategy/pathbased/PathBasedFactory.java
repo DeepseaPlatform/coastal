@@ -147,10 +147,12 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			Object[] propertyValues = new Object[4];
 			int index = 0;
 			double swt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
+			long c = refineCount.get();
+			long t = strategyTime.get();
 			propertyValues[index++] = getTaskCount();
-			propertyValues[index++] = refineCount.get();
+			propertyValues[index++] = String.format("%d (%.1f/sec)", c, c / (0.001 * t));
 			propertyValues[index++] = swt;
-			propertyValues[index++] = strategyTime.get();
+			propertyValues[index++] = t;
 			return propertyValues;
 		}
 
