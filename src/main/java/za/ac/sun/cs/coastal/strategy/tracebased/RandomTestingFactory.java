@@ -4,15 +4,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.configuration2.ImmutableConfiguration;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
-import za.ac.sun.cs.coastal.solver.IntegerConstant;
 import za.ac.sun.cs.coastal.surfer.Trace;
+import za.ac.sun.cs.coastal.surfer.TraceState;
 import za.ac.sun.cs.coastal.symbolic.Model;
 
 public class RandomTestingFactory extends TraceBasedFactory {
@@ -79,8 +79,6 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 	public static class RandomTestingStrategy extends TraceBasedStrategy {
 
-		private final Random rng = new Random();
-
 		private final PathTree pathTree;
 
 		private final Map<String, Object> concreteValues = new HashMap<>();
@@ -119,32 +117,77 @@ public class RandomTestingFactory extends TraceBasedFactory {
 				if (type == boolean.class) {
 					int min = (Integer) coastal.getMinBound(name, type);
 					int max = (Integer) coastal.getMaxBound(name, type);
-					long value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntegerConstant(value, 32));
+					int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+					concreteValues.put(name, Long.valueOf(value));
 				} else if (type == byte.class) {
 					int min = (Byte) coastal.getMinBound(name, type);
 					int max = (Byte) coastal.getMaxBound(name, type);
-					int value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntegerConstant(value, 32));
+					int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+					concreteValues.put(name, Long.valueOf(value));
 				} else if (type == short.class) {
 					int min = (Short) coastal.getMinBound(name, type);
 					int max = (Short) coastal.getMaxBound(name, type);
-					int value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntegerConstant(value, 32));
+					int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+					concreteValues.put(name, Long.valueOf(value));
 				} else if (type == char.class) {
 					int min = (Character) coastal.getMinBound(name, type);
 					int max = (Character) coastal.getMaxBound(name, type);
-					int value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntegerConstant(value, 32));
+					int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+					concreteValues.put(name, Long.valueOf(value));
 				} else if (type == int.class) {
 					int min = (Integer) coastal.getMinBound(name, type);
 					int max = (Integer) coastal.getMaxBound(name, type);
-					int value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntegerConstant(value, 32));
+					int value = 0;
+					if ((min == Integer.MIN_VALUE) && (max == Integer.MAX_VALUE)) {
+						value = ThreadLocalRandom.current().nextInt();
+					} else if (max == Integer.MAX_VALUE) {
+						value = 1 + ThreadLocalRandom.current().nextInt(min - 1, max);
+					} else {
+						value = ThreadLocalRandom.current().nextInt(min, max + 1);
+					}
+					concreteValues.put(name, Long.valueOf(value));
+				} else if (type == long.class) {
+					long min = (Long) coastal.getMinBound(name, type);
+					long max = (Long) coastal.getMaxBound(name, type);
+					long value = 0;
+					if ((min == Long.MIN_VALUE) && (max == Long.MAX_VALUE)) {
+						value = 1 + ThreadLocalRandom.current().nextLong();
+					} else if (max == Long.MAX_VALUE) {
+						value = 1 + ThreadLocalRandom.current().nextLong(min - 1, max);
+					} else {
+						value = ThreadLocalRandom.current().nextLong(min, max + 1);
+					}
+					concreteValues.put(name, Long.valueOf(value));
+				} else if (type == float.class) {
+					double min = (Float) coastal.getMinBound(name, type);
+					double max = (Float) coastal.getMaxBound(name, type);
+					double value = ThreadLocalRandom.current().nextDouble(min, max);
+					concreteValues.put(name, Double.valueOf(value));
+				} else if (type == double.class) {
+					double min = (Float) coastal.getMinBound(name, type);
+					double max = (Float) coastal.getMaxBound(name, type);
+					double value = ThreadLocalRandom.current().nextDouble(min, max);
+					concreteValues.put(name, Double.valueOf(value));
+				} else if (type == int[].class) {
+					int size = coastal.getParameterSize(name);
+					int min = (Integer) coastal.getMinBound(name, type);
+					int max = (Integer) coastal.getMaxBound(name, type);
+					for (int i = 0; i < size; i++) {
+						int value = 0;
+						if ((min == Integer.MIN_VALUE) && (max == Integer.MAX_VALUE)) {
+							value = ThreadLocalRandom.current().nextInt();
+						} else if (max == Integer.MAX_VALUE) {
+							value = 1 + ThreadLocalRandom.current().nextInt(min - 1, max);
+						} else {
+							value = ThreadLocalRandom.current().nextInt(min, max + 1);
+						}
+						concreteValues.put(name + TraceState.INDEX_SEPARATOR + i, Long.valueOf(value));
+					}
 				}
 			}
 			String modelString = concreteValues.toString();
 			log.trace("... new model: {}", modelString);
+			numberOfModels++;
 			return Collections.singletonList(new Model(0, concreteValues));
 		}
 

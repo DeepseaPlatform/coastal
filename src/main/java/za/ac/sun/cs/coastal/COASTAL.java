@@ -106,6 +106,12 @@ public class COASTAL {
 	 */
 	private final Map<String, Class<?>> parameters = new HashMap<>();
 
+	/**
+	 * Mapping from parameter names (of all triggers) to their sizes (for
+	 * arrays).
+	 */
+	private final Map<String, Integer> parameterSize = new HashMap<>();
+
 	// ======================================================================
 	//
 	// VARIABLE BOUNDS
@@ -479,6 +485,8 @@ public class COASTAL {
 	 * 
 	 * private final List<String> prefixes = new ArrayList<>();
 	 * private final List<Trigger> triggers = new ArrayList<>();
+	 * private final Map<String, Class<?>> parameters = new HashMap<>();
+	 * private final Map<String, Integer> parameterSize = new HashMap<>();
 	 * 
 	 * // VARIABLE BOUNDS
 	 * 
@@ -925,14 +933,19 @@ public class COASTAL {
 	public Reportable getPathTreeReportable() {
 		return new Reportable() {
 
-			private final String[] propertyNames = new String[] { "#inserted", "#revisited", "#infeasible" };
+			private final String[] propertyNames = new String[] { "#inserted", "#revisited", "#infeasible", "#unique" };
 
 			@Override
 			public Object[] getPropertyValues() {
-				Object[] propertyValues = new Object[3];
-				propertyValues[0] = pathTree.getInsertedCount();
-				propertyValues[1] = pathTree.getRevisitCount();
-				propertyValues[2] = pathTree.getInfeasibleCount();
+				long i = pathTree.getInsertedCount();
+				long r = pathTree.getRevisitCount();
+				long f = pathTree.getInfeasibleCount();
+				long u = i - r - f;
+				Object[] propertyValues = new Object[4];
+				propertyValues[0] = i;
+				propertyValues[1] = r;
+				propertyValues[2] = f;
+				propertyValues[3] = u;
 				return propertyValues;
 			}
 
@@ -963,7 +976,7 @@ public class COASTAL {
 			@Override
 			public Object[] getPropertyValues() {
 				Object[] propertyValues = new Object[5];
-				propertyValues[0] = System.currentTimeMillis() - startingTime.getTimeInMillis();
+				propertyValues[0] = Banner.getElapsed(System.currentTimeMillis() - startingTime.getTimeInMillis());
 				propertyValues[1] = diverModelQueue.size();
 				propertyValues[2] = surferModelQueue.size();
 				propertyValues[3] = pcQueue.size();
@@ -1062,6 +1075,32 @@ public class COASTAL {
 	 */
 	public Map<String, Class<?>> getParameters() {
 		return parameters;
+	}
+
+	/**
+	 * Return the recorded size of the parameter. This is used for arrays.
+	 * 
+	 * @param name
+	 *            the name of the parameter
+	 * @return the recorded size of the parameter or zero
+	 */
+	public int getParameterSize(String name) {
+		Integer size = parameterSize.get(name);
+		return (size == null) ? 0 : size;
+	}
+
+	/**
+	 * Record size of a parameter. This is used for arrays.
+	 * 
+	 * @param name
+	 *            the name of the parameter
+	 * @param size
+	 *            the size of the parameter
+	 */
+	public void setParameterSize(String name, int size) {
+		if (parameters.containsKey(name)) {
+			parameterSize.put(name, size);
+		}
 	}
 
 	/**

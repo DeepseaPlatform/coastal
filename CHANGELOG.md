@@ -10,18 +10,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Tests for line coverage [e5f6236](https://github.com/DeepseaPlatform/coastal/commit/e5f623608a2f62a6e79f94029ced39e7db9e58d2)
 - Javadoc for ```za.ac.sun.cs.coastal``` package [dba5ce3](https://github.com/DeepseaPlatform/coastal/commit/dba5ce3acfe230c4d6942cf4cc011a5231462bef)
 - Caching of models inside COASTAL [1e3022c](https://github.com/DeepseaPlatform/coastal/commit/1e3022cda63225c873a4dc68a6f0ced9cb8f3516)
-- In-house solver
-- Support for all Java primitive types
+- In-house solver [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
+- Support for all Java primitive types [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
+- Average speed in GUI (number of divers/surfers/refinements per second)
 
 ### Changed
-- Improved text-based drawing of path trees
-- Better handling of exceptions
+- Improved text-based drawing of path trees [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
+- Better handling of exceptions [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
+- Improved support for random testing
 
 ### Deprecated
 - ...
 
 ### Removed
-- Removed dependency on GREEN
+- Removed dependency on GREEN [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
 
 ### Fixed
 - ...

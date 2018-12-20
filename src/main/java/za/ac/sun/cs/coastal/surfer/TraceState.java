@@ -19,7 +19,7 @@ import za.ac.sun.cs.coastal.symbolic.State;
 
 public class TraceState implements State {
 
-	private static final String INDEX_SEPARATOR = "_D_"; // "$"
+	public static final String INDEX_SEPARATOR = "_D_"; // "$"
 
 	public static final String CHAR_SEPARATOR = "_H_"; // "#"
 
@@ -240,16 +240,19 @@ public class TraceState implements State {
 	public Object getConcreteIntegralArray(int triggerIndex, int index, int address, Object currentArray,
 			Function<Long, Object> convert) {
 		if (concreteValues == null) {
+			coastal.setParameterSize(coastal.getTrigger(triggerIndex).getParamName(index), Array.getLength(currentArray));
 			return currentArray;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
-		Class<?> type = trigger.getParamType(index);
 		if (name == null) { // not symbolic
 			return currentArray;
 		}
 		int length = Array.getLength(currentArray);
-		Object newArray = Array.newInstance(type, length);
+		Class<?> type = trigger.getParamType(index);
+		assert type.isArray();
+		Class<?> elementType = type.getComponentType();
+		Object newArray = Array.newInstance(elementType, length);
 		for (int i = 0; i < length; i++) {
 			String entryName = name + INDEX_SEPARATOR + i;
 			Object concrete = concreteValues.get(entryName);
@@ -265,6 +268,7 @@ public class TraceState implements State {
 	public Object getConcreteRealArray(int triggerIndex, int index, int address, Object currentArray, Class<?> type,
 			Function<Double, Object> convert) {
 		if (concreteValues == null) {
+			coastal.setParameterSize(coastal.getTrigger(triggerIndex).getParamName(index), Array.getLength(currentArray));
 			return currentArray;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
