@@ -3,7 +3,7 @@
 	<Appenders>
 		<Console name="CONSOLE" target="SYSTEM_OUT" direct="true">
 			<ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-      		<PatternLayout pattern="{%T} %msg%n"/>
+      		<PatternLayout pattern="%msg%n"/>
   		</Console>
 		<File name="FILE" fileName="/tmp/coastal.log" append="false">
       		<PatternLayout pattern="%d{HH:mm:ss.SSS} {%T} %msg%n"/>
