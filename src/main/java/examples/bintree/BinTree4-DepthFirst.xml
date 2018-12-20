@@ -19,17 +19,11 @@
 		</bounds>
 		<divers threads="1"/>
 		<strategies>
-			<!--
-			<strategy threads="2">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
 			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
-			-->
-			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.BreadthFirstFactory</strategy>
 		</strategies>
 		<observers>
 			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
-			<observer>za.ac.sun.cs.coastal.observers.InstructionCoverageFactory</observer>
+			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
 		</observers>
-		<!-- 
-		-->
 	</coastal>
 </configuration>
