@@ -27,6 +27,13 @@ import java.io.StringWriter;
  *   bn.println(exception.getMessage());
  *   bn.display(log);
  * </pre>
+ * 
+ * <p>
+ * Two additional methods ({@link #getElapsed(COASTAL)} and
+ * {@link #getElapsed(long)}) are provided to format the COASTAL running time,
+ * and to format a general amount of elapsed time. These routines produce
+ * different forms depending on the amount of elapsed time.
+ * </p>
  */
 public class Banner {
 
@@ -238,8 +245,8 @@ public class Banner {
 	// ======================================================================
 
 	/**
-	 * Format the elapsed time in human-readable form. It checks the duration
-	 * and decides which units to include.
+	 * Format the elapsed time for a COASTAL analysis run in human-readable
+	 * form. It checks the duration and decides which units to include.
 	 * 
 	 * @param coastal
 	 *            the instance of COASTAL for which to compute the elapsed time
@@ -247,11 +254,25 @@ public class Banner {
 	 */
 	public static String getElapsed(COASTAL coastal) {
 		long t0 = coastal.getStartingTime();
-		long dt = System.currentTimeMillis() - t0;
-		long ms = dt % 1000;
-		long sec = (dt / 1000) % 60;
-		long min = (dt / 60000) % 60;
-		long hr = dt / 3600000;
+		return getElapsed(System.currentTimeMillis() - t0);
+	}
+
+	/**
+	 * Format the elapsed time in human-readable form. It checks the duration
+	 * and decides which units to include.
+	 * 
+	 * @since 0.0.3
+	 * 
+	 * @param delta
+	 *            the elapsed time in milliseconds
+	 * @return the nicely-formatted elapsed time
+	 *
+	 */
+	public static String getElapsed(long delta) {
+		long ms = delta % 1000;
+		long sec = (delta / 1000) % 60;
+		long min = (delta / 60000) % 60;
+		long hr = delta / 3600000;
 		if (hr != 0) {
 			return String.format("%d:%02d:%02d.%02d", hr, min, sec, ms / 10);
 		} else if (min != 0) {
