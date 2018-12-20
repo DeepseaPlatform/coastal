@@ -72,4 +72,8 @@ public class LightAdapter extends ClassVisitor {
 		return count;
 	}
 
+	public void showInstrumentation() {
+		coastal.getLog().info(swriter.toString());
+	}
+
 }

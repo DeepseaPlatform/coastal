@@ -72,7 +72,7 @@ public class HeavyAdapter extends ClassVisitor {
 		return count;
 	}
 
-	public void reportNow() {
+	public void showInstrumentation() {
 		coastal.getLog().info(swriter.toString());
 	}
 

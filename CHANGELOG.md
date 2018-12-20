@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Caching of models inside COASTAL [1e3022c](https://github.com/DeepseaPlatform/coastal/commit/1e3022cda63225c873a4dc68a6f0ced9cb8f3516)
 - In-house solver [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
 - Support for all Java primitive types [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
-- Average speed in GUI (number of divers/surfers/refinements per second)
+- Average speed in GUI (number of divers/surfers/refinements per second) [e395280](https://github.com/DeepseaPlatform/coastal/commit/e395280f8e8b573f012f491e62691ec3c91807c4)
+- [Issue #23](https://github.com/DeepseaPlatform/coastal/issues/23) Options to write instrumented code to file and to the log
 
 ### Changed
 - Improved text-based drawing of path trees [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)

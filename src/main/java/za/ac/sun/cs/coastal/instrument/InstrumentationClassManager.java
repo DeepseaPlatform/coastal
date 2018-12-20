@@ -37,6 +37,10 @@ public class InstrumentationClassManager {
 
 	private final Broker broker;
 
+	private final boolean showInstrumentation;
+
+	private final String writeClassfile;
+
 	private final List<String> classPaths = new ArrayList<>();
 
 	private final Map<String, String> jars = new HashMap<>();
@@ -64,6 +68,8 @@ public class InstrumentationClassManager {
 		log = coastal.getLog();
 		broker = coastal.getBroker();
 		broker.subscribe("coastal-stop", this::report);
+		showInstrumentation = coastal.getConfig().getBoolean("coastal.settings.show-instrumentation", false);
+		writeClassfile = coastal.getConfig().getString("coastal.settings.write-classfile", null);
 		String[] paths = classPath.split(File.pathSeparator);
 		for (String path : paths) {
 			classPaths.add(path);
@@ -142,12 +148,16 @@ public class InstrumentationClassManager {
 			HeavyAdapter ia = new HeavyAdapter(coastal, name, cw);
 			cr.accept(ia, 0);
 			instrumented = cw.toByteArray();
-			// writeFile("/tmp/X.class", instrumented);
 			instrumentedCount.incrementAndGet();
 			preInstrumentedSize.addAndGet(in.length);
 			postInstrumentedSize.addAndGet(instrumented.length);
 			log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, instrumented.length);
-			// ia.reportNow();
+			if (writeClassfile != null) {
+				writeFile(writeClassfile, instrumented);
+			}
+			if (showInstrumentation) {
+				ia.showInstrumentation();
+			}
 		}
 		return instrumented;
 	}
@@ -181,6 +191,12 @@ public class InstrumentationClassManager {
 			preInstrumentedSize.addAndGet(in.length);
 			postInstrumentedSize.addAndGet(instrumented.length);
 			log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, instrumented.length);
+			if (writeClassfile != null) {
+				writeFile(writeClassfile, instrumented);
+			}
+			if (showInstrumentation) {
+				ia.showInstrumentation();
+			}
 		}
 		return instrumented;
 	}

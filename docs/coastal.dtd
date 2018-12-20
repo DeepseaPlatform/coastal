@@ -22,11 +22,13 @@
 <!ATTLIST bound max CDATA #REQUIRED>
 
 <!-- general settings -->
-<!ELEMENT settings (trace-all?,echo-output?,draw-paths?,concrete-values?,max-threads?,run-limit?,time-limit?,path-limit?,conjunct-limit?)>
+<!ELEMENT settings (trace-all?,echo-output?,draw-paths?,concrete-values?,show-instrumentation?,write-classfile?,max-threads?,run-limit?,time-limit?,path-limit?,conjunct-limit?)>
 <!ELEMENT trace-all (#PCDATA)>
 <!ELEMENT echo-output (#PCDATA)>
 <!ELEMENT draw-paths (#PCDATA)>
 <!ELEMENT concrete-values (#PCDATA)>
+<!ELEMENT show-instrumentation (#PCDATA)>
+<!ELEMENT write-classfile (#PCDATA)>
 <!--<! E LEMENT load-balance (#PCDATA)>-->
 <!ELEMENT max-threads (#PCDATA)>
 <!ELEMENT run-limit (#PCDATA)>
