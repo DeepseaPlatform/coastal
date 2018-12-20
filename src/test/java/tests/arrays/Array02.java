@@ -10,6 +10,7 @@ public class Array02 {
 	}
 
 	public static int test(int[] arr) {
+		System.out.println(arr[0] + " " + arr[1]);
 		if (arr[0] < arr[1]) {
 			return -1;
 		} else if (arr[0] > arr[1]) {
@@ -18,5 +19,5 @@ public class Array02 {
 			return 0;
 		}
 	}
-	
+
 }

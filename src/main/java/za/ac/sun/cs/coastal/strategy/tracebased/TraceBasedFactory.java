@@ -165,9 +165,13 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 					log.trace("+++ starting refinement");
 					List<Model> mdls = refine(trace);
 					int d = -1;
-					if (mdls != null) {
-						coastal.addSurferModels(mdls);
-						d = mdls.size() - 1;
+					while (mdls != null) {
+						int m = coastal.addSurferModels(mdls);
+						if (m > 0) {
+							d += m;
+							break;
+						}
+						mdls = refine1();
 					}
 					log.trace("+++ added {} surfer models", d);
 					coastal.updateWork(d);
@@ -186,6 +190,8 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 		}
 
 		protected abstract List<Model> refine0(Trace trace);
+
+		protected abstract List<Model> refine1();
 
 	}
 

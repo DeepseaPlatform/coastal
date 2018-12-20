@@ -26,7 +26,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 	private final COASTAL coastal;
 
 	private final Logger log;
-	
+
 	private final boolean useConcreteValues;
 
 	private final InstrumentationClassManager classManager;
@@ -50,7 +50,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 	private static Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
 
 	private static Set<Label> catchLabels = new HashSet<>();
-	
+
 	private BitSet currentLinenumbers;
 
 	// private static BitSet currentBranchInstructions;
@@ -66,25 +66,19 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		this.argCount = argCount;
 	}
 
-	private void visitParameter(Trigger trigger, int triggerIndex, int index, int address) {
+	private int visitParameter(Trigger trigger, int triggerIndex, int index, int address) {
 		String name = trigger.getParamName(index);
-		if (name == null) {
-			return;
-		}
 		Class<?> type = trigger.getParamType(index);
-		if (type == int.class) {
+		int size = ((type == long.class) || (type == double.class)) ? 2 : 1;
+		if (name == null) {
+			return size;
+		}
+		if (type == boolean.class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);
 			mv.visitLdcInsn(address);
 			mv.visitIntInsn(Opcodes.ILOAD, address);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteInt", "(IIII)I", false);
-			mv.visitIntInsn(Opcodes.ISTORE, address);
-		} else if (type == char.class) {
-			mv.visitLdcInsn(triggerIndex);
-			mv.visitLdcInsn(index);
-			mv.visitLdcInsn(address);
-			mv.visitIntInsn(Opcodes.ILOAD, address);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteChar", "(IIIC)C", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteBoolean", "(IIIZ)Z", false);
 			mv.visitIntInsn(Opcodes.ISTORE, address);
 		} else if (type == byte.class) {
 			mv.visitLdcInsn(triggerIndex);
@@ -93,27 +87,48 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			mv.visitIntInsn(Opcodes.ILOAD, address);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteByte", "(IIIB)B", false);
 			mv.visitIntInsn(Opcodes.ISTORE, address);
-		} else if (type == int[].class) {
+		} else if (type == short.class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);
 			mv.visitLdcInsn(address);
-			mv.visitIntInsn(Opcodes.ALOAD, address);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteIntArray", "(III[I)[I", false);
-			mv.visitIntInsn(Opcodes.ASTORE, address);
-		} else if (type == char[].class) {
+			mv.visitIntInsn(Opcodes.ILOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteShort", "(IIIS)S", false);
+			mv.visitIntInsn(Opcodes.ISTORE, address);
+		} else if (type == char.class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);
 			mv.visitLdcInsn(address);
-			mv.visitIntInsn(Opcodes.ALOAD, address);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteCharArray", "(III[C)[C", false);
-			mv.visitIntInsn(Opcodes.ASTORE, address);
-		} else if (type == byte[].class) {
+			mv.visitIntInsn(Opcodes.ILOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteChar", "(IIIC)C", false);
+			mv.visitIntInsn(Opcodes.ISTORE, address);
+		} else if (type == int.class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);
 			mv.visitLdcInsn(address);
-			mv.visitIntInsn(Opcodes.ALOAD, address);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteByteArray", "(III[B)[B", false);
-			mv.visitIntInsn(Opcodes.ASTORE, address);
+			mv.visitIntInsn(Opcodes.ILOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteInt", "(IIII)I", false);
+			mv.visitIntInsn(Opcodes.ISTORE, address);
+		} else if (type == long.class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.LLOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteLong", "(IIIJ)J", false);
+			mv.visitIntInsn(Opcodes.LSTORE, address);
+		} else if (type == float.class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.FLOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteFloat", "(IIIF)F", false);
+			mv.visitIntInsn(Opcodes.FSTORE, address);
+		} else if (type == double.class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.DLOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteDouble", "(IIID)D", false);
+			mv.visitIntInsn(Opcodes.DSTORE, address);
 		} else if (type == String.class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);
@@ -122,10 +137,75 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteString",
 					"(IIILjava/lang/String;)Ljava/lang/String;", false);
 			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == boolean[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteBooleanArray", "(III[Z)[Z", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == byte[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteByteArray", "(III[B)[B", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == short[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteShortArray", "(III[S)[S", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == char[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteCharArray", "(III[C)[C", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == int[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteIntArray", "(III[I)[I", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == long[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteLongArray", "(III[J)[J", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == float[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteFloatArray", "(III[F)[F", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == double[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteDoubleArray", "(III[D)[D", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
+		} else if (type == String[].class) {
+			mv.visitLdcInsn(triggerIndex);
+			mv.visitLdcInsn(index);
+			mv.visitLdcInsn(address);
+			mv.visitIntInsn(Opcodes.ALOAD, address);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getConcreteStringArray",
+					"(III[Ljava/lang/String;)[Ljava/lang/String;", false);
+			mv.visitIntInsn(Opcodes.ASTORE, address);
 		} else {
 			log.fatal("UNHANDLED PARAMETER TYPE");
 			System.exit(1);
 		}
+		return size;
 	}
 
 	@Override
@@ -137,7 +217,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		mv.visitLineNumber(line, start);
 		currentLinenumbers.set(line);
 	}
-	
+
 	@Override
 	public void visitEnd() {
 		log.trace("visitEnd()");
@@ -153,7 +233,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		catchLabels.add(handler);
 		mv.visitTryCatchBlock(start, end, handler, type);
 	}
-	
+
 	@Override
 	public void visitCode() {
 		log.trace("visitCode()");
@@ -169,21 +249,22 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			int n = trigger.getParamCount();
 			int offset = (isStatic ? 0 : 1);
+			int address = offset;
 			for (int i = 0; i < n; i++) {
-				visitParameter(trigger, triggerIndex, i, i + offset);
+				address += visitParameter(trigger, triggerIndex, i, address);
 			}
 			Label end = new Label();
 			mv.visitJumpInsn(Opcodes.GOTO, end);
 			mv.visitLabel(label);
+			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 			//--- } else {
 			//---   startMethod()
-			// mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 			mv.visitLdcInsn(classManager.getMethodCounter());
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 			//--- }
 			mv.visitLabel(end);
-			// mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		} else {
 			mv.visitLdcInsn(classManager.getNextMethodCounter());
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
@@ -273,6 +354,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		log.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		if (owner.equals(SYMBOLIC)) {
 			mv.visitMethodInsn(opcode, LIBRARY, name, descriptor, isInterface);
+			// pop params !!!!!!!!!!!
 		} else {
 			mv.visitLdcInsn(classManager.getNextInstructionCounter());
 			mv.visitLdcInsn(opcode);
@@ -325,7 +407,17 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(18);
 		mv.visitLdcInsn(value);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "ldcInsn", "(IILjava/lang/Object;)V", false);
+		if (value instanceof Integer) {
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "ldcInsn", "(III)V", false);
+		} else if (value instanceof Long) {
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "ldcInsn", "(IIJ)V", false);
+		} else if (value instanceof Float) {
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "ldcInsn", "(IIF)V", false);
+		} else if (value instanceof Double) {
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "ldcInsn", "(IID)V", false);
+		} else {
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "ldcInsn", "(IILjava/lang/Object;)V", false);
+		}
 		mv.visitLdcInsn(value);
 	}
 

@@ -11,10 +11,9 @@ import org.apache.commons.configuration2.ImmutableConfiguration;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
+import za.ac.sun.cs.coastal.solver.IntegerConstant;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.green.expr.Constant;
-import za.ac.sun.cs.green.expr.IntConstant;
 
 public class RandomTestingFactory extends TraceBasedFactory {
 
@@ -84,7 +83,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 		private final PathTree pathTree;
 
-		private final Map<String, Constant> concreteValues = new HashMap<>();
+		private final Map<String, Object> concreteValues = new HashMap<>();
 
 		private final int maxNumberOfModels;
 
@@ -98,7 +97,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 		@Override
 		protected List<Model> refine0(Trace trace) {
-			if (numberOfModels++ >= maxNumberOfModels) {
+			if (numberOfModels >= maxNumberOfModels) {
 				return null;
 			}
 			if ((trace == null) || (trace == Trace.NULL)) {
@@ -109,34 +108,39 @@ public class RandomTestingFactory extends TraceBasedFactory {
 			if (pathTree.getRoot().isFullyExplored()) {
 				return null;
 			}
+			return refine1();
+		}
+
+		@Override
+		protected List<Model> refine1() {
 			for (Map.Entry<String, Class<?>> parameter : coastal.getParameters().entrySet()) {
 				String name = parameter.getKey();
 				Class<?> type = parameter.getValue();
 				if (type == boolean.class) {
 					int min = (Integer) coastal.getMinBound(name, type);
 					int max = (Integer) coastal.getMaxBound(name, type);
-					int value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntConstant(value));
+					long value = min + rng.nextInt(max - min + 1);
+					concreteValues.put(name, new IntegerConstant(value, 32));
 				} else if (type == byte.class) {
 					int min = (Byte) coastal.getMinBound(name, type);
 					int max = (Byte) coastal.getMaxBound(name, type);
 					int value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntConstant(value));
+					concreteValues.put(name, new IntegerConstant(value, 32));
 				} else if (type == short.class) {
 					int min = (Short) coastal.getMinBound(name, type);
 					int max = (Short) coastal.getMaxBound(name, type);
 					int value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntConstant(value));
+					concreteValues.put(name, new IntegerConstant(value, 32));
 				} else if (type == char.class) {
 					int min = (Character) coastal.getMinBound(name, type);
 					int max = (Character) coastal.getMaxBound(name, type);
 					int value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntConstant(value));
+					concreteValues.put(name, new IntegerConstant(value, 32));
 				} else if (type == int.class) {
 					int min = (Integer) coastal.getMinBound(name, type);
 					int max = (Integer) coastal.getMaxBound(name, type);
 					int value = min + rng.nextInt(max - min + 1);
-					concreteValues.put(name, new IntConstant(value));
+					concreteValues.put(name, new IntegerConstant(value, 32));
 				}
 			}
 			String modelString = concreteValues.toString();

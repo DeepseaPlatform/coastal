@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import za.ac.sun.cs.green.expr.Expression;
+import za.ac.sun.cs.coastal.solver.Expression;
 
 public class SymbolicFrame {
 

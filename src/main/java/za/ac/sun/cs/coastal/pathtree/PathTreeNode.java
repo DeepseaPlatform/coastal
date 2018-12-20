@@ -258,7 +258,7 @@ public final class PathTreeNode {
 	//
 	// ======================================================================
 
-	private static final int SPACING = 3;
+	private static final int SPACING = 2;
 
 	/**
 	 * Return the height of the subtree starting at this node.
@@ -271,113 +271,118 @@ public final class PathTreeNode {
 		} else if (isInfeasible()) {
 			return 1;
 		} else {
-			PathTreeNode ch = getChild(0);
-			int m = (ch == null) ? 0 : ch.height();
-			for (int i = 1; i < getChildCount(); i++) {
-				ch = getChild(i);
-				m = Math.max(m, (ch == null) ? 0 : ch.height());
+			int numChildren = getChildCount();
+			int totalHeight = 0;
+			for (int i = 0; i < numChildren; i++) {
+				PathTreeNode child = getChild(i);
+				totalHeight = Math.max(totalHeight, (child == null) ? 1 : child.height());
 			}
-			return 1 + m;
+			return 1 + totalHeight;
 		}
 	}
 
 	public int width() {
+		// Calculate the label width
+		int labelWidth = 2 + Integer.toString(id).length();
+		int conditionWidth = 0;
+		int childrenWidth = 0;
 		if (isLeaf()) {
-			return 4;
+			conditionWidth = 4;
 		} else if (isInfeasible()) {
-			return 6;
+			conditionWidth = 6;
 		} else {
-			PathTreeNode ch = getChild(0);
-			int m = (ch == null) ? 1 : ch.width();
-			for (int i = 1; i < getChildCount(); i++) {
-				ch = getChild(i);
-				m += SPACING + ((ch == null) ? 1 : ch.width());
+			Execution execution = getExecution();
+			if (execution instanceof SegmentedPC) {
+				conditionWidth = ((SegmentedPC) execution).getExpression().toString().length();
+			} else {
+				conditionWidth = 1;
 			}
-			Execution ex = getExecution();
-			String e = "0";
-			if (ex instanceof SegmentedPC) {
-				e = ((SegmentedPC) ex).getExpression().toString();
+			int numChildren = getChildCount();
+			childrenWidth = -SPACING;
+			for (int i = 0; i < numChildren; i++) {
+				PathTreeNode child = getChild(i);
+				child = getChild(i);
+				childrenWidth += SPACING + ((child == null) ? 1 : child.width());
 			}
-			return 1 + Math.max(m, 2 * e.length());
 		}
+		return 1 + Math.max(labelWidth, Math.max(conditionWidth, childrenWidth));
 	}
 
 	public int stringFill(char[][] lines, int x, int y) {
-		if (isLeaf()) {
-			if (hasBeenGenerated()) {
-				stringWrite(lines, x, y, "#!" + id);
-			} else {
-				stringWrite(lines, x, y, "#" + id);
-			}
-			stringWrite(lines, x, y + 1, "LEAF");
-			return x;
-		} else if (isInfeasible()) {
-			if (hasBeenGenerated()) {
-				stringWrite(lines, x, y, "#!" + id);
-			} else {
-				stringWrite(lines, x, y, "#" + id);
-			}
-			stringWrite(lines, x, y + 1, "INFEAS");
-			return x;
-		} else {
-			int firstx, lastx;
-			PathTreeNode ch = getChild(0);
-			if (ch == null) {
-				stringWrite(lines, x, y + 4, "-");
-				firstx = x;
-				x += 1;
-			} else {
-				firstx = ch.stringFill(lines, x, y + 4);
-				x += ch.width();
-			}
-			lastx = firstx;
-			stringWrite(lines, lastx, y + 2, getExecution().getOutcome(0));
-			lines[y + 3][lastx] = '|';
-			int k = getChildCount();
-			for (int i = 1; i < k; i++) {
-				x += SPACING;
-				ch = getChild(i);
-				int d = 0;
-				String z = getExecution().getOutcome(i);
-				if (i < k - 1) {
-					d = z.length() - 1;
-				}
-				if (ch == null) {
-					stringWrite(lines, x, y + 4, "-");
-					lastx = x;
-					x += 1;
-				} else {
-					lastx = ch.stringFill(lines, x, y + 4);
-					x += ch.width();
-				}
-				stringWrite(lines, lastx - d, y + 2, z);
-				lines[y + 3][lastx] = '|';
-			}
-			int cx = (firstx + lastx) / 2, mx = cx;
-			String n = "#";
-			if (hasBeenGenerated()) {
-				n += "!" + Integer.toString(id);
-			} else {
-				n += Integer.toString(id);
-			}
-			Execution ex = getExecution();
-			String e = "0";
-			if (ex instanceof SegmentedPC) {
-				e = ((SegmentedPC) ex).getExpression().toString();
-			}
-			mx -= Math.min(mx, Math.max(e.length(), n.length()) / 2);
-			stringWrite(lines, mx, y, n);
-			stringWrite(lines, mx, y + 1, e);
-			for (x = firstx; x <= lastx; x++) {
-				if (lines[y + 2][x] == ' ') {
-					lines[y + 2][x] = '-';
-				}
-			}
-			if (lines[y + 2][cx] == '-') {
-				lines[y + 2][cx] = '+';
-			}
-			return mx;
+		// Construct the label
+		StringBuilder b = new StringBuilder();
+		if (hasBeenGenerated()) {
+			b.append('*');
 		}
+		if (isFullyExplored()) {
+			b.append('!');
+		}
+		b.append('#').append(id);
+		String label = b.toString();
+		int labelWidth = label.length();
+		// Construct the "condition"
+		b.setLength(0);
+		if (isLeaf()) {
+			b.append("LEAF");
+		} else if (isInfeasible()) {
+			b.append("INFEAS");
+		} else {
+			Execution execution = getExecution();
+			if (execution instanceof SegmentedPC) {
+				b.append(((SegmentedPC) execution).getExpression().toString());
+			} else {
+				b.append('?');
+			}
+		}
+		String condition = b.toString();
+		int conditionWidth = condition.length();
+		// Recalculate the children width
+		int numChildren = getChildCount();
+		int childrenWidth = -SPACING;
+		for (int i = 0; i < numChildren; i++) {
+			PathTreeNode child = getChild(i);
+			child = getChild(i);
+			childrenWidth += SPACING + ((child == null) ? 1 : child.width());
+		}
+		// Decide where to start the label/condition/children
+		int width = Math.max(labelWidth, Math.max(conditionWidth, childrenWidth));
+		int middle = x + width / 2;
+		int labelX = middle - labelWidth / 2;
+		int conditionX = middle - conditionWidth / 2;
+		int childX = middle - childrenWidth / 2;
+		// Place the label and condition
+		stringWrite(lines, labelX, y, label);
+		stringWrite(lines, conditionX, y + 1, condition);
+		// Now construct each of the leaves
+		if (!isLeaf() && !isInfeasible()) {
+			int firstHook = -1;
+			int lastHook = -1;
+			int curx = childX;
+			for (int i = 0; i < numChildren; i++) {
+				PathTreeNode child = getChild(i);
+				child = getChild(i);
+				if (child == null) {
+					// We shall draw this leaf ourselves
+					stringWrite(lines, curx, y + 4, "?");
+					lastHook = curx;
+				} else {
+					lastHook = child.stringFill(lines, curx, y + 4);
+				}
+				stringWrite(lines, lastHook, y + 2, getExecution().getOutcome(i));
+				stringWrite(lines, lastHook, y + 3, "|");
+				if (firstHook == -1) {
+					firstHook = lastHook;
+				}
+				curx += SPACING + ((child == null) ? 1 : child.width());
+			}
+			// Write the horizontal line
+			for (int i = firstHook + 1; i < lastHook; i++) {
+				if (lines[y + 2][i] == ' ') {
+					lines[y + 2][i] = '-';
+				}
+			}
+		}
+		return middle;
 	}
 
 	private static void stringWrite(char[][] lines, int x, int y, String string) {

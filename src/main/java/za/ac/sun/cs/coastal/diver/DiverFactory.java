@@ -17,7 +17,6 @@ import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.VM;
-import za.ac.sun.cs.green.expr.Constant;
 
 public class DiverFactory implements TaskFactory {
 
@@ -183,7 +182,7 @@ public class DiverFactory implements TaskFactory {
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
-					Map<String, Constant> concreteValues = coastal.getNextDiverModel();
+					Map<String, Object> concreteValues = coastal.getNextDiverModel();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
@@ -221,8 +220,14 @@ public class DiverFactory implements TaskFactory {
 				x.printStackTrace(coastal.getSystemErr());
 			} catch (InvocationTargetException x) {
 				Throwable t = x.getCause();
-				if ((t == null) || !(t instanceof LimitConjunctException)) {
-					x.printStackTrace();
+				if (t == null) {
+					try {
+						VM.startCatch(-1);
+					} catch (LimitConjunctException e) {
+						// ignore, since run is over in any case
+					}
+				} else if (!(t instanceof LimitConjunctException)) {
+					log.trace("!@#$%$#@! PROGRAM EXCEPTION:", t);
 					try {
 						VM.startCatch(-1);
 					} catch (LimitConjunctException e) {

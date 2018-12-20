@@ -1,6 +1,6 @@
 package za.ac.sun.cs.coastal.symbolic;
 
-import za.ac.sun.cs.green.expr.Expression;
+import za.ac.sun.cs.coastal.solver.Expression;
 
 public interface State {
 
@@ -30,20 +30,42 @@ public interface State {
 
 	boolean getRecordMode();
 
-	int getConcreteInt(int triggerIndex, int index, int address, int currentValue);
-
+	boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue);
+	
+	byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue);
+	
+	short getConcreteShort(int triggerIndex, int index, int address, short currentValue);
+	
 	char getConcreteChar(int triggerIndex, int index, int address, char currentValue);
 
-	byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue);
-
+	int getConcreteInt(int triggerIndex, int index, int address, int currentValue);
+	
+	long getConcreteLong(int triggerIndex, int index, int address, long currentValue);
+	
+	float getConcreteFloat(int triggerIndex, int index, int address, float currentValue);
+	
+	double getConcreteDouble(int triggerIndex, int index, int address, double currentValue);
+	
 	String getConcreteString(int triggerIndex, int index, int address, String currentValue);
 
-	int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue);
-
-	char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue);
-
+	boolean[] getConcreteBooleanArray(int triggerIndex, int index, int address, boolean[] currentValue);
+	
 	byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue);
-
+	
+	short[] getConcreteShortArray(int triggerIndex, int index, int address, short[] currentValue);
+	
+	char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue);
+	
+	int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue);
+	
+	long[] getConcreteLongArray(int triggerIndex, int index, int address, long[] currentValue);
+	
+	float[] getConcreteFloatArray(int triggerIndex, int index, int address, float[] currentValue);
+	
+	double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue);
+	
+	String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue);
+	
 	void triggerMethod(int methodNumber);
 
 	void startMethod(int methodNumber, int argCount);

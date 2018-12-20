@@ -9,15 +9,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Tests for line coverage [e5f6236](https://github.com/DeepseaPlatform/coastal/commit/e5f623608a2f62a6e79f94029ced39e7db9e58d2)
 - Javadoc for ```za.ac.sun.cs.coastal``` package [dba5ce3](https://github.com/DeepseaPlatform/coastal/commit/dba5ce3acfe230c4d6942cf4cc011a5231462bef)
+- Caching of models inside COASTAL [1e3022c](https://github.com/DeepseaPlatform/coastal/commit/1e3022cda63225c873a4dc68a6f0ced9cb8f3516)
+- In-house solver
+- Support for all Java primitive types
 
 ### Changed
-- ...
+- Improved text-based drawing of path trees
+- Better handling of exceptions
 
 ### Deprecated
 - ...
 
 ### Removed
-- ...
+- Removed dependency on GREEN
 
 ### Fixed
 - ...

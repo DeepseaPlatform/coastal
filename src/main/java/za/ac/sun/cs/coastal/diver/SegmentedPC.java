@@ -1,11 +1,10 @@
 package za.ac.sun.cs.coastal.diver;
 
+import za.ac.sun.cs.coastal.solver.Constant;
+import za.ac.sun.cs.coastal.solver.Expression;
+import za.ac.sun.cs.coastal.solver.IntegerConstant;
+import za.ac.sun.cs.coastal.solver.Operation;
 import za.ac.sun.cs.coastal.symbolic.Execution;
-import za.ac.sun.cs.green.expr.Constant;
-import za.ac.sun.cs.green.expr.Expression;
-import za.ac.sun.cs.green.expr.IntConstant;
-import za.ac.sun.cs.green.expr.Operation;
-import za.ac.sun.cs.green.expr.Operation.Operator;
 
 /**
  * A class that implements segmented path conditions. It is called "segmented"
@@ -120,11 +119,11 @@ public abstract class SegmentedPC implements Execution {
 			if ((apc != null)) { // && !isConstant(apc) && !p.contains(apc)) {
 				// Do we even need isConstant and p.contains()?
 				// Perhaps duplicate and constant conjuncts are no longer relevant?
-				pathCondition = (pathCondition == null) ? apc : new Operation(Operator.AND, apc, pathCondition);
+				pathCondition = (pathCondition == null) ? apc : Operation.and(apc, pathCondition);
 			}
 			Expression ppc = getPassiveConjunct();
 			if (ppc != null) {
-				pathCondition = (pathCondition == null) ? ppc : new Operation(Operator.AND, ppc, pathCondition);
+				pathCondition = (pathCondition == null) ? ppc : Operation.and(ppc, pathCondition);
 			}
 		}
 		return pathCondition;
@@ -237,30 +236,26 @@ public abstract class SegmentedPC implements Execution {
 				case NOT:
 					return operation.getOperand(0);
 				case EQ:
-					return new Operation(Operator.NE, operation.getOperand(0), operation.getOperand(1));
+					return Operation.ne(operation.getOperand(0), operation.getOperand(1));
 				case NE:
-					return new Operation(Operator.EQ, operation.getOperand(0), operation.getOperand(1));
+					return Operation.eq(operation.getOperand(0), operation.getOperand(1));
 				case LT:
-					return new Operation(Operator.GE, operation.getOperand(0), operation.getOperand(1));
+					return Operation.ge(operation.getOperand(0), operation.getOperand(1));
 				case LE:
-					return new Operation(Operator.GT, operation.getOperand(0), operation.getOperand(1));
+					return Operation.gt(operation.getOperand(0), operation.getOperand(1));
 				case GT:
-					return new Operation(Operator.LE, operation.getOperand(0), operation.getOperand(1));
+					return Operation.le(operation.getOperand(0), operation.getOperand(1));
 				case GE:
-					return new Operation(Operator.LT, operation.getOperand(0), operation.getOperand(1));
+					return Operation.lt(operation.getOperand(0), operation.getOperand(1));
 				case AND:
-					Expression e0 = negate(operation.getOperand(0));
-					Expression e1 = negate(operation.getOperand(1));
-					return new Operation(Operator.OR, e0, e1);
+					return Operation.or(negate(operation.getOperand(0)), negate(operation.getOperand(1)));
 				case OR:
-					e0 = negate(operation.getOperand(0));
-					e1 = negate(operation.getOperand(1));
-					return new Operation(Operator.AND, e0, e1);
+					return Operation.and(negate(operation.getOperand(0)), negate(operation.getOperand(1)));
 				default:
 					break;
 				}
 			}
-			return new Operation(Operator.NOT, expression);
+			return Operation.not(expression);
 		}
 
 		@Override
@@ -346,32 +341,32 @@ public abstract class SegmentedPC implements Execution {
 
 		private final Expression expression;
 
-		private final int min;
+		private final long min;
 
-		private final int max;
+		private final long max;
 
-		private final int cur;
+		private final long cur;
 
 		private final Expression activeConjunct;
 
 		private final String signature;
 
-		public SegmentedPCSwitch(SegmentedPC parent, Expression expression, Expression passiveConjunct, int min,
-				int max, int cur) {
+		public SegmentedPCSwitch(SegmentedPC parent, Expression expression, Expression passiveConjunct, long min,
+				long max, long cur) {
 			super(parent, passiveConjunct);
 			this.expression = expression;
 			this.min = min;
 			this.max = max;
 			this.cur = cur;
 			if (this.cur < this.min) {
-				Operation lo = new Operation(Operator.LT, expression, new IntConstant(this.min));
-				Operation hi = new Operation(Operator.GT, expression, new IntConstant(this.max));
-				this.activeConjunct = new Operation(Operator.OR, lo, hi);
+				Expression lo = Operation.lt(expression, new IntegerConstant(this.min, 32));
+				Expression hi = Operation.gt(expression, new IntegerConstant(this.max, 32));
+				this.activeConjunct = Operation.or(lo, hi);
 				SegmentedPC p = getParent();
 				this.signature = (p == null) ? "X" : (p.getSignature() + "X");
 			} else {
-				this.activeConjunct = new Operation(Operator.EQ, expression, new IntConstant(this.cur));
-				String q = Integer.toString(this.cur) + ".";
+				this.activeConjunct = Operation.eq(expression, new IntegerConstant(this.cur, 32));
+				String q = Long.toString(this.cur) + ".";
 				SegmentedPC p = getParent();
 				this.signature = (p == null) ? q : (p.getSignature() + "." + q);
 			}
@@ -394,18 +389,18 @@ public abstract class SegmentedPC implements Execution {
 
 		@Override
 		public int getNrOfOutcomes() {
-			return max - min + 2;
+			return (int) (max - min + 2);
 		}
 
 		@Override
 		public int getOutcomeIndex() {
-			return (cur < min) ? (max - min + 1) : (cur - min);
+			return (int) ((cur < min) ? (max - min + 1) : (cur - min));
 		}
 
 		@Override
 		public String getOutcome(int index) {
 			if ((index >= 0) && (index < max - min + 1)) {
-				return Integer.toString(index + min);
+				return Long.toString(index + min);
 			} else {
 				return "DF";
 			}
@@ -427,7 +422,7 @@ public abstract class SegmentedPC implements Execution {
 		public String toString0() {
 			Expression e = getPassiveConjunct();
 			StringBuilder sb = new StringBuilder();
-			sb.append(String.format("%-7s ", (cur < min) ? "DEFAULT" : Integer.toString(cur)));
+			sb.append(String.format("%-7s ", (cur < min) ? "DEFAULT" : Long.toString(cur)));
 			sb.append(String.format("%-30s ", getExpression().toString()));
 			sb.append(String.format("%s", (e == null) ? "NULL" : e.toString()));
 			SegmentedPC p = getParent();

@@ -46,7 +46,6 @@ import za.ac.sun.cs.coastal.surfer.SurferFactory;
 import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.green.expr.Constant;
 
 /**
  * A COASTAL analysis run. The main function (or some outside client) constructs
@@ -608,25 +607,33 @@ public class COASTAL {
 		defaultMinBounds.put(short.class, Short.MIN_VALUE);
 		defaultMinBounds.put(char.class, Character.MIN_VALUE);
 		defaultMinBounds.put(int.class, Integer.MIN_VALUE + 1);
-		defaultMinBounds.put(long.class, Integer.MIN_VALUE + 1L);
+		defaultMinBounds.put(long.class, Long.MIN_VALUE + 1L);
+		defaultMinBounds.put(float.class, -Float.MAX_VALUE);
+		defaultMinBounds.put(double.class, -Double.MAX_VALUE);
 		defaultMinBounds.put(boolean[].class, 0);
 		defaultMinBounds.put(byte[].class, Byte.MIN_VALUE);
 		defaultMinBounds.put(short[].class, Short.MIN_VALUE);
 		defaultMinBounds.put(char[].class, Character.MIN_VALUE);
 		defaultMinBounds.put(int[].class, Integer.MIN_VALUE + 1);
-		defaultMinBounds.put(long[].class, Integer.MIN_VALUE + 1L);
+		defaultMinBounds.put(long[].class, Long.MIN_VALUE + 1L);
+		defaultMinBounds.put(float[].class, -Float.MAX_VALUE);
+		defaultMinBounds.put(double[].class, -Double.MAX_VALUE);
 		defaultMaxBounds.put(boolean.class, 1);
 		defaultMaxBounds.put(byte.class, Byte.MAX_VALUE);
 		defaultMaxBounds.put(short.class, Short.MAX_VALUE);
 		defaultMaxBounds.put(char.class, Character.MAX_VALUE);
 		defaultMaxBounds.put(int.class, Integer.MAX_VALUE);
-		defaultMaxBounds.put(long.class, (long) Integer.MAX_VALUE);
+		defaultMaxBounds.put(long.class, Long.MAX_VALUE);
+		defaultMaxBounds.put(float.class, Float.MAX_VALUE);
+		defaultMaxBounds.put(double.class, Double.MAX_VALUE);
 		defaultMaxBounds.put(boolean[].class, 1);
 		defaultMaxBounds.put(byte[].class, Byte.MAX_VALUE);
 		defaultMaxBounds.put(short[].class, Short.MAX_VALUE);
 		defaultMaxBounds.put(char[].class, Character.MAX_VALUE);
 		defaultMaxBounds.put(int[].class, Integer.MAX_VALUE);
-		defaultMaxBounds.put(long[].class, (long) Integer.MAX_VALUE);
+		defaultMaxBounds.put(long[].class, Long.MAX_VALUE);
+		defaultMaxBounds.put(float[].class, Float.MAX_VALUE);
+		defaultMaxBounds.put(double[].class, Double.MAX_VALUE);
 		for (int i = 0; true; i++) {
 			String key = "coastal.bounds.bound(" + i + ")";
 			String var = getConfig().getString(key + "[@name]");
@@ -692,6 +699,26 @@ public class COASTAL {
 				long u = (Long) defaultMaxBounds.get(long[].class);
 				defaultMinBounds.put(long[].class, new Long((long) getConfig().getLong(key + "[@min]", l)));
 				defaultMaxBounds.put(long[].class, new Long((long) getConfig().getLong(key + "[@max]", u)));
+			} else if (var.equals("float")) {
+				float l = (Float) defaultMinBounds.get(float.class);
+				float u = (Float) defaultMaxBounds.get(float.class);
+				defaultMinBounds.put(float.class, new Float((float) getConfig().getFloat(key + "[@min]", l)));
+				defaultMaxBounds.put(float.class, new Float((float) getConfig().getFloat(key + "[@max]", u)));
+			} else if (var.equals("float[]")) {
+				float l = (Float) defaultMinBounds.get(float[].class);
+				float u = (Float) defaultMaxBounds.get(float[].class);
+				defaultMinBounds.put(float[].class, new Float((float) getConfig().getFloat(key + "[@min]", l)));
+				defaultMaxBounds.put(float[].class, new Float((float) getConfig().getFloat(key + "[@max]", u)));
+			} else if (var.equals("double")) {
+				double l = (Double) defaultMinBounds.get(double.class);
+				double u = (Double) defaultMaxBounds.get(double.class);
+				defaultMinBounds.put(double.class, new Double((double) getConfig().getDouble(key + "[@min]", l)));
+				defaultMaxBounds.put(double.class, new Double((double) getConfig().getDouble(key + "[@max]", u)));
+			} else if (var.equals("double[]")) {
+				double l = (Double) defaultMinBounds.get(double[].class);
+				double u = (Double) defaultMaxBounds.get(double[].class);
+				defaultMinBounds.put(double[].class, new Double((double) getConfig().getDouble(key + "[@min]", l)));
+				defaultMaxBounds.put(double[].class, new Double((double) getConfig().getDouble(key + "[@max]", u)));
 			} else {
 				addBound(minBounds, key + "[@min]", var);
 				addBound(maxBounds, key + "[@max]", var);
@@ -712,21 +739,24 @@ public class COASTAL {
 	private void addBound(Map<String, Object> bounds, String key, String var) {
 		if (getConfig().containsKey(key)) {
 			Class<?> type = parameters.get(var);
-			long value = getConfig().getLong(key);
 			if ((type == boolean.class) || (type == boolean[].class)) {
-				bounds.put(var, (int) value);
+				bounds.put(var, getConfig().getInt(key));
 			} else if ((type == byte.class) || (type == byte[].class)) {
-				bounds.put(var, (byte) value);
+				bounds.put(var, getConfig().getByte(key));
 			} else if ((type == short.class) || (type == short[].class)) {
-				bounds.put(var, (short) value);
+				bounds.put(var, getConfig().getShort(key));
 			} else if ((type == char.class) || (type == char[].class)) {
-				bounds.put(var, (char) value);
+				bounds.put(var, (char) getConfig().getInt(key));
 			} else if ((type == int.class) || (type == int[].class)) {
-				bounds.put(var, (int) value);
+				bounds.put(var, getConfig().getInt(key));
 			} else if ((type == long.class) || (type == long[].class)) {
-				bounds.put(var, value);
+				bounds.put(var, getConfig().getLong(key));
+			} else if ((type == float.class) || (type == float[].class)) {
+				bounds.put(var, getConfig().getFloat(key));
+			} else if ((type == double.class) || (type == double[].class)) {
+				bounds.put(var, getConfig().getDouble(key));
 			} else {
-				bounds.put(var, (int) value);
+				bounds.put(var, getConfig().getInt(key));
 			}
 		}
 	}
@@ -1357,7 +1387,7 @@ public class COASTAL {
 	 * @throws InterruptedException
 	 *             if the action of removing the model was interrupted
 	 */
-	public Map<String, Constant> getNextDiverModel() throws InterruptedException {
+	public Map<String, Object> getNextDiverModel() throws InterruptedException {
 		return diverModelQueue.take().getConcreteValues();
 	}
 
@@ -1421,7 +1451,7 @@ public class COASTAL {
 	 * @throws InterruptedException
 	 *             if the action of removing the model was interrupted
 	 */
-	public Map<String, Constant> getNextSurferModel() throws InterruptedException {
+	public Map<String, Object> getNextSurferModel() throws InterruptedException {
 		return surferModelQueue.take().getConcreteValues();
 	}
 

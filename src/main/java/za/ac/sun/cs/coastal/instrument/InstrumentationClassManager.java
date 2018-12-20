@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -31,27 +32,27 @@ import za.ac.sun.cs.coastal.surfer.TraceState;
 public class InstrumentationClassManager {
 
 	private final COASTAL coastal;
-	
+
 	private final Logger log;
-	
+
 	private final Broker broker;
 
 	private final List<String> classPaths = new ArrayList<>();
 
 	private final Map<String, String> jars = new HashMap<>();
-	
+
 	private final AtomicLong requestCount = new AtomicLong(0);
-	
+
 	private final AtomicLong cacheHitCount = new AtomicLong(0);
 
 	private final AtomicLong instrumentedCount = new AtomicLong(0);
 
 	private final AtomicLong loadTime = new AtomicLong(0);
-	
+
 	private final AtomicLong instrumentedTime = new AtomicLong(0);
 
 	private final AtomicLong uninstrumentedTime = new AtomicLong(0);
-	
+
 	private final AtomicLong preInstrumentedSize = new AtomicLong(0);
 
 	private final AtomicLong postInstrumentedSize = new AtomicLong(0);
@@ -86,15 +87,15 @@ public class InstrumentationClassManager {
 	public ClassLoader createLightClassLoader(TraceState traceState) {
 		return new LightClassLoader(coastal, this, traceState);
 	}
-	
+
 	public void startLoad() {
 		requestCount.incrementAndGet();
 	}
-	
+
 	public void endLoad(long time) {
 		loadTime.addAndGet(System.currentTimeMillis() - time);
 	}
-	
+
 	public byte[] loadUninstrumented(String name) {
 		long t = System.currentTimeMillis();
 		byte[] unInstrumented = cache.get(name);
@@ -115,7 +116,7 @@ public class InstrumentationClassManager {
 		}
 		return unInstrumented;
 	}
-	
+
 	public byte[] loadHeavyInstrumented(String name) {
 		long t = System.currentTimeMillis();
 		byte[] instrumented = cache.get(name);
@@ -128,7 +129,7 @@ public class InstrumentationClassManager {
 		instrumentedTime.addAndGet(System.currentTimeMillis() - t);
 		return instrumented;
 	}
-	
+
 	private synchronized byte[] loadHeavyInstrumented0(String name) {
 		byte[] instrumented = cache.get(name);
 		if (instrumented == null) {
@@ -141,14 +142,16 @@ public class InstrumentationClassManager {
 			HeavyAdapter ia = new HeavyAdapter(coastal, name, cw);
 			cr.accept(ia, 0);
 			instrumented = cw.toByteArray();
+			// writeFile("/tmp/X.class", instrumented);
 			instrumentedCount.incrementAndGet();
 			preInstrumentedSize.addAndGet(in.length);
 			postInstrumentedSize.addAndGet(instrumented.length);
 			log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, instrumented.length);
+			// ia.reportNow();
 		}
 		return instrumented;
 	}
-	
+
 	public byte[] loadLightInstrumented(String name) {
 		long t = System.currentTimeMillis();
 		byte[] instrumented = cache.get(name);
@@ -161,7 +164,7 @@ public class InstrumentationClassManager {
 		instrumentedTime.addAndGet(System.currentTimeMillis() - t);
 		return instrumented;
 	}
-	
+
 	private synchronized byte[] loadLightInstrumented0(String name) {
 		byte[] instrumented = cache.get(name);
 		if (instrumented == null) {
@@ -181,7 +184,17 @@ public class InstrumentationClassManager {
 		}
 		return instrumented;
 	}
-	
+
+	public void writeFile(String filename, byte[] contents) {
+		try (FileOutputStream fos = new FileOutputStream(filename)) {
+			fos.write(contents);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private byte[] loadFile(String filename, boolean tryResource, boolean tryJar) {
 		InputStream in = searchFor(filename, tryResource);
 		if (in != null) {
@@ -230,7 +243,7 @@ public class InstrumentationClassManager {
 		}
 		return null;
 	}
-	
+
 	private InputStream searchFor(String filename, boolean tryResource) {
 		for (String classPath : classPaths) {
 			File file = new File(classPath, filename);
@@ -275,7 +288,7 @@ public class InstrumentationClassManager {
 	private Map<Integer, Integer> lastInstruction = new TreeMap<>();
 	private Map<Integer, BitSet> linenumbers = new TreeMap<>();
 	private Map<Integer, BitSet> branchInstructions = new TreeMap<>();
-	
+
 	public Integer getFirstInstruction(int methodNumber) {
 		return firstInstruction.get(methodNumber);
 	}
@@ -287,7 +300,7 @@ public class InstrumentationClassManager {
 	public BitSet getLineNumbers(int methodNumber) {
 		return linenumbers.get(methodNumber);
 	}
-	
+
 	public BitSet getJumpPoints(int methodNumber) {
 		return branchInstructions.get(methodNumber);
 	}
@@ -299,25 +312,25 @@ public class InstrumentationClassManager {
 	public int getNextInstructionCounter() {
 		return ++instructionCounter;
 	}
-	
+
 	public int getMethodCounter() {
 		return methodCounter;
 	}
-	
+
 	public int getNextMethodCounter() {
 		return ++methodCounter;
 	}
-	
+
 	public void registerFirstInstruction() {
 		firstInstruction.put(methodCounter, instructionCounter + 1);
 	}
-	
+
 	public void registerLastInstruction() {
 		lastInstruction.put(methodCounter, instructionCounter);
 	}
-	
+
 	public void registerLinenumbers(BitSet linenumbers) {
 		this.linenumbers.put(methodCounter, linenumbers);
 	}
-	
+
 }

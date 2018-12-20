@@ -1,6 +1,6 @@
 package za.ac.sun.cs.coastal.symbolic;
 
-import za.ac.sun.cs.green.expr.Expression;
+import za.ac.sun.cs.coastal.solver.Expression;
 
 public class VM {
 
@@ -50,34 +50,78 @@ public class VM {
 		return state.getRecordMode();
 	}
 
-	public static int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
-		return state.getConcreteInt(triggerIndex, index, address, currentValue);
+	public static boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) {
+		return state.getConcreteBoolean(triggerIndex, index, address, currentValue);
 	}
-
+	
+	public static byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
+		return state.getConcreteByte(triggerIndex, index, address, currentValue);
+	}
+	
+	public static short getConcreteShort(int triggerIndex, int index, int address, short currentValue) {
+		return state.getConcreteShort(triggerIndex, index, address, currentValue);
+	}
+	
 	public static char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
 		return state.getConcreteChar(triggerIndex, index, address, currentValue);
 	}
-
-	public static byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
-		return state.getConcreteByte(triggerIndex, index, address, currentValue);
+	
+	public static int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
+		return state.getConcreteInt(triggerIndex, index, address, currentValue);
+	}
+	
+	public static long getConcreteLong(int triggerIndex, int index, int address, long currentValue) {
+		return state.getConcreteLong(triggerIndex, index, address, currentValue);
+	}
+	
+	public static float getConcreteFloat(int triggerIndex, int index, int address, float currentValue) {
+		return state.getConcreteFloat(triggerIndex, index, address, currentValue);
+	}
+	
+	public static double getConcreteDouble(int triggerIndex, int index, int address, double currentValue) {
+		return state.getConcreteDouble(triggerIndex, index, address, currentValue);
 	}
 	
 	public static String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
 		return state.getConcreteString(triggerIndex, index, address, currentValue);
 	}
 
-	public static int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
-		return state.getConcreteIntArray(triggerIndex, index, address, currentValue);
-	}
-
-	public static char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
-		return state.getConcreteCharArray(triggerIndex, index, address, currentValue);
+	public static boolean[] getConcreteBooleanArray(int triggerIndex, int index, int address, boolean[] currentValue) {
+		return state.getConcreteBooleanArray(triggerIndex, index, address, currentValue);
 	}
 	
 	public static byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) {
 		return state.getConcreteByteArray(triggerIndex, index, address, currentValue);
 	}
 	
+	public static short[] getConcreteShortArray(int triggerIndex, int index, int address, short[] currentValue) {
+		return state.getConcreteShortArray(triggerIndex, index, address, currentValue);
+	}
+	
+	public static char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
+		return state.getConcreteCharArray(triggerIndex, index, address, currentValue);
+	}
+	
+	public static int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
+		return state.getConcreteIntArray(triggerIndex, index, address, currentValue);
+	}
+	
+	public static long[] getConcreteLongArray(int triggerIndex, int index, int address, long[] currentValue) {
+		return state.getConcreteLongArray(triggerIndex, index, address, currentValue);
+	}
+	
+	public static float[] getConcreteFloatArray(int triggerIndex, int index, int address, float[] currentValue) {
+		return state.getConcreteFloatArray(triggerIndex, index, address, currentValue);
+	}
+	
+	public static double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue) {
+		return state.getConcreteDoubleArray(triggerIndex, index, address, currentValue);
+	}
+	
+	public static String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue) {
+		return state.getConcreteStringArray(triggerIndex, index, address, currentValue);
+	}
+
 	public static void triggerMethod(int methodNumber) {
 		state.triggerMethod(methodNumber);
 	}
@@ -162,6 +206,22 @@ public class VM {
 		state.postJumpInsn(instr, opcode);
 	}
 
+	public static void ldcInsn(int instr, int opcode, int value) throws LimitConjunctException {
+		state.ldcInsn(instr, opcode, value);
+	}
+	
+	public static void ldcInsn(int instr, int opcode, long value) throws LimitConjunctException {
+		state.ldcInsn(instr, opcode, value);
+	}
+	
+	public static void ldcInsn(int instr, int opcode, float value) throws LimitConjunctException {
+		state.ldcInsn(instr, opcode, value);
+	}
+	
+	public static void ldcInsn(int instr, int opcode, double value) throws LimitConjunctException {
+		state.ldcInsn(instr, opcode, value);
+	}
+	
 	public static void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException {
 		state.ldcInsn(instr, opcode, value);
 	}

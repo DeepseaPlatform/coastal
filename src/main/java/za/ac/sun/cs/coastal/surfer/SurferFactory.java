@@ -17,7 +17,6 @@ import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.VM;
-import za.ac.sun.cs.green.expr.Constant;
 
 public class SurferFactory implements TaskFactory {
 
@@ -183,7 +182,7 @@ public class SurferFactory implements TaskFactory {
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
-					Map<String, Constant> concreteValues = coastal.getNextSurferModel();
+					Map<String, Object> concreteValues = coastal.getNextSurferModel();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					TraceState traceState = new TraceState(coastal, concreteValues);

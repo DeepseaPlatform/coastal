@@ -11,9 +11,8 @@ import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.diver.SegmentedPC.SegmentedPCIf;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
+import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.green.expr.Constant;
-import za.ac.sun.cs.green.expr.Expression;
 
 public class GenerationalFactory extends PathBasedFactory {
 
@@ -119,7 +118,7 @@ public class GenerationalFactory extends PathBasedFactory {
 					Expression pc = altSpc.getPathCondition();
 					String sig = altSpc.getSignature();
 					log.trace("trying   <{}> {}", sig, pc.toString());
-					Map<String, Constant> model = findModel(pc);
+					Map<String, Object> model = solver.solve(pc);
 					if (model == null) {
 						log.trace("no model");
 						log.trace("(The spc is {})", altSpc.getPathCondition().toString());
@@ -221,7 +220,7 @@ public class GenerationalFactory extends PathBasedFactory {
 					Expression pc = altSpc.getPathCondition();
 					String sig = altSpc.getSignature();
 					log.trace("trying   <{}> {}", sig, pc.toString());
-					Map<String, Constant> model = findModel(pc);
+					Map<String, Object> model = solver.solve(pc);
 					if (model == null) {
 						log.trace("no model");
 						log.trace("(The spc is {})", altSpc.getPathCondition().toString());

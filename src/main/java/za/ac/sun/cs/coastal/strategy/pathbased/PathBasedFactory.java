@@ -1,33 +1,23 @@
 package za.ac.sun.cs.coastal.strategy.pathbased;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
-import org.apache.logging.log4j.LogManager;
-
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
-import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
+import za.ac.sun.cs.coastal.solver.Expression;
+import za.ac.sun.cs.coastal.solver.Solver;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.green.Green;
-import za.ac.sun.cs.green.Instance;
-import za.ac.sun.cs.green.expr.Constant;
-import za.ac.sun.cs.green.expr.Expression;
-import za.ac.sun.cs.green.expr.IntConstant;
-import za.ac.sun.cs.green.expr.IntVariable;
 
 public abstract class PathBasedFactory implements StrategyFactory {
 
@@ -178,7 +168,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 
 		protected final Broker broker;
 
-		protected final Green green;
+		protected final Solver solver;
 
 		protected final Set<String> visitedModels = new HashSet<>();
 
@@ -186,17 +176,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			super(coastal, manager);
 			this.manager = (PathBasedManager) manager;
 			broker = coastal.getBroker();
-			green = new Green("COASTAL", LogManager.getLogger("GREEN"));
-			Properties greenProperties = new Properties();
-			ImmutableConfiguration config = coastal.getConfig();
-			config.getKeys("green.").forEachRemaining(k -> greenProperties.setProperty(k, config.getString(k)));
-			greenProperties.setProperty("green.log.level", "ALL");
-			greenProperties.setProperty("green.services", "model");
-			greenProperties.setProperty("green.service.model", "(bounder modeller)");
-			greenProperties.setProperty("green.service.model.bounder",
-					"za.ac.sun.cs.green.service.bounder.BounderService");
-			greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3Service");
-			new za.ac.sun.cs.green.util.Configuration(green, greenProperties).configure();
+			solver = new Solver(coastal);
 		}
 
 		@Override
@@ -214,8 +194,8 @@ public abstract class PathBasedFactory implements StrategyFactory {
 					int d = -1;
 					while (mdls != null) {
 						int m = coastal.addDiverModels(mdls);
-						d += m;
 						if (m > 0) {
+							d += m;
 							break;
 						}
 						mdls = refine1();
@@ -256,7 +236,9 @@ public abstract class PathBasedFactory implements StrategyFactory {
 				Expression pc = spc.getPathCondition();
 				String sig = spc.getSignature();
 				log.trace("... trying   <{}> {}", sig, pc.toString());
-				Map<String, Constant> model = findModel(pc);
+				long t = System.currentTimeMillis();
+				Map<String, Object> model = solver.solve(pc);
+				manager.recordSolverTime(System.currentTimeMillis() - t);
 				if (model == null) {
 					log.trace("... no model");
 					log.trace("(The spc is {})", spc.getPathCondition().toString());
@@ -275,29 +257,6 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		}
 
 		protected abstract SegmentedPC findNewPath(PathTree pathTree);
-
-		protected Map<String, Constant> findModel(Expression pc) {
-			Instance instance = new Instance(green, null, pc);
-			long t = System.currentTimeMillis();
-			@SuppressWarnings("unchecked")
-			Map<IntVariable, IntConstant> model = (Map<IntVariable, IntConstant>) instance.request("model");
-			manager.recordSolverTime(System.currentTimeMillis() - t);
-			if (model == null) {
-				return null;
-			}
-			t = System.currentTimeMillis();
-			Map<String, Constant> newModel = new HashMap<>();
-			for (IntVariable variable : model.keySet()) {
-				String name = variable.getName();
-				if (name.startsWith(SymbolicState.NEW_VAR_PREFIX)) {
-					continue;
-				}
-				Constant value = model.get(variable);
-				newModel.put(name, value);
-			}
-			manager.recordExtractionTime(System.currentTimeMillis() - t);
-			return newModel;
-		}
 
 	}
 

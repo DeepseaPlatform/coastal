@@ -166,20 +166,40 @@ public final class Trigger {
 					sb.append('?');
 				} else if (paramTypes[i] == boolean.class) {
 					sb.append("boolean");
-				} else if (paramTypes[i] == int.class) {
-					sb.append("int");
 				} else if (paramTypes[i] == byte.class) {
 					sb.append("byte");
+				} else if (paramTypes[i] == short.class) {
+					sb.append("short");
 				} else if (paramTypes[i] == char.class) {
 					sb.append("char");
+				} else if (paramTypes[i] == int.class) {
+					sb.append("int");
+				} else if (paramTypes[i] == long.class) {
+					sb.append("long");
+				} else if (paramTypes[i] == float.class) {
+					sb.append("float");
+				} else if (paramTypes[i] == double.class) {
+					sb.append("double");
 				} else if (paramTypes[i] == String.class) {
 					sb.append("string");
-				} else if (paramTypes[i] == int[].class) {
-					sb.append("int[]");
-				} else if (paramTypes[i] == char[].class) {
-					sb.append("char[]");
+				} else if (paramTypes[i] == boolean[].class) {
+					sb.append("boolean[]");
 				} else if (paramTypes[i] == byte[].class) {
 					sb.append("byte[]");
+				} else if (paramTypes[i] == short[].class) {
+					sb.append("short[]");
+				} else if (paramTypes[i] == char[].class) {
+					sb.append("char[]");
+				} else if (paramTypes[i] == int[].class) {
+					sb.append("int[]");
+				} else if (paramTypes[i] == long[].class) {
+					sb.append("long[]");
+				} else if (paramTypes[i] == float[].class) {
+					sb.append("float[]");
+				} else if (paramTypes[i] == double[].class) {
+					sb.append("double[]");
+				} else if (paramTypes[i] == String[].class) {
+					sb.append("string[]");
 				} else {
 					sb.append('*');
 				}
@@ -259,14 +279,17 @@ public final class Trigger {
 	 * types are currently recognized:
 	 * 
 	 * <ul>
-	 * <li>{@code int}, {@code byte}, {@code char}, {@link String}</li>
-	 * <li>{@code int[]}, {@code byte[]}, {@code char[]}</li>
+	 * <li>{@code boolean}</li>
+	 * <li>{@code byte}</li>
+	 * <li>{@code short}</li>
+	 * <li>{@code char}</li>
+	 * <li>{@code int}</li>
+	 * <li>{@code long}</li>
+	 * <li>{@code float}</li>
+	 * <li>{@code double}</li>
+	 * <li>{@code String}</li>
+	 * <li>and any one-dimensional arrays of the above.</li>
 	 * </ul>
-	 * 
-	 * <p>
-	 * <b>Note:</b> This method should include additional types that are already
-	 * supported in other parts of COASTAL.
-	 * </p>
 	 * 
 	 * @param type
 	 *            a string description of a type
@@ -276,21 +299,43 @@ public final class Trigger {
 		int i = type.indexOf('[');
 		if (i > -1) {
 			String arrayType = type.substring(0, i);
-			if (arrayType.equals("int")) {
-				return int[].class;
-			} else if (arrayType.equals("char")) {
-				return char[].class;
+			if (arrayType.equals("boolean")) {
+				return boolean[].class;
 			} else if (arrayType.equals("byte")) {
 				return byte[].class;
+			} else if (arrayType.equals("short")) {
+				return short[].class;
+			} else if (arrayType.equals("char")) {
+				return char[].class;
+			} else if (arrayType.equals("int")) {
+				return int[].class;
+			} else if (arrayType.equals("long")) {
+				return long[].class;
+			} else if (arrayType.equals("float")) {
+				return float[].class;
+			} else if (arrayType.equals("double")) {
+				return double[].class;
+			} else if (arrayType.equals("String")) {
+				return String[].class;
 			} else {
 				return Object[].class;
 			}
-		} else if (type.equals("int")) {
-			return int.class;
+		} else if (type.equals("boolean")) {
+			return boolean.class;
 		} else if (type.equals("byte")) {
 			return byte.class;
+		} else if (type.equals("short")) {
+			return short.class;
 		} else if (type.equals("char")) {
 			return char.class;
+		} else if (type.equals("int")) {
+			return int.class;
+		} else if (type.equals("long")) {
+			return long.class;
+		} else if (type.equals("float")) {
+			return float.class;
+		} else if (type.equals("double")) {
+			return double.class;
 		} else if (type.equals("String")) {
 			return String.class;
 		} else {

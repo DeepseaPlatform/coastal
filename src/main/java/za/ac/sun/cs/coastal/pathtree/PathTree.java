@@ -9,9 +9,9 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
+import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.symbolic.Execution;
-import za.ac.sun.cs.green.expr.Expression;
 
 /**
  * Representation of all execution paths in a single tree.
@@ -249,7 +249,7 @@ public class PathTree {
 	}
 
 	public String[] stringRepr() {
-		int h = root.height() * 4 - 2;
+		int h = root.height() * 4 - 1;
 		int w = root.width();
 		/*
 		 * Step 1: create and clear the character array

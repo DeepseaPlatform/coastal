@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>tests.types.Mixed03</main>
+			<instrument>tests.types</instrument>
+			<trigger>tests.types.Mixed03.run(A: long, B: byte)</trigger>
+		</target>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
+		</observers>
+	</coastal>
+</configuration>

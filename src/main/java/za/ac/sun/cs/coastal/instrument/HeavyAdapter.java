@@ -72,20 +72,8 @@ public class HeavyAdapter extends ClassVisitor {
 		return count;
 	}
 
-//	// ======================================================================
-//	//
-//	// REPORTING
-//	//
-//	// ======================================================================
-//
-//	@Override
-//	public String getName() {
-//		return name;
-//	}
-//
-//	@Override
-//	public void report(PrintWriter info, PrintWriter trace) {
-//		trace.print(swriter.toString());
-//	}
+	public void reportNow() {
+		coastal.getLog().info(swriter.toString());
+	}
 
 }

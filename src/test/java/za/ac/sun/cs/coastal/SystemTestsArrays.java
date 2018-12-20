@@ -36,7 +36,7 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 15, 4, 1);
+		checkInstrumentation(reporter, 24, 4, 1);
 	}
 	
 	@Test
