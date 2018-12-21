@@ -17,7 +17,7 @@ public class LineCoverageFactory implements ObserverFactory {
 	}
 
 	@Override
-	public int getFrequency() {
+	public int getFrequencyflags() {
 		return ObserverFactory.ONCE_PER_TASK;
 	}
 

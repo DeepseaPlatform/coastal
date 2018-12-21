@@ -45,7 +45,7 @@ public class GUIFactory implements ObserverFactory {
 	}
 
 	@Override
-	public int getFrequency() {
+	public int getFrequencyflags() {
 		return ObserverFactory.ONCE_PER_RUN;
 	}
 

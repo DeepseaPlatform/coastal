@@ -12,6 +12,8 @@ import za.ac.sun.cs.coastal.Trigger;
 
 public class LightMethodAdapter extends MethodVisitor {
 
+	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
+
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/VM";
 
 	private final COASTAL coastal;
@@ -253,6 +255,17 @@ public class LightMethodAdapter extends MethodVisitor {
 		//		if (opcode == Opcodes.IDIV) {
 		//			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "noException", "()V", false);
 		//		}
+	}
+
+	@Override
+	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+		log.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
+		if (owner.equals(SYMBOLIC)) {
+			mv.visitMethodInsn(opcode, LIBRARY, name, descriptor, isInterface);
+			// pop params !!!!!!!!!!!
+		} else {
+			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+		}
 	}
 
 	@Override

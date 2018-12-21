@@ -216,6 +216,7 @@ public class TraceState implements State {
 	@Override
 	public String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
 		if (concreteValues == null) {
+			coastal.setParameterSize(coastal.getTrigger(triggerIndex).getParamName(index), currentValue.length());
 			return currentValue;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);

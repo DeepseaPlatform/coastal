@@ -5,15 +5,15 @@ import za.ac.sun.cs.coastal.Reporter.Reportable;
 
 public interface ObserverFactory {
 
-	int ONCE_PER_RUN = 0;
+	int ONCE_PER_RUN = 1;
 
-	int ONCE_PER_TASK = 1;
+	int ONCE_PER_TASK = 2;
 
-	int ONCE_PER_DIVER = 2;
+	int ONCE_PER_DIVER = 4;
 
-	int ONCE_PER_SURFER = 3;
+	int ONCE_PER_SURFER = 8;
 	
-	int getFrequency();
+	int getFrequencyflags();
 
 	ObserverManager createManager(COASTAL coastal);
 

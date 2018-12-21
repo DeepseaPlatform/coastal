@@ -834,19 +834,18 @@ public class COASTAL {
 				ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
 				Tuple fm = new Tuple(observerFactory, manager);
 				allObservers.add(fm);
-				switch (factory.getFrequency()) {
-				case ObserverFactory.ONCE_PER_RUN:
+				int freq = factory.getFrequencyflags();
+				if ((freq & ObserverFactory.ONCE_PER_RUN) != 0) {
 					observersPerRun.add(fm);
-					break;
-				case ObserverFactory.ONCE_PER_TASK:
+				}
+				if ((freq & ObserverFactory.ONCE_PER_TASK) != 0) {
 					observersPerTask.add(fm);
-					break;
-				case ObserverFactory.ONCE_PER_DIVER:
+				}
+				if ((freq & ObserverFactory.ONCE_PER_DIVER) != 0) {
 					observersPerDiver.add(fm);
-					break;
-				default:
+				}
+				if ((freq & ObserverFactory.ONCE_PER_SURFER) != 0) {
 					observersPerSurfer.add(fm);
-					break;
 				}
 			}
 		}
