@@ -7,6 +7,9 @@
 			<instrument>tests.strings</instrument>
 			<trigger>tests.strings.CharAt01.test(S: String, X: int)</trigger>
 		</target>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
+		</observers>
 		<delegates>
 			<delegate>
 				<for>java.lang.String</for>

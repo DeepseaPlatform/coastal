@@ -3,9 +3,9 @@
 <configuration>
 	<coastal>
 		<target>
-			<main>tests.strings.StartsEnds01</main>
+			<main>tests.strings.Starts01</main>
 			<instrument>tests.strings</instrument>
-			<trigger>tests.strings.StartsEnds01.test(S: String)</trigger>
+			<trigger>tests.strings.Starts01.test(S: String)</trigger>
 		</target>
 		<observers>
 			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
