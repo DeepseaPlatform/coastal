@@ -160,7 +160,7 @@ public class String {
 			if (guard == null) {
 				state.push(IntegerConstant.ONE32); // |prefix| == 0, so result is always TRUE (=1)
 			} else {
-				Expression var = new IntegerVariable(state.getNewVariableName(), 8, 0, 1);
+				Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
 				Expression pc = Operation.or(Operation.and(guard, Operation.eq(var, IntegerConstant.ONE32)),
 						Operation.and(Operation.not(guard), Operation.eq(var, IntegerConstant.ZERO32)));
 				state.pushExtraConjunct(pc);
@@ -199,7 +199,7 @@ public class String {
 			if (guard == null) {
 				state.push(IntegerConstant.ONE32); // |prefix| == 0, so result is always TRUE (=1)
 			} else {
-				Expression var = new IntegerVariable(state.getNewVariableName(), 8, 0, 1);
+				Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
 				Expression posGuard = Operation.and(guard, Operation.eq(var, IntegerConstant.ONE32));
 				Expression negGuard = Operation.and(Operation.not(guard), Operation.eq(var, IntegerConstant.ZERO32));
 				Expression pc = Operation.or(posGuard, negGuard);
@@ -232,7 +232,7 @@ public class String {
 			if (guard == null) {
 				state.push(IntegerConstant.ONE32); // |prefix| == 0, so result is always TRUE (=1)
 			} else {
-				Expression var = new IntegerVariable(state.getNewVariableName(), 8, 0, 1);
+				Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
 				Expression pc = Operation.or(Operation.and(guard, Operation.eq(var, IntegerConstant.ONE32)),
 						Operation.and(Operation.not(guard), Operation.eq(var, IntegerConstant.ZERO32)));
 				state.pushExtraConjunct(pc);

@@ -44,19 +44,19 @@ public class SymbolicState implements State {
 	 * Separator for array elements. For example, the elements of an array named
 	 * {@code A} are called {@code A_D_0}, {@code A_D_1}, {@code A_D_2}, ...
 	 */
-	private static final String INDEX_SEPARATOR = "_D_"; // "$"
+	private static final String INDEX_SEPARATOR = "$"; // "_D_"
 
 	/**
 	 * Separator for string characters. For example, the characters of a string
 	 * named {@code X} are called {@code X_H_0}, {@code X_H_1}, {@code X_H_2},
 	 * ...
 	 */
-	public static final String CHAR_SEPARATOR = "_H_"; // "#"
+	public static final String CHAR_SEPARATOR = "!"; // "_H_"
 
 	/**
 	 * Prefix for new symbolic variables.
 	 */
-	public static final String NEW_VAR_PREFIX = "U_D_"; // "$"
+	public static final String NEW_VAR_PREFIX = "$"; // "U_D_"
 
 	private final COASTAL coastal;
 

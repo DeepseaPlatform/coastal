@@ -1,6 +1,6 @@
-package examples.strings;
+package tests.strings;
 
-public class First {
+public class StartsEnds01 {
 
 	public static int test(String str) {
 		if (str.startsWith("bl")) {

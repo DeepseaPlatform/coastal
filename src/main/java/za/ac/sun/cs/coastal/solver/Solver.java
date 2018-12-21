@@ -487,7 +487,7 @@ public class Solver {
 	private Map<String, Object> retrieveModel(String output, Map<String, Variable> variables) {
 		output = output.replaceAll("^\\s*\\(model\\s+(.*)\\s*\\)\\s*$", "$1@");
 		output = output.replaceAll("\\)\\s*\\(define-fun", ")@(define-fun");
-		output = output.replaceAll("\\(define-fun\\s+([\\w-]+)\\s*\\(\\)\\s*((\\w+)|(\\([^)]+\\)))\\s+([^@]+)\\s*\\)@",
+		output = output.replaceAll("\\(define-fun\\s+([$!\\w-]+)\\s*\\(\\)\\s*((\\w+)|(\\([^)]+\\)))\\s+([^@]+)\\s*\\)@",
 				"$1 == $5 ;; ");
 
 		final Map<String, String> assignment = new HashMap<>();
