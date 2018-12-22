@@ -14,11 +14,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Support for all Java primitive types [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
 - Average speed in GUI (number of divers/surfers/refinements per second) [e395280](https://github.com/DeepseaPlatform/coastal/commit/e395280f8e8b573f012f491e62691ec3c91807c4)
 - [Issue #23](https://github.com/DeepseaPlatform/coastal/issues/23) Options to write instrumented code to file and to the log [69a7255](https://github.com/DeepseaPlatform/coastal/commit/69a72555dd664427a872a6e52234430cfe2663aa)
+- [Issue #25](https://github.com/DeepseaPlatform/coastal/issues/25) Add support for user specified program entry points and (command-line) arguments
 
 ### Changed
 - Improved text-based drawing of path trees [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
 - Better handling of exceptions [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
-- Improved support for random testing [60eccd2](https://github.com/DeepseaPlatform/coastal/commit/60eccd27562304b69a991f6ecb14b65dd6e8ce84)
+- Improved support for random testing [60eccd2](https://github.com/DeepseaPlatform/coastal/commit/60eccd27562304b69a991f6ecb14b65dd6e8ce84) [691c43c](https://github.com/DeepseaPlatform/coastal/commit/691c43c0dd02149d4664c7ec716caa6b4c7d194b)
 
 ### Deprecated
 - ...

@@ -5,12 +5,12 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.TaskFactory;
+import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
@@ -159,8 +159,6 @@ public class SurferFactory implements TaskFactory {
 
 		private final Logger log;
 
-		private final ImmutableConfiguration config;
-
 		private final Broker broker;
 
 		private final SurferManager manager;
@@ -168,7 +166,6 @@ public class SurferFactory implements TaskFactory {
 		public Surfer(COASTAL coastal, SurferManager manager) {
 			this.coastal = coastal;
 			log = coastal.getLog();
-			config = coastal.getConfig();
 			broker = coastal.getBroker();
 			this.manager = manager;
 		}
@@ -213,9 +210,11 @@ public class SurferFactory implements TaskFactory {
 				observerFactory.createObserver(coastal, observerManager);
 			}
 			try {
-				Class<?> clas = classLoader.loadClass(config.getString("coastal.target.main"));
-				Method meth = clas.getMethod("main", String[].class);
-				meth.invoke(null, new Object[] { new String[0] });
+				Trigger trigger = coastal.getMainEntrypoint();
+				Class<?> clas = classLoader.loadClass(trigger.getClassName());
+				Method meth = clas.getMethod(trigger.getMethodName(), trigger.getParamTypes());
+				meth.setAccessible(true);
+				meth.invoke(null, coastal.getMainArguments());
 			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
 					| IllegalArgumentException x) {
 				x.printStackTrace(coastal.getSystemErr());

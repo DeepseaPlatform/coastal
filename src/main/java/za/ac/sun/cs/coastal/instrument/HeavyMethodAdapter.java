@@ -67,12 +67,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 	}
 
 	private int visitParameter(Trigger trigger, int triggerIndex, int index, int address) {
-		String name = trigger.getParamName(index);
 		Class<?> type = trigger.getParamType(index);
 		int size = ((type == long.class) || (type == double.class)) ? 2 : 1;
-		if (name == null) {
-			return size;
-		}
 		if (type == boolean.class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);

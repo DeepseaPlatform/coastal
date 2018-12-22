@@ -251,7 +251,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 				return ThreadLocalRandom.current().nextLong(min, max + 1);
 			}
 		}
-		
+
 	}
 
 }

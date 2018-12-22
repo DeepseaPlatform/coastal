@@ -40,12 +40,9 @@ public class LightMethodAdapter extends MethodVisitor {
 		this.argCount = argCount;
 	}
 
-	private void visitParameter(Trigger trigger, int triggerIndex, int index, int address) {
-		String name = trigger.getParamName(index);
-		if (name == null) {
-			return;
-		}
+	private int visitParameter(Trigger trigger, int triggerIndex, int index, int address) {
 		Class<?> type = trigger.getParamType(index);
+		int size = ((type == long.class) || (type == double.class)) ? 2 : 1;
 		if (type == boolean.class) {
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(index);
@@ -178,6 +175,7 @@ public class LightMethodAdapter extends MethodVisitor {
 			log.fatal("UNHANDLED PARAMETER TYPE");
 			System.exit(1);
 		}
+		return size;
 	}
 
 	@Override
@@ -212,8 +210,9 @@ public class LightMethodAdapter extends MethodVisitor {
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			int n = trigger.getParamCount();
 			int offset = (isStatic ? 0 : 1);
+			int address = offset;
 			for (int i = 0; i < n; i++) {
-				visitParameter(trigger, triggerIndex, i, i + offset);
+				address += visitParameter(trigger, triggerIndex, i, address);
 			}
 			Label end = new Label();
 			mv.visitJumpInsn(Opcodes.GOTO, end);

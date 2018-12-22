@@ -46,10 +46,21 @@ import za.ac.sun.cs.coastal.symbolic.VM;
 public final class Trigger {
 
 	/**
+	 * The name of the method (e.g., {@code "routine"}).
+	 */
+	private final String methodName;
+
+	/**
+	 * The fully qualified name of the class (e.g.,
+	 * {@code "example.progs.Program"}).
+	 */
+	private final String className;
+
+	/**
 	 * The fully qualified name of the method (e.g.,
 	 * {@code "example.progs.Program.routine"}).
 	 */
-	private final String methodName;
+	private final String fullName;
 
 	/**
 	 * The names of the symbolic parameters. If a parameter is non-symbolic, its
@@ -82,8 +93,10 @@ public final class Trigger {
 	 * @param paramTypes
 	 *            the trigger parameter types
 	 */
-	private Trigger(String methodName, String[] paramNames, Class<?>[] paramTypes) {
+	private Trigger(String methodName, String packageName, String[] paramNames, Class<?>[] paramTypes) {
 		this.methodName = methodName;
+		this.className = packageName;
+		this.fullName = packageName + "." + methodName;
 		assert paramNames.length == paramTypes.length;
 		this.paramNames = paramNames;
 		this.paramTypes = paramTypes;
@@ -106,7 +119,25 @@ public final class Trigger {
 	 *         this triggers
 	 */
 	public boolean match(String methodName, String signature) {
-		return methodName.equals(this.methodName) && signature.startsWith(this.signature);
+		return methodName.equals(this.fullName) && signature.startsWith(this.signature);
+	}
+
+	/**
+	 * Return the name of the trigger method.
+	 * 
+	 * @return the name of the method
+	 */
+	public String getMethodName() {
+		return methodName;
+	}
+
+	/**
+	 * Return the name of the trigger class.
+	 * 
+	 * @return the name of the class
+	 */
+	public String getClassName() {
+		return className;
 	}
 
 	/**
@@ -131,6 +162,15 @@ public final class Trigger {
 		return paramNames[index];
 	}
 
+	/**
+	 * Return the array that lists all the parameter types.
+	 * 
+	 * @return the parameter types
+	 */
+	public Class<?>[] getParamTypes() {
+		return paramTypes;
+	}
+	
 	/**
 	 * Return the type of the given parameter. This will be a valid type even if
 	 * the parameter is not symbolic.
@@ -212,19 +252,22 @@ public final class Trigger {
 
 	/**
 	 * Create a new trigger from a string specified in the COASTAL
-	 * configuration. The string should consist of the fully qualified name of
-	 * the method, an open parenthesis ({@code (}), a comma-separated list of
-	 * zero or more parameters, and a closing parenthesis ({@code )}). Each
-	 * parameter consists of a name, followed by a colon ({@code :}), and a type
-	 * description.
+	 * configuration. The string should consist of the name of the method, an
+	 * open parenthesis ({@code (}), a comma-separated list of zero or more
+	 * parameters, and a closing parenthesis ({@code )}). Each parameter
+	 * consists of a name, followed by a colon ({@code :}), and a type
+	 * description. If the method name is not fully qualified, the class name
+	 * parameter is used.
 	 * 
 	 * @param desc
 	 *            the description of the trigger method
+	 * @param className
+	 *            optional name of the entry point class
 	 * @param parameters
 	 *            a mapping that relates parameter names to Java classes
 	 * @return the new trigger
 	 */
-	public static Trigger createTrigger(String desc, Map<String, Class<?>> parameters) {
+	public static Trigger createTrigger(String desc, String className, Map<String, Class<?>> parameters) {
 		int s = desc.indexOf('('), e = desc.indexOf(')', s);
 		assert s != -1;
 		assert e != -1;
@@ -270,7 +313,66 @@ public final class Trigger {
 			bn.display(System.out);
 			return null;
 		}
-		return new Trigger(m, pn, pt);
+		String tm = "", tc = "";
+		int dot = m.lastIndexOf('.');
+		if (dot != -1) {
+			tm = m.substring(dot + 1);
+			tc = m.substring(0, dot);
+		} else {
+			tm = m;
+			tc = className;
+		}
+		return new Trigger(tm, tc, pn, pt);
+	}
+
+	/**
+	 * Create a new trigger that represents the entry point for the analysis
+	 * run. The string should consist of the name of the method, an open
+	 * parenthesis ({@code (}), a comma-separated list of zero or more types,
+	 * and a closing parenthesis ({@code )}). If the method name is not fully
+	 * qualified, the class name parameter is used.
+	 * 
+	 * @since 0.0.2
+	 * 
+	 * @param desc
+	 *            the description of the entry point
+	 * @param className
+	 *            optional name of the entry point class
+	 * @return the new trigger
+	 */
+	public static Trigger createTrigger(String desc, String className) {
+		int s = desc.indexOf('('), e = desc.indexOf(')', s);
+		assert s != -1;
+		assert e != -1;
+		String m = desc.substring(0, s).trim();
+		String ps = desc.substring(s + 1, e).trim();
+		int n = 0;
+		String[] pn;
+		Class<?>[] pt;
+		if (ps.length() > 0) {
+			String[] pz = ps.split(",");
+			n = pz.length;
+			pn = new String[n];
+			pt = new Class<?>[n];
+			for (int i = 0; i < n; i++) {
+				String p = pz[i].trim();
+				pn[i] = null;
+				pt[i] = parseType(p.trim());
+			}
+		} else {
+			pn = new String[0];
+			pt = new Class<?>[0];
+		}
+		String tm = "", tc = "";
+		int dot = m.lastIndexOf('.');
+		if (dot != -1) {
+			tm = m.substring(dot + 1);
+			tc = m.substring(0, dot);
+		} else {
+			tm = m;
+			tc = className;
+		}
+		return new Trigger(tm, tc, pn, pt);
 	}
 
 	/**

@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.TaskFactory;
+import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
@@ -213,10 +214,11 @@ public class DiverFactory implements TaskFactory {
 				observerFactory.createObserver(coastal, observerManager);
 			}
 			try {
-				Class<?> clas = classLoader.loadClass(config.getString("coastal.target.main"));
-				Method meth = clas.getMethod("main", String[].class);
+				Trigger trigger = coastal.getMainEntrypoint();
+				Class<?> clas = classLoader.loadClass(trigger.getClassName());
+				Method meth = clas.getMethod(trigger.getMethodName(), trigger.getParamTypes());
 				meth.setAccessible(true);
-				meth.invoke(null, new Object[] { new String[0] });
+				meth.invoke(null, coastal.getMainArguments());
 			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
 					| IllegalArgumentException x) {
 				x.printStackTrace(coastal.getSystemErr());

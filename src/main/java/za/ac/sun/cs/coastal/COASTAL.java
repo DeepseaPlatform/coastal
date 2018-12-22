@@ -112,6 +112,17 @@ public class COASTAL {
 	 */
 	private final Map<String, Integer> parameterSize = new HashMap<>();
 
+	/**
+	 * A trigger that describes the entry point. This is (basically) the name of
+	 * the main method and the parameter types.
+	 */
+	private Trigger mainEntrypoint;
+
+	/**
+	 * Actual values that must be passed as command line parameters.
+	 */
+	private Object[] mainArguments;
+
 	// ======================================================================
 	//
 	// VARIABLE BOUNDS
@@ -583,15 +594,10 @@ public class COASTAL {
 	 * delegates, bounds, and observers.
 	 */
 	private void parseConfig() {
-		// TARGET INFORMATION
 		parseConfigTarget();
-		// VARIABLE BOUNDS
 		parseConfigBounds();
-		// STRATEGIES
 		parseConfigStrategies();
-		// OBSERVERS
 		parseConfigObservers();
-		// DELEGATES
 		parseConfigDelegates();
 	}
 
@@ -600,10 +606,193 @@ public class COASTAL {
 	 */
 	private void parseConfigTarget() {
 		prefixes.addAll(getConfig().getList(String.class, "coastal.target.instrument"));
+		String mainClass = config.getString("coastal.target.main", null);
 		String[] triggerNames = getConfig().getStringArray("coastal.target.trigger");
 		for (int i = 0; i < triggerNames.length; i++) {
-			triggers.add(Trigger.createTrigger(triggerNames[i].trim(), parameters));
+			triggers.add(Trigger.createTrigger(triggerNames[i].trim(), mainClass, parameters));
 		}
+		String entrypoint = config.getString("coastal.target.entrypoint", null);
+		if (entrypoint != null) {
+			mainEntrypoint = Trigger.createTrigger(entrypoint, mainClass);
+		} else {
+			mainEntrypoint = Trigger.createTrigger("main(String[])", mainClass);
+		}
+		mainArguments = new Object[mainEntrypoint.getParamCount()];
+		String[] args = getConfig().getStringArray("coastal.target.arg");
+		for (int i = 0; i < mainEntrypoint.getParamCount(); i++) {
+			Class<?> type = mainEntrypoint.getParamType(i);
+			if (type == boolean.class) {
+				mainArguments[i] = Boolean.valueOf((i < args.length) ? args[i] : "false");
+			} else if (type == byte.class) {
+				mainArguments[i] = Byte.valueOf((i < args.length) ? args[i] : "0");
+			} else if (type == short.class) {
+				mainArguments[i] = Short.valueOf((i < args.length) ? args[i] : "0");
+			} else if (type == char.class) {
+				mainArguments[i] = Character.valueOf((i < args.length) ? args[i].charAt(0) : ' ');
+			} else if (type == int.class) {
+				mainArguments[i] = Integer.valueOf((i < args.length) ? args[i] : "0");
+			} else if (type == long.class) {
+				mainArguments[i] = Long.valueOf((i < args.length) ? args[i] : "0");
+			} else if (type == float.class) {
+				mainArguments[i] = Float.valueOf((i < args.length) ? args[i] : "0.0");
+			} else if (type == double.class) {
+				mainArguments[i] = Double.valueOf((i < args.length) ? args[i] : "0.0");
+			} else if (type == String.class) {
+				mainArguments[i] = (i < args.length) ? args[i] : "";
+			} else if (type.isArray() && (i >= args.length)) {
+				mainArguments[i] = null;
+			} else if (type == boolean[].class) {
+				String[] stringValues = args[i].split("\\s+");
+				boolean[] values = new boolean[stringValues.length];
+				for (int k = 0; k < values.length; k++) {
+					values[k] = Boolean.valueOf(stringValues[k]);
+				}
+				mainArguments[i] = values;
+			} else if (type == byte[].class) {
+				String[] stringValues = args[i].split("\\s+");
+				byte[] values = new byte[stringValues.length];
+				for (int k = 0; k < values.length; k++) {
+					values[k] = Byte.valueOf(stringValues[k]);
+				}
+				mainArguments[i] = values;
+			} else if (type == short[].class) {
+				String[] stringValues = args[i].split("\\s+");
+				short[] values = new short[stringValues.length];
+				for (int k = 0; k < values.length; k++) {
+					values[k] = Short.valueOf(stringValues[k]);
+				}
+				mainArguments[i] = values;
+			} else if (type == char[].class) {
+				String[] stringValues = args[i].split("\\s+");
+				char[] values = new char[stringValues.length];
+				for (int k = 0; k < values.length; k++) {
+					values[k] = Character.valueOf(stringValues[k].charAt(0));
+				}
+				mainArguments[i] = values;
+			} else if (type == int[].class) {
+				String[] stringValues = args[i].split("\\s+");
+				int[] values = new int[stringValues.length];
+				for (int k = 0; k < values.length; k++) {
+					values[k] = Integer.valueOf(stringValues[k]);
+				}
+				mainArguments[i] = values;
+			} else if (type == long[].class) {
+				String[] stringValues = args[i].split("\\s+");
+				long[] values = new long[stringValues.length];
+				for (int k = 0; k < values.length; k++) {
+					values[k] = Long.valueOf(stringValues[k]);
+				}
+				mainArguments[i] = values;
+			} else if (type == float[].class) {
+				String[] stringValues = args[i].split("\\s+");
+				float[] values = new float[stringValues.length];
+				for (int k = 0; k < values.length; k++) {
+					values[k] = Float.valueOf(stringValues[k]);
+				}
+				mainArguments[i] = values;
+			} else if (type == double[].class) {
+				String[] stringValues = args[i].split("\\s+");
+				double[] values = new double[stringValues.length];
+				for (int k = 0; k < values.length; k++) {
+					values[k] = Double.valueOf(stringValues[k]);
+				}
+				mainArguments[i] = values;
+			} else if (type == String[].class) {
+				String[] stringValues = args[i].replaceFirst("^\\s+", "").split("(?<!\\\\)\\s+");
+				for (int k = 0; k < stringValues.length; k++) {
+					stringValues[k] = unescape(stringValues[k]);
+				}
+				mainArguments[i] = stringValues;
+			} else {
+				mainArguments[i] = null;
+			}
+		}
+	}
+
+	/**
+	 * Unescapes a string that contains standard Java escape sequences.
+	 * <ul>
+	 * <li><strong>&#92;b &#92;f &#92;n &#92;r &#92;t &#92;" &#92;'</strong> :
+	 * BS, FF, NL, CR, TAB, double and single quote.</li>
+	 * <li><strong>&#92;X &#92;XX &#92;XXX</strong> : Octal character
+	 * specification (0 - 377, 0x00 - 0xFF).</li>
+	 * <li><strong>&#92;uXXXX</strong> : Hexadecimal based Unicode
+	 * character.</li>
+	 * </ul>
+	 * 
+	 * @param st
+	 *            A string optionally containing standard java escape sequences.
+	 * @return The translated string.
+	 */
+	public static String unescape(String st) {
+
+		StringBuilder sb = new StringBuilder(st.length());
+
+		for (int i = 0; i < st.length(); i++) {
+			char ch = st.charAt(i);
+			if (ch == '\\') {
+				char nextChar = (i == st.length() - 1) ? '\\' : st.charAt(i + 1);
+				// Octal escape?
+				if (nextChar >= '0' && nextChar <= '7') {
+					String code = "" + nextChar;
+					i++;
+					if ((i < st.length() - 1) && st.charAt(i + 1) >= '0' && st.charAt(i + 1) <= '7') {
+						code += st.charAt(i + 1);
+						i++;
+						if ((i < st.length() - 1) && st.charAt(i + 1) >= '0' && st.charAt(i + 1) <= '7') {
+							code += st.charAt(i + 1);
+							i++;
+						}
+					}
+					sb.append((char) Integer.parseInt(code, 8));
+					continue;
+				}
+				switch (nextChar) {
+				case '\\':
+					ch = '\\';
+					break;
+				case 'b':
+					ch = '\b';
+					break;
+				case 'f':
+					ch = '\f';
+					break;
+				case 'n':
+					ch = '\n';
+					break;
+				case 'r':
+					ch = '\r';
+					break;
+				case 't':
+					ch = '\t';
+					break;
+				case '\"':
+					ch = '\"';
+					break;
+				case '\'':
+					ch = '\'';
+					break;
+				case ' ':
+					ch = ' ';
+					break;
+				case 'u':
+					if (i >= st.length() - 5) {
+						ch = 'u';
+						break;
+					}
+					int code = Integer.parseInt(
+							"" + st.charAt(i + 2) + st.charAt(i + 3) + st.charAt(i + 4) + st.charAt(i + 5), 16);
+					sb.append(Character.toChars(code));
+					i += 5;
+					continue;
+				default:
+					break;
+				}
+				i++;
+			}
+			sb.append(ch);
+		}
+		return sb.toString();
 	}
 
 	/**
@@ -1100,6 +1289,30 @@ public class COASTAL {
 		if (parameters.containsKey(name)) {
 			parameterSize.put(name, size);
 		}
+	}
+
+	/**
+	 * Return the trigger that represents the main entry point for this analysis
+	 * run.
+	 * 
+	 * @since 0.0.2
+	 * 
+	 * @return the main entry point
+	 */
+	public Trigger getMainEntrypoint() {
+		return mainEntrypoint;
+	}
+
+	/**
+	 * Return the actual arguments that should be passed to the main entry point
+	 * in the main class for this run.
+	 *
+	 * @since 0.0.2
+	 * 
+	 * @return the arguments for the main entry point
+	 */
+	public Object[] getMainArguments() {
+		return mainArguments;
 	}
 
 	/**

@@ -1240,6 +1240,9 @@ public class SymbolicState implements State {
 
 	@Override
 	public void returnValue(int returnValue) {
+		if (!symbolicMode) {
+			return;
+		}
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
 		} else {
