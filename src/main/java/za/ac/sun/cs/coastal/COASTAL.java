@@ -1698,6 +1698,26 @@ public class COASTAL {
 	}
 
 	/**
+	 * Add a single model to the surfer model queue. The operation will only succeed if the model
+	 * has not been enqueued before.
+	 * 
+	 * @param mdl
+	 *            the model to add
+	 * @return {@code true} if the model has been added successfully
+	 */
+	public boolean addSurferModel(Model mdl) {
+		try {
+			if (visitedSurferModels.add(mdl.getConcreteValues().toString())) {
+				surferModelQueue.put(mdl);
+				return true;
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
 	 * Return the next available surfer model.
 	 * 
 	 * @return the model as a variable-value mapping
@@ -1934,7 +1954,7 @@ public class COASTAL {
 			String time = Banner.getElapsed(this);
 			String dives = String.format("dives:%d", diverManager.getDiveCount());
 			String surfs = String.format("surfs:%d", surferManager.getSurfCount());
-			String queue = String.format("[models:%d pcs:%d]", diverModelQueue.size(), pcQueue.size());
+			String queue = String.format("[dm:%d sm:%d pc:%d tr:%d]", diverModelQueue.size(), surferModelQueue.size(), pcQueue.size(), traceQueue.size());
 			log.info("{} {} {} {}", time, dives, surfs, queue);
 			if (elapsedTime > 3600000) {
 				// After 1 hour, we report every 5 minutes

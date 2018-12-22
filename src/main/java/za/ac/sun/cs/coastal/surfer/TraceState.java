@@ -1,6 +1,7 @@
 package za.ac.sun.cs.coastal.surfer;
 
 import java.lang.reflect.Array;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -41,13 +42,18 @@ public class TraceState implements State {
 
 	private final Map<String, Object> concreteValues;
 
+	private final boolean useCurrentValues;
+
 	private boolean mayContinue = true;
+
+	private int lastLinenumber = -1;
 
 	public TraceState(COASTAL coastal, Map<String, Object> concreteValues) throws InterruptedException {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();
-		this.concreteValues = concreteValues;
+		useCurrentValues = (concreteValues == null);
+		this.concreteValues = (concreteValues == null) ? new HashMap<>() : concreteValues;
 	}
 
 	public boolean getSymbolicMode() {
@@ -85,6 +91,7 @@ public class TraceState implements State {
 			recordMode = false;
 			mayRecord = false;
 			traceMode = false;
+			trace.setModel(concreteValues);
 		}
 		return traceMode;
 	}
@@ -140,7 +147,10 @@ public class TraceState implements State {
 	// ======================================================================
 
 	private long getConcreteIntegral(int triggerIndex, int index, int address, long currentValue) {
-		if (concreteValues == null) {
+		if (useCurrentValues) {
+			Trigger trigger = coastal.getTrigger(triggerIndex);
+			String name = trigger.getParamName(index);
+			concreteValues.put(name, currentValue); 
 			return currentValue;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
@@ -157,7 +167,10 @@ public class TraceState implements State {
 	}
 
 	private double getConcreteReal(int triggerIndex, int index, int address, double currentValue) {
-		if (concreteValues == null) {
+		if (useCurrentValues) {
+			Trigger trigger = coastal.getTrigger(triggerIndex);
+			String name = trigger.getParamName(index);
+			concreteValues.put(name, currentValue); 
 			return currentValue;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
@@ -215,8 +228,14 @@ public class TraceState implements State {
 
 	@Override
 	public String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
-		if (concreteValues == null) {
-			coastal.setParameterSize(coastal.getTrigger(triggerIndex).getParamName(index), currentValue.length());
+		if (useCurrentValues) {
+			Trigger trigger = coastal.getTrigger(triggerIndex);
+			String name = trigger.getParamName(index);
+			int length = currentValue.length();
+			coastal.setParameterSize(name, length);
+			for (int i = 0; i < length; i++) {
+				concreteValues.put(name + CHAR_SEPARATOR + i, (long) currentValue.charAt(i));
+			}
 			return currentValue;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
@@ -240,8 +259,14 @@ public class TraceState implements State {
 
 	public Object getConcreteIntegralArray(int triggerIndex, int index, int address, Object currentArray,
 			Function<Long, Object> convert) {
-		if (concreteValues == null) {
-			coastal.setParameterSize(coastal.getTrigger(triggerIndex).getParamName(index), Array.getLength(currentArray));
+		if (useCurrentValues) {
+			Trigger trigger = coastal.getTrigger(triggerIndex);
+			String name = trigger.getParamName(index);
+			int length = Array.getLength(currentArray);
+			coastal.setParameterSize(name, length);
+			for (int i = 0; i < length; i++) {
+				concreteValues.put(name + INDEX_SEPARATOR + i, (long) Array.get(currentArray, i));
+			}
 			return currentArray;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
@@ -268,8 +293,14 @@ public class TraceState implements State {
 
 	public Object getConcreteRealArray(int triggerIndex, int index, int address, Object currentArray, Class<?> type,
 			Function<Double, Object> convert) {
-		if (concreteValues == null) {
-			coastal.setParameterSize(coastal.getTrigger(triggerIndex).getParamName(index), Array.getLength(currentArray));
+		if (useCurrentValues) {
+			Trigger trigger = coastal.getTrigger(triggerIndex);
+			String name = trigger.getParamName(index);
+			int length = Array.getLength(currentArray);
+			coastal.setParameterSize(name, length);
+			for (int i = 0; i < length; i++) {
+				concreteValues.put(name + INDEX_SEPARATOR + i, (double) Array.get(currentArray, i));
+			}
 			return currentArray;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
@@ -333,198 +364,6 @@ public class TraceState implements State {
 		return (double[]) getConcreteIntegralArray(triggerIndex, index, address, currentValue,
 				x -> (double) x.intValue());
 	}
-
-	//	@Override
-	//	public boolean[] getConcreteBooleanArray(int triggerIndex, int index, int address, boolean[] currentValue) {
-	//		if (concreteValues == null) {
-	//			return currentValue;
-	//		}
-	//		Trigger trigger = coastal.getTrigger(triggerIndex);
-	//		String name = trigger.getParamName(index);
-	//		if (name == null) { // not symbolic
-	//			return currentValue;
-	//		}
-	//		int length = currentValue.length;
-	//		boolean[] value = new boolean[length];
-	//		for (int i = 0; i < length; i++) {
-	//			String entryName = name + INDEX_SEPARATOR + i;
-	//			Constant concrete = concreteValues.get(entryName);
-	//			if ((concrete != null) && (concrete instanceof IntConstant)) {
-	//				value[i] = ((IntConstant) concrete).getValue() != 0;
-	//			} else {
-	//				value[i] = currentValue[i];
-	//			}
-	//		}
-	//		return value;
-	//	}
-	//
-	//	@Override
-	//	public byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) {
-	//		if (concreteValues == null) {
-	//			return currentValue;
-	//		}
-	//		Trigger trigger = coastal.getTrigger(triggerIndex);
-	//		String name = trigger.getParamName(index);
-	//		if (name == null) { // not symbolic
-	//			return currentValue;
-	//		}
-	//		int length = currentValue.length;
-	//		byte[] value = new byte[length];
-	//		for (int i = 0; i < length; i++) {
-	//			String entryName = name + INDEX_SEPARATOR + i;
-	//			Constant concrete = concreteValues.get(entryName);
-	//			if ((concrete != null) && (concrete instanceof IntConstant)) {
-	//				value[i] = (byte) ((IntConstant) concrete).getValue();
-	//			} else {
-	//				value[i] = currentValue[i];
-	//			}
-	//		}
-	//		return value;
-	//	}
-	//	
-	//	@Override
-	//	public short[] getConcreteShortArray(int triggerIndex, int index, int address, short[] currentValue) {
-	//		if (concreteValues == null) {
-	//			return currentValue;
-	//		}
-	//		Trigger trigger = coastal.getTrigger(triggerIndex);
-	//		String name = trigger.getParamName(index);
-	//		if (name == null) { // not symbolic
-	//			return currentValue;
-	//		}
-	//		int length = currentValue.length;
-	//		short[] value = new short[length];
-	//		for (int i = 0; i < length; i++) {
-	//			String entryName = name + INDEX_SEPARATOR + i;
-	//			Constant concrete = concreteValues.get(entryName);
-	//			if ((concrete != null) && (concrete instanceof IntConstant)) {
-	//				value[i] = (short) ((IntConstant) concrete).getValue();
-	//			} else {
-	//				value[i] = currentValue[i];
-	//			}
-	//		}
-	//		return value;
-	//	}
-	//	
-	//	@Override
-	//	public char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
-	//		if (concreteValues == null) {
-	//			return currentValue;
-	//		}
-	//		Trigger trigger = coastal.getTrigger(triggerIndex);
-	//		String name = trigger.getParamName(index);
-	//		if (name == null) { // not symbolic
-	//			return currentValue;
-	//		}
-	//		int length = currentValue.length;
-	//		char[] value = new char[length];
-	//		for (int i = 0; i < length; i++) {
-	//			String entryName = name + INDEX_SEPARATOR + i;
-	//			Constant concrete = concreteValues.get(entryName);
-	//			if ((concrete != null) && (concrete instanceof IntConstant)) {
-	//				value[i] = (char) ((IntConstant) concrete).getValue();
-	//			} else {
-	//				value[i] = currentValue[i];
-	//			}
-	//		}
-	//		return value;
-	//	}
-	//	
-	//	@Override
-	//	public int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
-	//		if (concreteValues == null) {
-	//			return currentValue;
-	//		}
-	//		Trigger trigger = coastal.getTrigger(triggerIndex);
-	//		String name = trigger.getParamName(index);
-	//		if (name == null) { // not symbolic
-	//			return currentValue;
-	//		}
-	//		int length = currentValue.length;
-	//		int[] value = new int[length];
-	//		for (int i = 0; i < length; i++) {
-	//			String entryName = name + INDEX_SEPARATOR + i;
-	//			Constant concrete = concreteValues.get(entryName);
-	//			if ((concrete != null) && (concrete instanceof IntConstant)) {
-	//				value[i] = ((IntConstant) concrete).getValue();
-	//			} else {
-	//				value[i] = currentValue[i];
-	//			}
-	//		}
-	//		return value;
-	//	}
-	//
-	//	@Override
-	//	public long[] getConcreteLongArray(int triggerIndex, int index, int address, long[] currentValue) {
-	//		if (concreteValues == null) {
-	//			return currentValue;
-	//		}
-	//		Trigger trigger = coastal.getTrigger(triggerIndex);
-	//		String name = trigger.getParamName(index);
-	//		if (name == null) { // not symbolic
-	//			return currentValue;
-	//		}
-	//		int length = currentValue.length;
-	//		long[] value = new long[length];
-	//		for (int i = 0; i < length; i++) {
-	//			String entryName = name + INDEX_SEPARATOR + i;
-	//			Constant concrete = concreteValues.get(entryName);
-	//			if ((concrete != null) && (concrete instanceof IntConstant)) {
-	//				value[i] = ((IntConstant) concrete).getValue();
-	//			} else {
-	//				value[i] = currentValue[i];
-	//			}
-	//		}
-	//		return value;
-	//	}
-	//	
-	//	@Override
-	//	public float[] getConcreteFloatArray(int triggerIndex, int index, int address, float[] currentValue) {
-	//		if (concreteValues == null) {
-	//			return currentValue;
-	//		}
-	//		Trigger trigger = coastal.getTrigger(triggerIndex);
-	//		String name = trigger.getParamName(index);
-	//		if (name == null) { // not symbolic
-	//			return currentValue;
-	//		}
-	//		int length = currentValue.length;
-	//		float[] value = new float[length];
-	//		for (int i = 0; i < length; i++) {
-	//			String entryName = name + INDEX_SEPARATOR + i;
-	//			Constant concrete = concreteValues.get(entryName);
-	//			if ((concrete != null) && (concrete instanceof RealConstant)) {
-	//				value[i] = (float) ((RealConstant) concrete).getValue();
-	//			} else {
-	//				value[i] = currentValue[i];
-	//			}
-	//		}
-	//		return value;
-	//	}
-	//	
-	//	@Override
-	//	public double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue) {
-	//		if (concreteValues == null) {
-	//			return currentValue;
-	//		}
-	//		Trigger trigger = coastal.getTrigger(triggerIndex);
-	//		String name = trigger.getParamName(index);
-	//		if (name == null) { // not symbolic
-	//			return currentValue;
-	//		}
-	//		int length = currentValue.length;
-	//		double[] value = new double[length];
-	//		for (int i = 0; i < length; i++) {
-	//			String entryName = name + INDEX_SEPARATOR + i;
-	//			Constant concrete = concreteValues.get(entryName);
-	//			if ((concrete != null) && (concrete instanceof RealConstant)) {
-	//				value[i] = ((RealConstant) concrete).getValue();
-	//			} else {
-	//				value[i] = currentValue[i];
-	//			}
-	//		}
-	//		return value;
-	//	}
 
 	@Override
 	public String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue) {
@@ -603,6 +442,7 @@ public class TraceState implements State {
 			return;
 		}
 		log.trace("### LINENUMBER {}", line);
+		lastLinenumber = line;
 		broker.publishThread("linenumber", new Tuple(instr, line));
 	}
 
@@ -711,7 +551,7 @@ public class TraceState implements State {
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
 		if (recordMode && (opcode != Opcodes.GOTO)) {
-			trace = new TraceIf(trace, true);
+			trace = new TraceIf(trace, lastLinenumber, true);
 		}
 	}
 
@@ -724,7 +564,7 @@ public class TraceState implements State {
 			log.trace("(POST) {}", Bytecodes.toString(opcode));
 			log.trace(">>> previous conjunct is false");
 			assert trace instanceof TraceIf;
-			trace = ((TraceIf) trace).negate();
+			trace = ((TraceIf) trace).negate(lastLinenumber);
 		}
 	}
 

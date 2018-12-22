@@ -1,17 +1,27 @@
 package za.ac.sun.cs.coastal.surfer;
 
+import java.util.Map;
+
 import za.ac.sun.cs.coastal.symbolic.Execution;
 
 public abstract class Trace implements Execution {
 
-	public static final Trace NULL = new TraceIf(null, true);
+	public static final Trace NULL = new TraceIf(null, -1, true);
 	
-	private final Trace parent;
+	protected final Trace parent;
 
-	private final int depth;
+	protected final Trace root;
+	
+	protected final int block;
+	
+	protected final int depth;
 
-	public Trace(Trace parent) {
+	protected Map<String, Object> model = null;
+	
+	public Trace(Trace parent, int block) {
 		this.parent = parent;
+		this.block = block;
+		this.root = (parent == null) ? this : parent.root;
 		this.depth = (parent == null) ? 1 : (1 + parent.getDepth());
 	}
 
@@ -20,11 +30,23 @@ public abstract class Trace implements Execution {
 		return parent;
 	}
 
+	public int getBlock() {
+		return block;
+	}
+	
 	@Override
 	public int getDepth() {
 		return depth;
 	}
 
+	public Map<String, Object> getModel() {
+		return root.model;
+	}
+
+	public void setModel(Map<String, Object> model) {
+		root.model = model;
+	}
+	
 	private String stringRep = null;
 
 	@Override
@@ -45,21 +67,21 @@ public abstract class Trace implements Execution {
 
 	public static class TraceIf extends Trace {
 
-		private final boolean value;
+		protected final boolean value;
 
-		private final String signature;
+		protected final String signature;
 
-		private Trace negated = null;
+		protected Trace negated = null;
 
-		public TraceIf(Trace parent, boolean value) {
-			super(parent);
+		public TraceIf(Trace parent, int block, boolean value) {
+			super(parent, block);
 			this.value = value;
 			if (this.value) {
 				Trace p = getParent();
-				this.signature = (p == null) ? "1" : (p.getSignature() + "1");
+				this.signature = (p == null) ? "1[" + block + "]" : (p.getSignature() + "1");
 			} else {
 				Trace p = getParent();
-				this.signature = (p == null) ? "0" : (p.getSignature() + "0");
+				this.signature = (p == null) ? "0[" + block + "]" : (p.getSignature() + "0");
 			}
 		}
 
@@ -96,13 +118,13 @@ public abstract class Trace implements Execution {
 			if (getValue() == (index == 1)) {
 				return this;
 			} else {
-				return new TraceIf((Trace) parent, index == 1);
+				return new TraceIf((Trace) parent, block, index == 1);
 			}
 		}
 
-		public Trace negate() {
+		public Trace negate(int block) {
 			if (negated == null) {
-				negated = new TraceIf(getParent(), !getValue());
+				negated = new TraceIf(getParent(), block, !getValue());
 			}
 			return negated;
 		}
