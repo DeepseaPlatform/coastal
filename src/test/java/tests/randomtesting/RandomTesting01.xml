@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>tests.randomtesting.RandomTesting01</main>
+			<instrument>tests.randomtesting</instrument>
+			<trigger>tests.randomtesting.RandomTesting01.test(a:int, b:int, c:int)</trigger>
+		</target>
+		<bounds>
+			<bound name="int" min="-100" max="100"/>
+		</bounds>
+		<divers threads="0"/>
+		<surfers threads="1"/>
+		<strategies>
+			<strategy>
+				za.ac.sun.cs.coastal.strategy.tracebased.RandomTestingFactory
+				<options>
+					<max-models>100</max-models>
+					<seed>123456</seed>
+				</options>
+			</strategy>
+		</strategies>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
+		</observers>
+	</coastal>
+</configuration>

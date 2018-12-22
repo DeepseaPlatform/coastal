@@ -4,13 +4,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.configuration2.ImmutableConfiguration;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
+import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.surfer.TraceState;
 import za.ac.sun.cs.coastal.symbolic.Model;
@@ -46,9 +46,12 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 		protected final int maxNumberOfModels;
 
+		protected final long randomSeed;
+
 		public RandomTestingManager(COASTAL coastal, ImmutableConfiguration options) {
 			super(coastal);
 			maxNumberOfModels = ConfigHelper.zero(options.getInt("max-models", 1000), Integer.MAX_VALUE - 1);
+			randomSeed = ConfigHelper.zero(options.getInt("seed", 0), System.currentTimeMillis());
 		}
 
 		protected void incrementTaskCount() {
@@ -59,9 +62,13 @@ public class RandomTestingFactory extends TraceBasedFactory {
 			return maxNumberOfModels;
 		}
 
+		protected long getRandomSeed() {
+			return randomSeed + taskCount;
+		}
+
 		@Override
 		protected int getTaskCount() {
-			return 0;
+			return taskCount;
 		}
 
 		@Override
@@ -87,10 +94,13 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 		private int numberOfModels = 0;
 
+		private final MTRandom rng;
+
 		public RandomTestingStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 			pathTree = coastal.getPathTree();
 			maxNumberOfModels = ((RandomTestingManager) manager).getMaxNumberOfModels();
+			rng = new MTRandom(((RandomTestingManager) manager).getRandomSeed());
 		}
 
 		@Override
@@ -117,22 +127,22 @@ public class RandomTestingFactory extends TraceBasedFactory {
 				if (type == boolean.class) {
 					int min = (Integer) coastal.getMinBound(name, type);
 					int max = (Integer) coastal.getMaxBound(name, type);
-					int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+					int value = rng.nextInt(min, max + 1);
 					concreteValues.put(name, Long.valueOf(value));
 				} else if (type == byte.class) {
 					int min = (Byte) coastal.getMinBound(name, type);
 					int max = (Byte) coastal.getMaxBound(name, type);
-					int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+					int value = rng.nextInt(min, max + 1);
 					concreteValues.put(name, Long.valueOf(value));
 				} else if (type == short.class) {
 					int min = (Short) coastal.getMinBound(name, type);
 					int max = (Short) coastal.getMaxBound(name, type);
-					int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+					int value = rng.nextInt(min, max + 1);
 					concreteValues.put(name, Long.valueOf(value));
 				} else if (type == char.class) {
 					int min = (Character) coastal.getMinBound(name, type);
 					int max = (Character) coastal.getMaxBound(name, type);
-					int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+					int value = rng.nextInt(min, max + 1);
 					concreteValues.put(name, Long.valueOf(value));
 				} else if (type == int.class) {
 					int min = (Integer) coastal.getMinBound(name, type);
@@ -146,19 +156,19 @@ public class RandomTestingFactory extends TraceBasedFactory {
 				} else if (type == float.class) {
 					double min = (Float) coastal.getMinBound(name, type);
 					double max = (Float) coastal.getMaxBound(name, type);
-					double value = ThreadLocalRandom.current().nextDouble(min, max);
+					double value = rng.nextDouble(min, max);
 					concreteValues.put(name, Double.valueOf(value));
 				} else if (type == double.class) {
 					double min = (Double) coastal.getMinBound(name, type);
 					double max = (Double) coastal.getMaxBound(name, type);
-					double value = ThreadLocalRandom.current().nextDouble(min, max);
+					double value = rng.nextDouble(min, max);
 					concreteValues.put(name, value);
 				} else if (type == String.class) {
 					int size = coastal.getParameterSize(name);
 					int min = (Character) coastal.getMinBound(name, char.class);
 					int max = (Character) coastal.getMaxBound(name, char.class);
 					for (int i = 0; i < size; i++) {
-						int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+						int value = rng.nextInt(min, max + 1);
 						concreteValues.put(name + TraceState.CHAR_SEPARATOR + i, Long.valueOf(value));
 					}
 				} else if (type == boolean[].class) {
@@ -166,7 +176,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 					int min = (Integer) coastal.getMinBound(name, type);
 					int max = (Integer) coastal.getMaxBound(name, type);
 					for (int i = 0; i < size; i++) {
-						int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+						int value = rng.nextInt(min, max + 1);
 						concreteValues.put(name + TraceState.INDEX_SEPARATOR + i, Long.valueOf(value));
 					}
 				} else if (type == byte[].class) {
@@ -174,7 +184,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 					int min = (Byte) coastal.getMinBound(name, type);
 					int max = (Byte) coastal.getMaxBound(name, type);
 					for (int i = 0; i < size; i++) {
-						int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+						int value = rng.nextInt(min, max + 1);
 						concreteValues.put(name + TraceState.INDEX_SEPARATOR + i, Long.valueOf(value));
 					}
 				} else if (type == short[].class) {
@@ -182,7 +192,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 					int min = (Short) coastal.getMinBound(name, type);
 					int max = (Short) coastal.getMaxBound(name, type);
 					for (int i = 0; i < size; i++) {
-						int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+						int value = rng.nextInt(min, max + 1);
 						concreteValues.put(name + TraceState.INDEX_SEPARATOR + i, Long.valueOf(value));
 					}
 				} else if (type == short[].class) {
@@ -190,7 +200,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 					int min = (Short) coastal.getMinBound(name, type);
 					int max = (Short) coastal.getMaxBound(name, type);
 					for (int i = 0; i < size; i++) {
-						int value = ThreadLocalRandom.current().nextInt(min, max + 1);
+						int value = rng.nextInt(min, max + 1);
 						concreteValues.put(name + TraceState.INDEX_SEPARATOR + i, Long.valueOf(value));
 					}
 				} else if (type == char[].class) {
@@ -213,7 +223,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 					double min = (Float) coastal.getMinBound(name, type);
 					double max = (Float) coastal.getMaxBound(name, type);
 					for (int i = 0; i < size; i++) {
-						double value = ThreadLocalRandom.current().nextDouble(min, max);
+						double value = rng.nextDouble(min, max);
 						concreteValues.put(name + TraceState.INDEX_SEPARATOR + i, Double.valueOf(value));
 					}
 				} else if (type == double[].class) {
@@ -221,7 +231,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 					double min = (Double) coastal.getMinBound(name, type);
 					double max = (Double) coastal.getMaxBound(name, type);
 					for (int i = 0; i < size; i++) {
-						double value = ThreadLocalRandom.current().nextDouble(min, max);
+						double value = rng.nextDouble(min, max);
 						concreteValues.put(name + TraceState.INDEX_SEPARATOR + i, value);
 					}
 				}
@@ -234,21 +244,21 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 		private int randomInt(int min, int max) {
 			if ((min == Integer.MIN_VALUE) && (max == Integer.MAX_VALUE)) {
-				return ThreadLocalRandom.current().nextInt();
+				return rng.nextInt();
 			} else if (max == Integer.MAX_VALUE) {
-				return 1 + ThreadLocalRandom.current().nextInt(min - 1, max);
+				return 1 + rng.nextInt(min - 1, max);
 			} else {
-				return ThreadLocalRandom.current().nextInt(min, max + 1);
+				return rng.nextInt(min, max + 1);
 			}
 		}
 
 		private long randomLong(long min, long max) {
 			if ((min == Long.MIN_VALUE) && (max == Long.MAX_VALUE)) {
-				return 1 + ThreadLocalRandom.current().nextLong();
+				return 1 + rng.nextLong();
 			} else if (max == Long.MAX_VALUE) {
-				return 1 + ThreadLocalRandom.current().nextLong(min - 1, max);
+				return 1 + rng.nextLong(min - 1, max);
 			} else {
-				return ThreadLocalRandom.current().nextLong(min, max + 1);
+				return rng.nextLong(min, max + 1);
 			}
 		}
 

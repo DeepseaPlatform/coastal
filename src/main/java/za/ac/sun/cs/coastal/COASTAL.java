@@ -720,6 +720,8 @@ public class COASTAL {
 	 * character.</li>
 	 * </ul>
 	 * 
+	 * @since 0.0.3
+	 * 
 	 * @param st
 	 *            A string optionally containing standard java escape sequences.
 	 * @return The translated string.
@@ -1295,7 +1297,7 @@ public class COASTAL {
 	 * Return the trigger that represents the main entry point for this analysis
 	 * run.
 	 * 
-	 * @since 0.0.2
+	 * @since 0.0.3
 	 * 
 	 * @return the main entry point
 	 */
@@ -1307,7 +1309,7 @@ public class COASTAL {
 	 * Return the actual arguments that should be passed to the main entry point
 	 * in the main class for this run.
 	 *
-	 * @since 0.0.2
+	 * @since 0.0.3
 	 * 
 	 * @return the arguments for the main entry point
 	 */

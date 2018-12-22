@@ -596,7 +596,7 @@ public class ConfigHelper {
 	 *         was found
 	 */
 	public static ImmutableConfiguration loadConfiguration(Logger log, String[] args, String extra) {
-		String runName = (args.length > 0) ? FilenameUtils.getName(args[0]) : null;
+		String runName = (args.length > 0) ? FilenameUtils.getName(args[args.length - 1]) : null;
 		return loadConfiguration(log, runName, args, extra);
 	}
 
@@ -634,13 +634,13 @@ public class ConfigHelper {
 			return null;
 		}
 		Configuration[] cfg3 = new Configuration[args.length];
-		int cfgIndex = -1;
+		int cfgIndex = args.length;
 		for (String arg : args) {
 			String filename = arg;
 			if (filename.endsWith(".java")) {
 				filename = filename.substring(0, filename.length() - 4) + "xml";
 			}
-			cfg3[++cfgIndex] = loadConfigFromFile(log, filename);
+			cfg3[--cfgIndex] = loadConfigFromFile(log, filename);
 			if (cfg3[cfgIndex] == null) {
 				cfg3[cfgIndex] = loadConfigFromResource(log, filename);
 			}

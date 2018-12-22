@@ -9,7 +9,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Boolean01.xml");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
 		checkInstrumentation(reporter, 20, 6, 1);
 		checkMarkerCoverage(reporter, 0, 9, 18, 29);
@@ -22,7 +22,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Byte01.xml");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
 		checkInstrumentation(reporter, 20, 6, 1);
 		checkMarkerCoverage(reporter, 0, 9, 16, 25);
@@ -35,7 +35,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Char01.xml");
 		checkDivers(reporter, 1, 5);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 1);
 		checkInstrumentation(reporter, 25, 8, 1);
 		checkMarkerCoverage(reporter, 0, 9, 25);
@@ -49,7 +49,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Short01.xml");
 		checkDivers(reporter, 1, 3);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 3);
 		checkInstrumentation(reporter, 16, 4, 1);
 		checkMarkerCoverage(reporter, 0, 10, 17, 19, 28);
@@ -62,7 +62,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Int01.xml");
 		checkDivers(reporter, 1, 13);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 13, 0, 0);
 		checkInstrumentation(reporter, 77, 24, 1);
 		checkMarkerCoverage(reporter, 0, 0);
@@ -77,7 +77,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Long01.xml");
 		checkDivers(reporter, 1, 6);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 0);
 		checkInstrumentation(reporter, 34, 10, 1);
 		checkMarkerCoverage(reporter, 0, 9);
@@ -91,7 +91,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Float01.xml");
 		checkDivers(reporter, 1, 5);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 1);
 		checkInstrumentation(reporter, 32, 8, 1);
 		checkMarkerCoverage(reporter, 0, 1000, 1004);
@@ -105,7 +105,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Float02.xml");
 		checkDivers(reporter, 1, 6);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 0);
 		checkInstrumentation(reporter, 36, 10, 1);
 		checkMarkerCoverage(reporter, 0, 9);
@@ -118,7 +118,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Double01.xml");
 		checkDivers(reporter, 1, 6);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 0);
 		checkInstrumentation(reporter, 36, 10, 1);
 		checkMarkerCoverage(reporter, 0, 0, 21);
@@ -131,7 +131,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Mixed01.xml");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
 		checkInstrumentation(reporter, 21, 6, 1);
 		checkMarkerCoverage(reporter, 0, 10, 17, 19);
@@ -144,7 +144,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Mixed02.xml");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
 		checkInstrumentation(reporter, 21, 6, 1);
 		checkMarkerCoverage(reporter, 0, 1000, 1002, 1003);
@@ -157,7 +157,7 @@ public class SystemTestsTypes extends SystemTests {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Mixed03.xml");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
 		checkInstrumentation(reporter, 24, 6, 1);
 		checkMarkerCoverage(reporter, 0, 1000, 1002, 1003);

@@ -332,7 +332,7 @@ public final class Trigger {
 	 * and a closing parenthesis ({@code )}). If the method name is not fully
 	 * qualified, the class name parameter is used.
 	 * 
-	 * @since 0.0.2
+	 * @since 0.0.3
 	 * 
 	 * @param desc
 	 *            the description of the entry point

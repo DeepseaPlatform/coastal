@@ -22,7 +22,7 @@ public class SystemTestsObservers extends SystemTests {
 		Reporter reporter = coastal.getReporter();
 		checkDivers(reporter, 1, 8);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
 		checkInstrumentation(reporter, 56, 14, 1);
 		assertEquals(38, reporter.getLong("InstructionCoverage.covered-count"));
@@ -40,7 +40,7 @@ public class SystemTestsObservers extends SystemTests {
 		Reporter reporter = coastal.getReporter();
 		checkDivers(reporter, 1, 5);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 3);
 		checkInstrumentation(reporter, 35, 8, 1);
 		assertEquals(9, reporter.getLong("LineCoverage.covered-count"));
@@ -59,7 +59,7 @@ public class SystemTestsObservers extends SystemTests {
 		Reporter reporter = coastal.getReporter();
 		checkDivers(reporter, 1, 8);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
 		checkInstrumentation(reporter, 56, 14, 1);
 		assertEquals(0, reporter.getLong("MarkerCoverage.marker[0]"));
@@ -83,7 +83,7 @@ public class SystemTestsObservers extends SystemTests {
 		Reporter reporter = coastal.getReporter();
 		checkDivers(reporter, 1, 8);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
 		checkInstrumentation(reporter, 56, 14, 1);
 		assertEquals(0, reporter.getLong("MarkerCoverage.marker[0]"));
@@ -115,7 +115,7 @@ public class SystemTestsObservers extends SystemTests {
 		Reporter reporter = coastal.getReporter();
 		checkDivers(reporter, 1, 8);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
 		checkInstrumentation(reporter, 56, 14, 1);
 		assertEquals(0, reporter.getLong("MarkerCoverage.marker[never]"));
@@ -147,7 +147,7 @@ public class SystemTestsObservers extends SystemTests {
 		Reporter reporter = coastal.getReporter();
 		checkDivers(reporter, 1, 2);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 1, 0, 0);
 		checkInstrumentation(reporter, 2, 1);
 		assertTrue(reporter.getBool("StopController.was-stopped"));

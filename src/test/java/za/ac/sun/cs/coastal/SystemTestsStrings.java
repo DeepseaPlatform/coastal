@@ -20,7 +20,7 @@ public class SystemTestsStrings extends SystemTests {
 		Reporter reporter = coastal.getReporter();
 		checkDivers(reporter, 1, 2);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 2, 0, 0);
 		checkInstrumentation(reporter, 10, 2, 1);
 		checkMarkerCoverage(reporter, 0, 0);
@@ -38,7 +38,7 @@ public class SystemTestsStrings extends SystemTests {
 		Reporter reporter = coastal.getReporter();
 		checkDivers(reporter, 1, 3);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
 		checkInstrumentation(reporter, 15, 4, 1);
 		checkMarkerCoverage(reporter, 0, 0);
@@ -56,7 +56,7 @@ public class SystemTestsStrings extends SystemTests {
 		Reporter reporter = coastal.getReporter();
 		checkDivers(reporter, 1, 3);
 		checkSurfers(reporter, 0, 0);
-		checkStrategy(reporter, 1);
+		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
 		checkInstrumentation(reporter, 15, 4, 1);
 		checkMarkerCoverage(reporter, 0, 0);

@@ -28,10 +28,14 @@ public class SystemTests {
 		assertEquals(count, reporter.getLong("Surfers.count"));
 	}
 
-	protected void checkStrategy(Reporter reporter, int tasks) {
+	protected void checkDFStrategy(Reporter reporter, int tasks) {
 		checkStrategy(reporter, "DepthFirstStrategy", tasks);
 	}
 
+	protected void checkRandomTestingStrategy(Reporter reporter, int tasks) {
+		checkStrategy(reporter, "RandomTesting", tasks);
+	}
+	
 	protected void checkStrategy(Reporter reporter, String strategy, int tasks) {
 		assertEquals(tasks, reporter.getLong(strategy + ".tasks"));
 	}
