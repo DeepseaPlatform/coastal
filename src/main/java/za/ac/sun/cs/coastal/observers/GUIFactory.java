@@ -11,7 +11,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -29,6 +28,8 @@ import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -98,6 +99,8 @@ public class GUIFactory implements ObserverFactory {
 
 		private Button doneButton;
 
+		private Button stopButton;
+		
 		public static class XTableView<S> extends TableView<S> {
 			@Override
 			public void resize(double width, double height) {
@@ -258,14 +261,17 @@ public class GUIFactory implements ObserverFactory {
 			}
 
 			doneButton = new Button("Done");
-			doneButton.setOnAction((ActionEvent e) -> {
-				primaryStage.close();
-			});
+			doneButton.setOnAction(e -> primaryStage.close());
 			doneButton.setDisable(true);
+			stopButton = new Button("Stop");
+			stopButton.setOnAction(e -> coastal.getBroker().publish("emergency-stop", this));
+			stopButton.setDisable(false);
+			Region region = new Region();
+			HBox.setHgrow(region, Priority.ALWAYS);
 			final HBox bottomBox = new HBox();
 			bottomBox.setPadding(new Insets(10, 10, 10, 10));
 			bottomBox.setAlignment(Pos.CENTER_RIGHT);
-			bottomBox.getChildren().add(doneButton);
+			bottomBox.getChildren().addAll(stopButton, region, doneButton);
 			bottomBox.setStyle("-fx-background-color:#336699");
 
 			final BorderPane border = new BorderPane();
@@ -287,6 +293,7 @@ public class GUIFactory implements ObserverFactory {
 
 		public void isDone(Object object) {
 			doneButton.setDisable(false);
+			stopButton.setDisable(true);
 			update(true);
 		}
 

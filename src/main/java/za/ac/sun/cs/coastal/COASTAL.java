@@ -1901,6 +1901,7 @@ public class COASTAL {
 		}
 		getBroker().publish("coastal-start", this);
 		getBroker().subscribe("tick", this::tick);
+		getBroker().subscribe("emergency-stop", this::emergencyStop);
 		addFirstModel(new Model(0, null));
 		try {
 			startTasks();
@@ -1978,6 +1979,17 @@ public class COASTAL {
 				nextReportingTime = elapsedTime + 500;
 			}
 		}
+	}
+
+	/**
+	 * Execute an emergency stop.
+	 * 
+	 * @param object
+	 *            dummy object
+	 */
+	private void emergencyStop(Object object) {
+		new Banner('@').println("EMERGENCY STOP").display(log);
+		workDone.set(true);
 	}
 
 	/**

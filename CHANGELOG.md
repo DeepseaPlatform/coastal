@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [Issue #24](https://github.com/DeepseaPlatform/coastal/issues/24) Tests for the RandomTesting strategy [159ed27](https://github.com/DeepseaPlatform/coastal/commit/159ed27e44f796923929fba7bc4c8517624d82a8)
 - Hybrid fuzzer [dd5fb83](https://github.com/DeepseaPlatform/coastal/commit/dd5fb83ee98981f9187f5a0d8c384f7b5942b95a)
 - Add command-line option (```-quiet```) to switch off detailed log [daa866d](https://github.com/DeepseaPlatform/coastal/commit/daa866df324d66cf6692c85099053ea6bd4d95be)
+- Add "Stop" button for the GUI.
 
 ### Changed
 - Improved text-based drawing of path trees [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
