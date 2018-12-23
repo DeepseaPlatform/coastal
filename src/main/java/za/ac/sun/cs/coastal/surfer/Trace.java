@@ -17,7 +17,9 @@ public abstract class Trace implements Execution {
 	protected final int depth;
 
 	protected Map<String, Object> model = null;
-	
+
+	protected int score;
+
 	public Trace(Trace parent, String block) {
 		this.parent = parent;
 		this.block = block;
@@ -45,6 +47,14 @@ public abstract class Trace implements Execution {
 
 	public void setModel(Map<String, Object> model) {
 		root.model = model;
+	}
+	
+	public int getScore() {
+		return root.score;
+	}
+	
+	public void setScore(int score) {
+		root.score = score;
 	}
 	
 	private String stringRep = null;

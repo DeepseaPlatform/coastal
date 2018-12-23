@@ -10,7 +10,7 @@ public class Fuzzing03 {
 	}
 
 	private static void run(int a, int b, int c, int d, int e, int f) {
-		if (a > 111) {
+		if (a > 999) {
 			Symbolic.mark(1);
 			if (b < 222) {
 				Symbolic.mark(2);
@@ -27,7 +27,7 @@ public class Fuzzing03 {
 					}
 				}
 			}
-		} else if (a > 999) {
+		} else if (a > 111) {
 			Symbolic.mark(7);
 			if (b < 888) {
 				Symbolic.mark(8);

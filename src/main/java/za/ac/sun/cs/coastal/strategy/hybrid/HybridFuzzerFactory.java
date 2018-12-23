@@ -335,6 +335,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 		 * @return the score
 		 */
 		private int calculateScore(Trace trace) {
+			int oldScore = trace.getScore();
 			Map<String, Integer> edges = new HashMap<>();
 			String prevBlock = trace.getBlock();
 			trace = trace.getParent();
@@ -365,7 +366,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 					edges.put(edge, COUNT_TO_BUCKET[count]);
 				}
 			}
-			return manager.scoreEdges(edges);
+			return manager.scoreEdges(edges) + (oldScore >> 1);
 		}
 
 		/**

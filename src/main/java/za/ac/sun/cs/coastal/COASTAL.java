@@ -1721,12 +1721,12 @@ public class COASTAL {
 	/**
 	 * Return the next available surfer model.
 	 * 
-	 * @return the model as a variable-value mapping
+	 * @return the model
 	 * @throws InterruptedException
 	 *             if the action of removing the model was interrupted
 	 */
-	public Map<String, Object> getNextSurferModel() throws InterruptedException {
-		return surferModelQueue.take().getConcreteValues();
+	public Model getNextSurferModel() throws InterruptedException {
+		return surferModelQueue.take();
 	}
 
 	// PATH CONDITION QUEUE
