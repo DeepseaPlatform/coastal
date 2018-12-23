@@ -9,6 +9,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1698,8 +1699,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Add a single model to the surfer model queue. The operation will only succeed if the model
-	 * has not been enqueued before.
+	 * Add a single model to the surfer model queue. The operation will only
+	 * succeed if the model has not been enqueued before.
 	 * 
 	 * @param mdl
 	 *            the model to add
@@ -1716,7 +1717,7 @@ public class COASTAL {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Return the next available surfer model.
 	 * 
@@ -1954,7 +1955,8 @@ public class COASTAL {
 			String time = Banner.getElapsed(this);
 			String dives = String.format("dives:%d", diverManager.getDiveCount());
 			String surfs = String.format("surfs:%d", surferManager.getSurfCount());
-			String queue = String.format("[dm:%d sm:%d pc:%d tr:%d]", diverModelQueue.size(), surferModelQueue.size(), pcQueue.size(), traceQueue.size());
+			String queue = String.format("[dm:%d sm:%d pc:%d tr:%d]", diverModelQueue.size(), surferModelQueue.size(),
+					pcQueue.size(), traceQueue.size());
 			log.info("{} {} {} {}", time, dives, surfs, queue);
 			if (elapsedTime > 3600000) {
 				// After 1 hour, we report every 5 minutes
@@ -1998,19 +2000,46 @@ public class COASTAL {
 	// ======================================================================
 
 	/**
+	 * Whether or not logging should be reduced.
+	 */
+	private static boolean quietLogging = false;
+
+	/**
 	 * The main function and entry point for COASTAL.
 	 * 
 	 * @param args
 	 *            the command-line arguments
 	 */
 	public static void main(String[] args) {
-		final Logger log = LogManager.getLogger("COASTAL");
+		args = parseOptions(args);
+		final Logger log = LogManager.getLogger(quietLogging ? "COASTAL-QUIET" : "COASTAL");
 		new Banner('~').println("COASTAL version " + Version.read()).display(log);
 		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, args);
 		if (config != null) {
 			new COASTAL(log, config).start(false);
 		}
 		new Banner('~').println("COASTAL DONE (" + config.getString("run-name", "?") + ")").display(log);
+	}
+
+	/**
+	 * Parse the command-line options. Meaningful options are processed, setting
+	 * various internal flags. Unrecognized options are placed in a new array
+	 * which is assumed to contain configuration files.
+	 * 
+	 * @param args
+	 *            the original command-line arguments
+	 * @return unprocessed command-line arguments
+	 */
+	private static String[] parseOptions(String[] args) {
+		List<String> newArgs = new LinkedList<>();
+		for (String arg : args) {
+			if (arg.equals("-quiet")) {
+				quietLogging = true;
+			} else {
+				newArgs.add(arg);
+			}
+		}
+		return newArgs.toArray(new String[0]);
 	}
 
 }

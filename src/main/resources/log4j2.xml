@@ -8,14 +8,11 @@
 		<File name="FILE" fileName="/tmp/coastal.log" append="false">
       		<PatternLayout pattern="%d{HH:mm:ss.SSS} {%T} %msg%n"/>
 		</File>
-		<File name="GREEN" fileName="/tmp/coastal-green.log" append="false">
-      		<PatternLayout pattern="%d{HH:mm:ss.SSS} %-6level {%T} %msg%n"/>
-		</File>
 	</Appenders>
 	<Loggers>
 		<Logger name="COASTAL-TEST" level="ALL" additivity="false"/>
-		<Logger name="GREEN" level="ALL" additivity="false">
-			<AppenderRef ref="GREEN"/>
+		<Logger name="COASTAL-QUIET" level="ALL" additivity="false">
+			<AppenderRef ref="CONSOLE"/>
 		</Logger>
    		<Root level="ALL">
 			<AppenderRef ref="CONSOLE"/>
