@@ -92,6 +92,8 @@ public interface State {
 
 	void linenumber(int instr, int line);
 
+	void label(int instr, String label);
+	
 	void insn(int instr, int opcode) throws LimitConjunctException;
 
 	void intInsn(int instr, int opcode, int operand) throws LimitConjunctException;

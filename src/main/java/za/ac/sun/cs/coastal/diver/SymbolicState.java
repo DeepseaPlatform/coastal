@@ -781,6 +781,15 @@ public class SymbolicState implements State {
 	}
 
 	@Override
+	public void label(int instr, String label) {
+		if (!symbolicMode) {
+			return;
+		}
+		log.trace("### LABEL {}", label);
+		broker.publishThread("label", new Tuple(instr, label));
+	}
+	
+	@Override
 	public void insn(int instr, int opcode) throws LimitConjunctException {
 		if (!symbolicMode) {
 			return;

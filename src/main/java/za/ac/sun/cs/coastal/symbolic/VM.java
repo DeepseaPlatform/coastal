@@ -168,6 +168,10 @@ public class VM {
 		state.linenumber(instr, line);
 	}
 
+	public static void label(int instr, String label) {
+		state.label(instr, label);
+	}
+	
 	public static void insn(int instr, int opcode) throws LimitConjunctException {
 		state.insn(instr, opcode);
 	}

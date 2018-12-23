@@ -189,6 +189,15 @@ public class LightMethodAdapter extends MethodVisitor {
 	}
 
 	@Override
+	public void visitLabel(Label label) {
+		log.trace("visitLabel(label:{})", label);
+		mv.visitLdcInsn(classManager.getInstructionCounter());
+		mv.visitLdcInsn(label.toString());
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "label", "(ILjava/lang/String;)V", false);
+		mv.visitLabel(label);
+	}
+
+	@Override
 	public void visitEnd() {
 		log.trace("visitEnd()");
 		classManager.registerLinenumbers(currentLinenumbers);

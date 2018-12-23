@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>tests.fuzzing.Fuzzing02</main>
+			<instrument>tests.fuzzing</instrument>
+			<trigger>tests.fuzzing.Fuzzing02.run(a:int, b:int, c:int, d:int, e:int, f:int)</trigger>
+		</target>
+		<divers threads="0"/>
+		<surfers threads="1"/>
+		<strategies>
+			<strategy threads="2">
+				za.ac.sun.cs.coastal.strategy.hybrid.HybridFuzzerFactory
+			</strategy>
+		</strategies>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
+			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
+		</observers>
+	</coastal>
+</configuration>

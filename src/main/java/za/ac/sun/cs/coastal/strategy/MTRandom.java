@@ -279,6 +279,10 @@ public class MTRandom {
 		return y >>> (32 - bits);
 	}
 
+	public boolean nextBoolean() {
+		return next(8) < 128;
+	}
+
 	public int nextInt() {
 		return next(32);
 	}

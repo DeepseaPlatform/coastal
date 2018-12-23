@@ -6,19 +6,19 @@ import za.ac.sun.cs.coastal.symbolic.Execution;
 
 public abstract class Trace implements Execution {
 
-	public static final Trace NULL = new TraceIf(null, -1, true);
+	public static final Trace NULL = new TraceIf(null, "ORIGIN", true);
 	
 	protected final Trace parent;
 
 	protected final Trace root;
 	
-	protected final int block;
+	protected final String block;
 	
 	protected final int depth;
 
 	protected Map<String, Object> model = null;
 	
-	public Trace(Trace parent, int block) {
+	public Trace(Trace parent, String block) {
 		this.parent = parent;
 		this.block = block;
 		this.root = (parent == null) ? this : parent.root;
@@ -30,7 +30,7 @@ public abstract class Trace implements Execution {
 		return parent;
 	}
 
-	public int getBlock() {
+	public String getBlock() {
 		return block;
 	}
 	
@@ -73,15 +73,15 @@ public abstract class Trace implements Execution {
 
 		protected Trace negated = null;
 
-		public TraceIf(Trace parent, int block, boolean value) {
+		public TraceIf(Trace parent, String block, boolean value) {
 			super(parent, block);
 			this.value = value;
 			if (this.value) {
 				Trace p = getParent();
-				this.signature = (p == null) ? "1[" + block + "]" : (p.getSignature() + "1");
+				this.signature = (p == null) ? "1[" + block + "]" : (p.getSignature() + "1[" + block + "]");
 			} else {
 				Trace p = getParent();
-				this.signature = (p == null) ? "0[" + block + "]" : (p.getSignature() + "0");
+				this.signature = (p == null) ? "0[" + block + "]" : (p.getSignature() + "0[" + block + "]");
 			}
 		}
 
@@ -122,7 +122,7 @@ public abstract class Trace implements Execution {
 			}
 		}
 
-		public Trace negate(int block) {
+		public Trace negate(String block) {
 			if (negated == null) {
 				negated = new TraceIf(getParent(), block, !getValue());
 			}

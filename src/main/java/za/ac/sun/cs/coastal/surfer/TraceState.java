@@ -46,7 +46,7 @@ public class TraceState implements State {
 
 	private boolean mayContinue = true;
 
-	private int lastLinenumber = -1;
+	private String lastLabel = "NONE";
 
 	public TraceState(COASTAL coastal, Map<String, Object> concreteValues) throws InterruptedException {
 		this.coastal = coastal;
@@ -442,10 +442,19 @@ public class TraceState implements State {
 			return;
 		}
 		log.trace("### LINENUMBER {}", line);
-		lastLinenumber = line;
 		broker.publishThread("linenumber", new Tuple(instr, line));
 	}
 
+	@Override
+	public void label(int instr, String label) {
+		if (!traceMode) {
+			return;
+		}
+		log.trace("### LABEL {}", label);
+		lastLabel = label;
+		broker.publishThread("label", new Tuple(instr, label));
+	}
+	
 	@Override
 	public void insn(int instr, int opcode) throws LimitConjunctException {
 		if (!traceMode) {
@@ -551,7 +560,7 @@ public class TraceState implements State {
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
 		if (recordMode && (opcode != Opcodes.GOTO)) {
-			trace = new TraceIf(trace, lastLinenumber, true);
+			trace = new TraceIf(trace, lastLabel, true);
 		}
 	}
 
@@ -564,7 +573,7 @@ public class TraceState implements State {
 			log.trace("(POST) {}", Bytecodes.toString(opcode));
 			log.trace(">>> previous conjunct is false");
 			assert trace instanceof TraceIf;
-			trace = ((TraceIf) trace).negate(lastLinenumber);
+			trace = ((TraceIf) trace).negate(lastLabel);
 		}
 	}
 
