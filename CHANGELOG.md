@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [Issue #25](https://github.com/DeepseaPlatform/coastal/issues/25) Add support for user specified program entry points and (command-line) arguments [3edc259](https://github.com/DeepseaPlatform/coastal/commit/3edc259910277c4d33e0e5e5313b47c2b6aa10e4)
 - User specified seeds for RandomTesting strategy [159ed27](https://github.com/DeepseaPlatform/coastal/commit/159ed27e44f796923929fba7bc4c8517624d82a8)
 - [Issue #24](https://github.com/DeepseaPlatform/coastal/issues/24) Tests for the RandomTesting strategy [159ed27](https://github.com/DeepseaPlatform/coastal/commit/159ed27e44f796923929fba7bc4c8517624d82a8)
-- Hybrid fuzzer [dd5fb83](https://github.com/DeepseaPlatform/coastal/commit/dd5fb83ee98981f9187f5a0d8c384f7b5942b95a)
+- Hybrid fuzzer [dd5fb83](https://github.com/DeepseaPlatform/coastal/commit/dd5fb83ee98981f9187f5a0d8c384f7b5942b95a) [71d7cda](https://github.com/DeepseaPlatform/coastal/commit/71d7cda9645646bae36415a27a3ccd4f3afcca40) [aadcfc1](https://github.com/DeepseaPlatform/coastal/commit/aadcfc1289055c2343273b999af3097e3b1dc177)
 - Add command-line option (```-quiet```) to switch off detailed log [daa866d](https://github.com/DeepseaPlatform/coastal/commit/daa866df324d66cf6692c85099053ea6bd4d95be)
 - Add "Stop" button for the GUI. [cbb488b](https://github.com/DeepseaPlatform/coastal/commit/cbb488b20327aa12e4514a78b9b0565868523ed7)
 

@@ -7,13 +7,11 @@
 			<instrument>tests.fuzzing</instrument>
 			<trigger>tests.fuzzing.Fuzzing03.run(a:int, b:int, c:int, d:int, e:int, f:int)</trigger>
 		</target>
-		<!--
 		<settings>
-			<show-instrumentation>true</show-instrumentation>
+			<time-limit>60</time-limit>
 		</settings>
-		-->
 		<divers threads="0"/>
-		<surfers threads="2"/>
+		<surfers threads="4"/>
 		<strategies>
 			<strategy threads="1">
 				za.ac.sun.cs.coastal.strategy.hybrid.HybridFuzzerFactory
@@ -23,9 +21,9 @@
 			</strategy>
 		</strategies>
 		<observers>
-			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
 			<!--
+			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 			-->
 		</observers>
 	</coastal>

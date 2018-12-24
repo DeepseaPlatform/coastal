@@ -1826,7 +1826,7 @@ public class COASTAL {
 	 */
 	private void idle(long delay) throws InterruptedException {
 		if ((System.currentTimeMillis() - startingTime.getTimeInMillis()) / 1000 > timeLimit) {
-			log.warn("time limit reached");
+			new Banner('@').println("TIME LIMIT REACHED").display(log);
 			stopWork();
 		} else {
 			synchronized (workDone) {
@@ -1859,7 +1859,7 @@ public class COASTAL {
 	}
 
 	/**
-	 * Stop the still-executing tasks and the taks manager itself.
+	 * Stop the still-executing tasks and the thread manager itself.
 	 */
 	public void shutdown() {
 		futures.forEach(f -> f.cancel(true));
@@ -1904,11 +1904,12 @@ public class COASTAL {
 		getBroker().subscribe("emergency-stop", this::emergencyStop);
 		addFirstModel(new Model(0, null));
 		try {
+			// Start surfers, divers, and strategies
 			startTasks();
+			// This main thread spends most of its time in the following loop
 			while (!workDone.get()) {
 				idle(500);
 				getBroker().publish("tick", this);
-				// TO DO ----> balance the threads
 			}
 		} catch (InterruptedException e) {
 			log.info(Banner.getBannerLine("main thread interrupted", '!'));
@@ -1989,7 +1990,7 @@ public class COASTAL {
 	 */
 	private void emergencyStop(Object object) {
 		new Banner('@').println("EMERGENCY STOP").display(log);
-		workDone.set(true);
+		stopWork();
 	}
 
 	/**
@@ -2031,6 +2032,8 @@ public class COASTAL {
 			new COASTAL(log, config).start(false);
 		}
 		new Banner('~').println("COASTAL DONE (" + config.getString("run-name", "?") + ")").display(log);
+		LogManager.shutdown(true);
+		System.exit(0);
 	}
 
 	/**
