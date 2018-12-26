@@ -61,7 +61,11 @@ public class InstrumentationClassManager {
 
 	private final AtomicLong postInstrumentedSize = new AtomicLong(0);
 
-	private final Map<String, byte[]> cache = new HashMap<>();
+	private final Map<String, byte[]> clearCache = new HashMap<>();
+	
+	private final Map<String, byte[]> heavyCache = new HashMap<>();
+	
+	private final Map<String, byte[]> lightCache = new HashMap<>();
 
 	public InstrumentationClassManager(COASTAL coastal, String classPath) {
 		this.coastal = coastal;
@@ -104,7 +108,7 @@ public class InstrumentationClassManager {
 
 	public byte[] loadUninstrumented(String name) {
 		long t = System.currentTimeMillis();
-		byte[] unInstrumented = cache.get(name);
+		byte[] unInstrumented = clearCache.get(name);
 		if (unInstrumented == null) {
 			unInstrumented = loadUninstrumented0(name);
 		} else {
@@ -115,20 +119,20 @@ public class InstrumentationClassManager {
 	}
 
 	private synchronized byte[] loadUninstrumented0(String name) {
-		byte[] unInstrumented = cache.get(name);
+		byte[] unInstrumented = clearCache.get(name);
 		if (unInstrumented == null) {
 			unInstrumented = loadFile(name.replace('.', '/').concat(".class"), false, false);
-			cache.put(name, unInstrumented);
+			clearCache.put(name, unInstrumented);
 		}
 		return unInstrumented;
 	}
 
 	public byte[] loadHeavyInstrumented(String name) {
 		long t = System.currentTimeMillis();
-		byte[] instrumented = cache.get(name);
+		byte[] instrumented = heavyCache.get(name);
 		if (instrumented == null) {
 			instrumented = loadHeavyInstrumented0(name);
-			cache.put(name, instrumented);
+			heavyCache.put(name, instrumented);
 		} else {
 			cacheHitCount.incrementAndGet();
 		}
@@ -137,7 +141,7 @@ public class InstrumentationClassManager {
 	}
 
 	private synchronized byte[] loadHeavyInstrumented0(String name) {
-		byte[] instrumented = cache.get(name);
+		byte[] instrumented = heavyCache.get(name);
 		if (instrumented == null) {
 			byte[] in = loadFile(name.replace('.', '/').concat(".class"), true, true);
 			if (in == null) {
@@ -164,10 +168,10 @@ public class InstrumentationClassManager {
 
 	public byte[] loadLightInstrumented(String name) {
 		long t = System.currentTimeMillis();
-		byte[] instrumented = cache.get(name);
+		byte[] instrumented = lightCache.get(name);
 		if (instrumented == null) {
 			instrumented = loadLightInstrumented0(name);
-			cache.put(name, instrumented);
+			lightCache.put(name, instrumented);
 		} else {
 			cacheHitCount.incrementAndGet();
 		}
@@ -176,7 +180,7 @@ public class InstrumentationClassManager {
 	}
 
 	private synchronized byte[] loadLightInstrumented0(String name) {
-		byte[] instrumented = cache.get(name);
+		byte[] instrumented = lightCache.get(name);
 		if (instrumented == null) {
 			byte[] in = loadFile(name.replace('.', '/').concat(".class"), true, true);
 			if (in == null) {
