@@ -97,10 +97,12 @@ public class GUIFactory implements ObserverFactory {
 
 		private static COASTAL coastal;
 
-		private Button doneButton;
-
 		private Button stopButton;
-		
+
+		private Label doneLabel;
+
+		private Button quitButton;
+
 		public static class XTableView<S> extends TableView<S> {
 			@Override
 			public void resize(double width, double height) {
@@ -194,9 +196,9 @@ public class GUIFactory implements ObserverFactory {
 
 			public void refresh() {
 				Platform.runLater(() -> {
-					int index = 0;
-					for (Object propertyValue : reportable.getPropertyValues()) {
-						table.getItems().get(index++).setValue(propertyValue.toString());
+					Object[] propertyValues = reportable.getPropertyValues();
+					for (int i = 0, n = propertyValues.length; i < n; i++) {
+						table.getItems().get(i).setValue(propertyValues[i].toString());
 					}
 				});
 			}
@@ -260,18 +262,25 @@ public class GUIFactory implements ObserverFactory {
 				}
 			}
 
-			doneButton = new Button("Done");
-			doneButton.setOnAction(e -> primaryStage.close());
-			doneButton.setDisable(true);
 			stopButton = new Button("Stop");
 			stopButton.setOnAction(e -> coastal.getBroker().publish("emergency-stop", this));
 			stopButton.setDisable(false);
-			Region region = new Region();
-			HBox.setHgrow(region, Priority.ALWAYS);
+			doneLabel = new Label("Done");
+			doneLabel.setVisible(false);
+			doneLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+			doneLabel.setStyle("-fx-text-fill:#330000;-fx-background-color:#ffff00;-fx-padding:10 30");
+			quitButton = new Button("Quit");
+			quitButton.setOnAction(e -> Platform.exit());
+			quitButton.setDisable(false);
+			quitButton.setVisible(false);
+			Region region1 = new Region();
+			HBox.setHgrow(region1, Priority.ALWAYS);
+			Region region2 = new Region();
+			HBox.setHgrow(region2, Priority.ALWAYS);
 			final HBox bottomBox = new HBox();
 			bottomBox.setPadding(new Insets(10, 10, 10, 10));
 			bottomBox.setAlignment(Pos.CENTER_RIGHT);
-			bottomBox.getChildren().addAll(stopButton, region, doneButton);
+			bottomBox.getChildren().addAll(stopButton, region1, doneLabel, region2, quitButton);
 			bottomBox.setStyle("-fx-background-color:#336699");
 
 			final BorderPane border = new BorderPane();
@@ -292,8 +301,9 @@ public class GUIFactory implements ObserverFactory {
 		}
 
 		public void isDone(Object object) {
-			doneButton.setDisable(false);
 			stopButton.setDisable(true);
+			doneLabel.setVisible(true);
+			quitButton.setVisible(true);
 			update(true);
 		}
 
