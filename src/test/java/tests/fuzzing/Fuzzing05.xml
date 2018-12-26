@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>tests.fuzzing.Fuzzing05</main>
+			<instrument>tests.fuzzing</instrument>
+			<trigger>tests.fuzzing.Fuzzing05.analyse(a:char[])</trigger>
+		</target>
+		<bounds>
+			<bound name="a" min="32" max="128"/>
+		</bounds>
+		<settings>
+			<time-limit>300</time-limit>
+		</settings>
+		<divers threads="0"/>
+		<surfers threads="6"/>
+		<strategies>
+			<strategy threads="1">
+				za.ac.sun.cs.coastal.strategy.hybrid.GybridFuzzerFactory
+				<options>
+					<queue-limit>500000</queue-limit>
+					<attenuation>0.2</attenuation>
+				</options>
+			</strategy>
+		</strategies>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
+			<observer>za.ac.sun.cs.coastal.observers.StopControllerFactory</observer>
+			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
+			<!--
+			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
+			-->
+		</observers>
+	</coastal>
+</configuration>

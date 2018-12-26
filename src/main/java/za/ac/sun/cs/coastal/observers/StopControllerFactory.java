@@ -89,7 +89,7 @@ public class StopControllerFactory implements ObserverFactory {
 		public Object[] getPropertyValues() {
 			Object[] propertyValues = new Object[2];
 			propertyValues[0] = wasStopped;
-			propertyValues[1] = stopMessage;
+			propertyValues[1] = (stopMessage == null) ? "?" : stopMessage;
 			return propertyValues;
 		}
 

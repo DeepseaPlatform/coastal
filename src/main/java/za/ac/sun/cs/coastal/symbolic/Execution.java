@@ -15,5 +15,7 @@ public interface Execution {
 	String getOutcome(int index);
 
 	Execution getChild(int index, Execution parent);
+	
+	Payload getPayload();
 
 }

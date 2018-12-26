@@ -179,21 +179,49 @@ public class SurferFactory implements TaskFactory {
 				ObserverManager observerManager = (ObserverManager) observer.get(1);
 				observerFactory.createObserver(coastal, observerManager);
 			}
+			for (Tuple observer : coastal.getObserversPerSurfer()) {
+				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
+				ObserverManager observerManager = (ObserverManager) observer.get(1);
+				observerFactory.createObserver(coastal, observerManager);
+			}
 			try {
-				while (true) {
+				Trigger trigger = coastal.getMainEntrypoint();
+				while (!Thread.currentThread().isInterrupted()) {
 					long t0 = System.currentTimeMillis();
 					Model model = coastal.getNextSurferModel();
 					Map<String, Object> concreteValues = model.getConcreteValues();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					TraceState traceState = new TraceState(coastal, concreteValues);
-					String banner = "starting surf " + manager.getNextSurfCount() + " @" + Banner.getElapsed(coastal);
+					String banner = "starting surf " + manager.getNextSurfCount(); // + " @" + Banner.getElapsed(coastal)
 					log.trace(Banner.getBannerLine(banner, '-'));
 					ClassLoader classLoader = coastal.getClassManager().createLightClassLoader(traceState);
-					performRun(classLoader);
+					// ------- BEGIN MANUAL INLINE
+					// performRun(classLoader, trigger);
+					try {
+						Class<?> clas = classLoader.loadClass(trigger.getClassName());
+						Method meth = clas.getMethod(trigger.getMethodName(), trigger.getParamTypes());
+						meth.setAccessible(true);
+						meth.invoke(null, coastal.getMainArguments());
+					} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
+							| IllegalArgumentException x) {
+						x.printStackTrace(coastal.getSystemErr());
+					} catch (InvocationTargetException x) {
+						Throwable t = x.getCause();
+						if ((t == null) || !(t instanceof LimitConjunctException)) {
+							// x.printStackTrace();
+							try {
+								VM.startCatch(-1);
+							} catch (LimitConjunctException e) {
+								// ignore, since run is over in any case
+							}
+						}
+					}
+					// ------- END MANUAL INLINE
 					manager.recordSurferTime(System.currentTimeMillis() - t1);
 					Trace trace = traceState.getTrace();
-					trace.setScore(model.getPriority());
+					trace.setModel(traceState.getConcreteValues());
+					trace.setPayload(model.getPayload());
 					coastal.addTrace(traceState.getTrace());
 					broker.publishThread("surfer-end", this);
 					if (!traceState.mayContinue()) {
@@ -205,34 +233,9 @@ public class SurferFactory implements TaskFactory {
 				log.trace("^^^ surfer task canceled");
 				throw e;
 			}
-		}
-
-		private void performRun(ClassLoader classLoader) {
-			for (Tuple observer : coastal.getObserversPerSurfer()) {
-				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
-				ObserverManager observerManager = (ObserverManager) observer.get(1);
-				observerFactory.createObserver(coastal, observerManager);
-			}
-			try {
-				Trigger trigger = coastal.getMainEntrypoint();
-				Class<?> clas = classLoader.loadClass(trigger.getClassName());
-				Method meth = clas.getMethod(trigger.getMethodName(), trigger.getParamTypes());
-				meth.setAccessible(true);
-				meth.invoke(null, coastal.getMainArguments());
-			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
-					| IllegalArgumentException x) {
-				x.printStackTrace(coastal.getSystemErr());
-			} catch (InvocationTargetException x) {
-				Throwable t = x.getCause();
-				if ((t == null) || !(t instanceof LimitConjunctException)) {
-					// x.printStackTrace();
-					try {
-						VM.startCatch(-1);
-					} catch (LimitConjunctException e) {
-						// ignore, since run is over in any case
-					}
-				}
-			}
+			broker.publishThread("surfer-task-end", this);
+			log.trace("^^^ surfer task canceled");
+			return null;
 		}
 
 	}

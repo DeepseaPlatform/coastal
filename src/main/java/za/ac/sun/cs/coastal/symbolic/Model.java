@@ -21,14 +21,38 @@ public class Model {
 	private final Map<String, Object> concreteValues;
 
 	/**
+	 * Additional information about this model.
+	 */
+	private Payload payload;
+
+	/**
 	 * Construct a new model.
 	 * 
-	 * @param priority the priority for this model
-	 * @param concreteValues the variable-value mapping for this model
+	 * @param priority
+	 *            the priority for this model
+	 * @param concreteValues
+	 *            the variable-value mapping for this model
 	 */
 	public Model(int priority, Map<String, Object> concreteValues) {
 		this.priority = priority;
 		this.concreteValues = concreteValues;
+		this.payload = null;
+	}
+
+	/**
+	 * Construct a new model.
+	 * 
+	 * @param priority
+	 *            the priority for this model
+	 * @param concreteValues
+	 *            the variable-value mapping for this model
+	 * @param payload
+	 *            additional payload information
+	 */
+	public Model(int priority, Map<String, Object> concreteValues, Payload payload) {
+		this.priority = priority;
+		this.concreteValues = concreteValues;
+		this.payload = payload;
 	}
 
 	/**
@@ -49,7 +73,27 @@ public class Model {
 		return concreteValues;
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Set the payload for this model.
+	 * 
+	 * @param payload the paylaod information
+	 */
+	public void setPayload(Payload payload) {
+		this.payload = payload;
+	}
+
+	/**
+	 * Return the payload for this model.
+	 * 
+	 * @return the payload information
+	 */
+	public Payload getPayload() {
+		return payload;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override

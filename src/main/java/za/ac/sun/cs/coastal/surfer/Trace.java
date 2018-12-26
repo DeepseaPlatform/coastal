@@ -3,6 +3,7 @@ package za.ac.sun.cs.coastal.surfer;
 import java.util.Map;
 
 import za.ac.sun.cs.coastal.symbolic.Execution;
+import za.ac.sun.cs.coastal.symbolic.Payload;
 
 public abstract class Trace implements Execution {
 
@@ -16,9 +17,9 @@ public abstract class Trace implements Execution {
 	
 	protected final int depth;
 
-	protected Map<String, Object> model = null;
+	protected Payload payload;
 
-	protected int score;
+	protected Map<String, Object> model = null;
 
 	public Trace(Trace parent, String block) {
 		this.parent = parent;
@@ -41,20 +42,21 @@ public abstract class Trace implements Execution {
 		return depth;
 	}
 
+	@Override
+	public Payload getPayload() {
+		return root.payload;
+	}
+
+	public void setPayload(Payload payload) {
+		root.payload = payload;
+	}
+	
 	public Map<String, Object> getModel() {
 		return root.model;
 	}
-
+	
 	public void setModel(Map<String, Object> model) {
 		root.model = model;
-	}
-	
-	public int getScore() {
-		return root.score;
-	}
-	
-	public void setScore(int score) {
-		root.score = score;
 	}
 	
 	private String stringRep = null;

@@ -7,7 +7,7 @@
 	<module name="NewlineAtEndOfFile" />
 	<module name="Translation" />
 	<module name="FileLength">
-		<property name="max" value="2000" />
+		<property name="max" value="2500" />
 	</module>
 	<!-- <module name="FileTabCharacter"/> -->
 	<module name="RegexpSingleline">

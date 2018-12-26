@@ -3,29 +3,28 @@
 <configuration>
 	<coastal>
 		<target>
-			<main>tests.fuzzing.Fuzzing03</main>
+			<main>tests.fuzzing.Fuzzing04</main>
 			<instrument>tests.fuzzing</instrument>
-			<trigger>tests.fuzzing.Fuzzing03.run(a:int, b:int, c:int, d:int, e:int, f:int)</trigger>
+			<trigger>tests.fuzzing.Fuzzing04.run(a:short, b:short, c:short, d:short, e:short, f:short)</trigger>
 		</target>
 		<settings>
-			<draw-paths>true</draw-paths>
-			<time-limit>240</time-limit>
+			<time-limit>20</time-limit>
 		</settings>
 		<divers threads="0"/>
 		<surfers threads="4"/>
 		<strategies>
-			<strategy threads="1">
-				za.ac.sun.cs.coastal.strategy.hybrid.MybridFuzzerFactory
+			<strategy threads="2">
+				za.ac.sun.cs.coastal.strategy.hybrid.GybridFuzzerFactory
 				<options>
-					<queue-limit>750000</queue-limit>
+					<queue-limit>500000</queue-limit>
 				</options>
 			</strategy>
 		</strategies>
 		<observers>
-			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
-			<!--
 			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
+			<!--
+			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
 			-->
 		</observers>
 	</coastal>

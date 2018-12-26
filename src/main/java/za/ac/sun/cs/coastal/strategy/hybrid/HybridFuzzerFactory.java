@@ -215,11 +215,11 @@ public class HybridFuzzerFactory implements StrategyFactory {
 
 	public static class HybridFuzzerStrategy extends Strategy {
 
-		private static int[] INTERESTING_8 = { -128, -1, 0, 1, 16, 32, 64, 100, 127 };
+		private static final int[] INTERESTING_8 = { -128, -1, 0, 1, 16, 32, 64, 100, 127 };
 
-		private static int[] INTERESTING_16 = { -32768, -128, 128, 255, 256, 512, 1000, 1024, 4096, 32767 };
+		private static final int[] INTERESTING_16 = { -32768, -128, 128, 255, 256, 512, 1000, 1024, 4096, 32767 };
 
-		private static int[] INTERESTING_32 = { -2147483648, -100663046, -32769, 32768, 65535, 65536, 100663045,
+		private static final int[] INTERESTING_32 = { -2147483648, -100663046, -32769, 32768, 65535, 65536, 100663045,
 				2147483647 };
 
 		public static final int[] COUNT_TO_BUCKET = new int[128];
@@ -335,7 +335,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 		 * @return the score
 		 */
 		private int calculateScore(Trace trace) {
-			int oldScore = trace.getScore();
+			int oldScore = 0; // trace.getScore();
 			Map<String, Integer> edges = new HashMap<>();
 			String prevBlock = trace.getBlock();
 			trace = trace.getParent();
@@ -402,8 +402,10 @@ public class HybridFuzzerFactory implements StrategyFactory {
 					bos.write((Long) value, 64);
 				} else if (type == String.class) {
 					// ????
+					System.exit(1);
 				} else if (type == boolean[].class) {
 					// ????
+					System.exit(1);
 				}
 			}
 			return bos.toByteArray();
@@ -438,8 +440,10 @@ public class HybridFuzzerFactory implements StrategyFactory {
 					model.put(name, bis.read(64));
 				} else if (type == String.class) {
 					// ????
+					System.exit(1);
 				} else if (type == boolean[].class) {
 					// ????
+					System.exit(1);
 				}
 			}
 			if (coastal.addSurferModel(new Model(score, model))) {
@@ -453,7 +457,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 		//
 		// ----------------------------------------------------------------------
 
-		private static int ARITH_MAX = 35;
+		private static final int ARITH_MAX = 35;
 
 		private void flipBits(byte[] base, int score) {
 			for (int i = 0; i < 8; i++) {

@@ -77,6 +77,10 @@ public class TraceState implements State {
 		return trace;
 	}
 
+	public Map<String, Object> getConcreteValues() {
+		return concreteValues;
+	}
+
 	@Override
 	public void pushExtraConjunct(Expression extraConjunct) {
 		assert false; // should never be invoked
@@ -150,7 +154,9 @@ public class TraceState implements State {
 		if (useCurrentValues) {
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			String name = trigger.getParamName(index);
-			concreteValues.put(name, currentValue); 
+			if (name != null) {
+				concreteValues.put(name, currentValue);
+			}
 			return currentValue;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
@@ -170,7 +176,9 @@ public class TraceState implements State {
 		if (useCurrentValues) {
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			String name = trigger.getParamName(index);
-			concreteValues.put(name, currentValue); 
+			if (name != null) {
+				concreteValues.put(name, currentValue);
+			}
 			return currentValue;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
@@ -231,10 +239,12 @@ public class TraceState implements State {
 		if (useCurrentValues) {
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			String name = trigger.getParamName(index);
-			int length = currentValue.length();
-			coastal.setParameterSize(name, length);
-			for (int i = 0; i < length; i++) {
-				concreteValues.put(name + CHAR_SEPARATOR + i, (long) currentValue.charAt(i));
+			if (name != null) {
+				int length = currentValue.length();
+				coastal.setParameterSize(name, length);
+				for (int i = 0; i < length; i++) {
+					concreteValues.put(name + CHAR_SEPARATOR + i, (long) currentValue.charAt(i));
+				}
 			}
 			return currentValue;
 		}
@@ -262,10 +272,23 @@ public class TraceState implements State {
 		if (useCurrentValues) {
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			String name = trigger.getParamName(index);
-			int length = Array.getLength(currentArray);
-			coastal.setParameterSize(name, length);
-			for (int i = 0; i < length; i++) {
-				concreteValues.put(name + INDEX_SEPARATOR + i, (long) Array.get(currentArray, i));
+			if (name != null) {
+				int length = Array.getLength(currentArray);
+				coastal.setParameterSize(name, length);
+				if ((length > 0)) {
+					Object zero = Array.get(currentArray, 0);
+					if (zero instanceof Number) {
+						for (int i = 0; i < length; i++) {
+							concreteValues.put(name + INDEX_SEPARATOR + i,
+									((Number) Array.get(currentArray, i)).longValue());
+						}
+					} else {
+						for (int i = 0; i < length; i++) {
+							concreteValues.put(name + INDEX_SEPARATOR + i,
+									(long) ((Character) Array.get(currentArray, i)).charValue());
+						}
+					}
+				}
 			}
 			return currentArray;
 		}
@@ -296,10 +319,12 @@ public class TraceState implements State {
 		if (useCurrentValues) {
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			String name = trigger.getParamName(index);
-			int length = Array.getLength(currentArray);
-			coastal.setParameterSize(name, length);
-			for (int i = 0; i < length; i++) {
-				concreteValues.put(name + INDEX_SEPARATOR + i, (double) Array.get(currentArray, i));
+			if (name != null) {
+				int length = Array.getLength(currentArray);
+				coastal.setParameterSize(name, length);
+				for (int i = 0; i < length; i++) {
+					concreteValues.put(name + INDEX_SEPARATOR + i, (double) Array.get(currentArray, i));
+				}
 			}
 			return currentArray;
 		}
@@ -454,7 +479,7 @@ public class TraceState implements State {
 		lastLabel = label;
 		broker.publishThread("label", new Tuple(instr, label));
 	}
-	
+
 	@Override
 	public void insn(int instr, int opcode) throws LimitConjunctException {
 		if (!traceMode) {

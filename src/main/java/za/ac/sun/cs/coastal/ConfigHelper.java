@@ -191,6 +191,22 @@ public class ConfigHelper {
 	}
 
 	/**
+	 * Return the {@code double} value "clamped" to lie between the minimum and
+	 * maximum values.
+	 * 
+	 * @param value
+	 *            the original value
+	 * @param min
+	 *            the minimum value allowed
+	 * @param max
+	 *            the maximum value allowed
+	 * @return the clamped {@code double} value
+	 */
+	public static double minmax(double value, double min, double max) {
+		return (value < min) ? min : (value > max) ? max : value;
+	}
+	
+	/**
 	 * Return the {@code int} value or, if it is equal to zero, a replacement
 	 * value.
 	 * 

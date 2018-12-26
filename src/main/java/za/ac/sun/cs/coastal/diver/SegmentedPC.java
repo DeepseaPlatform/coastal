@@ -5,6 +5,7 @@ import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.solver.IntegerConstant;
 import za.ac.sun.cs.coastal.solver.Operation;
 import za.ac.sun.cs.coastal.symbolic.Execution;
+import za.ac.sun.cs.coastal.symbolic.Payload;
 
 /**
  * A class that implements segmented path conditions. It is called "segmented"
@@ -195,6 +196,11 @@ public abstract class SegmentedPC implements Execution {
 		} else {
 			return (expression instanceof Constant);
 		}
+	}
+
+	@Override
+	public Payload getPayload() {
+		return null;
 	}
 
 	// ======================================================================

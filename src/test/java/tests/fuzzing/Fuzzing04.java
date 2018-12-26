@@ -2,14 +2,14 @@ package tests.fuzzing;
 
 import za.ac.sun.cs.coastal.Symbolic;
 
-public class Fuzzing03 {
+public class Fuzzing04 {
 
 	public static void main(String[] args) {
-		run(0, 1, 2, 3, 4, 5);
+		run((short) 0, (short) 1, (short) 2, (short) 3, (short) 4, (short) 5);
 		Symbolic.mark(0);
 	}
 
-	private static void run(int a, int b, int c, int d, int e, int f) {
+	private static void run(short a, short b, short c, short d, short e, short f) {
 		Symbolic.mark(111);
 		if (a > 999) {
 			Symbolic.mark(1);

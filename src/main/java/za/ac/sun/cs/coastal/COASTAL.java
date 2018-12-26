@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -584,7 +585,7 @@ public class COASTAL {
 		// TIMING INFORMATION
 		timeLimit = ConfigHelper.limitLong(getConfig(), "coastal.settings.time-limit");
 		// TASK MANAGEMENT
-		maxThreads = ConfigHelper.minmax(getConfig().getInt("coastal.settings.max-threads", 2), 2, Short.MAX_VALUE);
+		maxThreads = ConfigHelper.minmax(getConfig().getInt("coastal.settings.max-threads", 32), 2, Short.MAX_VALUE);
 		executor = Executors.newCachedThreadPool();
 		completionService = new ExecutorCompletionService<Void>(executor);
 		futures = new ArrayList<Future<Void>>(maxThreads);
@@ -1863,7 +1864,23 @@ public class COASTAL {
 	 */
 	public void shutdown() {
 		futures.forEach(f -> f.cancel(true));
-		executor.shutdownNow();
+		executor.shutdown();
+		try {
+			if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+				executor.shutdownNow();
+				diverModelQueue.clear();
+				surferModelQueue.clear();
+				pcQueue.clear();
+				traceQueue.clear();
+				if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+					executor.shutdownNow();
+					log.trace("(still awaiting termination)");
+				}
+			}
+		} catch (InterruptedException x) {
+			executor.shutdownNow();
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	/**
@@ -2000,6 +2017,8 @@ public class COASTAL {
 	 *            dummy object
 	 */
 	private void report(Object object) {
+		getBroker().publish("report", new Tuple("COASTAL.diver-models", visitedDiverModels.size()));
+		getBroker().publish("report", new Tuple("COASTAL.surfer-models", visitedSurferModels.size()));
 		getBroker().publish("report", new Tuple("COASTAL.start", startingTime));
 		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
 		long duration = stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis();
@@ -2033,7 +2052,6 @@ public class COASTAL {
 		}
 		new Banner('~').println("COASTAL DONE (" + config.getString("run-name", "?") + ")").display(log);
 		LogManager.shutdown(true);
-		System.exit(0);
 	}
 
 	/**
