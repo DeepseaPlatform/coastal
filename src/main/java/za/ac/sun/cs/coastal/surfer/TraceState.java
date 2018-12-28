@@ -2,7 +2,9 @@ package za.ac.sun.cs.coastal.surfer;
 
 import java.lang.reflect.Array;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.Logger;
@@ -13,10 +15,13 @@ import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
+import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.surfer.Trace.TraceIf;
-import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
+import za.ac.sun.cs.coastal.symbolic.AbortedRunException;
+import za.ac.sun.cs.coastal.symbolic.CompletedRunException;
 import za.ac.sun.cs.coastal.symbolic.State;
+import za.ac.sun.cs.coastal.symbolic.SymbolicException;
 
 public class TraceState implements State {
 
@@ -40,13 +45,19 @@ public class TraceState implements State {
 
 	private Trace trace = null;
 
-	private final Map<String, Object> concreteValues;
+	private Map<String, Object> concreteValues;
 
-	private final boolean useCurrentValues;
+	private boolean useCurrentValues;
 
 	private boolean mayContinue = true;
 
-	private String lastLabel = "NONE";
+	private final Set<Integer> setValues = new HashSet<>();
+	
+	private final Set<Integer> incValues = new HashSet<>();
+
+	private PathTreeNode pathTreeNode;
+
+//	private String lastLabel = "NONE";
 
 	public TraceState(COASTAL coastal, Map<String, Object> concreteValues) throws InterruptedException {
 		this.coastal = coastal;
@@ -54,6 +65,21 @@ public class TraceState implements State {
 		broker = coastal.getBroker();
 		useCurrentValues = (concreteValues == null);
 		this.concreteValues = (concreteValues == null) ? new HashMap<>() : concreteValues;
+		pathTreeNode = coastal.getPathTree().getRoot();
+	}
+
+	public void reset(Map<String, Object> concreteValues) {
+		traceMode = false;
+		recordMode = false;
+		mayRecord = true;
+		frameCount = 0;
+		trace = null;
+		useCurrentValues = (concreteValues == null);
+		this.concreteValues = (concreteValues == null) ? new HashMap<>() : concreteValues;
+		pathTreeNode = coastal.getPathTree().getRoot();
+		mayContinue = true;
+		setValues.clear();
+		incValues.clear();
 	}
 
 	public boolean getSymbolicMode() {
@@ -86,7 +112,7 @@ public class TraceState implements State {
 		assert false; // should never be invoked
 	}
 
-	private boolean methodReturn() {
+	private boolean methodReturn() throws CompletedRunException {
 		assert traceMode;
 		assert frameCount > 0;
 		frameCount--;
@@ -96,6 +122,9 @@ public class TraceState implements State {
 			mayRecord = false;
 			traceMode = false;
 			trace.setModel(concreteValues);
+			trace.setSetValues(setValues);
+			trace.setIncValues(incValues);
+			throw new CompletedRunException();
 		}
 		return traceMode;
 	}
@@ -472,16 +501,17 @@ public class TraceState implements State {
 
 	@Override
 	public void label(int instr, String label) {
-		if (!traceMode) {
-			return;
-		}
-		log.trace("### LABEL {}", label);
-		lastLabel = label;
-		broker.publishThread("label", new Tuple(instr, label));
+//		if (!traceMode) {
+//			return;
+//		}
+//		log.trace("### LABEL {}", label);
+//		lastLabel = label;
+//		broker.publishThread("label", new Tuple(instr, label));
+		assert false; // should never be invoked 
 	}
 
 	@Override
-	public void insn(int instr, int opcode) throws LimitConjunctException {
+	public void insn(int instr, int opcode) throws SymbolicException {
 		if (!traceMode) {
 			return;
 		}
@@ -511,29 +541,29 @@ public class TraceState implements State {
 	}
 
 	@Override
-	public void intInsn(int instr, int opcode, int operand) throws LimitConjunctException {
+	public void intInsn(int instr, int opcode, int operand) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
-	public void varInsn(int instr, int opcode, int var) throws LimitConjunctException {
+	public void varInsn(int instr, int opcode, int var) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
-	public void typeInsn(int instr, int opcode) throws LimitConjunctException {
+	public void typeInsn(int instr, int opcode) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
 	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws LimitConjunctException {
+			throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
 	public void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws LimitConjunctException {
+			throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
@@ -573,62 +603,156 @@ public class TraceState implements State {
 	}
 
 	@Override
-	public void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
+	public void invokeDynamicInsn(int instr, int opcode) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
-	/* Missing offset because destination not yet known. */
 	@Override
-	public void jumpInsn(int instr, int opcode) throws LimitConjunctException {
+	public void jumpInsn(int value, int instr, int opcode) throws SymbolicException {
 		if (!traceMode) {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
-		if (recordMode && (opcode != Opcodes.GOTO)) {
-			trace = new TraceIf(trace, lastLabel, true);
+		switch (opcode) {
+		case Opcodes.IFEQ:
+		case Opcodes.IFNULL:
+			jumpInsn(instr, opcode, value == 0);
+			break;
+		case Opcodes.IFNE:
+		case Opcodes.IFNONNULL:
+			jumpInsn(instr, opcode, value != 0);
+			break;
+		case Opcodes.IFLT:
+			jumpInsn(instr, opcode, value < 0);
+			break;
+		case Opcodes.IFLE:
+			jumpInsn(instr, opcode, value <= 0);
+			break;
+		case Opcodes.IFGT:
+			jumpInsn(instr, opcode, value > 0);
+			break;
+		case Opcodes.IFGE:
+			jumpInsn(instr, opcode, value >= 0);
+			break;
+		default:
+			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			System.exit(1);
 		}
 	}
-
+	
 	@Override
-	public void postJumpInsn(int instr, int opcode) throws LimitConjunctException {
+	public void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException {
 		if (!traceMode) {
 			return;
 		}
-		if (recordMode) {
-			log.trace("(POST) {}", Bytecodes.toString(opcode));
-			log.trace(">>> previous conjunct is false");
-			assert trace instanceof TraceIf;
-			trace = ((TraceIf) trace).negate(lastLabel);
+		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		switch (opcode) {
+		case Opcodes.IF_ACMPEQ:
+		case Opcodes.IF_ICMPEQ:
+			setValues.add(value1);
+			setValues.add(value2);
+			jumpInsn(instr, opcode, value1 == value2);
+			break;
+		case Opcodes.IF_ACMPNE:
+		case Opcodes.IF_ICMPNE:
+			setValues.add(value1);
+			setValues.add(value2);
+			jumpInsn(instr, opcode, value1 != value2);
+			break;
+		case Opcodes.IF_ICMPLT:
+			incValues.add(Math.abs(value1 - value2) + 1);
+			jumpInsn(instr, opcode, value1 < value2);
+			break;
+		case Opcodes.IF_ICMPGE:
+			incValues.add(Math.abs(value1 - value2) + 1);
+			jumpInsn(instr, opcode, value1 >= value2);
+			break;
+		case Opcodes.IF_ICMPGT:
+			incValues.add(Math.abs(value1 - value2) + 1);
+			jumpInsn(instr, opcode, value1 > value2);
+			break;
+		case Opcodes.IF_ICMPLE:
+			incValues.add(Math.abs(value1 - value2) + 1);
+			jumpInsn(instr, opcode, value1 <= value2);
+			break;
+		default:
+			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			System.exit(1);
+		}
+	}
+	
+	/* Missing offset because destination not yet known. */
+	@Override
+	public void jumpInsn(int instr, int opcode) throws SymbolicException {
+		if (!traceMode) {
+			return;
+		}
+		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		switch (opcode) {
+		case Opcodes.GOTO:
+			break;
+		case Opcodes.JSR:
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			System.exit(1);
+		default:
+			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			System.exit(1);
 		}
 	}
 
+	/* Missing offset because destination not yet known. */
+	private void jumpInsn(int instr, int opcode, boolean result) throws SymbolicException {
+		if (recordMode) {
+			if (pathTreeNode != null) {
+				int ptn = pathTreeNode.getId();
+				if (result) {
+					pathTreeNode = pathTreeNode.getChild(1);
+				} else {
+					pathTreeNode = pathTreeNode.getChild(0);
+				}
+				if (pathTreeNode != null) {
+					log.trace("PTN: #{} -> #{}", ptn, pathTreeNode.getId());
+				}
+				if ((pathTreeNode != null) && pathTreeNode.isFullyExplored()) {
+					throw new AbortedRunException();
+				}
+			}
+			trace = new TraceIf(trace, Integer.toString(instr), result);
+		}
+	}
+	
 	@Override
-	public void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException {
+	public void postJumpInsn(int instr, int opcode) throws SymbolicException {
+		assert false;
+	}
+
+	@Override
+	public void ldcInsn(int instr, int opcode, Object value) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
-	public void iincInsn(int instr, int var, int increment) throws LimitConjunctException {
+	public void iincInsn(int instr, int var, int increment) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
-	public void tableSwitchInsn(int instr, int opcode) throws LimitConjunctException {
+	public void tableSwitchInsn(int instr, int opcode) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
-	public void tableCaseInsn(int min, int max, int value) throws LimitConjunctException {
+	public void tableCaseInsn(int min, int max, int value) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
-	public void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException {
+	public void lookupSwitchInsn(int instr, int opcode) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
-	public void multiANewArrayInsn(int instr, int opcode) throws LimitConjunctException {
+	public void multiANewArrayInsn(int instr, int opcode) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
@@ -662,12 +786,12 @@ public class TraceState implements State {
 	// ======================================================================
 
 	@Override
-	public void noException() throws LimitConjunctException {
+	public void noException() throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 
 	@Override
-	public void startCatch(int instr) throws LimitConjunctException {
+	public void startCatch(int instr) throws SymbolicException {
 		assert false; // should never be invoked 
 	}
 

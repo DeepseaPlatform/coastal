@@ -2,6 +2,7 @@ package za.ac.sun.cs.coastal.strategy.hybrid;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -21,23 +22,23 @@ import za.ac.sun.cs.coastal.surfer.TraceState;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.Payload;
 
-public class GybridFuzzerFactory implements StrategyFactory {
+public class CybridFuzzerFactory implements StrategyFactory {
 
 	protected final ImmutableConfiguration options;
 
-	public GybridFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
+	public CybridFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
 		this.options = options;
 	}
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new GybridFuzzerManager(coastal, options);
+		return new CybridFuzzerManager(coastal, options);
 	}
 
 	@Override
 	public Strategy createTask(COASTAL coastal, TaskManager manager) {
-		((GybridFuzzerManager) manager).incrementTaskCount();
-		return new GybridFuzzerStrategy(coastal, (StrategyManager) manager);
+		((CybridFuzzerManager) manager).incrementTaskCount();
+		return new CybridFuzzerStrategy(coastal, (StrategyManager) manager);
 	}
 
 	// ======================================================================
@@ -46,9 +47,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 	//
 	// ======================================================================
 
-	public static class GybridFuzzerManager implements StrategyManager {
-
-		private static final int DEFAULT_QUEUE_LIMIT = 100000;
+	public static class CybridFuzzerManager implements StrategyManager {
 
 		private static final int NEW_EDGE_SCORE = 100;
 
@@ -60,15 +59,19 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 		protected final PathTree pathTree;
 
-		protected final int queueLimit;
-
 		protected final long randomSeed;
 
 		protected final double attenuation;
 
-		protected final int firstRepeat;
+		protected final int mutationCount;
 
-		protected final int pairRepeat;
+		protected final int eliminationCount;
+		
+		protected final double eliminationRatio;
+		
+		protected final int keepTop;
+		
+		protected final boolean drawTree;
 
 		protected int taskCount = 0;
 
@@ -94,16 +97,18 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 		protected final Map<String, Integer> edgesSeen = new HashMap<>();
 
-		public GybridFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
+		public CybridFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
 			this.coastal = coastal;
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
 			pathTree = coastal.getPathTree();
-			queueLimit = ConfigHelper.zero(options.getInt("queue-limit", 0), DEFAULT_QUEUE_LIMIT);
-			randomSeed = ConfigHelper.zero(options.getInt("seed", 0), System.currentTimeMillis());
+			randomSeed = ConfigHelper.zero(options.getInt("random-seed", 0), System.currentTimeMillis());
 			attenuation = ConfigHelper.minmax(options.getDouble("attenuation", 0.5), 0.0, 1.0);
-			firstRepeat = ConfigHelper.zero(options.getInt("first-repeat", 0), 100);
-			pairRepeat = ConfigHelper.zero(options.getInt("pair-repeat", 0), 50);
+			mutationCount = ConfigHelper.zero(options.getInt("mutation-count", 0), 100);
+			eliminationCount = options.getInt("elimination-count", 0);
+			eliminationRatio = ConfigHelper.minmax(options.getDouble("elimination-ratio", 0), 0.0, 1.0);
+			keepTop = ConfigHelper.minmax(options.getInt("keep-top", 1), 1, Integer.MAX_VALUE);
+			drawTree = options.getBoolean("draw-final-tree", false);
 		}
 
 		public PathTree getPathTree() {
@@ -118,10 +123,6 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			return (pathTree.insertPath(trace, infeasible) == null);
 		}
 
-		public int getQueueLimit() {
-			return queueLimit;
-		}
-
 		protected long getRandomSeed() {
 			return randomSeed + taskCount;
 		}
@@ -130,14 +131,22 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			return attenuation;
 		}
 
-		protected int getFirstRepeat() {
-			return firstRepeat;
+		protected int getMutationCount() {
+			return mutationCount;
 		}
 
-		protected int getPairRepeat() {
-			return pairRepeat;
+		protected int getEliminationCount() {
+			return eliminationCount;
 		}
-
+		
+		protected double getEliminationRatio() {
+			return eliminationRatio;
+		}
+		
+		protected int getKeepTop() {
+			return keepTop;
+		}
+		
 		/**
 		 * Increment the number of refinements.
 		 */
@@ -200,6 +209,12 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			broker.publish("report", new Tuple(name + ".refinements", refineCount.get()));
 			broker.publish("report", new Tuple(name + ".wait-time", swt));
 			broker.publish("report", new Tuple(name + ".total-time", strategyTime.get()));
+			if (drawTree) {
+				int i = 0;
+				for (String ll : pathTree.stringRepr()) {
+					broker.publish("report", new Tuple(String.format("%s.tree%03d",  name, i++), ll));
+				}
+			}
 		}
 
 		private static final String[] PROPERTY_NAMES = new String[] { "#tasks", "#refinements", "waiting time",
@@ -207,7 +222,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 		@Override
 		public String getName() {
-			return "GybridFuzzer";
+			return "CybridFuzzer";
 		}
 
 		@Override
@@ -237,7 +252,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 	//
 	// ======================================================================
 
-	public static class GybridFuzzerStrategy extends Strategy {
+	public static class CybridFuzzerStrategy extends Strategy {
 
 		public static final int[] COUNT_TO_BUCKET = new int[128];
 
@@ -260,7 +275,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			}
 		}
 
-		protected final GybridFuzzerManager manager;
+		protected final CybridFuzzerManager manager;
 
 		protected final Broker broker;
 
@@ -270,27 +285,28 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 		protected Map<String, Class<?>> parameters = null;
 
-		protected final int queueLimit;
-
 		private final MTRandom rng;
 
 		private final double attenuation;
 
-		protected final int firstRepeat;
+		protected final int mutationCount;
 
-		protected final int pairRepeat;
-
-		private int highScore = 0;
-
-		public GybridFuzzerStrategy(COASTAL coastal, StrategyManager manager) {
+		protected final int eliminationCount;
+		
+		protected final double eliminationRatio;
+		
+		protected final int keepTop;
+		
+		public CybridFuzzerStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
-			this.manager = (GybridFuzzerManager) manager;
+			this.manager = (CybridFuzzerManager) manager;
 			broker = coastal.getBroker();
-			queueLimit = this.manager.getQueueLimit();
 			rng = new MTRandom(this.manager.getRandomSeed());
 			attenuation = this.manager.getAttenuation();
-			firstRepeat = this.manager.getFirstRepeat();
-			pairRepeat = this.manager.getPairRepeat();
+			mutationCount = this.manager.getMutationCount();
+			eliminationCount = this.manager.getEliminationCount();
+			eliminationRatio = this.manager.getEliminationRatio();
+			keepTop = this.manager.getKeepTop();
 		}
 
 		private Set<Integer> setValues = new HashSet<>();
@@ -300,164 +316,106 @@ public class GybridFuzzerFactory implements StrategyFactory {
 		public Void call() throws Exception {
 			log.trace("^^^ strategy task starting");
 			try {
+				TraceCollection keepers = new TraceCollection(keepTop);
+				TraceCollection allTime = new TraceCollection(keepTop);
 				long t0 = System.currentTimeMillis();
-				Trace trace = coastal.getNextTrace();
-				int score = calculateScore(trace);
+				Trace trace0 = coastal.getNextTrace();
 				long t1 = System.currentTimeMillis();
 				manager.recordWaitTime(t1 - t0);
 				manager.incrementRefinements();
 				log.trace("+++ starting refinement");
-				setValues = trace.getSetValues();
-				incValues = trace.getIncValues();
-//				Set<Integer> sv = trace.getSetValues();
-//				if (sv != null) {
-//					setValues.addAll(sv);
-//				}
-//				Set<Integer> iv = trace.getIncValues();
-//				if (iv != null) {
-//					incValues.addAll(iv);
-//				}
-				refineFirst(trace, score);
+				int score0 = calculateScore(trace0);
+				keepers.add(score0, trace0);
+				allTime.add(score0, trace0);
+				setValues.addAll(trace0.getSetValues());
+				incValues.addAll(trace0.getIncValues());
+				refine(trace0, new GybridPayload(score0));
 				while (true) {
-					t0 = System.currentTimeMillis();
-					Trace trace1 = null, trace2 = null;
-					int score1 = 0, score2 = 0;
-					do {
-						trace1 = coastal.getNextTrace();
-						score1 = calculateScore(trace1);
-					} while (score1 <= 0);
-					setValues = trace1.getSetValues();
-					incValues = trace1.getIncValues();
-					int tries = 5;
-					do {
-						trace2 = coastal.getNextTrace();
-						score2 = calculateScore(trace2);
-					} while ((tries-- > 0) && (score2 <= 0));
-					//} while ((tries-- > 0) && ((score2 <= 0) || trace1.toString().equals(trace2.toString())));
-					setValues.addAll(trace2.getSetValues());
-					incValues.addAll(trace2.getIncValues());
-					t1 = System.currentTimeMillis();
-					manager.recordWaitTime(t1 - t0);
+					keepers.clear();
+					int eliminate = Math.max(eliminationCount, (int) (eliminationRatio * coastal.getTraceQueueLength()));
+					for (int i = 0; i < eliminate; i++) {
+						t0 = System.currentTimeMillis();
+						Trace tracex = coastal.getNextTrace(200);
+						t1 = System.currentTimeMillis();
+						manager.recordWaitTime(t1 - t0);
+						if (tracex == null) { 
+							log.trace("+++ out of traces");
+							break;
+						}
+						int scorex = calculateScore(tracex);
+						keepers.add(scorex, tracex);
+						allTime.add(scorex, tracex);
+					}
 					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
-					refinePair(trace1, score1, trace2, score2);
+					TraceCollection candidates = (keepers.size() > 0) ? keepers : allTime;
+					setValues.clear();
+					incValues.clear();
+					for (Trace trace : candidates.traces()) {
+						setValues.addAll(trace.getSetValues());
+						incValues.addAll(trace.getIncValues());
+					}
+					for (int j = 0, n = candidates.size(); j < n; j++) {
+						refine(candidates.getTrace(j), new GybridPayload(candidates.getScore(j)));
+					}
+					PathTreeNode root = manager.getPathTree().getRoot();
+					if ((root != null) && root.isFullyExplored()) {
+						coastal.stopWork("PATH TREE FULLY EXPLORED");
+						break;
+					}
 				}
 			} catch (InterruptedException e) {
 				log.trace("^^^ strategy task canceled");
 				throw e;
 			}
+			log.trace("^^^ strategy task finished");
+			return null;
 		}
-
-		protected void refineFirst(Trace trace, int score) {
+		
+		protected void refine(Trace trace, GybridPayload payload) {
 			long t0 = System.currentTimeMillis();
 			modelsAdded = -1;
 			manager.insertPath(trace, false);
 			parameters = coastal.getParameters();
 			Map<String, Object> model = trace.getModel();
-			if (score > highScore) {
-				highScore = score;
-				log.info("NEW HIGH SCORE: {} {}", score, model);
-			}
-			for (int i = 0; i < firstRepeat; i++) {
-				mutatem(score, model);
-			}
+			mutate(payload, model);
 			log.trace("+++ added {} surfer models", modelsAdded);
 			coastal.updateWork(modelsAdded);
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}
 
-		protected void refinePair(Trace trace1, int score1, Trace trace2, int score2) {
-			long t0 = System.currentTimeMillis();
-			modelsAdded = -1;
-			manager.insertPath(trace1, false);
-			manager.insertPath(trace2, false);
-			Map<String, Object> model1 = trace1.getModel();
-			Map<String, Object> model2 = trace2.getModel();
-			if (score1 > highScore) {
-				highScore = score1;
-				log.info("NEW HIGH SCORE: {} {}", score1, model1);
-			}
-			if (score2 > highScore) {
-				highScore = score2;
-				log.info("NEW HIGH SCORE: {} {}", score2, model2);
-			}
-			int score = Math.max(score1, score2);
-			for (int i = 0; i < pairRepeat; i++) {
-				Map<String, Object> newModel1 = new HashMap<>(model1);
-				Map<String, Object> newModel2 = new HashMap<>(model2);
-				if (!trace1.toString().equals(trace2.toString())) {
-					for (Map.Entry<String, Object> entry : model1.entrySet()) {
-						String name = entry.getKey();
-						Object value1 = model1.get(name);
-						Object value2 = model2.get(name);
-						assert (value2 != null);
-						if (rng.nextInt(100) < 5) {
-							Object value = null;
-							if (value1 instanceof Long) {
-								value = (((Long) value1) + ((Long) value2)) / 2;
-							} else {
-								value = (((Double) value1) + ((Double) value2)) / 2;
-							}
-							newModel1.put(name, value);
-							newModel2.put(name, value);
-						} else if (rng.nextBoolean()) {
-							newModel1.put(name, value2);
-							newModel2.put(name, value1);
-						}
-					}
-				}
-				mutatem(score, newModel1);
-				mutatem(score, newModel2);
-			}
-			log.trace("+++ added {} surfer models", modelsAdded);
-			coastal.updateWork(modelsAdded);
-			manager.recordTime(System.currentTimeMillis() - t0);
-		}
-
-		protected void mutatem(int score, Map<String, Object> model) {
+		protected void mutate(GybridPayload payload, Map<String, Object> model) {
 			for (Map.Entry<String, Class<?>> entry : parameters.entrySet()) {
 				String name = entry.getKey();
 				Class<?> type = entry.getValue();
 				if (type == boolean.class) {
-					update(score, model, name, (Integer) coastal.getMinBound(name, type), (Integer) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Integer) coastal.getMinBound(name, type), (Integer) coastal.getMaxBound(name, type));
 				} else if (type == byte.class) {
-					update(score, model, name, (Byte) coastal.getMinBound(name, type), (Byte) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Byte) coastal.getMinBound(name, type), (Byte) coastal.getMaxBound(name, type));
 				} else if (type == short.class) {
-					update(score, model, name, (Short) coastal.getMinBound(name, type), (Short) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Short) coastal.getMinBound(name, type), (Short) coastal.getMaxBound(name, type));
 				} else if (type == char.class) {
-					update(score, model, name, (Character) coastal.getMinBound(name, type), (Character) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Character) coastal.getMinBound(name, type), (Character) coastal.getMaxBound(name, type));
 				} else if (type == int.class) {
-					update(score, model, name, (Integer) coastal.getMinBound(name, type), (Integer) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Integer) coastal.getMinBound(name, type), (Integer) coastal.getMaxBound(name, type));
 				} else if (type == long.class) {
 					Map<String, Object> newModel = new HashMap<>(model);
 					long min = (Long) coastal.getMinBound(name, type);
 					long max = (Long) coastal.getMaxBound(name, type);
 					newModel.put(name, randomLong(min, max));
-					Model mdl = new Model(score, newModel);
-					mdl.setPayload(new GybridPayload(score));
-					if (coastal.addSurferModel(mdl)) {
-						modelsAdded++;
-					}
+					submitModel(payload, newModel);
 				} else if (type == float.class) {
 					Map<String, Object> newModel = new HashMap<>(model);
 					double min = (Float) coastal.getMinBound(name, type);
 					double max = (Float) coastal.getMaxBound(name, type);
 					newModel.put(name, Double.valueOf(rng.nextDouble(min, max)));
-					Model mdl = new Model(score, newModel);
-					mdl.setPayload(new GybridPayload(score));
-					if (coastal.addSurferModel(mdl)) {
-						modelsAdded++;
-					}
+					submitModel(payload, newModel);
 				} else if (type == double.class) {
 					Map<String, Object> newModel = new HashMap<>(model);
 					double min = (Double) coastal.getMinBound(name, type);
 					double max = (Double) coastal.getMaxBound(name, type);
 					newModel.put(name, Double.valueOf(rng.nextDouble(min, max)));
-					Model mdl = new Model(score, newModel);
-					mdl.setPayload(new GybridPayload(score));
-					if (coastal.addSurferModel(mdl)) {
-						modelsAdded++;
-					}
+					submitModel(payload, newModel);
 				} else if (type == String.class) {
 					long min = (Long) coastal.getMinBound(name, type);
 					long max = (Long) coastal.getMaxBound(name, type);
@@ -465,18 +423,14 @@ public class GybridFuzzerFactory implements StrategyFactory {
 					for (int i = 0; i < length; i++) {
 						Map<String, Object> newModel = new HashMap<>(model);
 						newModel.put(name + TraceState.CHAR_SEPARATOR + i, randomLong(min, max));
-						Model mdl = new Model(score, newModel);
-						mdl.setPayload(new GybridPayload(score));
-						if (coastal.addSurferModel(mdl)) {
-							modelsAdded++;
-						}
+						submitModel(payload, newModel);
 					}
 				} else if (type == char[].class) {
 					int min = (Character) coastal.getMinBound(name, type);
 					int max = (Character) coastal.getMaxBound(name, type);
 					int length = coastal.getParameterSize(name);
 					for (int i = 0; i < length; i++) {
-						update(score, model, name + TraceState.INDEX_SEPARATOR + i, min, max);
+						update(payload, model, name + TraceState.INDEX_SEPARATOR + i, min, max);
 					}
 				} else {
 					System.exit(1);
@@ -484,25 +438,19 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			}
 		}
 
-		private void update(int score, Map<String, Object> model, String name, int min, int max) {
-			Map<String, Object> newModel = new HashMap<>(model);
-			newModel.put(name, Long.valueOf(randomInt(min, max)));
-			Model mdl = new Model(score, newModel);
-			mdl.setPayload(new GybridPayload(score));
-			if (coastal.addSurferModel(mdl)) {
-				modelsAdded++;
+		private void update(GybridPayload payload, Map<String, Object> model, String name, int min, int max) {
+			for (int i = 0; i < mutationCount; i++) {
+				Map<String, Object> newModel = new HashMap<>(model);
+				newModel.put(name, Long.valueOf(randomInt(min, max)));
+				submitModel(payload, newModel);
 			}
 			if (setValues != null) {
+				int cur = ((Long) model.get(name)).intValue();
 				for (int set : setValues) {
-					int cur = ((Long) model.get(name)).intValue();
 					if ((set >= min) && (set <= max) && (set != cur)) {
-						newModel = new HashMap<>(model);
+						Map<String, Object> newModel = new HashMap<>(model);
 						newModel.put(name, Long.valueOf(set));
-						mdl = new Model(score, newModel);
-						mdl.setPayload(new GybridPayload(score));
-						if (coastal.addSurferModel(mdl)) {
-							modelsAdded++;
-						}
+						submitModel(payload, newModel);
 					}
 				}
 			}
@@ -510,25 +458,25 @@ public class GybridFuzzerFactory implements StrategyFactory {
 				for (int inc : incValues) {
 					int set = ((Long) model.get(name)).intValue() + inc;
 					if ((set >= min) && (set <= max)) {
-						newModel = new HashMap<>(model);
+						Map<String, Object> newModel = new HashMap<>(model);
 						newModel.put(name, Long.valueOf(set));
-						mdl = new Model(score, newModel);
-						mdl.setPayload(new GybridPayload(score));
-						if (coastal.addSurferModel(mdl)) {
-							modelsAdded++;
-						}
+						submitModel(payload, newModel);
 					}
 					set = ((Long) model.get(name)).intValue() - inc;
 					if ((set >= min) && (set <= max)) {
-						newModel = new HashMap<>(model);
+						Map<String, Object> newModel = new HashMap<>(model);
 						newModel.put(name, Long.valueOf(set));
-						mdl = new Model(score, newModel);
-						mdl.setPayload(new GybridPayload(score));
-						if (coastal.addSurferModel(mdl)) {
-							modelsAdded++;
-						}
+						submitModel(payload, newModel);
 					}
 				}
+			}
+		}
+
+		private void submitModel(GybridPayload payload, Map<String, Object> model) {
+			Model mdl = new Model(payload.score, model);
+			mdl.setPayload(payload);
+			if (coastal.addSurferModel(mdl)) {
+				modelsAdded++;
 			}
 		}
 
@@ -610,6 +558,96 @@ public class GybridFuzzerFactory implements StrategyFactory {
 		public GybridPayload(int score) {
 			this.score = score;
 		}
+	}
+
+	public static class TraceCollection {
+
+		protected final int capacity;
+
+		protected final int scores[];
+		
+		protected final Trace traces[];
+
+		protected int size;
+
+		public TraceCollection(int capacity) {
+			assert capacity > 0;
+			this.capacity = capacity;
+			scores = new int[capacity];
+			traces = new Trace[capacity];
+			size = 0;
+		}
+
+		public void clear() {
+			size = 0;
+		}
+
+		public void add(int score, Trace trace) {
+			if (size == 0) {
+				scores[0] = score;
+				traces[0] = trace;
+				size = 1;
+			} else {
+				int position = 0;
+				while ((position < size) && (score <= scores[position])) {
+					position++;
+				}
+//				if ((position < capacity) && !trace.toString().equals(traces[position].toString())) {
+				if (position < capacity) {
+					if (size < capacity) {
+						size++;
+					}
+					for (int i = size - 1; i > position; i--) {
+						scores[i] = scores[i - 1];
+						traces[i] = traces[i - 1];
+					}
+					scores[position] = score;
+					traces[position] = trace;
+				}
+			}
+		}
+
+		public int size() {
+			return size;
+		}
+
+		public Iterable<Trace> traces() {
+			return new Iterable<Trace>() {
+				@Override
+				public Iterator<Trace> iterator() {
+					return new Iterator<Trace>() {
+						private int index = 0;
+						@Override
+						public Trace next() {
+							return traces[index++];
+						}
+						@Override
+						public boolean hasNext() {
+							return index < size;
+						}
+					};
+				}
+			};
+		}
+
+		public int getScore(int index) {
+			return scores[index];
+		}
+
+		public Trace getTrace(int index) {
+			return traces[index];
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder b = new StringBuilder();
+			b.append(size).append('/').append(capacity);
+			for (int i = 0; i < size; i++) {
+				b.append(' ').append(scores[i]).append(':').append(traces[i].toString());
+			}
+			return b.toString();
+		}
+
 	}
 
 }

@@ -91,9 +91,9 @@ public class GUIFactory implements ObserverFactory {
 
 	public static class GUI extends Application implements Runnable {
 
-		private static final int INITIAL_WIDTH = 1000;
+		private static final int INITIAL_WIDTH = 1200;
 
-		private static final int INITIAL_HEIGHT = 600;
+		private static final int INITIAL_HEIGHT = 720;
 
 		private static COASTAL coastal;
 
@@ -192,6 +192,7 @@ public class GUIFactory implements ObserverFactory {
 				setCenter(table);
 				setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
 						BorderWidths.DEFAULT)));
+				setPrefWidth(400);
 			}
 
 			public void refresh() {

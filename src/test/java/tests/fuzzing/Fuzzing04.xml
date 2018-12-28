@@ -8,24 +8,26 @@
 			<trigger>tests.fuzzing.Fuzzing04.run(a:short, b:short, c:short, d:short, e:short, f:short)</trigger>
 		</target>
 		<settings>
-			<time-limit>20</time-limit>
+			<time-limit>300</time-limit>
 		</settings>
 		<divers threads="0"/>
-		<surfers threads="4"/>
+		<surfers threads="1"/>
 		<strategies>
-			<strategy threads="2">
-				za.ac.sun.cs.coastal.strategy.hybrid.GybridFuzzerFactory
+			<strategy threads="1">
+				za.ac.sun.cs.coastal.strategy.hybrid.CybridFuzzerFactory
 				<options>
-					<queue-limit>500000</queue-limit>
+					<random-seed>999</random-seed>
+					<attenuation>0.95</attenuation>
+					<mutation-count>5</mutation-count>
+					<elimination-count>4</elimination-count>
+					<keep-top>2</keep-top>
+					<draw-final-tree>true</draw-final-tree>
 				</options>
 			</strategy>
 		</strategies>
 		<observers>
-			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
-			<!--
-			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
-			-->
+			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 		</observers>
 	</coastal>
 </configuration>

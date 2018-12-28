@@ -1810,6 +1810,18 @@ public class COASTAL {
 		return traceQueue.take();
 	}
 
+	/**
+	 * Return the next available trace.
+	 * 
+	 * @param timeout number of milliseconds to wait
+	 * @return the next trace or {@code null}
+	 * @throws InterruptedException
+	 *             if the action of removing the trace was interrupted
+	 */
+	public Trace getNextTrace(long timeout) throws InterruptedException {
+		return traceQueue.poll(timeout, TimeUnit.MILLISECONDS);
+	}
+	
 	// ======================================================================
 	//
 	// TIMING INFORMATION
@@ -1859,6 +1871,19 @@ public class COASTAL {
 		}
 	}
 
+	/**
+	 * Set the flag to indicate that the analysis run must stop.
+	 *
+	 * @param message information message to display in the log
+	 */
+	public void stopWork(String message) {
+		new Banner('@').println(message).display(log);
+		workDone.set(true);
+		synchronized (workDone) {
+			workDone.notifyAll();
+		}
+	}
+	
 	/**
 	 * Stop the still-executing tasks and the thread manager itself.
 	 */

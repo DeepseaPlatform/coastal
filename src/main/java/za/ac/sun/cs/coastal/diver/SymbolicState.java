@@ -31,6 +31,7 @@ import za.ac.sun.cs.coastal.solver.RealConstant;
 import za.ac.sun.cs.coastal.solver.RealVariable;
 import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.State;
+import za.ac.sun.cs.coastal.symbolic.SymbolicException;
 
 public class SymbolicState implements State {
 
@@ -745,7 +746,7 @@ public class SymbolicState implements State {
 		broker.publishThread("enter-method", methodNumber);
 	}
 
-	private void checkLimitConjuncts() throws LimitConjunctException {
+	private void checkLimitConjuncts() throws SymbolicException {
 		if (dangerFlag) {
 			if ((spc != null) && (spc.getDepth() >= limitConjuncts)) {
 				throw new LimitConjunctException();
@@ -790,7 +791,7 @@ public class SymbolicState implements State {
 	}
 	
 	@Override
-	public void insn(int instr, int opcode) throws LimitConjunctException {
+	public void insn(int instr, int opcode) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -992,7 +993,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void intInsn(int instr, int opcode, int operand) throws LimitConjunctException {
+	public void intInsn(int instr, int opcode, int operand) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1048,7 +1049,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void varInsn(int instr, int opcode, int var) throws LimitConjunctException {
+	public void varInsn(int instr, int opcode, int var) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1078,7 +1079,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void typeInsn(int instr, int opcode) throws LimitConjunctException {
+	public void typeInsn(int instr, int opcode) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1099,7 +1100,7 @@ public class SymbolicState implements State {
 
 	@Override
 	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws LimitConjunctException {
+			throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1133,7 +1134,7 @@ public class SymbolicState implements State {
 
 	@Override
 	public void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws LimitConjunctException {
+			throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1277,7 +1278,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
+	public void invokeDynamicInsn(int instr, int opcode) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1293,9 +1294,19 @@ public class SymbolicState implements State {
 		dumpFrames();
 	}
 
+	@Override
+	public void jumpInsn(int value, int instr, int opcode) throws SymbolicException {
+		jumpInsn(instr, opcode);
+	}
+	
+	@Override
+	public void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException {
+		jumpInsn(instr, opcode);
+	}
+	
 	/* Missing offset because destination not yet known. */
 	@Override
-	public void jumpInsn(int instr, int opcode) throws LimitConjunctException {
+	public void jumpInsn(int instr, int opcode) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1410,7 +1421,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void postJumpInsn(int instr, int opcode) throws LimitConjunctException {
+	public void postJumpInsn(int instr, int opcode) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1426,7 +1437,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException {
+	public void ldcInsn(int instr, int opcode, Object value) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1463,7 +1474,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void iincInsn(int instr, int var, int increment) throws LimitConjunctException {
+	public void iincInsn(int instr, int var, int increment) throws SymbolicException {
 		final int opcode = 132;
 		if (!symbolicMode) {
 			return;
@@ -1478,7 +1489,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void tableSwitchInsn(int instr, int opcode) throws LimitConjunctException {
+	public void tableSwitchInsn(int instr, int opcode) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1490,7 +1501,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void tableCaseInsn(int min, int max, int value) throws LimitConjunctException {
+	public void tableCaseInsn(int min, int max, int value) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1505,7 +1516,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException {
+	public void lookupSwitchInsn(int instr, int opcode) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1521,7 +1532,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void multiANewArrayInsn(int instr, int opcode) throws LimitConjunctException {
+	public void multiANewArrayInsn(int instr, int opcode) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1592,7 +1603,7 @@ public class SymbolicState implements State {
 	// ======================================================================
 
 	@Override
-	public void noException() throws LimitConjunctException {
+	public void noException() throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}
@@ -1607,7 +1618,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void startCatch(int instr) throws LimitConjunctException {
+	public void startCatch(int instr) throws SymbolicException {
 		if (!symbolicMode) {
 			return;
 		}

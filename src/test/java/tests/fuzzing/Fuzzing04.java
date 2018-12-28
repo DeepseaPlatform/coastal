@@ -23,10 +23,20 @@ public class Fuzzing04 {
 							Symbolic.mark(5);
 							if (f < 666) {
 								Symbolic.mark(6);
+							} else {
+								Symbolic.mark(60);
 							}
+						} else {
+							Symbolic.mark(50);
 						}
+					} else {
+						Symbolic.mark(40);
 					}
+				} else {
+					Symbolic.mark(30);
 				}
+			} else {
+				Symbolic.mark(20);
 			}
 		} else if (a > 111) {
 			Symbolic.mark(7);
@@ -40,13 +50,23 @@ public class Fuzzing04 {
 							Symbolic.mark(11);
 							if (f < 333) {
 								Symbolic.mark(12);
+							} else {
+								Symbolic.mark(12);
 							}
+						} else {
+							Symbolic.mark(120);
 						}
+					} else {
+						Symbolic.mark(110);
 					}
+				} else {
+					Symbolic.mark(100);
 				}
+			} else {
+				Symbolic.mark(90);
 			}
 		} else {
-			Symbolic.mark(13);
+			Symbolic.mark(80);
 		}
 		Symbolic.mark(999);
 	}

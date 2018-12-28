@@ -172,81 +172,89 @@ public class VM {
 		state.label(instr, label);
 	}
 	
-	public static void insn(int instr, int opcode) throws LimitConjunctException {
+	public static void insn(int instr, int opcode) throws SymbolicException {
 		state.insn(instr, opcode);
 	}
 
-	public static void intInsn(int instr, int opcode, int operand) throws LimitConjunctException {
+	public static void intInsn(int instr, int opcode, int operand) throws SymbolicException {
 		state.intInsn(instr, opcode, operand);
 	}
 
-	public static void varInsn(int instr, int opcode, int var) throws LimitConjunctException {
+	public static void varInsn(int instr, int opcode, int var) throws SymbolicException {
 		state.varInsn(instr, opcode, var);
 	}
 
-	public static void typeInsn(int instr, int opcode) throws LimitConjunctException {
+	public static void typeInsn(int instr, int opcode) throws SymbolicException {
 		state.typeInsn(instr, opcode);
 	}
 
 	public static void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws LimitConjunctException {
+			throws SymbolicException {
 		state.fieldInsn(instr, opcode, owner, name, descriptor);
 	}
 
 	public static void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws LimitConjunctException {
+			throws SymbolicException {
 		state.methodInsn(instr, opcode, owner, name, descriptor);
 	}
 
-	public static void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException {
+	public static void invokeDynamicInsn(int instr, int opcode) throws SymbolicException {
 		state.invokeDynamicInsn(instr, opcode);
 	}
 
-	public static void jumpInsn(int instr, int opcode) throws LimitConjunctException {
+	public static void jumpInsn(int instr, int opcode) throws SymbolicException {
 		state.jumpInsn(instr, opcode);
 	}
 
-	public static void postJumpInsn(int instr, int opcode) throws LimitConjunctException {
+	public static void jumpInsn(int value, int instr, int opcode) throws SymbolicException {
+		state.jumpInsn(value, instr, opcode);
+	}
+	
+	public static void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException {
+		state.jumpInsn(value1, value2, instr, opcode);
+	}
+	
+	public static void postJumpInsn(int instr, int opcode) throws SymbolicException {
 		state.postJumpInsn(instr, opcode);
 	}
 
-	public static void ldcInsn(int instr, int opcode, int value) throws LimitConjunctException {
+	public static void ldcInsn(int instr, int opcode, int value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
 	
-	public static void ldcInsn(int instr, int opcode, long value) throws LimitConjunctException {
+	public static void ldcInsn(int instr, int opcode, long value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
 	
-	public static void ldcInsn(int instr, int opcode, float value) throws LimitConjunctException {
+	public static void ldcInsn(int instr, int opcode, float value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
 	
-	public static void ldcInsn(int instr, int opcode, double value) throws LimitConjunctException {
+	public static void ldcInsn(int instr, int opcode, double value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
 	
-	public static void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException {
+	public static void ldcInsn(int instr, int opcode, Object value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
 
-	public static void iincInsn(int instr, int var, int increment) throws LimitConjunctException {
+	public static void iincInsn(int instr, int var, int increment) throws SymbolicException {
 		state.iincInsn(instr, var, increment);
 	}
 
-	public static void tableSwitchInsn(int instr, int opcode) throws LimitConjunctException {
+	public static void tableSwitchInsn(int instr, int opcode) throws SymbolicException {
 		state.tableSwitchInsn(instr, opcode);
 	}
 
-	public static void tableCaseInsn(int min, int max, int value) throws LimitConjunctException {
+	public static void tableCaseInsn(int min, int max, int value) throws SymbolicException {
 		state.tableCaseInsn(min, max, value);
 	}
 
-	public static void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException {
+	public static void lookupSwitchInsn(int instr, int opcode) throws SymbolicException {
 		state.lookupSwitchInsn(instr, opcode);
 	}
 
-	public static void multiANewArrayInsn(int instr, int opcode) throws LimitConjunctException {
+	public static void multiANewArrayInsn(int instr, int opcode) throws SymbolicException {
 		state.multiANewArrayInsn(instr, opcode);
 	}
 
@@ -256,11 +264,11 @@ public class VM {
 	//
 	// ======================================================================
 
-	public static void noException() throws LimitConjunctException {
+	public static void noException() throws SymbolicException {
 		state.noException();
 	}
 	
-	public static void startCatch(int instr) throws LimitConjunctException {
+	public static void startCatch(int instr) throws SymbolicException {
 		state.startCatch(instr);
 	}
 

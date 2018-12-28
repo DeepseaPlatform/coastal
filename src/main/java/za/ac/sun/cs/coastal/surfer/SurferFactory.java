@@ -15,8 +15,10 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
+import za.ac.sun.cs.coastal.symbolic.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.Model;
+import za.ac.sun.cs.coastal.symbolic.SymbolicException;
 import za.ac.sun.cs.coastal.symbolic.VM;
 
 public class SurferFactory implements TaskFactory {
@@ -69,6 +71,11 @@ public class SurferFactory implements TaskFactory {
 		 */
 		private final AtomicLong surferWaitCount = new AtomicLong(0);
 
+		/**
+		 * The number of aborted surfs. 
+		 */
+		private final AtomicLong abortCount = new AtomicLong(0);
+
 		SurferManager(COASTAL coastal) {
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
@@ -115,10 +122,20 @@ public class SurferFactory implements TaskFactory {
 			surferWaitCount.incrementAndGet();
 		}
 
+		/**
+		 * Increment and return the abort counter.
+		 * 
+		 * @return the incremented value of the abort counter
+		 */
+		public long incrementAbortCount() {
+			return abortCount.incrementAndGet();
+		}
+
 		public void report(Object object) {
 			double swt = surferWaitTime.get() / surferWaitCount.doubleValue();
 			broker.publish("report", new Tuple("Surfers.tasks", surferTaskCount));
 			broker.publish("report", new Tuple("Surfers.count", getSurfCount()));
+			broker.publish("report", new Tuple("Surfers.aborted", abortCount.get()));
 			broker.publish("report", new Tuple("Surfers.total-time", surferTime.get()));
 			broker.publish("report", new Tuple("Surfers.wait-time", swt));
 		}
@@ -164,13 +181,17 @@ public class SurferFactory implements TaskFactory {
 
 		private final SurferManager manager;
 
+		private final boolean safeMode;
+
 		public Surfer(COASTAL coastal, SurferManager manager) {
 			this.coastal = coastal;
 			log = coastal.getLog();
 			broker = coastal.getBroker();
 			this.manager = manager;
+			safeMode = !coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		}
 
+		@SuppressWarnings("null")
 		@Override
 		public Void call() throws Exception {
 			log.trace("^^^ surfer task starting");
@@ -185,44 +206,75 @@ public class SurferFactory implements TaskFactory {
 				observerFactory.createObserver(coastal, observerManager);
 			}
 			try {
+				Method meth = null;
 				Trigger trigger = coastal.getMainEntrypoint();
+				TraceState traceState = new TraceState(coastal, null);
 				while (!Thread.currentThread().isInterrupted()) {
 					long t0 = System.currentTimeMillis();
 					Model model = coastal.getNextSurferModel();
 					Map<String, Object> concreteValues = model.getConcreteValues();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
-					TraceState traceState = new TraceState(coastal, concreteValues);
 					String banner = "starting surf " + manager.getNextSurfCount(); // + " @" + Banner.getElapsed(coastal)
 					log.trace(Banner.getBannerLine(banner, '-'));
-					ClassLoader classLoader = coastal.getClassManager().createLightClassLoader(traceState);
+					boolean aborted = false;
 					// ------- BEGIN MANUAL INLINE
 					// performRun(classLoader, trigger);
-					try {
-						Class<?> clas = classLoader.loadClass(trigger.getClassName());
-						Method meth = clas.getMethod(trigger.getMethodName(), trigger.getParamTypes());
-						meth.setAccessible(true);
-						meth.invoke(null, coastal.getMainArguments());
-					} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
-							| IllegalArgumentException x) {
-						x.printStackTrace(coastal.getSystemErr());
-					} catch (InvocationTargetException x) {
-						Throwable t = x.getCause();
-						if ((t == null) || !(t instanceof LimitConjunctException)) {
-							// x.printStackTrace();
-							try {
-								VM.startCatch(-1);
-							} catch (LimitConjunctException e) {
-								// ignore, since run is over in any case
+					if (safeMode && (meth != null)) {
+						traceState.reset(concreteValues);
+						try {
+							meth.invoke(null, coastal.getMainArguments());
+						} catch (SecurityException | IllegalAccessException | IllegalArgumentException x) {
+							x.printStackTrace(coastal.getSystemErr());
+						} catch (InvocationTargetException x) {
+							Throwable t = x.getCause();
+							if ((t == null) || !(t instanceof SymbolicException)) {
+								// x.printStackTrace();
+								try {
+									VM.startCatch(-1);
+								} catch (LimitConjunctException e) {
+									// ignore, since run is over in any case
+								}
+							} else if (t instanceof AbortedRunException) {
+								aborted = true;
+							}
+						}
+					} else {
+						traceState = new TraceState(coastal, concreteValues);
+						ClassLoader classLoader = coastal.getClassManager().createLightClassLoader(traceState);
+						try {
+							Class<?> clas = classLoader.loadClass(trigger.getClassName());
+							meth = clas.getMethod(trigger.getMethodName(), trigger.getParamTypes());
+							meth.setAccessible(true);
+							meth.invoke(null, coastal.getMainArguments());
+						} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
+								| IllegalArgumentException x) {
+							x.printStackTrace(coastal.getSystemErr());
+						} catch (InvocationTargetException x) {
+							Throwable t = x.getCause();
+							if ((t == null) || !(t instanceof SymbolicException)) {
+								// x.printStackTrace();
+								try {
+									VM.startCatch(-1);
+								} catch (LimitConjunctException e) {
+									// ignore, since run is over in any case
+								}
+							} else if (t instanceof AbortedRunException) {
+								aborted = true;
 							}
 						}
 					}
 					// ------- END MANUAL INLINE
 					manager.recordSurferTime(System.currentTimeMillis() - t1);
-					Trace trace = traceState.getTrace();
-					trace.setModel(traceState.getConcreteValues());
-					trace.setPayload(model.getPayload());
-					coastal.addTrace(traceState.getTrace());
+					if (aborted) {
+						log.trace("!!! execution aborted, fully explored");
+						manager.incrementAbortCount();
+					} else {
+						Trace trace = traceState.getTrace();
+						trace.setModel(traceState.getConcreteValues());
+						trace.setPayload(model.getPayload());
+						coastal.addTrace(traceState.getTrace());
+					}
 					broker.publishThread("surfer-end", this);
 					if (!traceState.mayContinue()) {
 						coastal.stopWork();

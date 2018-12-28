@@ -94,35 +94,39 @@ public interface State {
 
 	void label(int instr, String label);
 	
-	void insn(int instr, int opcode) throws LimitConjunctException;
+	void insn(int instr, int opcode) throws SymbolicException;
 
-	void intInsn(int instr, int opcode, int operand) throws LimitConjunctException;
+	void intInsn(int instr, int opcode, int operand) throws SymbolicException;
 
-	void varInsn(int instr, int opcode, int var) throws LimitConjunctException;
+	void varInsn(int instr, int opcode, int var) throws SymbolicException;
 
-	void typeInsn(int instr, int opcode) throws LimitConjunctException;
+	void typeInsn(int instr, int opcode) throws SymbolicException;
 
-	void fieldInsn(int instr, int opcode, String owner, String name, String descriptor) throws LimitConjunctException;
+	void fieldInsn(int instr, int opcode, String owner, String name, String descriptor) throws SymbolicException;
 
-	void methodInsn(int instr, int opcode, String owner, String name, String descriptor) throws LimitConjunctException;
+	void methodInsn(int instr, int opcode, String owner, String name, String descriptor) throws SymbolicException;
 
-	void invokeDynamicInsn(int instr, int opcode) throws LimitConjunctException;
+	void invokeDynamicInsn(int instr, int opcode) throws SymbolicException;
 
-	void jumpInsn(int instr, int opcode) throws LimitConjunctException;
+	void jumpInsn(int instr, int opcode) throws SymbolicException;
 
-	void postJumpInsn(int instr, int opcode) throws LimitConjunctException;
+	void jumpInsn(int value, int instr, int opcode) throws SymbolicException;
+	
+	void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException;
+	
+	void postJumpInsn(int instr, int opcode) throws SymbolicException;
 
-	void ldcInsn(int instr, int opcode, Object value) throws LimitConjunctException;
+	void ldcInsn(int instr, int opcode, Object value) throws SymbolicException;
 
-	void iincInsn(int instr, int var, int increment) throws LimitConjunctException;
+	void iincInsn(int instr, int var, int increment) throws SymbolicException;
 
-	void tableSwitchInsn(int instr, int opcode) throws LimitConjunctException;
+	void tableSwitchInsn(int instr, int opcode) throws SymbolicException;
 
-	void tableCaseInsn(int min, int max, int value) throws LimitConjunctException;
+	void tableCaseInsn(int min, int max, int value) throws SymbolicException;
 
-	void lookupSwitchInsn(int instr, int opcode) throws LimitConjunctException;
+	void lookupSwitchInsn(int instr, int opcode) throws SymbolicException;
 
-	void multiANewArrayInsn(int instr, int opcode) throws LimitConjunctException;
+	void multiANewArrayInsn(int instr, int opcode) throws SymbolicException;
 
 	// ======================================================================
 	//
@@ -130,9 +134,9 @@ public interface State {
 	//
 	// ======================================================================
 
-	void noException() throws LimitConjunctException;
+	void noException() throws SymbolicException;
 	
-	void startCatch(int instr) throws LimitConjunctException;
+	void startCatch(int instr) throws SymbolicException;
 
 	// ======================================================================
 	//

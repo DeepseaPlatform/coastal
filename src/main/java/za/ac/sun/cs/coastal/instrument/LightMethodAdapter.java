@@ -188,14 +188,14 @@ public class LightMethodAdapter extends MethodVisitor {
 		currentLinenumbers.set(line);
 	}
 
-	@Override
-	public void visitLabel(Label label) {
-		log.trace("visitLabel(label:{})", label);
-		mv.visitLdcInsn(classManager.getInstructionCounter());
-		mv.visitLdcInsn(label.toString());
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "label", "(ILjava/lang/String;)V", false);
-		mv.visitLabel(label);
-	}
+//	@Override
+//	public void visitLabel(Label label) {
+//		log.trace("visitLabel(label:{})", label);
+//		mv.visitLdcInsn(classManager.getInstructionCounter());
+//		mv.visitLdcInsn(label.toString());
+//		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "label", "(ILjava/lang/String;)V", false);
+//		mv.visitLabel(label);
+//	}
 
 	@Override
 	public void visitEnd() {
@@ -279,15 +279,40 @@ public class LightMethodAdapter extends MethodVisitor {
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
 		log.trace("visitJumpInsn(opcode:{}, label:{})", opcode, label);
-		mv.visitLdcInsn(classManager.getNextInstructionCounter());
-		mv.visitLdcInsn(opcode);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(II)V", false);
-		mv.visitJumpInsn(opcode, label);
-		if (opcode != Opcodes.GOTO) {
-			mv.visitLdcInsn(classManager.getInstructionCounter());
+		switch (opcode) {
+		case Opcodes.IFEQ:
+		case Opcodes.IFNE:
+		case Opcodes.IFLT:
+		case Opcodes.IFLE:
+		case Opcodes.IFGT:
+		case Opcodes.IFGE:
+		case Opcodes.IFNULL:
+		case Opcodes.IFNONNULL:
+			mv.visitInsn(Opcodes.DUP);
+			mv.visitLdcInsn(classManager.getNextInstructionCounter());
 			mv.visitLdcInsn(opcode);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "postJumpInsn", "(II)V", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(III)V", false);
+			break;
+		case Opcodes.IF_ACMPEQ:
+		case Opcodes.IF_ACMPNE:
+		case Opcodes.IF_ICMPEQ:
+		case Opcodes.IF_ICMPNE:
+		case Opcodes.IF_ICMPLT:
+		case Opcodes.IF_ICMPGE:
+		case Opcodes.IF_ICMPGT:
+		case Opcodes.IF_ICMPLE:
+			mv.visitInsn(Opcodes.DUP2);
+			mv.visitLdcInsn(classManager.getNextInstructionCounter());
+			mv.visitLdcInsn(opcode);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(IIII)V", false);
+			break;
+		default:
+			mv.visitLdcInsn(classManager.getNextInstructionCounter());
+			mv.visitLdcInsn(opcode);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(II)V", false);
+			break;
 		}
+		mv.visitJumpInsn(opcode, label);
 	}
 
 }

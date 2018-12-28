@@ -11,16 +11,20 @@
 			<bound name="a" min="32" max="128"/>
 		</bounds>
 		<settings>
-			<time-limit>300</time-limit>
+			<time-limit>120</time-limit>
 		</settings>
 		<divers threads="0"/>
-		<surfers threads="6"/>
+		<surfers threads="5"/>
 		<strategies>
 			<strategy threads="1">
-				za.ac.sun.cs.coastal.strategy.hybrid.GybridFuzzerFactory
+				za.ac.sun.cs.coastal.strategy.hybrid.CybridFuzzerFactory
 				<options>
-					<queue-limit>500000</queue-limit>
-					<attenuation>0.2</attenuation>
+					<random-seed>888</random-seed>
+					<attenuation>0.95</attenuation>
+					<mutation-count>1</mutation-count>
+					<elimination-ratio>1</elimination-ratio>
+					<keep-top>1</keep-top>
+					<draw-final-tree>true</draw-final-tree>
 				</options>
 			</strategy>
 		</strategies>
@@ -28,9 +32,6 @@
 			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
 			<observer>za.ac.sun.cs.coastal.observers.StopControllerFactory</observer>
 			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
-			<!--
-			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
-			-->
 		</observers>
 	</coastal>
 </configuration>

@@ -16,7 +16,7 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
-import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
+import za.ac.sun.cs.coastal.symbolic.SymbolicException;
 import za.ac.sun.cs.coastal.symbolic.VM;
 
 public class DiverFactory implements TaskFactory {
@@ -227,14 +227,14 @@ public class DiverFactory implements TaskFactory {
 				if (t == null) {
 					try {
 						VM.startCatch(-1);
-					} catch (LimitConjunctException e) {
+					} catch (SymbolicException e) {
 						// ignore, since run is over in any case
 					}
-				} else if (!(t instanceof LimitConjunctException)) {
+				} else if (!(t instanceof SymbolicException)) {
 					log.trace("!@#$%$#@! PROGRAM EXCEPTION:", t);
 					try {
 						VM.startCatch(-1);
-					} catch (LimitConjunctException e) {
+					} catch (SymbolicException e) {
 						// ignore, since run is over in any case
 					}
 				}

@@ -1,6 +1,8 @@
 package za.ac.sun.cs.coastal.surfer;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Payload;
@@ -21,6 +23,10 @@ public abstract class Trace implements Execution {
 
 	protected Map<String, Object> model = null;
 
+	protected Set<Integer> setValues = null;
+	
+	protected Set<Integer> incValues = null;
+	
 	public Trace(Trace parent, String block) {
 		this.parent = parent;
 		this.block = block;
@@ -57,6 +63,22 @@ public abstract class Trace implements Execution {
 	
 	public void setModel(Map<String, Object> model) {
 		root.model = model;
+	}
+
+	public Set<Integer> getSetValues() {
+		return root.setValues;
+	}
+	
+	public void setSetValues(Set<Integer> setValues) {
+		root.setValues = new HashSet<>(setValues);
+	}
+	
+	public Set<Integer> getIncValues() {
+		return root.incValues;
+	}
+	
+	public void setIncValues(Set<Integer> incValues) {
+		root.incValues = new HashSet<>(incValues);
 	}
 	
 	private String stringRep = null;
