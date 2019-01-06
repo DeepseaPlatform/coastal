@@ -49,6 +49,8 @@ public class CybridFuzzerFactory implements StrategyFactory {
 
 	public static class CybridFuzzerManager implements StrategyManager {
 
+		private static final int DEFAULT_QUEUE_LIMIT = 10000000;
+		
 		private static final int NEW_EDGE_SCORE = 100;
 
 		private static final int NEW_BUCKET_SCORE = 50;
@@ -59,6 +61,8 @@ public class CybridFuzzerFactory implements StrategyFactory {
 
 		protected final PathTree pathTree;
 
+		protected final int queueLimit;
+		
 		protected final long randomSeed;
 
 		protected final double attenuation;
@@ -102,6 +106,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
 			pathTree = coastal.getPathTree();
+			queueLimit = ConfigHelper.zero(options.getInt("queue-limit", 0), DEFAULT_QUEUE_LIMIT);
 			randomSeed = ConfigHelper.zero(options.getInt("random-seed", 0), System.currentTimeMillis());
 			attenuation = ConfigHelper.minmax(options.getDouble("attenuation", 0.5), 0.0, 1.0);
 			mutationCount = ConfigHelper.zero(options.getInt("mutation-count", 0), 100);
@@ -123,6 +128,10 @@ public class CybridFuzzerFactory implements StrategyFactory {
 			return (pathTree.insertPath(trace, infeasible) == null);
 		}
 
+		protected int getQueueLimit() {
+			return queueLimit;
+		}
+		
 		protected long getRandomSeed() {
 			return randomSeed + taskCount;
 		}
@@ -285,6 +294,8 @@ public class CybridFuzzerFactory implements StrategyFactory {
 
 		protected Map<String, Class<?>> parameters = null;
 
+		protected final int queueLimit;
+		
 		private final MTRandom rng;
 
 		private final double attenuation;
@@ -301,6 +312,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 			super(coastal, manager);
 			this.manager = (CybridFuzzerManager) manager;
 			broker = coastal.getBroker();
+			queueLimit = this.manager.getQueueLimit();
 			rng = new MTRandom(this.manager.getRandomSeed());
 			attenuation = this.manager.getAttenuation();
 			mutationCount = this.manager.getMutationCount();
@@ -331,6 +343,9 @@ public class CybridFuzzerFactory implements StrategyFactory {
 				incValues.addAll(trace0.getIncValues());
 				refine(trace0, new GybridPayload(score0));
 				while (true) {
+					while (coastal.getSurferModelQueueLength() > queueLimit) {
+						Thread.sleep(200);
+					}
 					keepers.clear();
 					int eliminate = Math.max(eliminationCount, (int) (eliminationRatio * coastal.getTraceQueueLength()));
 					for (int i = 0; i < eliminate; i++) {
@@ -439,7 +454,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 		}
 
 		private void update(GybridPayload payload, Map<String, Object> model, String name, int min, int max) {
-			for (int i = 0; i < mutationCount; i++) {
+			for (int i = 0, n = mutationCount / 2; i < n; i++) {
 				Map<String, Object> newModel = new HashMap<>(model);
 				newModel.put(name, Long.valueOf(randomInt(min, max)));
 				submitModel(payload, newModel);
@@ -469,6 +484,11 @@ public class CybridFuzzerFactory implements StrategyFactory {
 						submitModel(payload, newModel);
 					}
 				}
+			}
+			for (int i = 0, n = (mutationCount + 1) / 2; i < n; i++) {
+				Map<String, Object> newModel = new HashMap<>(model);
+				newModel.put(name, Long.valueOf(randomInt(min, max)));
+				submitModel(payload, newModel);
 			}
 		}
 

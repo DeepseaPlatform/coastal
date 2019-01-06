@@ -10,8 +10,16 @@
 		<divers threads="0"/>
 		<surfers threads="1"/>
 		<strategies>
-			<strategy>
-				za.ac.sun.cs.coastal.strategy.hybrid.HybridFuzzerFactory
+			<strategy threads="1">
+				za.ac.sun.cs.coastal.strategy.hybrid.CybridFuzzerFactory
+				<options>
+					<random-seed>999</random-seed>
+					<attenuation>0.95</attenuation>
+					<mutation-count>5</mutation-count>
+					<elimination-count>4</elimination-count>
+					<keep-top>2</keep-top>
+					<draw-final-tree>true</draw-final-tree>
+				</options>
 			</strategy>
 		</strategies>
 		<observers>
