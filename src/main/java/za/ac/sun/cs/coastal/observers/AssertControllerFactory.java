@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal.observers;
 
+import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Banner;
@@ -9,10 +10,11 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class AssertControllerFactory implements ObserverFactory {
 
-	public AssertControllerFactory(COASTAL coastal) {
+	public AssertControllerFactory(COASTAL coastal, ImmutableConfiguration options) {
 	}
 
-	public int getFrequency() {
+	@Override
+	public int getFrequencyflags() {
 		return ObserverFactory.ONCE_PER_RUN;
 	}
 
@@ -28,10 +30,12 @@ public class AssertControllerFactory implements ObserverFactory {
 
 	// ======================================================================
 	//
-	// MANAGER FOR STOP CONTROL
+	// MANAGER FOR ASSERT CONTROL
 	//
 	// ======================================================================
 
+	private static final String[] PROPERTY_NAMES = new String[] { "assert-failed", "message" };
+	
 	private static class AssertManager implements ObserverManager {
 
 		private final Logger log;
@@ -54,6 +58,9 @@ public class AssertControllerFactory implements ObserverFactory {
 
 		public void report(Object object) {
 			broker.publish("report", new Tuple("AssertController.assert-failed", wasStopped));
+			if (stopMessage != null) {
+				broker.publish("report", new Tuple("AssertController.message", stopMessage));
+			}
 		}
 
 		public void stop(Object object) {
@@ -70,28 +77,22 @@ public class AssertControllerFactory implements ObserverFactory {
 
 		@Override
 		public String getName() {
-			// TODO Auto-generated method stub
-			return null;
+			return "AssertController";
 		}
 
 		@Override
 		public String[] getPropertyNames() {
-			// TODO Auto-generated method stub
-			return null;
+			return PROPERTY_NAMES;
 		}
 
 		@Override
 		public Object[] getPropertyValues() {
-			// TODO Auto-generated method stub
-			return null;
+			Object[] propertyValues = new Object[2];
+			propertyValues[0] = wasStopped;
+			propertyValues[1] = (stopMessage == null) ? "?" : stopMessage;
+			return propertyValues;
 		}
 
-	}
-
-	@Override
-	public int getFrequencyflags() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 }

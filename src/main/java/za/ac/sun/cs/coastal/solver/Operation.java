@@ -286,6 +286,9 @@ public class Operation extends Expression {
 		if (a instanceof IntegerConstant) {
 			if (b instanceof IntegerConstant) {
 				int z = Math.max(((IntegerConstant) a).getSize(), ((IntegerConstant) b).getSize());
+				if (((IntegerConstant) b).getValue() == 0) {
+					return null;
+				}
 				return new IntegerConstant(((IntegerConstant) a).getValue() / ((IntegerConstant) b).getValue(), z);
 			} else if (b instanceof RealConstant) {
 				// Should not happen
@@ -299,6 +302,9 @@ public class Operation extends Expression {
 				// return new RealConstant(((RealConstant) a).getValue() / ((IntegerConstant) b).getValue());
 			} else if (b instanceof RealConstant) {
 				int z = Math.max(((RealConstant) a).getSize(), ((RealConstant) b).getSize());
+				if (((RealConstant) b).getValue() == 0.0) {
+					return null;
+				} 
 				return new RealConstant(((RealConstant) a).getValue() / ((RealConstant) b).getValue(), z);
 			}
 		}
@@ -309,6 +315,9 @@ public class Operation extends Expression {
 		if (a instanceof IntegerConstant) {
 			if (b instanceof IntegerConstant) {
 				int z = Math.max(((IntegerConstant)a).getSize(), ((IntegerConstant) b).getSize());
+				if (((IntegerConstant) b).getValue() == 0) {
+					return null;
+				}
 				return new IntegerConstant(((IntegerConstant) a).getValue() % ((IntegerConstant) b).getValue(), z);
 			} else if (b instanceof RealConstant) {
 				//should not happen
@@ -320,6 +329,9 @@ public class Operation extends Expression {
 				assert false;
 			} else if (b instanceof RealConstant) {
 				int z = Math.max(((RealConstant) a).getSize(), ((RealConstant) b).getSize());
+				if (((RealConstant) b).getValue() == 0.0) {
+					return null;
+				} 
 				return new RealConstant(((RealConstant) a).getValue() % ((RealConstant) b).getValue(), z);
 			}
 		}

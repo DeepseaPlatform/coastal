@@ -309,8 +309,9 @@ public class SymbolicState implements State {
 
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntegerVariable(name, 32, 0, 255));
-		IntegerConstant concrete = (IntegerConstant) (concreteValues == null ? null : concreteValues.get(name));
+		push(new IntegerVariable(name, 32, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		Long concreteVal = concreteValues == null ? null : (Long) concreteValues.get(name);
+		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
 		if (concrete == null) {
 			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
 			return currentValue;
@@ -921,36 +922,60 @@ public class SymbolicState implements State {
 			break;
 		case Opcodes.IDIV:
 			e = pop();
-			push(Operation.div(pop(), e));
+			Expression idiv = Operation.rem(pop(), e);
+			if (idiv != null) {
+				push(idiv);
+			} else {
+				broker.publish("stop", "Division by zero");
+			}
 			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.LDIV:
 			e = pop();
-			push(Operation.div(pop(), e));
+			Expression ldiv = Operation.rem(pop(), e);
+			if (ldiv != null) {
+				push(ldiv);
+			} else {
+				broker.publish("stop", "Division by zero");
+			}
 			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.FDIV:
 			e = pop();
-			push(Operation.div(pop(), e));
+			Expression fdiv = Operation.rem(pop(), e);
+			if (fdiv != null) {
+				push(fdiv);
+			} else {
+				broker.publish("stop", "Division by zero");
+			}
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.DDIV:
 			e = pop();
-			push(Operation.div(pop(), e));
+			Expression ddiv = Operation.rem(pop(), e);
+			if (ddiv != null) {
+				push(ddiv);
+			} else {
+				broker.publish("stop", "Division by zero");
+			}
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.IREM:
 			e = pop();
-			//push(Operation.rem(a, b))
-			Operation.rem(pop(), e);
+			Expression rem = Operation.rem(pop(), e);
+			if (rem != null) {
+				push(rem);
+			} else {
+				broker.publish("stop", "Division by zero");
+			}
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
 			// Add ExceptionExpression to noExceptionExpressionList
 			exceptionDepth = Thread.currentThread().getStackTrace().length;

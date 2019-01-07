@@ -20,22 +20,21 @@ public class SVComp {
 	@Parameters
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
-//			{ "jpf-regression", "ExLazy_true", true },
-//			{ "jpf-regression", "ExLazy_false", false },
-//			{ "jpf-regression", "ExSymExe1_true", true },
-//			{ "jpf-regression", "ExSymExe1_false", false },
-//			{ "jpf-regression", "ExSymExe2_true", true },
-//			{ "jpf-regression", "ExSymExe2_false", false },
-//			{ "jpf-regression", "ExSymExe3_true", true },
-//			{ "jpf-regression", "ExSymExe3_false", false },
-//			{ "jpf-regression", "ExSymExe4_true", true },
-//			{ "jpf-regression", "ExSymExe4_false", false },
-//			{ "jpf-regression", "ExSymExe5_true", true },
-//			{ "jpf-regression", "ExSymExe5_false", false },
-//			{ "jpf-regression", "ExSymExe6_true", true },
-//			{ "jpf-regression", "ExSymExe6_false", false }, // Divide by zero
-//			{ "jpf-regression", "ExSymExe7_true", true },
-//			{ "jpf-regression", "ExSymExe7_false", false },
+			{ "jpf-regression", "ExLazy_true", true },
+			{ "jpf-regression", "ExLazy_false", false },
+			{ "jpf-regression", "ExSymExe1_true", true },
+			{ "jpf-regression", "ExSymExe1_false", false },
+			{ "jpf-regression", "ExSymExe2_true", true },
+			{ "jpf-regression", "ExSymExe2_false", false },
+			{ "jpf-regression", "ExSymExe3_true", true },
+			{ "jpf-regression", "ExSymExe3_false", false },
+			{ "jpf-regression", "ExSymExe4_true", true },
+			{ "jpf-regression", "ExSymExe4_false", false },
+			{ "jpf-regression", "ExSymExe5_true", true },
+			{ "jpf-regression", "ExSymExe5_false", false },
+			{ "jpf-regression", "ExSymExe6_true", true },
+			{ "jpf-regression", "ExSymExe7_true", true },
+			{ "jpf-regression", "ExSymExe7_false", false },
 //			{ "jpf-regression", "ExSymExe8_true", true },
 //			{ "jpf-regression", "ExSymExe9_true", true },
 //			{ "jpf-regression", "ExGenSymExe_true", true },
@@ -55,6 +54,9 @@ public class SVComp {
 //			{ "jpf-regression", "ExSymExeSuzette_true", true }, 
 //			{ "jpf-regression", "ExSymExeTestAssignments_true", true }, 
 //			{ "jpf-regression", "ExSymExeTestClassFields_true", true },
+
+		
+//			{ "jpf-regression", "ExSymExe6_false", false }, // Divide by zero
 		});
 	}
 	
@@ -73,13 +75,13 @@ public class SVComp {
 	@Test
 	public void testSVComp() {
 		final Logger log = LogManager.getLogger("COASTAL");
-		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/jars/" + testDir + ".xml" },
+		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/jars/" + testDir + ".xml" },
 				"<coastal><target><jar directory=\"tmp/" + testSubDir + "\">tests/jars/" + testDir + ".jar</jar></target></coastal>");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
 		Reporter reporter = coastal.getReporter();
-		assertNotEquals(reporter.getStatBool("AssertController.assert-failed"), testExpectedOutcome);
+		assertNotEquals(reporter.getBool("AssertController.assert-failed"), testExpectedOutcome);
 	}
 }
 

@@ -22,7 +22,7 @@ public interface State {
 
 	void pushExtraConjunct(Expression extraConjunct);
 	
-	int createSymbolicInt(int oldValue, int uniqueId);
+	int createSymbolicInt(int currentValue, int uniqueId);
 
 	// ======================================================================
 	//
@@ -67,8 +67,6 @@ public interface State {
 	double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue);
 	
 	String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue);
-	
-	int createSymbolicInt(int currentValue, int uniqueId);
 	
 	void triggerMethod(int methodNumber);
 
