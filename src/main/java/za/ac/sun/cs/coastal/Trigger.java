@@ -56,6 +56,7 @@ public final class Trigger {
 	 */
 	private final String className;
 
+
 	/**
 	 * The fully qualified name of the method (e.g.,
 	 * {@code "example.progs.Program.routine"}).

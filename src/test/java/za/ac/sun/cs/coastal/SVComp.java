@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal;
 
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -10,6 +11,7 @@ import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -54,9 +56,9 @@ public class SVComp {
 //			{ "jpf-regression", "ExSymExeSuzette_true", true }, 
 //			{ "jpf-regression", "ExSymExeTestAssignments_true", true }, 
 //			{ "jpf-regression", "ExSymExeTestClassFields_true", true },
-
 		
 //			{ "jpf-regression", "ExSymExe6_false", false }, // Divide by zero
+
 		});
 	}
 	
@@ -84,4 +86,3 @@ public class SVComp {
 		assertNotEquals(reporter.getBool("AssertController.assert-failed"), testExpectedOutcome);
 	}
 }
-
