@@ -314,7 +314,7 @@ public class Operation extends Expression {
 	public static Expression rem(Expression a, Expression b) {
 		if (a instanceof IntegerConstant) {
 			if (b instanceof IntegerConstant) {
-				int z = Math.max(((IntegerConstant)a).getSize(), ((IntegerConstant) b).getSize());
+				int z = Math.max(((IntegerConstant) a).getSize(), ((IntegerConstant) b).getSize());
 				if (((IntegerConstant) b).getValue() == 0) {
 					return null;
 				}

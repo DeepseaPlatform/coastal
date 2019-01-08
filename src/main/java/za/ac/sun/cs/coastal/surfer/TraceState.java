@@ -820,7 +820,7 @@ public class TraceState implements State {
 
 	@Override
 	public int createSymbolicInt(int currentValue, int uniqueId) {
-		// TODO Auto-generated method stub
+		// TODO Get a concrete value
 		return 0;
 	}
 

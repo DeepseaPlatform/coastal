@@ -419,15 +419,20 @@ public class GybridFuzzerFactory implements StrategyFactory {
 				String name = entry.getKey();
 				Class<?> type = entry.getValue();
 				if (type == boolean.class) {
-					update(score, model, name, (Integer) coastal.getMinBound(name, type), (Integer) coastal.getMaxBound(name, type));
+					update(score, model, name, (Integer) coastal.getMinBound(name, type),
+							(Integer) coastal.getMaxBound(name, type));
 				} else if (type == byte.class) {
-					update(score, model, name, (Byte) coastal.getMinBound(name, type), (Byte) coastal.getMaxBound(name, type));
+					update(score, model, name, (Byte) coastal.getMinBound(name, type),
+							(Byte) coastal.getMaxBound(name, type));
 				} else if (type == short.class) {
-					update(score, model, name, (Short) coastal.getMinBound(name, type), (Short) coastal.getMaxBound(name, type));
+					update(score, model, name, (Short) coastal.getMinBound(name, type),
+							(Short) coastal.getMaxBound(name, type));
 				} else if (type == char.class) {
-					update(score, model, name, (Character) coastal.getMinBound(name, type), (Character) coastal.getMaxBound(name, type));
+					update(score, model, name, (Character) coastal.getMinBound(name, type),
+							(Character) coastal.getMaxBound(name, type));
 				} else if (type == int.class) {
-					update(score, model, name, (Integer) coastal.getMinBound(name, type), (Integer) coastal.getMaxBound(name, type));
+					update(score, model, name, (Integer) coastal.getMinBound(name, type),
+							(Integer) coastal.getMaxBound(name, type));
 				} else if (type == long.class) {
 					Map<String, Object> newModel = new HashMap<>(model);
 					long min = (Long) coastal.getMinBound(name, type);

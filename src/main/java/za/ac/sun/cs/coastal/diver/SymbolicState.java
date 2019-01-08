@@ -2,7 +2,6 @@ package za.ac.sun.cs.coastal.diver;
 
 
 import java.lang.reflect.Array;
-import java.util.List;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -924,11 +923,7 @@ public class SymbolicState implements State {
 		case Opcodes.IDIV:
 			e = pop();
 			Expression idiv = Operation.rem(pop(), e);
-			if (idiv != null) {
-				push(idiv);
-			} else {
-				broker.publish("stop", "Division by zero");
-			}
+			push(idiv);
 			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
@@ -936,11 +931,7 @@ public class SymbolicState implements State {
 		case Opcodes.LDIV:
 			e = pop();
 			Expression ldiv = Operation.rem(pop(), e);
-			if (ldiv != null) {
-				push(ldiv);
-			} else {
-				broker.publish("stop", "Division by zero");
-			}
+			push(ldiv);
 			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
@@ -948,11 +939,7 @@ public class SymbolicState implements State {
 		case Opcodes.FDIV:
 			e = pop();
 			Expression fdiv = Operation.rem(pop(), e);
-			if (fdiv != null) {
-				push(fdiv);
-			} else {
-				broker.publish("stop", "Division by zero");
-			}
+			push(fdiv);
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
@@ -960,11 +947,7 @@ public class SymbolicState implements State {
 		case Opcodes.DDIV:
 			e = pop();
 			Expression ddiv = Operation.rem(pop(), e);
-			if (ddiv != null) {
-				push(ddiv);
-			} else {
-				broker.publish("stop", "Division by zero");
-			}
+			push(ddiv);
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
@@ -972,11 +955,7 @@ public class SymbolicState implements State {
 		case Opcodes.IREM:
 			e = pop();
 			Expression rem = Operation.rem(pop(), e);
-			if (rem != null) {
-				push(rem);
-			} else {
-				broker.publish("stop", "Division by zero");
-			}
+			push(rem);
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
 			// Add ExceptionExpression to noExceptionExpressionList
 			exceptionDepth = Thread.currentThread().getStackTrace().length;

@@ -9,7 +9,7 @@
 		</target>
 		<settings>
 			<trace-all>false</trace-all>
-			<echo-output>true</echo-output>
+			<echo-output>false</echo-output>
 			<draw-paths>false</draw-paths>
 			<concrete-values>true</concrete-values>
 			<max-threads>0</max-threads>
