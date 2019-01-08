@@ -21,21 +21,21 @@ public class SVComp {
 	@Parameters
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] {
-//			{ "jpf-regression", "ExLazy_true", true },
-//			{ "jpf-regression", "ExLazy_false", false },
-//			{ "jpf-regression", "ExSymExe1_true", true },
-//			{ "jpf-regression", "ExSymExe1_false", false },
-//			{ "jpf-regression", "ExSymExe2_true", true },
-//			{ "jpf-regression", "ExSymExe2_false", false },
-//			{ "jpf-regression", "ExSymExe3_true", true },
-//			{ "jpf-regression", "ExSymExe3_false", false },
-//			{ "jpf-regression", "ExSymExe4_true", true },
-//			{ "jpf-regression", "ExSymExe4_false", false },
-//			{ "jpf-regression", "ExSymExe5_true", true },
-//			{ "jpf-regression", "ExSymExe5_false", false },
-//			{ "jpf-regression", "ExSymExe6_true", true },
-//			{ "jpf-regression", "ExSymExe7_true", true },
-//			{ "jpf-regression", "ExSymExe7_false", false },
+			{ "jpf-regression", "ExLazy_true", true },
+			{ "jpf-regression", "ExLazy_false", false },
+			{ "jpf-regression", "ExSymExe1_true", true },
+			{ "jpf-regression", "ExSymExe1_false", false },
+			{ "jpf-regression", "ExSymExe2_true", true },
+			{ "jpf-regression", "ExSymExe2_false", false },
+			{ "jpf-regression", "ExSymExe3_true", true },
+			{ "jpf-regression", "ExSymExe3_false", false },
+			{ "jpf-regression", "ExSymExe4_true", true },
+			{ "jpf-regression", "ExSymExe4_false", false },
+			{ "jpf-regression", "ExSymExe5_true", true },
+			{ "jpf-regression", "ExSymExe5_false", false },
+			{ "jpf-regression", "ExSymExe6_true", true },
+			{ "jpf-regression", "ExSymExe7_true", true },
+			{ "jpf-regression", "ExSymExe7_false", false },
 
 //			{ "jpf-regression", "ExSymExe8_true", true },
 //			{ "jpf-regression", "ExSymExe9_true", true },
@@ -57,7 +57,7 @@ public class SVComp {
 //			{ "jpf-regression", "ExSymExeTestAssignments_true", true }, 
 //			{ "jpf-regression", "ExSymExeTestClassFields_true", true },
 
-			{ "jpf-regression", "ExSymExe6_false", false }, // Divide by zero
+//			{ "jpf-regression", "ExSymExe6_false", false }, // Divide by zero
 
 		});
 	}
