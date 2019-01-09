@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>examples.fuzzing.Fuzzing08</main>
+			<instrument>examples.fuzzing</instrument>
+			<trigger>examples.fuzzing.Fuzzing08.preserveSomeHtmlTagsAndRemoveWhitespaces(S: String)</trigger>
+		</target>
+		<settings>
+			<show-instrumentation>true</show-instrumentation>
+			<time-limit>10</time-limit>
+		</settings>
+		<divers threads="0"/>
+		<surfers threads="1"/>
+		<strategies>
+			<strategy threads="1">
+				za.ac.sun.cs.coastal.strategy.hybrid.CybridFuzzerFactory
+				<options>
+					<queue-limit>100000</queue-limit>
+					<random-seed>777888999</random-seed>
+					<attenuation>0.95</attenuation>
+					<mutation-count>1</mutation-count>
+					<elimination-ratio>1</elimination-ratio>
+					<keep-top>2</keep-top>
+					<draw-final-tree>true</draw-final-tree>
+				</options>
+			</strategy>
+		</strategies>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.StopControllerFactory</observer>
+			<!--
+			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
+			-->
+		</observers>
+		<delegates>
+			<delegate>
+				<for>java.lang.String</for>
+				<model>za.ac.sun.cs.coastal.model.String</model>
+			</delegate>
+		</delegates>
+		<!--
+		-->
+	</coastal>
+</configuration>
