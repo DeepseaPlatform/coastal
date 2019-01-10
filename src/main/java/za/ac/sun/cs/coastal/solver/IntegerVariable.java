@@ -13,7 +13,7 @@ public class IntegerVariable extends Variable {
 	
 	public IntegerVariable(final String name, final int size, final long lowerBound, final long upperBound) {
 		super(name);
-		assert (size == 32) || (size == 64);
+		assert (size == 32) || (size == 64) || (size == 8) || (size == 16);
 		this.size = size;
 		assert (lowerBound <= upperBound);
 		this.lowerBound = lowerBound;
