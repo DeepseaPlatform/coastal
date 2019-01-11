@@ -50,7 +50,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 	public static class CybridFuzzerManager implements StrategyManager {
 
 		private static final int DEFAULT_QUEUE_LIMIT = 10000000;
-		
+
 		private static final int NEW_EDGE_SCORE = 100;
 
 		private static final int NEW_BUCKET_SCORE = 50;
@@ -62,7 +62,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 		protected final PathTree pathTree;
 
 		protected final int queueLimit;
-		
+
 		protected final long randomSeed;
 
 		protected final double attenuation;
@@ -70,11 +70,11 @@ public class CybridFuzzerFactory implements StrategyFactory {
 		protected final int mutationCount;
 
 		protected final int eliminationCount;
-		
+
 		protected final double eliminationRatio;
-		
+
 		protected final int keepTop;
-		
+
 		protected final boolean drawTree;
 
 		protected int taskCount = 0;
@@ -131,7 +131,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 		protected int getQueueLimit() {
 			return queueLimit;
 		}
-		
+
 		protected long getRandomSeed() {
 			return randomSeed + taskCount;
 		}
@@ -147,15 +147,15 @@ public class CybridFuzzerFactory implements StrategyFactory {
 		protected int getEliminationCount() {
 			return eliminationCount;
 		}
-		
+
 		protected double getEliminationRatio() {
 			return eliminationRatio;
 		}
-		
+
 		protected int getKeepTop() {
 			return keepTop;
 		}
-		
+
 		/**
 		 * Increment the number of refinements.
 		 */
@@ -164,22 +164,20 @@ public class CybridFuzzerFactory implements StrategyFactory {
 		}
 
 		/**
-		 * Add a reported dive time to the accumulator that tracks how long the
-		 * dives took.
+		 * Add a reported dive time to the accumulator that tracks how long the dives
+		 * took.
 		 * 
-		 * @param time
-		 *            the time for this dive
+		 * @param time the time for this dive
 		 */
 		public void recordTime(long time) {
 			strategyTime.addAndGet(time);
 		}
 
 		/**
-		 * Add a reported strategy wait time. This is used to determine if it
-		 * makes sense to create additional threads (or destroy them).
+		 * Add a reported strategy wait time. This is used to determine if it makes
+		 * sense to create additional threads (or destroy them).
 		 * 
-		 * @param time
-		 *            the wait time for this strategy
+		 * @param time the wait time for this strategy
 		 */
 		public void recordWaitTime(long time) {
 			strategyWaitTime.addAndGet(time);
@@ -221,7 +219,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 			if (drawTree) {
 				int i = 0;
 				for (String ll : pathTree.stringRepr()) {
-					broker.publish("report", new Tuple(String.format("%s.tree%03d",  name, i++), ll));
+					broker.publish("report", new Tuple(String.format("%s.tree%03d", name, i++), ll));
 				}
 			}
 		}
@@ -295,7 +293,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 		protected Map<String, Class<?>> parameters = null;
 
 		protected final int queueLimit;
-		
+
 		private final MTRandom rng;
 
 		private final double attenuation;
@@ -303,11 +301,11 @@ public class CybridFuzzerFactory implements StrategyFactory {
 		protected final int mutationCount;
 
 		protected final int eliminationCount;
-		
+
 		protected final double eliminationRatio;
-		
+
 		protected final int keepTop;
-		
+
 		public CybridFuzzerStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 			this.manager = (CybridFuzzerManager) manager;
@@ -347,13 +345,14 @@ public class CybridFuzzerFactory implements StrategyFactory {
 						Thread.sleep(200);
 					}
 					keepers.clear();
-					int eliminate = Math.max(eliminationCount, (int) (eliminationRatio * coastal.getTraceQueueLength()));
+					int eliminate = Math.max(eliminationCount,
+							(int) (eliminationRatio * coastal.getTraceQueueLength()));
 					for (int i = 0; i < eliminate; i++) {
 						t0 = System.currentTimeMillis();
 						Trace tracex = coastal.getNextTrace(200);
 						t1 = System.currentTimeMillis();
 						manager.recordWaitTime(t1 - t0);
-						if (tracex == null) { 
+						if (tracex == null) {
 							log.trace("+++ out of traces");
 							break;
 						}
@@ -386,7 +385,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 			log.trace("^^^ strategy task finished");
 			return null;
 		}
-		
+
 		protected void refine(Trace trace, GybridPayload payload) {
 			long t0 = System.currentTimeMillis();
 			modelsAdded = -1;
@@ -404,15 +403,20 @@ public class CybridFuzzerFactory implements StrategyFactory {
 				String name = entry.getKey();
 				Class<?> type = entry.getValue();
 				if (type == boolean.class) {
-					update(payload, model, name, (Integer) coastal.getMinBound(name, type), (Integer) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Integer) coastal.getMinBound(name, type),
+							(Integer) coastal.getMaxBound(name, type));
 				} else if (type == byte.class) {
-					update(payload, model, name, (Byte) coastal.getMinBound(name, type), (Byte) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Byte) coastal.getMinBound(name, type),
+							(Byte) coastal.getMaxBound(name, type));
 				} else if (type == short.class) {
-					update(payload, model, name, (Short) coastal.getMinBound(name, type), (Short) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Short) coastal.getMinBound(name, type),
+							(Short) coastal.getMaxBound(name, type));
 				} else if (type == char.class) {
-					update(payload, model, name, (Character) coastal.getMinBound(name, type), (Character) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Character) coastal.getMinBound(name, type),
+							(Character) coastal.getMaxBound(name, type));
 				} else if (type == int.class) {
-					update(payload, model, name, (Integer) coastal.getMinBound(name, type), (Integer) coastal.getMaxBound(name, type));
+					update(payload, model, name, (Integer) coastal.getMinBound(name, type),
+							(Integer) coastal.getMaxBound(name, type));
 				} else if (type == long.class) {
 					Map<String, Object> newModel = new HashMap<>(model);
 					long min = (Long) coastal.getMinBound(name, type);
@@ -522,9 +526,9 @@ public class CybridFuzzerFactory implements StrategyFactory {
 
 		/**
 		 * Calculate the score for a trace. First, the trace is scanned for its
-		 * "blocks", which are line numbers that represent basic blocks.
-		 * Consecutive blocks form tuples, the tuples are counted, and the
-		 * counts are converted according to the "bucket scale":
+		 * "blocks", which are line numbers that represent basic blocks. Consecutive
+		 * blocks form tuples, the tuples are counted, and the counts are converted
+		 * according to the "bucket scale":
 		 * 
 		 * <ul>
 		 * <li>1 occurrence = bucket 1</li>
@@ -537,12 +541,11 @@ public class CybridFuzzerFactory implements StrategyFactory {
 		 * <li>&ge;128 occurrences = bucket 8</li>
 		 * </ul>
 		 *
-		 * This information is passed to the manager, which returns a score
-		 * based on the counts. Finally, the score of the trace's parent trace
-		 * is added but scaled by a factor.
+		 * This information is passed to the manager, which returns a score based on the
+		 * counts. Finally, the score of the trace's parent trace is added but scaled by
+		 * a factor.
 		 * 
-		 * @param trace
-		 *            the trace to calculate a score for
+		 * @param trace the trace to calculate a score for
 		 * @return the score
 		 */
 		private int calculateScore(Trace trace) {
@@ -584,9 +587,9 @@ public class CybridFuzzerFactory implements StrategyFactory {
 
 		protected final int capacity;
 
-		protected final int scores[];
-		
-		protected final Trace traces[];
+		protected final int[] scores;
+
+		protected final Trace[] traces;
 
 		protected int size;
 
@@ -637,10 +640,12 @@ public class CybridFuzzerFactory implements StrategyFactory {
 				public Iterator<Trace> iterator() {
 					return new Iterator<Trace>() {
 						private int index = 0;
+
 						@Override
 						public Trace next() {
 							return traces[index++];
 						}
+
 						@Override
 						public boolean hasNext() {
 							return index < size;

@@ -22,6 +22,8 @@ public interface State {
 
 	void pushExtraConjunct(Expression extraConjunct);
 	
+	int createSymbolicInt(int currentValue, int uniqueId);
+
 	// ======================================================================
 	//
 	// METHOD ROUTINES

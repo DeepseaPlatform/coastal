@@ -559,7 +559,8 @@ public class COASTAL {
 	 *
 	 * @formatter:on
 	 */
-
+	
+	
 	/**
 	 * Initialize the final fields for this analysis run of COASTAL.
 	 * 
@@ -1870,7 +1871,7 @@ public class COASTAL {
 			workDone.notifyAll();
 		}
 	}
-
+	
 	/**
 	 * Set the flag to indicate that the analysis run must stop.
 	 *

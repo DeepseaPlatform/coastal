@@ -44,7 +44,7 @@ import za.ac.sun.cs.coastal.symbolic.VM;
  * </ol>
  */
 public final class Trigger {
-
+	
 	/**
 	 * The name of the method (e.g., {@code "routine"}).
 	 */
@@ -55,6 +55,7 @@ public final class Trigger {
 	 * {@code "example.progs.Program"}).
 	 */
 	private final String className;
+
 
 	/**
 	 * The fully qualified name of the method (e.g.,
@@ -306,13 +307,13 @@ public final class Trigger {
 			pn = new String[0];
 			pt = new Class<?>[0];
 		}
-		if (symbolicCount == 0) {
-			Banner bn = new Banner('@');
-			bn.println("COASTAL PROBLEM\n");
-			bn.println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"");
-			bn.display(System.out);
-			return null;
-		}
+//		if (symbolicCount == 0) {
+//			Banner bn = new Banner('@');
+//			bn.println("COASTAL PROBLEM\n");
+//			bn.println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"");
+//			bn.display(System.out);
+//			return null;
+//		}
 		String tm = "", tc = "";
 		int dot = m.lastIndexOf('.');
 		if (dot != -1) {

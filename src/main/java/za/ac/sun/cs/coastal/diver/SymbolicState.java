@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal.diver;
 
+
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -59,6 +60,8 @@ public class SymbolicState implements State {
 	 */
 	public static final String NEW_VAR_PREFIX = "$"; // "U_D_"
 
+	public static final String CREATE_VAR_PREFIX = "N_D_"; // "@"
+	
 	private final COASTAL coastal;
 
 	private final Logger log;
@@ -297,6 +300,26 @@ public class SymbolicState implements State {
 	@Override
 	public String getNewVariableName() {
 		return NEW_VAR_PREFIX + newVariableCount++;
+	}
+	
+	public int createSymbolicInt(int currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return 0;
+		}
+
+		String name = CREATE_VAR_PREFIX + uniqueId;
+		pop();
+		push(new IntegerVariable(name, 32, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		Long concreteVal = concreteValues == null ? null : (Long) concreteValues.get(name);
+		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
+		if (concrete == null) {
+			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			return currentValue;
+		} else {
+			int newValue = (int) concrete.getValue();
+			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
+			return newValue;
+		}
 	}
 
 	private void dumpFrames() {
@@ -899,29 +922,42 @@ public class SymbolicState implements State {
 			break;
 		case Opcodes.IDIV:
 			e = pop();
-			push(Operation.div(pop(), e));
+			Expression idiv = Operation.rem(pop(), e);
+			push(idiv);
 			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.LDIV:
 			e = pop();
-			push(Operation.div(pop(), e));
+			Expression ldiv = Operation.rem(pop(), e);
+			push(ldiv);
 			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.FDIV:
 			e = pop();
-			push(Operation.div(pop(), e));
+			Expression fdiv = Operation.rem(pop(), e);
+			push(fdiv);
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.DDIV:
 			e = pop();
-			push(Operation.div(pop(), e));
+			Expression ddiv = Operation.rem(pop(), e);
+			push(ddiv);
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = IntegerConstant.ZERO32;
+			break;
+		case Opcodes.IREM:
+			e = pop();
+			Expression rem = Operation.rem(pop(), e);
+			push(rem);
+			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
+			// Add ExceptionExpression to noExceptionExpressionList
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
@@ -984,6 +1020,7 @@ public class SymbolicState implements State {
 			noExceptionExpression.add(Operation.FALSE);
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = pop();
+			broker.publish("assert-failed", new Tuple(this, null));
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
