@@ -1,40 +1,27 @@
 package za.ac.sun.cs.coastal.observers;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+
 import org.apache.commons.configuration2.ImmutableConfiguration;
 
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.TilePane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.stage.Stage;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.Reporter.Reportable;
 import za.ac.sun.cs.coastal.TaskFactory.TaskManager;
@@ -89,117 +76,87 @@ public class GUIFactory implements ObserverFactory {
 
 	}
 
-	public static class GUI extends Application implements Runnable {
+	@SuppressWarnings("serial")
+	public static class GUI extends JFrame implements ActionListener, Runnable {
 
-		private static final int INITIAL_WIDTH = 1200;
+		private static final int INITIAL_WIDTH = 1000;
 
-		private static final int INITIAL_HEIGHT = 720;
+		private static final int INITIAL_HEIGHT = 600;
 
 		private static COASTAL coastal;
 
-		private Button stopButton;
+		private JButton stopButton;
 
-		private Label doneLabel;
+		private JLabel doneLabel;
 
-		private Button quitButton;
+		private JButton quitButton;
 
-		public static class XTableView<S> extends TableView<S> {
-			@Override
-			public void resize(double width, double height) {
-				super.resize(width, height);
-				Pane header = (Pane) lookup("TableHeaderRow");
-				header.setMinHeight(0);
-				header.setPrefHeight(0);
-				header.setMaxHeight(0);
-				header.setVisible(false);
-			}
-		}
-
-		public static final class Statistic {
-			private final SimpleStringProperty key;
-			private final SimpleStringProperty value;
-
-			private Statistic(String key, String value) {
-				this.key = new SimpleStringProperty(key);
-				this.value = new SimpleStringProperty(value);
-			}
-
-			public String getKey() {
-				return key.get();
-			}
-
-			public void setKey(String key) {
-				this.key.set(key);
-			}
-
-			public SimpleStringProperty keyProperty() {
-				return key;
-			}
-
-			public String getValue() {
-				return value.get();
-			}
-
-			public void setValue(String value) {
-				this.value.set(value);
-			}
-
-			public SimpleStringProperty valueProperty() {
-				return value;
-			}
-		}
-
-		public static class TaskPanel extends BorderPane {
+		public static class TaskPanel extends JPanel {
 
 			private final Reportable reportable;
 
-			private final XTableView<Statistic> table;
+			private final JLabel[] nameLabels;
 
+			private final JLabel[] valueLabels;
+			
 			TaskPanel(Reportable reportable) {
 				this.reportable = reportable;
+				// Set the label
+				setLayout(new BorderLayout());
 				// Create the top label
-				final Label topLabel = new Label(reportable.getName());
-				topLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-				final HBox topBox = new HBox();
-				topBox.setPadding(new Insets(6, 0, 6, 0));
-				topBox.setAlignment(Pos.CENTER);
-				topBox.getChildren().add(topLabel);
-				topBox.setStyle("-fx-background-color:#99ccff");
-				setTop(topBox);
-				// Create the data items
+				final JLabel topLabel = new JLabel(reportable.getName());
+				topLabel.setFont(new Font("Arial", Font.BOLD, 14));
+				topLabel.setForeground(Color.WHITE);
+				topLabel.setHorizontalAlignment(SwingConstants.CENTER);
+				final JPanel topPanel = new JPanel(new BorderLayout());
+				topPanel.setBackground(new Color(0x336699));
+				topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+				topPanel.add(topLabel, BorderLayout.CENTER);
+				add(topPanel, BorderLayout.PAGE_START);
+				// Create a border to reuse
+				final Border border = BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.BLACK, 1), BorderFactory.createEmptyBorder(2, 2, 2, 2));
+				final Dimension prefDim = new Dimension(200, 25);
+				// Create the property labels
 				String[] propertyNames = reportable.getPropertyNames();
 				int size = propertyNames.length;
-				final Statistic[] rows = new Statistic[size];
+				nameLabels = new JLabel[size];
 				for (int i = 0; i < size; i++) {
-					rows[i] = new Statistic(propertyNames[i], "?");
+					nameLabels[i] = new JLabel(propertyNames[i]);
+					nameLabels[i].setBackground(Color.WHITE);
+					nameLabels[i].setHorizontalAlignment(SwingConstants.LEADING);
+					nameLabels[i].setBorder(border);
+					nameLabels[i].setMinimumSize(prefDim);
+					nameLabels[i].setPreferredSize(prefDim);
+					nameLabels[i].setMaximumSize(prefDim);
+					nameLabels[i].setFont(new Font("Arial", Font.PLAIN, 14));
+				}
+				// Create the value labels
+				valueLabels = new JLabel[size];
+				for (int i = 0; i < size; i++) {
+					valueLabels[i] = new JLabel("?");
+					valueLabels[i].setBackground(Color.WHITE);
+					valueLabels[i].setHorizontalAlignment(SwingConstants.LEADING);
+					valueLabels[i].setBorder(border);
+					valueLabels[i].setMinimumSize(prefDim);
+					valueLabels[i].setPreferredSize(prefDim);
+					valueLabels[i].setMaximumSize(prefDim);
+					valueLabels[i].setFont(new Font("Arial", Font.PLAIN, 14));
 				}
 				// Create the table
-				table = new XTableView<Statistic>();
-				table.setEditable(true);
-				TableColumn<Statistic, String> keyCol = new TableColumn<>("KEY");
-				TableColumn<Statistic, String> valueCol = new TableColumn<>("VALUE");
-				keyCol.setCellValueFactory(new PropertyValueFactory<Statistic, String>("key"));
-				valueCol.setCellValueFactory(new PropertyValueFactory<Statistic, String>("value"));
-				table.getColumns().add(keyCol);
-				table.getColumns().add(valueCol);
-				final ObservableList<Statistic> data = FXCollections.observableArrayList(rows);
-				table.setItems(data);
-				table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-				table.setFixedCellSize(25);
-				table.prefHeightProperty()
-						.bind(Bindings.size(table.getItems()).multiply(table.getFixedCellSize()).add(5));
-				// Add the table and a border
-				setCenter(table);
-				setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
-						BorderWidths.DEFAULT)));
-				setPrefWidth(400);
+				final JPanel middlePanel = new JPanel(new GridLayout(0, 2));
+				middlePanel.setBackground(Color.WHITE);
+				for (int i = 0; i < size; i++) {
+					middlePanel.add(nameLabels[i]);
+					middlePanel.add(valueLabels[i]);
+				}
+				add(middlePanel, BorderLayout.CENTER);
 			}
 
 			public void refresh() {
-				Platform.runLater(() -> {
+				SwingUtilities.invokeLater(() -> {
 					Object[] propertyValues = reportable.getPropertyValues();
 					for (int i = 0, n = propertyValues.length; i < n; i++) {
-						table.getItems().get(i).setValue(propertyValues[i].toString());
+						valueLabels[i].setText(propertyValues[i].toString());
 					}
 				});
 			}
@@ -207,8 +164,10 @@ public class GUIFactory implements ObserverFactory {
 		}
 
 		private final List<TaskPanel> tasks = new ArrayList<>();
+		private JPanel bottomPanel;
 
 		public GUI(COASTAL coastal) {
+			super("COASTAL");
 			GUI.coastal = coastal;
 		}
 
@@ -217,92 +176,97 @@ public class GUIFactory implements ObserverFactory {
 
 		@Override
 		public void run() {
-			launch();
+			SwingUtilities.invokeLater(() -> createAndShowGUI()); 
 		}
 
-		@Override
-		public void start(Stage primaryStage) throws Exception {
-			primaryStage.setTitle("COASTAL");
-			final AnchorPane root = new AnchorPane();
-			Scene scene = new Scene(root);
+		public void createAndShowGUI() {
+			final JLabel topLabel = new JLabel(coastal.getConfig().getString("run-name", "?"));
+			topLabel.setFont(new Font("Arial", Font.BOLD, 20));
+			topLabel.setForeground(Color.WHITE);
+			topLabel.setHorizontalAlignment(SwingConstants.CENTER);
+			topLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+			final JPanel topPanel = new JPanel(new BorderLayout());
+			topPanel.setBackground(new Color(0x336699));
+			topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+			topPanel.add(topLabel, BorderLayout.CENTER);
 
-			final Label topLabel = new Label(coastal.getConfig().getString("run-name", "?"));
-			topLabel.setFont(Font.font("Arial", FontWeight.BOLD, 20));
-			topLabel.setStyle("-fx-text-fill:#ffffff");
-			final HBox topBox = new HBox();
-			topBox.setPadding(new Insets(10, 0, 10, 0));
-			topBox.setAlignment(Pos.CENTER);
-			topBox.getChildren().add(topLabel);
-			topBox.setStyle("-fx-background-color:#336699");
-
-			final TilePane tile = new TilePane();
-			tile.setPadding(new Insets(0, 0, 0, 0));
-			tile.setVgap(0);
-			tile.setHgap(0);
-			tile.setPrefColumns(2);
-			tile.setStyle("-fx-background-color:#ddddff");
 			// Create a reportable for COASTAL
 			TaskPanel tp = new TaskPanel(coastal.getCoastalReportable());
 			tasks.add(tp);
-			tile.getChildren().add(tp);
 			// Create a reportable for the path tree
 			tp = new TaskPanel(coastal.getPathTreeReportable());
 			tasks.add(tp);
-			tile.getChildren().add(tp);
 			for (TaskManager tm : coastal.getTasks()) {
 				tp = new TaskPanel(tm);
 				tasks.add(tp);
-				tile.getChildren().add(tp);
 			}
 			for (Tuple fm : coastal.getAllObservers()) {
 				ObserverManager m = (ObserverManager) fm.get(1);
 				if (m.getName() != null) {
 					tp = new TaskPanel(m);
 					tasks.add(tp);
-					tile.getChildren().add(tp);
 				}
 			}
+			final Dimension middleDim = new Dimension(INITIAL_WIDTH, INITIAL_HEIGHT);
+			final JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+			middlePanel.setBackground(new Color(0xddddff));
+			middlePanel.setMinimumSize(middleDim);
+			middlePanel.setPreferredSize(middleDim);
+			for (TaskPanel t : tasks) {
+				middlePanel.add(t);
+			}
 
-			stopButton = new Button("Stop");
-			stopButton.setOnAction(e -> coastal.getBroker().publish("emergency-stop", this));
-			stopButton.setDisable(false);
-			doneLabel = new Label("Done");
+			stopButton = new JButton("Stop");
+			stopButton.setActionCommand("stop");
+			stopButton.addActionListener(this);
+			stopButton.setEnabled(true);
+			doneLabel = new JLabel("Done");
 			doneLabel.setVisible(false);
-			doneLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-			doneLabel.setStyle("-fx-text-fill:#330000;-fx-background-color:#ffff00;-fx-padding:10 30");
-			quitButton = new Button("Quit");
-			quitButton.setOnAction(e -> Platform.exit());
-			quitButton.setDisable(false);
+			doneLabel.setFont(new Font("Arial", Font.BOLD, 16));
+			doneLabel.setOpaque(true);
+			doneLabel.setForeground(new Color(0x330000));
+			doneLabel.setBackground(new Color(0xffff00));
+			doneLabel.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+			quitButton = new JButton("Quit");
+			quitButton.setActionCommand("quit");
+			quitButton.addActionListener(this);
+			quitButton.setEnabled(true);
 			quitButton.setVisible(false);
-			Region region1 = new Region();
-			HBox.setHgrow(region1, Priority.ALWAYS);
-			Region region2 = new Region();
-			HBox.setHgrow(region2, Priority.ALWAYS);
-			final HBox bottomBox = new HBox();
-			bottomBox.setPadding(new Insets(10, 10, 10, 10));
-			bottomBox.setAlignment(Pos.CENTER_RIGHT);
-			bottomBox.getChildren().addAll(stopButton, region1, doneLabel, region2, quitButton);
-			bottomBox.setStyle("-fx-background-color:#336699");
+//			final JPanel bottomPanel = new JPanel(new BorderLayout());
+			bottomPanel = new JPanel(new BorderLayout());
+			bottomPanel.setBackground(new Color(0x336699));
+			bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+			bottomPanel.add(stopButton, BorderLayout.LINE_START);
+			bottomPanel.add(doneLabel, BorderLayout.CENTER);
+			bottomPanel.add(quitButton, BorderLayout.LINE_END);
+			final Dimension bottomDim = new Dimension(INITIAL_WIDTH, 60);
+			bottomPanel.setMinimumSize(bottomDim);
+			bottomPanel.setMaximumSize(bottomDim);
+			bottomPanel.setPreferredSize(bottomDim);
+			
+			add(topPanel, BorderLayout.PAGE_START);
+			add(middlePanel, BorderLayout.CENTER);
+			add(bottomPanel, BorderLayout.PAGE_END);
 
-			final BorderPane border = new BorderPane();
-			border.setTop(topBox);
-			border.setCenter(tile);
-			border.setBottom(bottomBox);
-			border.prefWidthProperty().bind(root.widthProperty());
-			border.prefHeightProperty().bind(root.heightProperty());
-
-			root.getChildren().addAll(border);
-
-			primaryStage.setScene(scene);
-			primaryStage.setWidth(INITIAL_WIDTH);
-			primaryStage.setHeight(INITIAL_HEIGHT);
-			primaryStage.show();
+			setSize(INITIAL_WIDTH, INITIAL_HEIGHT);
+			pack();
+			setVisible(true);
 			coastal.getBroker().subscribe("tick", this::tick);
 			coastal.getBroker().subscribe("reporting-done", this::isDone);
 		}
 
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if ("stop".equals(e.getActionCommand())) {
+				coastal.getBroker().publish("emergency-stop", this);
+			} else if ("quit".equals(e.getActionCommand())) {
+				setVisible(false);
+				dispose(); // Platform.exit();
+			}
+		}
+
 		public void isDone(Object object) {
-			stopButton.setDisable(true);
+			stopButton.setEnabled(false);
 			doneLabel.setVisible(true);
 			quitButton.setVisible(true);
 			update(true);
