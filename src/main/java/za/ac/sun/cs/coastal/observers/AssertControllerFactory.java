@@ -63,6 +63,11 @@ public class AssertControllerFactory implements ObserverFactory {
 			}
 		}
 
+//		public void fail(Object object) {
+//			Tuple tuple = (Tuple) object;
+//			wasStopped = true;
+//		}
+		
 		public void stop(Object object) {
 			Tuple tuple = (Tuple) object;
 			wasStopped = true;

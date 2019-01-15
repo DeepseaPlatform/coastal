@@ -11,6 +11,12 @@
 			<instrument>D</instrument>
 			<instrument>E</instrument>
 			<instrument>F</instrument>
+			<instrument>what_not</instrument>
+			<instrument>some_exception1</instrument>
+			<instrument>some_exception2</instrument>
+			<instrument>enum1</instrument>
+			<instrument>InetAddress</instrument>
+			<instrument>InetSocketAddress</instrument>
 			<trigger>Main.main(String[])</trigger>
 		</target>
 		<settings>

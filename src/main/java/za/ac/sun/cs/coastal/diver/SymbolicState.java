@@ -869,6 +869,7 @@ public class SymbolicState implements State {
 			push(new RealConstant(1, 64));
 			break;
 		case Opcodes.IALOAD:
+			// check if i is a variable, if a variable add noExceptionExpression 0 <= i < size
 			int i = (int) ((IntegerConstant) pop()).getValue();
 			int a = (int) ((IntegerConstant) pop()).getValue();
 			push(getArrayValue(a, i));
@@ -1004,6 +1005,12 @@ public class SymbolicState implements State {
 				push(e);
 			}
 			break;
+		case Opcodes.LRETURN:
+			e = pop();
+			if (methodReturn()) {
+				push(e);
+			}
+			break;
 		case Opcodes.ARETURN:
 			e = pop();
 			if (methodReturn()) {
@@ -1021,7 +1028,7 @@ public class SymbolicState implements State {
 			noExceptionExpression.add(Operation.FALSE);
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = pop();
-			broker.publish("assert-failed", new Tuple(this, null));
+			//broker.publish("assert-failed", new Tuple(this, null));
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);

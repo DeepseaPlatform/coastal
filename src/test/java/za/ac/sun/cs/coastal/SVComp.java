@@ -36,10 +36,10 @@ public class SVComp {
 //				{ "jpf-regression", "ExSymExe7_true", true }, { "jpf-regression", "ExSymExe7_false", false },
 //				{ "jpf-regression", "ExSymExe8_true", true }, { "jpf-regression", "ExSymExe8_false", false },
 //				{ "jpf-regression", "ExSymExe9_true", true }, { "jpf-regression", "ExSymExe9_false", false },
-//				{ "jpf-regression", "ExSymExe12_true", true }, { "jpf-regression", "ExSymExe12_false", false },
+////				{ "jpf-regression", "ExSymExe12_true", true }, { "jpf-regression", "ExSymExe12_false", false }, // nondetShort
 //				{ "jpf-regression", "ExSymExe13_true", true }, { "jpf-regression", "ExSymExe13_false", false },
-//				{ "jpf-regression", "ExSymExe14_true", true }, { "jpf-regression", "ExSymExe14_false", false },
-//				{ "jpf-regression", "ExSymExe15_true", true }, { "jpf-regression", "ExSymExe15_false", false },
+////				{ "jpf-regression", "ExSymExe14_true", true }, { "jpf-regression", "ExSymExe14_false", false }, // nondetShort
+////				{ "jpf-regression", "ExSymExe15_true", true }, { "jpf-regression", "ExSymExe15_false", false }, // nondetShort
 //				{ "jpf-regression", "ExSymExe16_true", true }, { "jpf-regression", "ExSymExe16_false", false },
 //				{ "jpf-regression", "ExSymExe17_true", true }, { "jpf-regression", "ExSymExe17_false", false },
 //				{ "jpf-regression", "ExSymExe18_true", true }, { "jpf-regression", "ExSymExe18_false", false },
@@ -125,98 +125,99 @@ public class SVComp {
 //			{ "jbmc-regression", "exceptions8", false }, // unknown issue
 //			{ "jbmc-regression", "interface1", false }, // UNIMPLEMENTED INSTRUCTION: <13> INVOKEINTERFACE A f ()V (opcode: 185)
 //			{ "jbmc-regression", "java_append_char", false }, // nondetBoolean
-			{ "jbmc-regression", "NegativeArraySizeException1", false },
-			{ "jbmc-regression", "NegativeArraySizeException2", false },
+//			{ "jbmc-regression", "NegativeArraySizeException1", false },
+//			{ "jbmc-regression", "NegativeArraySizeException2", false },
 //			{ "jbmc-regression", "NullPointerException2", false },
 //			{ "jbmc-regression", "NullPointerException3", false },
 //			{ "jbmc-regression", "NullPointerException4", false },
-//			{ "jbmc-regression", "RegexMatches02", false },
-//			{ "jbmc-regression", "RegexSubstitution02", false },
+//			{ "jbmc-regression", "RegexMatches02", false }, // nondetString
+//			{ "jbmc-regression", "RegexSubstitution02", false }, // nondetString
 //			{ "jbmc-regression", "return1", false },
 //			{ "jbmc-regression", "return2", false },
-//			{ "jbmc-regression", "StaticCharMethods02", false },
-//			{ "jbmc-regression", "StaticCharMethods03", false },
-//			{ "jbmc-regression", "StaticCharMethods04", false },
-//			{ "jbmc-regression", "StaticCharMethods05", false },
-//			{ "jbmc-regression", "StringBuilderAppend02", false },
-//			{ "jbmc-regression", "StringBuilderCapLen02", false },
-//			{ "jbmc-regression", "StringBuilderCapLen03", false },
-//			{ "jbmc-regression", "StringBuilderCapLen04", false },
-//			{ "jbmc-regression", "StringBuilderChars02", false },
-//			{ "jbmc-regression", "StringBuilderChars03", false },
-//			{ "jbmc-regression", "StringBuilderChars04", false },
-//			{ "jbmc-regression", "StringBuilderChars05", false },
-//			{ "jbmc-regression", "StringBuilderChars06", false },
-//			{ "jbmc-regression", "StringBuilderConstructors02", false },
-//			{ "jbmc-regression", "StringBuilderInsertDelete02", false },
-//			{ "jbmc-regression", "StringBuilderInsertDelete03", false },
-//			{ "jbmc-regression", "StringCompare02", false },
-//			{ "jbmc-regression", "StringCompare03", false },
-//			{ "jbmc-regression", "StringCompare04", false },
-//			{ "jbmc-regression", "StringCompare05", false },
-//			{ "jbmc-regression", "StringConcatenation02", false },
-//			{ "jbmc-regression", "StringConcatenation03", false },
-//			{ "jbmc-regression", "StringConcatenation04", false },
-//			{ "jbmc-regression", "StringConstructors02", false },
-//			{ "jbmc-regression", "StringConstructors03", false },
-//			{ "jbmc-regression", "StringConstructors04", false },
-//			{ "jbmc-regression", "StringConstructors05", false },
-//			{ "jbmc-regression", "StringContains01", false },
-//			{ "jbmc-regression", "StringContains02", false },
-//			{ "jbmc-regression", "StringIndexMethods02", false },
-//			{ "jbmc-regression", "StringIndexMethods03", false },
-//			{ "jbmc-regression", "StringIndexMethods04", false },
-//			{ "jbmc-regression", "StringIndexMethods05", false },
-//			{ "jbmc-regression", "StringMiscellaneous02", false },
-//			{ "jbmc-regression", "StringMiscellaneous03", false },
-//			{ "jbmc-regression", "StringStartEnd02", false },
-//			{ "jbmc-regression", "StringStartEnd03", false },
-//			{ "jbmc-regression", "StringValueOf02", false },
-//			{ "jbmc-regression", "StringValueOf03", false },
-//			{ "jbmc-regression", "StringValueOf04", false },
-//			{ "jbmc-regression", "StringValueOf05", false },
+//			{ "jbmc-regression", "StaticCharMethods02", false }, // nondetString
+//			{ "jbmc-regression", "StaticCharMethods03", false }, // nondetString
+//			{ "jbmc-regression", "StaticCharMethods04", false }, // nondetChar
+//			{ "jbmc-regression", "StaticCharMethods05", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderAppend02", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderCapLen02", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderCapLen03", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderCapLen04", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderChars02", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderChars03", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderChars04", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderChars05", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderChars06", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderConstructors02", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderInsertDelete02", false }, // nondetString
+//			{ "jbmc-regression", "StringBuilderInsertDelete03", false }, // nondetString
+//			{ "jbmc-regression", "StringCompare02", false }, // nondetString
+//			{ "jbmc-regression", "StringCompare03", false }, // nondetString
+//			{ "jbmc-regression", "StringCompare04", false }, // nondetString
+//			{ "jbmc-regression", "StringCompare05", false }, // nondetString
+//			{ "jbmc-regression", "StringConcatenation02", false }, // nondetString
+//			{ "jbmc-regression", "StringConcatenation03", false }, // nondetString
+//			{ "jbmc-regression", "StringConcatenation04", false }, // nondetString
+//			{ "jbmc-regression", "StringConstructors02", false }, // nondetString
+//			{ "jbmc-regression", "StringConstructors03", false }, // nondetString
+//			{ "jbmc-regression", "StringConstructors04", false }, // nondetString
+//			{ "jbmc-regression", "StringConstructors05", false }, // nondetString
+//			{ "jbmc-regression", "StringContains01", false }, // nondetString
+//			{ "jbmc-regression", "StringContains02", false }, // nondetString
+//			{ "jbmc-regression", "StringIndexMethods02", false }, // nondetString
+//			{ "jbmc-regression", "StringIndexMethods03", false }, // nondetString
+//			{ "jbmc-regression", "StringIndexMethods04", false }, // nondetString
+//			{ "jbmc-regression", "StringIndexMethods05", false }, // nondetString
+//			{ "jbmc-regression", "StringMiscellaneous02", false }, // nondetString
+//			{ "jbmc-regression", "StringMiscellaneous03", false }, // nondetString
+//			{ "jbmc-regression", "StringStartEnd02", false }, // nondetString
+//			{ "jbmc-regression", "StringStartEnd03", false }, // nondetString
+//			{ "jbmc-regression", "StringValueOf02", false }, // nondetString
+//			{ "jbmc-regression", "StringValueOf03", false }, // nondetString
+//			{ "jbmc-regression", "StringValueOf04", false }, // nondetBoolean
+//			{ "jbmc-regression", "StringValueOf05", false }, // nondetString
 //			{ "jbmc-regression", "StringValueOf06", false },
-//			{ "jbmc-regression", "StringValueOf07", false },
-//			{ "jbmc-regression", "StringValueOf08", false },
-//			{ "jbmc-regression", "StringValueOf09", false },
-//			{ "jbmc-regression", "StringValueOf10", false },
-//			{ "jbmc-regression", "SubString02", false },
-//			{ "jbmc-regression", "SubString03", false },
-//			{ "jbmc-regression", "TokenTest02", false },
-//			{ "jbmc-regression", "Validate02", false },
-//			{ "jbmc-regression", "virtual2", false },{ "jbmc-regression", "aastore_aaload1", true },
+//			{ "jbmc-regression", "StringValueOf07", false }, // nondetLong
+//			{ "jbmc-regression", "StringValueOf08", false }, // nondetString
+//			{ "jbmc-regression", "StringValueOf09", false }, // nondetString
+//			{ "jbmc-regression", "StringValueOf10", false }, // nondetString
+//			{ "jbmc-regression", "SubString02", false }, // nondetString
+//			{ "jbmc-regression", "SubString03", false }, // nondetString
+//			{ "jbmc-regression", "TokenTest02", false }, // nondetString
+//			{ "jbmc-regression", "Validate02", false }, // nondetString
+//			{ "jbmc-regression", "virtual2", false },
+//			{ "jbmc-regression", "aastore_aaload1", true }, // Object Arrays
 //			{ "jbmc-regression", "ArithmeticException5", true },
-//			{ "jbmc-regression", "array1", true },
+//			{ "jbmc-regression", "array1", true }, // Variable Length Arrays
 //			{ "jbmc-regression", "array2", true },
-//			{ "jbmc-regression", "arraylength1", true },
-//			{ "jbmc-regression", "arrayread1", true },
+//			{ "jbmc-regression", "arraylength1", true }, // Variable Array Length
+//			{ "jbmc-regression", "arrayread1", true }, // Object Arrays
 //			{ "jbmc-regression", "assert1", true },
 //			{ "jbmc-regression", "assert5", true },
 //			{ "jbmc-regression", "assert6", true },
-//			{ "jbmc-regression", "astore_aload1", true },
+//			{ "jbmc-regression", "astore_aload1", true }, // I2B, I2C and Object Arrays
 //			{ "jbmc-regression", "basic1", true },
-//			{ "jbmc-regression", "bitwise1", true },
-//			{ "jbmc-regression", "boolean1", true },
-//			{ "jbmc-regression", "boolean2", true },
+//			{ "jbmc-regression", "bitwise1", true }, // nondetChar
+//			{ "jbmc-regression", "boolean1", true }, // nondetBoolean
+//			{ "jbmc-regression", "boolean2", true }, // nondetBoolean
 //			{ "jbmc-regression", "bug-test-gen-119-2", true },
-//			{ "jbmc-regression", "bug-test-gen-119", true },
-//			{ "jbmc-regression", "calc", true },
-//			{ "jbmc-regression", "cast1", true },
-//			{ "jbmc-regression", "catch1", true },
-//			{ "jbmc-regression", "char1", true },
-//			{ "jbmc-regression", "charArray", true },
-//			{ "jbmc-regression", "CharSequenceToString", true },
-//			{ "jbmc-regression", "ClassCastException2", true },
+//			{ "jbmc-regression", "bug-test-gen-119", true }, // nondetBoolean
+//			{ "jbmc-regression", "calc", true }, // nondetString
+//			{ "jbmc-regression", "cast1", true }, // I2B, CHECKCAST
+//			{ "jbmc-regression", "catch1", true }, // INSTANCEOF
+//			{ "jbmc-regression", "char1", true }, // nondetString
+//			{ "jbmc-regression", "charArray", true }, // nondetString
+//			{ "jbmc-regression", "CharSequenceToString", true }, // nondetString
+//			{ "jbmc-regression", "ClassCastException2", true }, // unknown issue
 //			{ "jbmc-regression", "Class_method1", true },
 //			{ "jbmc-regression", "classtest1", true },
 //			{ "jbmc-regression", "const1", true },
 //			{ "jbmc-regression", "constructor1", true },
-//			{ "jbmc-regression", "enum1", true },
-//			{ "jbmc-regression", "exceptions14", true },
-//			{ "jbmc-regression", "exceptions15", true },
+//			{ "jbmc-regression", "enum1", true }, // ANEWARRAY
+//			{ "jbmc-regression", "exceptions14", true }, // unknown issue
+//			{ "jbmc-regression", "exceptions15", true }, // unknown issue
 //			{ "jbmc-regression", "exceptions18", true },
-//			{ "jbmc-regression", "exceptions4", true },
-//			{ "jbmc-regression", "exceptions5", true },
+//			{ "jbmc-regression", "exceptions4", true }, // unknown issue
+//			{ "jbmc-regression", "exceptions5", true }, // unnknown issue
 //			{ "jbmc-regression", "exceptions9", true },
 //			{ "jbmc-regression", "fcmpx_dcmpx1", true },
 //			{ "jbmc-regression", "iarith1", true },
