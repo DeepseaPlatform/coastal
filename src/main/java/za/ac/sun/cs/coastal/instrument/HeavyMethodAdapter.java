@@ -368,6 +368,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicInt", "(II)I", false);
 				} else {
 					//TODO
+					log.fatal("Unimplemented verifier method {}.{}", owner, name);
+					System.exit(1);
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
 				}
 			} else {

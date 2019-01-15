@@ -214,6 +214,7 @@ public class SymbolicState implements State {
 	}
 
 	private void setArrayValue(int arrayId, int index, Expression value) {
+		//if (index < 0) return;
 		putField(arrayId, "" + index, value);
 	}
 
@@ -1650,7 +1651,8 @@ public class SymbolicState implements State {
 		}
 		noExceptionExpression.clear();
 		checkLimitConjuncts();
-		log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+		String spcString = spc == null ? null : spc.getPathCondition().toString();
+		log.trace(">>> spc is now: {}", spcString);
 		dumpFrames();
 	}
 
@@ -1679,7 +1681,8 @@ public class SymbolicState implements State {
 		}
 		noExceptionExpression.clear();
 		checkLimitConjuncts();
-		log.trace(">>> spc is now: {}", spc.getPathCondition().toString());
+		String spcString = spc == null ? null : spc.getPathCondition().toString();
+		log.trace(">>> spc is now: {}", spcString);
 		dumpFrames();
 	}
 
