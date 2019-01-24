@@ -31,15 +31,14 @@ public class SVComp {
 //				{ "jpf-regression", "ExSymExe3_true", true }, { "jpf-regression", "ExSymExe3_false", false },
 //				{ "jpf-regression", "ExSymExe4_true", true }, { "jpf-regression", "ExSymExe4_false", false },
 //				{ "jpf-regression", "ExSymExe5_true", true }, { "jpf-regression", "ExSymExe5_false", false },
-//				{ "jpf-regression", "ExSymExe6_true", true }, // { "jpf-regression", "ExSymExe6_false", false }, //
-//																// Divide by zero
+//				{ "jpf-regression", "ExSymExe6_true", true }, // { "jpf-regression", "ExSymExe6_false", false }, //Divide by zero
 //				{ "jpf-regression", "ExSymExe7_true", true }, { "jpf-regression", "ExSymExe7_false", false },
 //				{ "jpf-regression", "ExSymExe8_true", true }, { "jpf-regression", "ExSymExe8_false", false },
 //				{ "jpf-regression", "ExSymExe9_true", true }, { "jpf-regression", "ExSymExe9_false", false },
-				{ "jpf-regression", "ExSymExe12_true", true }, { "jpf-regression", "ExSymExe12_false", false }, // nondetShort
+//				{ "jpf-regression", "ExSymExe12_true", true }, { "jpf-regression", "ExSymExe12_false", false },
 //				{ "jpf-regression", "ExSymExe13_true", true }, { "jpf-regression", "ExSymExe13_false", false },
-				{ "jpf-regression", "ExSymExe14_true", true }, { "jpf-regression", "ExSymExe14_false", false }, // nondetShort
-				{ "jpf-regression", "ExSymExe15_true", true }, { "jpf-regression", "ExSymExe15_false", false }, // nondetShort
+//				{ "jpf-regression", "ExSymExe14_true", true }, { "jpf-regression", "ExSymExe14_false", false },
+//				{ "jpf-regression", "ExSymExe15_true", true }, { "jpf-regression", "ExSymExe15_false", false },
 //				{ "jpf-regression", "ExSymExe16_true", true }, { "jpf-regression", "ExSymExe16_false", false },
 //				{ "jpf-regression", "ExSymExe17_true", true }, { "jpf-regression", "ExSymExe17_false", false },
 //				{ "jpf-regression", "ExSymExe18_true", true }, { "jpf-regression", "ExSymExe18_false", false },
@@ -98,9 +97,9 @@ public class SVComp {
 				 *************************/
 //			{ "jbmc-regression", "ArithmeticException1", false },
 //			{ "jbmc-regression", "ArithmeticException6", false },
-//			{ "jbmc-regression", "ArrayIndexOutOfBoundsException1", false }, // Variable Array Length
-//			{ "jbmc-regression", "ArrayIndexOutOfBoundsException2", false }, // Variable Array Length
-//			{ "jbmc-regression", "ArrayIndexOutOfBoundsException3", false }, // Variable Array Length
+//			{ "jbmc-regression", "ArrayIndexOutOfBoundsException1", false }, // Variable Array Index
+//			{ "jbmc-regression", "ArrayIndexOutOfBoundsException2", false }, // Variable Array Index
+//			{ "jbmc-regression", "ArrayIndexOutOfBoundsException3", false }, // Variable Array Index
 //			{ "jbmc-regression", "assert2", false },
 //			{ "jbmc-regression", "assert3", false },
 //			{ "jbmc-regression", "assert4", false },

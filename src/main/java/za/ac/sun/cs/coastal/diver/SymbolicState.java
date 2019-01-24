@@ -1,6 +1,5 @@
 package za.ac.sun.cs.coastal.diver;
 
-
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,12 +32,13 @@ import za.ac.sun.cs.coastal.solver.RealVariable;
 import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.State;
 import za.ac.sun.cs.coastal.symbolic.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.VM;
 
 public class SymbolicState implements State {
 
 	/**
-	 * Separator for fields. For example, the characters of a symbolic object
-	 * with address 0 are called {@code 0/a}, {@code 0/b}, {@code 0/c}, ...
+	 * Separator for fields. For example, the characters of a symbolic object with
+	 * address 0 are called {@code 0/a}, {@code 0/b}, {@code 0/c}, ...
 	 */
 	private static final String FIELD_SEPARATOR = "/";
 
@@ -50,8 +50,7 @@ public class SymbolicState implements State {
 
 	/**
 	 * Separator for string characters. For example, the characters of a string
-	 * named {@code X} are called {@code X_H_0}, {@code X_H_1}, {@code X_H_2},
-	 * ...
+	 * named {@code X} are called {@code X_H_0}, {@code X_H_1}, {@code X_H_2}, ...
 	 */
 	public static final String CHAR_SEPARATOR = "!"; // "_H_"
 
@@ -61,7 +60,7 @@ public class SymbolicState implements State {
 	public static final String NEW_VAR_PREFIX = "$"; // "U_D_"
 
 	public static final String CREATE_VAR_PREFIX = "N_D_"; // "@"
-	
+
 	private final COASTAL coastal;
 
 	private final Logger log;
@@ -197,9 +196,9 @@ public class SymbolicState implements State {
 		return incrAndGetNewObjectId();
 	}
 
-	//	private int getArrayLength(int arrayId) {
-	//		return ((IntConstant) getField(arrayId, "length")).getValue();
-	//	}
+	// private int getArrayLength(int arrayId) {
+	// return ((IntConstant) getField(arrayId, "length")).getValue();
+	// }
 
 	private void setArrayType(int arrayId, int type) {
 		putField(arrayId, "type", new IntegerConstant(type, 32));
@@ -214,7 +213,7 @@ public class SymbolicState implements State {
 	}
 
 	private void setArrayValue(int arrayId, int index, Expression value) {
-		//if (index < 0) return;
+		// if (index < 0) return;
 		putField(arrayId, "" + index, value);
 	}
 
@@ -302,7 +301,7 @@ public class SymbolicState implements State {
 	public String getNewVariableName() {
 		return NEW_VAR_PREFIX + newVariableCount++;
 	}
-	
+
 	public int createSymbolicInt(int currentValue, int uniqueId) {
 		if (!symbolicMode) {
 			return 0;
@@ -322,7 +321,7 @@ public class SymbolicState implements State {
 			return newValue;
 		}
 	}
-	
+
 	public short createSymbolicShort(short currentValue, int uniqueId) {
 		if (!symbolicMode) {
 			return 0;
@@ -474,10 +473,12 @@ public class SymbolicState implements State {
 		return (concrete == null) ? currentValue : concrete;
 	}
 
-	//	@Override
-	//	public boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) {
-	//		return getConcreteIntegral(triggerIndex, index, address, currentValue ? 1 : 0) != 0;
-	//	}
+	// @Override
+	// public boolean getConcreteBoolean(int triggerIndex, int index, int address,
+	// boolean currentValue) {
+	// return getConcreteIntegral(triggerIndex, index, address, currentValue ? 1 :
+	// 0) != 0;
+	// }
 
 	@Override
 	public boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) {
@@ -694,55 +695,52 @@ public class SymbolicState implements State {
 
 	/*
 	 * ======= // int length = currentValue.length(); // int stringId =
-	 * createString(); // setStringLength(stringId, new IntConstant(length)); //
-	 * if (name == null) { // not symbolic // for (int i = 0; i < length; i++) {
-	 * // IntConstant chValue = new IntConstant(currentValue.charAt(i)); //
+	 * createString(); // setStringLength(stringId, new IntConstant(length)); // if
+	 * (name == null) { // not symbolic // for (int i = 0; i < length; i++) { //
+	 * IntConstant chValue = new IntConstant(currentValue.charAt(i)); //
 	 * setStringChar(stringId, i, chValue); // } // setLocal(address, new
-	 * IntConstant(stringId)); // return currentValue; // } else { // char[]
-	 * chars = new char[length]; // currentValue.getChars(0, length, chars, 0);
-	 * // copy string into chars[] // for (int i = 0; i < length; i++) { //
-	 * String entryName = name + CHAR_SEPARATOR + i; // Constant concrete =
-	 * ((name == null) || (concreteValues == null)) ? null :
-	 * concreteValues.get(entryName); // Expression entryExpr = new
-	 * IntVariable(entryName, 0, 255); // if ((concrete != null) && (concrete
-	 * instanceof IntConstant)) { // chars[i] = (char) ((IntConstant)
-	 * concrete).getValue(); // } // setArrayValue(stringId, i, entryExpr); // }
-	 * // setLocal(address, new IntConstant(stringId)); // return new
-	 * String(chars); // }
+	 * IntConstant(stringId)); // return currentValue; // } else { // char[] chars =
+	 * new char[length]; // currentValue.getChars(0, length, chars, 0); // copy
+	 * string into chars[] // for (int i = 0; i < length; i++) { // String entryName
+	 * = name + CHAR_SEPARATOR + i; // Constant concrete = ((name == null) ||
+	 * (concreteValues == null)) ? null : concreteValues.get(entryName); //
+	 * Expression entryExpr = new IntVariable(entryName, 0, 255); // if ((concrete
+	 * != null) && (concrete instanceof IntConstant)) { // chars[i] = (char)
+	 * ((IntConstant) concrete).getValue(); // } // setArrayValue(stringId, i,
+	 * entryExpr); // } // setLocal(address, new IntConstant(stringId)); // return
+	 * new String(chars); // }
 	 * 
-	 * @Override public String[] getConcreteStringArray(int triggerIndex, int
-	 * index, int address, String[] currentValue) { Trigger trigger =
-	 * coastal.getTrigger(triggerIndex); String name =
-	 * trigger.getParamName(index); int length = currentValue.length; int
-	 * arrayId = createArray(); setArrayLength(arrayId, length); String[] value;
-	 * if (name == null) { // not symbolic value = currentValue; for (int i = 0;
-	 * i < length; i++) { int slength = currentValue[i].length(); int stringId =
-	 * createString(); for (int j = 0; j < slength; j++) { IntegerConstant
-	 * chValue = new IntegerConstant(currentValue[i].charAt(j));
-	 * setStringChar(stringId, j, chValue); } setArrayValue(arrayId, i, new
-	 * IntegerConstant(stringId)); } } else { int minChar = (Character)
-	 * coastal.getDefaultMinValue(char.class); int maxChar = (Character)
-	 * coastal.getDefaultMaxValue(char.class); value = new String[length]; for
-	 * (int i = 0; i < length; i++) { int slength = currentValue[i].length();
-	 * int stringId = createString(); for (int j = 0; j < slength; j++) { String
-	 * entryName = name + INDEX_SEPARATOR + i; Constant concrete = ((name ==
-	 * null) || (concreteValues == null)) ? null :
+	 * @Override public String[] getConcreteStringArray(int triggerIndex, int index,
+	 * int address, String[] currentValue) { Trigger trigger =
+	 * coastal.getTrigger(triggerIndex); String name = trigger.getParamName(index);
+	 * int length = currentValue.length; int arrayId = createArray();
+	 * setArrayLength(arrayId, length); String[] value; if (name == null) { // not
+	 * symbolic value = currentValue; for (int i = 0; i < length; i++) { int slength
+	 * = currentValue[i].length(); int stringId = createString(); for (int j = 0; j
+	 * < slength; j++) { IntegerConstant chValue = new
+	 * IntegerConstant(currentValue[i].charAt(j)); setStringChar(stringId, j,
+	 * chValue); } setArrayValue(arrayId, i, new IntegerConstant(stringId)); } }
+	 * else { int minChar = (Character) coastal.getDefaultMinValue(char.class); int
+	 * maxChar = (Character) coastal.getDefaultMaxValue(char.class); value = new
+	 * String[length]; for (int i = 0; i < length; i++) { int slength =
+	 * currentValue[i].length(); int stringId = createString(); for (int j = 0; j <
+	 * slength; j++) { String entryName = name + INDEX_SEPARATOR + i; Constant
+	 * concrete = ((name == null) || (concreteValues == null)) ? null :
 	 * concreteValues.get(entryName);
 	 * 
 	 * IntegerConstant chValue = new IntegerConstant(currentValue[i].charAt(j));
 	 * setStringChar(stringId, j, chValue); } setArrayValue(arrayId, i, new
 	 * IntegerConstant(stringId)); } } setLocal(index, new
 	 * IntegerConstant(arrayId)); return value; } // int length =
-	 * currentValue.length; // String[] strings = new String[length]; // for
-	 * (int i = 0; i < length; i++) { // String entryName = name +
-	 * INDEX_SEPARATOR + i; // int slength = currentValue[i].length(); // char[]
-	 * chars = new char[slength]; // for (int j = 0; j < slength; j++) { //
-	 * String sentryName = entryName + CHAR_SEPARATOR + j; // Constant concrete
-	 * = concreteValues.get(sentryName); // if ((concrete != null) && (concrete
-	 * instanceof IntConstant)) { // chars[j] = (char) ((IntConstant)
-	 * concrete).getValue(); // } else { // chars[j] =
-	 * currentValue[i].charAt(j); // } // } // strings[i] = new String(chars);
-	 * // } // return strings; =======
+	 * currentValue.length; // String[] strings = new String[length]; // for (int i
+	 * = 0; i < length; i++) { // String entryName = name + INDEX_SEPARATOR + i; //
+	 * int slength = currentValue[i].length(); // char[] chars = new char[slength];
+	 * // for (int j = 0; j < slength; j++) { // String sentryName = entryName +
+	 * CHAR_SEPARATOR + j; // Constant concrete = concreteValues.get(sentryName); //
+	 * if ((concrete != null) && (concrete instanceof IntConstant)) { // chars[j] =
+	 * (char) ((IntConstant) concrete).getValue(); // } else { // chars[j] =
+	 * currentValue[i].charAt(j); // } // } // strings[i] = new String(chars); // }
+	 * // return strings; =======
 	 */
 	@Override
 	public String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue) {
@@ -833,7 +831,7 @@ public class SymbolicState implements State {
 		log.trace("### LABEL {}", label);
 		broker.publishThread("label", new Tuple(instr, label));
 	}
-	
+
 	@Override
 	public void insn(int instr, int opcode) throws SymbolicException {
 		if (!symbolicMode) {
@@ -889,10 +887,21 @@ public class SymbolicState implements State {
 			push(new RealConstant(1, 64));
 			break;
 		case Opcodes.IALOAD:
-			// check if i is a variable, if a variable add noExceptionExpression 0 <= i < size
-			int i = (int) ((IntegerConstant) pop()).getValue();
+			// check if i is a variable, if a variable add noExceptionExpression 0 <= i <
+			// size
+			int i = 0;
+			Expression idx = pop();
+			if (idx instanceof IntegerVariable) {
+				String name = ((IntegerVariable) idx).getName();
+				i = (int) new IntegerConstant((Long) concreteValues.get(name), 32).getValue();
+			} else {
+				i = (int) ((IntegerConstant) idx).getValue();				
+			}
 			int a = (int) ((IntegerConstant) pop()).getValue();
 			push(getArrayValue(a, i));
+			noExceptionExpression.add(Operation.le(IntegerConstant.ZERO32, Operation.lt(idx, getField(a, "length"))));
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = new IntegerConstant(i, 32);
 			break;
 		case Opcodes.BALOAD:
 			i = (int) ((IntegerConstant) pop()).getValue();
@@ -906,9 +915,18 @@ public class SymbolicState implements State {
 			break;
 		case Opcodes.IASTORE:
 			Expression e = pop();
-			i = (int) ((IntegerConstant) pop()).getValue();
+			idx = pop();
+			if (idx instanceof IntegerVariable) {
+				String name = ((IntegerVariable) idx).getName();
+				i = (int) new IntegerConstant((Long) concreteValues.get(name), 32).getValue();
+			} else {
+				i = (int) ((IntegerConstant) idx).getValue();
+			}
 			a = (int) ((IntegerConstant) pop()).getValue();
 			setArrayValue(a, i, e);
+			noExceptionExpression.add(Operation.le(IntegerConstant.ZERO32, Operation.lt(idx, getField(a, "length"))));
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = new IntegerConstant(i, 32);
 			break;
 		case Opcodes.BASTORE:
 			e = pop();
@@ -944,7 +962,7 @@ public class SymbolicState implements State {
 			break;
 		case Opcodes.IDIV:
 			e = pop();
-			Expression idiv = Operation.rem(pop(), e);
+			Expression idiv = Operation.div(pop(), e);
 			push(idiv);
 			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
@@ -952,7 +970,7 @@ public class SymbolicState implements State {
 			break;
 		case Opcodes.LDIV:
 			e = pop();
-			Expression ldiv = Operation.rem(pop(), e);
+			Expression ldiv = Operation.div(pop(), e);
 			push(ldiv);
 			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
@@ -960,7 +978,7 @@ public class SymbolicState implements State {
 			break;
 		case Opcodes.FDIV:
 			e = pop();
-			Expression fdiv = Operation.rem(pop(), e);
+			Expression fdiv = Operation.div(pop(), e);
 			push(fdiv);
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
@@ -968,7 +986,7 @@ public class SymbolicState implements State {
 			break;
 		case Opcodes.DDIV:
 			e = pop();
-			Expression ddiv = Operation.rem(pop(), e);
+			Expression ddiv = Operation.div(pop(), e);
 			push(ddiv);
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
@@ -993,12 +1011,12 @@ public class SymbolicState implements State {
 		case Opcodes.I2L:
 			push(Operation.i2l(pop()));
 			break;
-		//		case Opcodes.L2I:
-		//		case Opcodes.D2F:
-		//		case Opcodes.I2B:
-		//		case Opcodes.I2C:
-		//		case Opcodes.I2S:
-		//			break;
+		// case Opcodes.L2I:
+		// case Opcodes.D2F:
+		// case Opcodes.I2B:
+		// case Opcodes.I2C:
+		// case Opcodes.I2S:
+		// break;
 		case Opcodes.LCMP:
 			e = pop();
 			push(Operation.lcmp(pop(), e));
@@ -1048,7 +1066,7 @@ public class SymbolicState implements State {
 			noExceptionExpression.add(Operation.FALSE);
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = pop();
-			//broker.publish("assert-failed", new Tuple(this, null));
+			// broker.publish("assert-failed", new Tuple(this, null));
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
@@ -1096,7 +1114,13 @@ public class SymbolicState implements State {
 				break;
 			}
 			Expression e = pop();
-			int n = (int) ((IntegerConstant) e).getValue();
+			int n = 0;
+			if (e instanceof IntegerVariable) {
+				String name = ((IntegerVariable) e).getName();
+				n = (int) new IntegerConstant((Long) concreteValues.get(name), 32).getValue();
+			} else {
+				n = (int) ((IntegerConstant) e).getValue();
+			}
 			int id = createArray();
 			setArrayType(id, operand);
 			setArrayLength(id, n);
@@ -1363,12 +1387,12 @@ public class SymbolicState implements State {
 	public void jumpInsn(int value, int instr, int opcode) throws SymbolicException {
 		jumpInsn(instr, opcode);
 	}
-	
+
 	@Override
 	public void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException {
 		jumpInsn(instr, opcode);
 	}
-	
+
 	/* Missing offset because destination not yet known. */
 	@Override
 	public void jumpInsn(int instr, int opcode) throws SymbolicException {
@@ -1639,7 +1663,7 @@ public class SymbolicState implements State {
 				i++;
 				count++;
 			} else if (ch != '[') {
-				return 0; // unknown character in signature 
+				return 0; // unknown character in signature
 			}
 		}
 	}
