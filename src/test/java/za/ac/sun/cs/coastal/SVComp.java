@@ -36,10 +36,10 @@ public class SVComp {
 //				{ "jpf-regression", "ExSymExe7_true", true }, { "jpf-regression", "ExSymExe7_false", false },
 //				{ "jpf-regression", "ExSymExe8_true", true }, { "jpf-regression", "ExSymExe8_false", false },
 //				{ "jpf-regression", "ExSymExe9_true", true }, { "jpf-regression", "ExSymExe9_false", false },
-////				{ "jpf-regression", "ExSymExe12_true", true }, { "jpf-regression", "ExSymExe12_false", false }, // nondetShort
+				{ "jpf-regression", "ExSymExe12_true", true }, { "jpf-regression", "ExSymExe12_false", false }, // nondetShort
 //				{ "jpf-regression", "ExSymExe13_true", true }, { "jpf-regression", "ExSymExe13_false", false },
-////				{ "jpf-regression", "ExSymExe14_true", true }, { "jpf-regression", "ExSymExe14_false", false }, // nondetShort
-////				{ "jpf-regression", "ExSymExe15_true", true }, { "jpf-regression", "ExSymExe15_false", false }, // nondetShort
+				{ "jpf-regression", "ExSymExe14_true", true }, { "jpf-regression", "ExSymExe14_false", false }, // nondetShort
+				{ "jpf-regression", "ExSymExe15_true", true }, { "jpf-regression", "ExSymExe15_false", false }, // nondetShort
 //				{ "jpf-regression", "ExSymExe16_true", true }, { "jpf-regression", "ExSymExe16_false", false },
 //				{ "jpf-regression", "ExSymExe17_true", true }, { "jpf-regression", "ExSymExe17_false", false },
 //				{ "jpf-regression", "ExSymExe18_true", true }, { "jpf-regression", "ExSymExe18_false", false },
@@ -54,10 +54,8 @@ public class SVComp {
 //				{ "jpf-regression", "ExSymExeTestAssignments_false", false },
 //				{ "jpf-regression", "ExSymExeTestClassFields_true", true },
 //				{ "jpf-regression", "ExSymExeTestClassFields_false", false },
-
-				// Not working
-//				{ "jpf-regression", "ExSymExeGetStatic_true", true }, // NoClassDefFoundError
-//				{ "jpf-regression", "ExSymExeGetStatic_false", false }, // NoClassDefFoundError 
+//				{ "jpf-regression", "ExSymExeGetStatic_true", true },
+//				{ "jpf-regression", "ExSymExeGetStatic_false", false },
 
 				/******************
 				 * MINEPUMP TESTS *
@@ -217,7 +215,7 @@ public class SVComp {
 //			{ "jbmc-regression", "exceptions15", true }, // unknown issue
 //			{ "jbmc-regression", "exceptions18", true },
 //			{ "jbmc-regression", "exceptions4", true }, // unknown issue
-//			{ "jbmc-regression", "exceptions5", true }, // unnknown issue
+//			{ "jbmc-regression", "exceptions5", true }, // unknown issue
 //			{ "jbmc-regression", "exceptions9", true },
 //			{ "jbmc-regression", "fcmpx_dcmpx1", true },
 //			{ "jbmc-regression", "iarith1", true },

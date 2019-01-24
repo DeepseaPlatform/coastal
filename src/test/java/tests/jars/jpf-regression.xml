@@ -5,6 +5,7 @@
 		<target>
 			<main>Main</main>
 			<instrument>Main</instrument>
+			<instrument>SNode</instrument>
 			<trigger>Main.main(String[])</trigger>
 		</target>
 		<settings>

@@ -23,7 +23,8 @@ public interface State {
 	void pushExtraConjunct(Expression extraConjunct);
 	
 	int createSymbolicInt(int currentValue, int uniqueId);
-
+	
+	short createSymbolicShort(short currentValue, int uniqueId);
 	// ======================================================================
 	//
 	// METHOD ROUTINES

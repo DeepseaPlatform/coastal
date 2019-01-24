@@ -322,6 +322,26 @@ public class SymbolicState implements State {
 			return newValue;
 		}
 	}
+	
+	public short createSymbolicShort(short currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return 0;
+		}
+
+		String name = CREATE_VAR_PREFIX + uniqueId;
+		pop();
+		push(new IntegerVariable(name, 16, Short.MIN_VALUE, Short.MAX_VALUE));
+		Long concreteVal = concreteValues == null ? null : (Long) concreteValues.get(name);
+		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
+		if (concrete == null) {
+			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			return currentValue;
+		} else {
+			short newValue = (short) concrete.getValue();
+			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
+			return newValue;
+		}
+	}
 
 	private void dumpFrames() {
 		int n = frames.size();

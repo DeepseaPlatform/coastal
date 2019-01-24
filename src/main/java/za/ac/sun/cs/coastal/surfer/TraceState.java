@@ -823,5 +823,11 @@ public class TraceState implements State {
 		// TODO Get a concrete value
 		return 0;
 	}
+	
+	@Override
+	public short createSymbolicShort(short currentValue, int uniqueId) {
+		// TODO Get a concrete value
+		return 0;
+	}
 
 }

@@ -43,6 +43,10 @@ public class VM {
 	public static int createSymbolicInt(int oldValue, int uniqueId) {
 		return state.createSymbolicInt(oldValue, uniqueId);
 	}
+	
+	public static short createSymbolicShort(short oldValue, int uniqueId) {
+		return state.createSymbolicShort(oldValue, uniqueId);
+	}
 
 	// ======================================================================
 	//
