@@ -214,6 +214,15 @@ public class SymbolicState implements State {
 
 	private void setArrayValue(int arrayId, int index, Expression value) {
 		// if (index < 0) return;
+		if (index < 0) return;
+		Expression length = getField(arrayId, "length");
+		if (length instanceof IntegerVariable) {
+			String name = ((IntegerVariable) length).getName();
+			int i = (int) new IntegerConstant((Long) concreteValues.get(name), 32).getValue();
+			if (i < index) return;
+		} else {
+			if (((IntegerConstant)length).getValue() < index) return;
+		}
 		putField(arrayId, "" + index, value);
 	}
 
@@ -899,7 +908,7 @@ public class SymbolicState implements State {
 			}
 			int a = (int) ((IntegerConstant) pop()).getValue();
 			push(getArrayValue(a, i));
-			noExceptionExpression.add(Operation.le(IntegerConstant.ZERO32, Operation.lt(idx, getField(a, "length"))));
+			noExceptionExpression.add(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, getField(a, "length"))));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = new IntegerConstant(i, 32);
 			break;
@@ -924,9 +933,10 @@ public class SymbolicState implements State {
 			}
 			a = (int) ((IntegerConstant) pop()).getValue();
 			setArrayValue(a, i, e);
-			noExceptionExpression.add(Operation.le(IntegerConstant.ZERO32, Operation.lt(idx, getField(a, "length"))));
+			noExceptionExpression.add(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, getField(a, "length"))));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = new IntegerConstant(i, 32);
+			noException();
 			break;
 		case Opcodes.BASTORE:
 			e = pop();

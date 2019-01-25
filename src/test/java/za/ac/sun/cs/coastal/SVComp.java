@@ -98,7 +98,7 @@ public class SVComp {
 //			{ "jbmc-regression", "ArithmeticException1", false },
 //			{ "jbmc-regression", "ArithmeticException6", false },
 //			{ "jbmc-regression", "ArrayIndexOutOfBoundsException1", false }, // Variable Array Index
-//			{ "jbmc-regression", "ArrayIndexOutOfBoundsException2", false }, // Variable Array Index
+			{ "jbmc-regression", "ArrayIndexOutOfBoundsException2", false }, // Variable Array Index
 //			{ "jbmc-regression", "ArrayIndexOutOfBoundsException3", false }, // Variable Array Index
 //			{ "jbmc-regression", "assert2", false },
 //			{ "jbmc-regression", "assert3", false },
