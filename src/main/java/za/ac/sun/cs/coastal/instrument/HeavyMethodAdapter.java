@@ -372,21 +372,19 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
 					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicShort", "(SI)S", false);
 					break;
+				case "nondetBoolean":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicBoolean", "(ZI)Z", false);
+					break;
 				case "nondetLong":
 				case "nondetByte":
 				case "nodetChar":
 				case "nondetFloat":
 				case "nondetDouble":
-				case "nondetBoolean":
 				case "nondetString":
 				default:
 					log.fatal("Unimplemented verifier method {}.{}", owner, name);
 					System.exit(1);					
-				}
-				if (name.equals("nondetInt")) {
-				} else {
-					//TODO
-					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
 				}
 			} else {
 				String className = owner.replace('/', '.');

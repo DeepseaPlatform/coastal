@@ -98,7 +98,7 @@ public class SVComp {
 //			{ "jbmc-regression", "ArithmeticException1", false },
 //			{ "jbmc-regression", "ArithmeticException6", false },
 //			{ "jbmc-regression", "ArrayIndexOutOfBoundsException1", false }, // Variable Array Index
-			{ "jbmc-regression", "ArrayIndexOutOfBoundsException2", false }, // Variable Array Index
+//			{ "jbmc-regression", "ArrayIndexOutOfBoundsException2", false }, // Variable Array Index
 //			{ "jbmc-regression", "ArrayIndexOutOfBoundsException3", false }, // Variable Array Index
 //			{ "jbmc-regression", "assert2", false },
 //			{ "jbmc-regression", "assert3", false },
@@ -107,8 +107,8 @@ public class SVComp {
 //			{ "jbmc-regression", "BufferedReaderReadLine", false }, // nondetString
 //			{ "jbmc-regression", "bug-test-gen-095", false }, // nondetString
 //			{ "jbmc-regression", "CharSequenceBug", false }, // nondetString
-//			{ "jbmc-regression", "ClassCastException1", false }, // CHECKCAST unimplemented
-//			{ "jbmc-regression", "ClassCastException3", false }, // CHECKCAST unimplemented
+//			{ "jbmc-regression", "ClassCastException1", false },
+//			{ "jbmc-regression", "ClassCastException3", false }, // unknown issue... not calling visitEnd();
 //			{ "jbmc-regression", "exceptions10", false }, // unknown issue
 //			{ "jbmc-regression", "exceptions11", false },
 //			{ "jbmc-regression", "exceptions12", false }, // unknown issue
@@ -121,7 +121,7 @@ public class SVComp {
 //			{ "jbmc-regression", "exceptions7", false }, // unknown issue
 //			{ "jbmc-regression", "exceptions8", false }, // unknown issue
 //			{ "jbmc-regression", "interface1", false }, // UNIMPLEMENTED INSTRUCTION: <13> INVOKEINTERFACE A f ()V (opcode: 185)
-//			{ "jbmc-regression", "java_append_char", false }, // nondetBoolean
+//			{ "jbmc-regression", "java_append_char", false },
 //			{ "jbmc-regression", "NegativeArraySizeException1", false },
 //			{ "jbmc-regression", "NegativeArraySizeException2", false },
 //			{ "jbmc-regression", "NullPointerException2", false },
@@ -170,7 +170,7 @@ public class SVComp {
 //			{ "jbmc-regression", "StringStartEnd03", false }, // nondetString
 //			{ "jbmc-regression", "StringValueOf02", false }, // nondetString
 //			{ "jbmc-regression", "StringValueOf03", false }, // nondetString
-//			{ "jbmc-regression", "StringValueOf04", false }, // nondetBoolean
+//			{ "jbmc-regression", "StringValueOf04", false }, // String valueOf
 //			{ "jbmc-regression", "StringValueOf05", false }, // nondetString
 //			{ "jbmc-regression", "StringValueOf06", false },
 //			{ "jbmc-regression", "StringValueOf07", false }, // nondetLong

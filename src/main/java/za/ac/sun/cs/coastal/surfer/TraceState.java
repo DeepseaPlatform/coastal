@@ -830,4 +830,10 @@ public class TraceState implements State {
 		return 0;
 	}
 
+	@Override
+	public boolean createSymbolicBoolean(boolean currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

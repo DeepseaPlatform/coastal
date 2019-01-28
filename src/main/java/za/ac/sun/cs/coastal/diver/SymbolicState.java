@@ -116,7 +116,7 @@ public class SymbolicState implements State {
 		broker = coastal.getBroker();
 		limitConjuncts = ConfigHelper.limitLong(coastal.getConfig(), "coastal.settings.conjunct-limit");
 		traceAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
-		this.concreteValues = concreteValues;
+		this.concreteValues = concreteValues == null ? new HashMap<String, Object>() : concreteValues;
 		symbolicMode = traceAll;
 	}
 
@@ -323,10 +323,34 @@ public class SymbolicState implements State {
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
 		if (concrete == null) {
 			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			concreteValues.put(name, new Long(currentValue));
 			return currentValue;
 		} else {
 			int newValue = (int) concrete.getValue();
 			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
+			return newValue;
+		}
+	}
+	
+	public boolean createSymbolicBoolean(boolean currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return false;
+		}
+		
+		String name = CREATE_VAR_PREFIX + uniqueId;
+		pop();
+		
+		push(new IntegerVariable(name, 32, 0, 1));
+		Long concreteVal = concreteValues == null ? null : (Long) concreteValues.get(name);
+		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
+		
+		if (concrete == null) {
+			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			concreteValues.put(name, new Long(currentValue ? 1 : 0));
+			return currentValue;
+		} else {
+			boolean newValue = concrete.getValue() != 0;
+			log.trace(">>> get symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
 	}
@@ -343,12 +367,20 @@ public class SymbolicState implements State {
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
 		if (concrete == null) {
 			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			concreteValues.put(name, new Long(currentValue));
 			return currentValue;
 		} else {
 			short newValue = (short) concrete.getValue();
 			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
+	}
+	
+	public String createSymbolicString(String currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return "";
+		}
+		return "";
 	}
 
 	private void dumpFrames() {
@@ -911,6 +943,7 @@ public class SymbolicState implements State {
 			noExceptionExpression.add(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, getField(a, "length"))));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = new IntegerConstant(i, 32);
+			noException();
 			break;
 		case Opcodes.BALOAD:
 			i = (int) ((IntegerConstant) pop()).getValue();
@@ -1189,6 +1222,8 @@ public class SymbolicState implements State {
 		case Opcodes.NEW:
 			int id = incrAndGetNewObjectId();
 			push(new IntegerConstant(id, 32));
+			break;
+		case Opcodes.CHECKCAST:
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);

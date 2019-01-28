@@ -47,6 +47,10 @@ public class VM {
 	public static short createSymbolicShort(short oldValue, int uniqueId) {
 		return state.createSymbolicShort(oldValue, uniqueId);
 	}
+	
+	public static boolean createSymbolicBoolean(boolean oldValue, int uniqueId) {
+		return state.createSymbolicBoolean(oldValue, uniqueId);
+	}
 
 	// ======================================================================
 	//
