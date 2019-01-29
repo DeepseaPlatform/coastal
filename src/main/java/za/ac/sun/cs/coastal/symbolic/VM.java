@@ -51,6 +51,10 @@ public class VM {
 	public static boolean createSymbolicBoolean(boolean oldValue, int uniqueId) {
 		return state.createSymbolicBoolean(oldValue, uniqueId);
 	}
+	
+	public static byte createSymbolicByte(byte oldValue, int uniqueId) {
+		return state.createSymbolicByte(oldValue, uniqueId);
+	}
 
 	// ======================================================================
 	//

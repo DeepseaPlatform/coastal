@@ -262,7 +262,8 @@ public class GUIFactory implements ObserverFactory {
 				coastal.getBroker().publish("emergency-stop", this);
 			} else if ("quit".equals(e.getActionCommand())) {
 				setVisible(false);
-				dispose(); // Platform.exit();
+				dispose();
+				System.exit(0);// Platform.exit();
 			}
 		}
 

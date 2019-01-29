@@ -27,6 +27,8 @@ public interface State {
 	short createSymbolicShort(short currentValue, int uniqueId);
 	
 	boolean createSymbolicBoolean(boolean currentValue, int uniqueId);
+	
+	byte createSymbolicByte(byte currentValue, int uniqueId);
 	// ======================================================================
 	//
 	// METHOD ROUTINES

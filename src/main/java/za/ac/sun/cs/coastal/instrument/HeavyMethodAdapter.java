@@ -376,8 +376,11 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
 					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicBoolean", "(ZI)Z", false);
 					break;
-				case "nondetLong":
 				case "nondetByte":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicByte", "(BI)B", false);
+					break;
+				case "nondetLong":
 				case "nodetChar":
 				case "nondetFloat":
 				case "nondetDouble":

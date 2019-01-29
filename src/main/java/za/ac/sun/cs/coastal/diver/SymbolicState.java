@@ -376,6 +376,27 @@ public class SymbolicState implements State {
 		}
 	}
 	
+	public byte createSymbolicByte(byte currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return 0;
+		}
+		
+		String name = CREATE_VAR_PREFIX + uniqueId;
+		pop();
+		push(new IntegerVariable(name, 8, Byte.MIN_VALUE, Byte.MAX_VALUE));
+		Long concreteVal = concreteValues == null ? null : (Long) concreteValues.get(name);
+		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 8);
+		if (concrete == null) {
+			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			concreteValues.put(name, new Long(currentValue));
+			return currentValue;
+		} else {
+			byte newValue = (byte) concrete.getValue();
+			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
+			return newValue;
+		}
+	}
+	
 	public String createSymbolicString(String currentValue, int uniqueId) {
 		if (!symbolicMode) {
 			return "";

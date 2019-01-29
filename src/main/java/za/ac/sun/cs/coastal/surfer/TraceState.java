@@ -840,4 +840,10 @@ public class TraceState implements State {
 		return false;
 	}
 
+	@Override
+	public byte createSymbolicByte(byte currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }
