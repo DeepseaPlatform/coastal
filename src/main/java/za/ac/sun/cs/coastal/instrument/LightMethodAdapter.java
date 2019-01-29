@@ -200,6 +200,7 @@ public class LightMethodAdapter extends MethodVisitor {
 	@Override
 	public void visitEnd() {
 		log.trace("visitEnd()");
+		classManager.registerLastInstruction();
 		classManager.registerLinenumbers(currentLinenumbers);
 		mv.visitEnd();
 	}

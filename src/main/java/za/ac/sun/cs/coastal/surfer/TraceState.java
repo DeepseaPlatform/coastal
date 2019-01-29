@@ -613,6 +613,7 @@ public class TraceState implements State {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.IFEQ:
 		case Opcodes.IFNULL:
@@ -646,6 +647,7 @@ public class TraceState implements State {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.IF_ACMPEQ:
 		case Opcodes.IF_ICMPEQ:
@@ -688,6 +690,7 @@ public class TraceState implements State {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.GOTO:
 			break;
@@ -703,6 +706,7 @@ public class TraceState implements State {
 	/* Missing offset because destination not yet known. */
 	private void jumpInsn(int instr, int opcode, boolean result) throws SymbolicException {
 		if (recordMode) {
+			broker.publishThread("jump-insn", new Tuple(instr, opcode));
 			if (pathTreeNode != null) {
 				int ptn = pathTreeNode.getId();
 				if (result) {

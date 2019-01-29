@@ -989,6 +989,9 @@ public class SymbolicState implements State {
 		case Opcodes.DUP:
 			push(peek());
 			break;
+		case Opcodes.INEG:
+			push(Operation.mul(pop(), new IntegerConstant(-1, 32)));
+			break;
 		case Opcodes.IADD:
 		case Opcodes.LADD:
 		case Opcodes.FADD:
