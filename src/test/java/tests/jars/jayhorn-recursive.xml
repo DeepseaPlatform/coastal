@@ -1,32 +1,10 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
 		<target>
 			<main>Main</main>
 			<instrument>Main</instrument>
-			<instrument>A</instrument>
-			<instrument>B</instrument>
-			<instrument>C</instrument>
-			<instrument>D</instrument>
-			<instrument>E</instrument>
-			<instrument>F</instrument>
-			<instrument>what_not</instrument>
-			<instrument>some_exception1</instrument>
-			<instrument>some_exception2</instrument>
-			<instrument>enum1</instrument>
-			<instrument>InetAddress</instrument>
-			<instrument>InetSocketAddress</instrument>
-			<instrument>LinkedList</instrument>
-			<instrument>Utils_nondet</instrument>
-			<instrument>Utils_synthesis</instrument>
-			<instrument>Problem</instrument>
-			<instrument>other_class</instrument>
-			<instrument>mypackage</instrument>
-			<instrument>ValidateInput01</instrument>
-			<instrument>Outer</instrument>
-			<instrument>Inner</instrument>
-			<instrument>Interface</instrument>
 			<trigger>Main.main(String[])</trigger>
 		</target>
 		<settings>

@@ -29,6 +29,10 @@ public interface State {
 	boolean createSymbolicBoolean(boolean currentValue, int uniqueId);
 	
 	byte createSymbolicByte(byte currentValue, int uniqueId);
+	
+	char createSymbolicChar(char currentValue, int uniqueId);
+	
+	long createSymbolicLong(long currentValue, int uniqueId);
 	// ======================================================================
 	//
 	// METHOD ROUTINES

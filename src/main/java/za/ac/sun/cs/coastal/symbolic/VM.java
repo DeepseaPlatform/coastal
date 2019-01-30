@@ -55,6 +55,14 @@ public class VM {
 	public static byte createSymbolicByte(byte oldValue, int uniqueId) {
 		return state.createSymbolicByte(oldValue, uniqueId);
 	}
+	
+	public static char createSymbolicChar(char oldValue, int uniqueId) {
+		return state.createSymbolicChar(oldValue, uniqueId);
+	}
+	
+	public static long createSymbolicLong(long oldValue, int uniqueId) {
+		return state.createSymbolicLong(oldValue, uniqueId);
+	}
 
 	// ======================================================================
 	//

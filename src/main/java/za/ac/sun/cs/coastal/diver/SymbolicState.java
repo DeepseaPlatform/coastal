@@ -397,6 +397,48 @@ public class SymbolicState implements State {
 		}
 	}
 	
+	public char createSymbolicChar(char currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return 0x00;
+		}
+		
+		String name = CREATE_VAR_PREFIX + uniqueId;
+		pop();
+		push(new IntegerVariable(name, 16, Character.MIN_VALUE, Character.MAX_VALUE));
+		Long concreteVal = concreteValues == null ? null : (Long) concreteValues.get(name);
+		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
+		if (concrete == null) {
+			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			concreteValues.put(name, new Long(currentValue));
+			return currentValue;
+		} else {
+			char newValue = (char) concrete.getValue();
+			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
+			return newValue;
+		}
+	}
+	
+	public long createSymbolicLong(long currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return 0x00;
+		}
+		
+		String name = CREATE_VAR_PREFIX + uniqueId;
+		pop();
+		push(new IntegerVariable(name, 64, Character.MIN_VALUE, Character.MAX_VALUE));
+		Long concreteVal = concreteValues == null ? null : (Long) concreteValues.get(name);
+		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 64);
+		if (concrete == null) {
+			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			concreteValues.put(name, new Long(currentValue));
+			return currentValue;
+		} else {
+			long newValue = (long) concrete.getValue();
+			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
+			return newValue;
+		}
+	}
+	
 	public String createSymbolicString(String currentValue, int uniqueId) {
 		if (!symbolicMode) {
 			return "";
@@ -1010,6 +1052,9 @@ public class SymbolicState implements State {
 		case Opcodes.DUP:
 			push(peek());
 			break;
+		case Opcodes.LNEG:
+			push(Operation.mul(pop(), new IntegerConstant(-1, 64)));
+			break;
 		case Opcodes.INEG:
 			push(Operation.mul(pop(), new IntegerConstant(-1, 32)));
 			break;
@@ -1026,6 +1071,36 @@ public class SymbolicState implements State {
 		case Opcodes.DMUL:
 			e = pop();
 			push(Operation.mul(pop(), e));
+			break;
+		case Opcodes.LUSHR:
+		case Opcodes.IUSHR:
+			e = pop();
+			push(Operation.lshr(pop(), e));
+			break;
+		case Opcodes.LSHR:
+		case Opcodes.ISHR:
+			e = pop();
+			push(Operation.ashr(pop(), e));
+			break;
+		case Opcodes.LSHL:
+		case Opcodes.ISHL:
+			e = pop();
+			push(Operation.shl(pop(), e));
+			break;
+		case Opcodes.LOR:
+		case Opcodes.IOR:
+			e = pop();
+			push(Operation.bitor(pop(), e));
+			break;
+		case Opcodes.LAND:
+		case Opcodes.IAND:
+			e = pop();
+			push(Operation.bitand(pop(), e));
+			break;
+		case Opcodes.LXOR:
+		case Opcodes.IXOR:
+			e = pop();
+			push(Operation.bitxor(pop(), e));
 			break;
 		case Opcodes.IDIV:
 			e = pop();
@@ -1059,15 +1134,25 @@ public class SymbolicState implements State {
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
-		case Opcodes.IREM:
+		case Opcodes.LREM:
 			e = pop();
 			Expression rem = Operation.rem(pop(), e);
 			push(rem);
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
 			// Add ExceptionExpression to noExceptionExpressionList
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = IntegerConstant.ZERO64;
+			break;
+		case Opcodes.IREM:
+			e = pop();
+			rem = Operation.rem(pop(), e);
+			push(rem);
+			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO32));
+			// Add ExceptionExpression to noExceptionExpressionList
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
+		case Opcodes.LSUB:
 		case Opcodes.ISUB:
 			e = pop();
 			push(Operation.sub(pop(), e));
@@ -1078,10 +1163,17 @@ public class SymbolicState implements State {
 		case Opcodes.I2L:
 			push(Operation.i2l(pop()));
 			break;
-		// case Opcodes.L2I:
+		case Opcodes.I2B:
+			push(Operation.i2b(pop()));
+			break;
+		case Opcodes.I2C:
+			push(Operation.i2c(pop()));
+			break;
+		case Opcodes.L2I:
+			push(Operation.l2i(pop()));
+			break;
+			
 		// case Opcodes.D2F:
-		// case Opcodes.I2B:
-		// case Opcodes.I2C:
 		// case Opcodes.I2S:
 		// break;
 		case Opcodes.LCMP:
@@ -1135,6 +1227,9 @@ public class SymbolicState implements State {
 			throwable = pop();
 			// broker.publish("assert-failed", new Tuple(this, null));
 			break;
+		case Opcodes.MONITORENTER:
+			pop();
+			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
@@ -1184,6 +1279,7 @@ public class SymbolicState implements State {
 			int n = 0;
 			if (e instanceof IntegerVariable) {
 				String name = ((IntegerVariable) e).getName();
+				log.trace(concreteValues.get(name) == null);
 				n = (int) new IntegerConstant((Long) concreteValues.get(name), 32).getValue();
 			} else {
 				n = (int) ((IntegerConstant) e).getValue();

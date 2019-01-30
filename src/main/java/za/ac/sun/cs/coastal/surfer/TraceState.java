@@ -846,4 +846,16 @@ public class TraceState implements State {
 		return 0;
 	}
 
+	@Override
+	public char createSymbolicChar(char currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long createSymbolicLong(long currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

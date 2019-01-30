@@ -205,10 +205,34 @@ public class Operation extends Expression {
 		return new Operation(Operator.DCMPG, a, b);
 	}
 
+	public static Expression l2i(Expression a) {
+		if (a instanceof IntegerConstant) {
+			return new IntegerConstant((int)(((IntegerConstant) a).getValue()), 32);
+		}
+		return new Operation(Operator.L2I, a);
+	}
+	
 	public static Expression i2l(Expression a) {
+		if (a instanceof IntegerConstant) {
+			return new IntegerConstant((long)(((IntegerConstant) a).getValue()), 64);
+		}
 		return new Operation(Operator.I2L, a);
 	}
+	
+	public static Expression i2b(Expression a) {
+		if (a instanceof IntegerConstant) {
+			return new IntegerConstant((byte)(((IntegerConstant) a).getValue()), 8);
+		}
+		return new Operation(Operator.I2B, a);
+	}
 
+	public static Expression i2c(Expression a) {
+		if (a instanceof IntegerConstant) {
+			return new IntegerConstant((char)(((IntegerConstant) a).getValue()), 16);
+		}
+		return new Operation(Operator.I2C, a);
+	}
+	
 	public static Expression f2d(Expression a) {
 		return new Operation(Operator.F2D, a);
 	}
@@ -337,6 +361,114 @@ public class Operation extends Expression {
 		}
 		return new Operation(Operator.REM, a, b);
 	}
+	
+	public static Expression bitor(Expression a, Expression b) {
+		if (a instanceof IntegerConstant) {
+			if (b instanceof IntegerConstant) {
+				int z = Math.max(((IntegerConstant) a).getSize(), ((IntegerConstant) b).getSize());
+				return new IntegerConstant(((IntegerConstant) a).getValue() | ((IntegerConstant) b).getValue(), z);
+			} else if (b instanceof RealConstant || b instanceof RealVariable) {
+				//should not happen
+				assert false;
+			}
+		} else if (a instanceof RealConstant || b instanceof RealConstant) {
+			//bitwise operators do not work on real values
+			assert false;
+		} else if (a instanceof RealVariable || b instanceof RealVariable) {
+			assert false;
+		}
+		return new Operation(Operator.BITOR, a, b);
+	}
+	
+	public static Expression bitand(Expression a, Expression b) {
+		if (a instanceof IntegerConstant) {
+			if (b instanceof IntegerConstant) {
+				int z = Math.max(((IntegerConstant) a).getSize(), ((IntegerConstant) b).getSize());
+				return new IntegerConstant(((IntegerConstant) a).getValue() & ((IntegerConstant) b).getValue(), z);
+			} else if (b instanceof RealConstant || b instanceof RealVariable) {
+				//should not happen
+				assert false;
+			}
+		} else if (a instanceof RealConstant || b instanceof RealConstant) {
+			//bitwise operators do not work on real values
+			assert false;
+		} else if (a instanceof RealVariable || b instanceof RealVariable) {
+			assert false;
+		}
+		return new Operation(Operator.BITAND, a, b);
+	}
+	
+	public static Expression bitxor(Expression a, Expression b) {
+		if (a instanceof IntegerConstant) {
+			if (b instanceof IntegerConstant) {
+				int z = Math.max(((IntegerConstant) a).getSize(), ((IntegerConstant) b).getSize());
+				return new IntegerConstant(((IntegerConstant) a).getValue() ^ ((IntegerConstant) b).getValue(), z);
+			} else if (b instanceof RealConstant || b instanceof RealVariable) {
+				//should not happen
+				assert false;
+			}
+		} else if (a instanceof RealConstant || b instanceof RealConstant) {
+			//bitwise operators do not work on real values
+			assert false;
+		} else if (a instanceof RealVariable || b instanceof RealVariable) {
+			assert false;
+		}
+		return new Operation(Operator.BITXOR, a, b);
+	}
+	
+	public static Expression shl(Expression a, Expression b) {
+		if (a instanceof IntegerConstant) {
+			if (b instanceof IntegerConstant) {
+				int z = ((IntegerConstant) a).getSize();
+				return new IntegerConstant(((IntegerConstant) a).getValue() << ((IntegerConstant) b).getValue(), z);
+			} else if (b instanceof RealConstant || b instanceof RealVariable) {
+				//should not happen
+				assert false;
+			}
+		} else if (a instanceof RealConstant || b instanceof RealConstant) {
+			//bitwise operators do not work on real values
+			assert false;
+		} else if (a instanceof RealVariable || b instanceof RealVariable) {
+			assert false;
+		}
+		return new Operation(Operator.SHL, a, b);
+	}
+	
+	public static Expression ashr(Expression a, Expression b) {
+		if (a instanceof IntegerConstant) {
+			if (b instanceof IntegerConstant) {
+				int z = ((IntegerConstant) a).getSize();
+				return new IntegerConstant(((IntegerConstant) a).getValue() >> ((IntegerConstant) b).getValue(), z);
+			} else if (b instanceof RealConstant || b instanceof RealVariable) {
+				//should not happen
+				assert false;
+			}
+		} else if (a instanceof RealConstant || b instanceof RealConstant) {
+			//bitwise operators do not work on real values
+			assert false;
+		} else if (a instanceof RealVariable || b instanceof RealVariable) {
+			assert false;
+		}
+		return new Operation(Operator.ASHR, a, b);
+	}
+	
+	public static Expression lshr(Expression a, Expression b) {
+		if (a instanceof IntegerConstant) {
+			if (b instanceof IntegerConstant) {
+				int z = ((IntegerConstant) a).getSize();
+				return new IntegerConstant(((IntegerConstant) a).getValue() >>> ((IntegerConstant) b).getValue(), z);
+			} else if (b instanceof RealConstant || b instanceof RealVariable) {
+				//should not happen
+				assert false;
+			}
+		} else if (a instanceof RealConstant || b instanceof RealConstant) {
+			//bitwise operators do not work on real values
+			assert false;
+		} else if (a instanceof RealVariable || b instanceof RealVariable) {
+			assert false;
+		}
+		return new Operation(Operator.LSHR, a, b);
+	}
 
 	// ======================================================================
 	//
@@ -370,13 +502,23 @@ public class Operation extends Expression {
 		DCMPG("DCMPG", 2, Fix.PREFIX, null, null),
 		// ---- Conversion operators ----
 		I2L("I2L", 1, Fix.PREFIX, null, null),
+		L2I("L2I", 1, Fix.PREFIX, null, null),
 		F2D("F2D", 1, Fix.PREFIX, null, null),
+		I2B("I2B", 1, Fix.PREFIX, null, null),
+		I2C("I2C", 1, Fix.PREFIX, null, null),
 		// ---- Arithmetic operators ----
 		ADD("+", 2, Fix.INFIX, "bvadd", "fp.add RNE"),
 		SUB("-", 2, Fix.INFIX, "bvsub", "fp.sub RNE"),
 		MUL("*", 2, Fix.INFIX, "bvmul", "fp.mul RNE"),
 		DIV("/", 2, Fix.INFIX, "bvsdiv", "fp.div RNE"),
-		REM("%", 2, Fix.INFIX, "bvsrem", "fp.rem RNE");
+		REM("%", 2, Fix.INFIX, "bvsrem", "fp.rem RNE"),
+		// ---- Bitwise operators ----
+		BITOR("|", 2, Fix.INFIX, "bvor", null),
+		BITAND("&", 2, Fix.INFIX, "bvand", null),
+		BITXOR("^", 2, Fix.INFIX, "bvxor", null),
+		SHL("<<", 2, Fix.INFIX, "bvshl", null),
+		ASHR(">>", 2, Fix.INFIX, "bvashr", null),
+		LSHR(">>>", 2, Fix.INFIX, "bvlshr", null);
 		// @formatter:on
 
 		private final String string;
