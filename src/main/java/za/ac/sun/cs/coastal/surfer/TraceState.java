@@ -858,4 +858,16 @@ public class TraceState implements State {
 		return 0;
 	}
 
+	@Override
+	public float createSymbolicFloat(float currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double createSymbolicDouble(double currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

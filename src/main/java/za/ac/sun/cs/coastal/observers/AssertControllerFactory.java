@@ -35,7 +35,7 @@ public class AssertControllerFactory implements ObserverFactory {
 	// ======================================================================
 
 	private static final String[] PROPERTY_NAMES = new String[] { "assert-failed", "message" };
-	
+
 	private static class AssertManager implements ObserverManager {
 
 		private final Logger log;
@@ -67,7 +67,7 @@ public class AssertControllerFactory implements ObserverFactory {
 //			Tuple tuple = (Tuple) object;
 //			wasStopped = true;
 //		}
-		
+
 		public void stop(Object object) {
 			Tuple tuple = (Tuple) object;
 			wasStopped = true;

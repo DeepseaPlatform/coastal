@@ -386,10 +386,16 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					break;
 				case "nondetLong":
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
-					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicLong", "(LI)L", false);
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicLong", "(JI)J", false);
 					break;
 				case "nondetFloat":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicFloat", "(FI)F", false);
+					break;
 				case "nondetDouble":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicDouble", "(DI)D", false);
+					break;
 				case "nondetString":
 				default:
 					log.fatal("Unimplemented verifier method {}.{}", owner, name);

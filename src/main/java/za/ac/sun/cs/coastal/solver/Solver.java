@@ -204,7 +204,7 @@ public class Solver {
 					lt = l.getType();
 					ls = l.getSize();
 				}
-				checkCompatible(lt, ls, rt, rs);
+				//checkCompatible(lt, ls, rt, rs);
 				StringBuilder b = new StringBuilder();
 				switch (op) {
 				case NE:

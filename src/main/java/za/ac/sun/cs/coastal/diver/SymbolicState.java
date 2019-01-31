@@ -32,7 +32,6 @@ import za.ac.sun.cs.coastal.solver.RealVariable;
 import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.State;
 import za.ac.sun.cs.coastal.symbolic.SymbolicException;
-import za.ac.sun.cs.coastal.symbolic.VM;
 
 public class SymbolicState implements State {
 
@@ -214,14 +213,20 @@ public class SymbolicState implements State {
 
 	private void setArrayValue(int arrayId, int index, Expression value) {
 		// if (index < 0) return;
-		if (index < 0) return;
+		if (index < 0) {
+			return;
+		}
 		Expression length = getField(arrayId, "length");
 		if (length instanceof IntegerVariable) {
 			String name = ((IntegerVariable) length).getName();
 			int i = (int) new IntegerConstant((Long) concreteValues.get(name), 32).getValue();
-			if (i < index) return;
+			if (i < index) {
+				return;
+			}
 		} else {
-			if (((IntegerConstant)length).getValue() < index) return;
+			if (((IntegerConstant) length).getValue() < index) {
+				return;
+			}
 		}
 		putField(arrayId, "" + index, value);
 	}
@@ -331,19 +336,19 @@ public class SymbolicState implements State {
 			return newValue;
 		}
 	}
-	
+
 	public boolean createSymbolicBoolean(boolean currentValue, int uniqueId) {
 		if (!symbolicMode) {
 			return false;
 		}
-		
+
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		
+
 		push(new IntegerVariable(name, 32, 0, 1));
 		Long concreteVal = concreteValues == null ? null : (Long) concreteValues.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
-		
+
 		if (concrete == null) {
 			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
 			concreteValues.put(name, new Long(currentValue ? 1 : 0));
@@ -375,12 +380,12 @@ public class SymbolicState implements State {
 			return newValue;
 		}
 	}
-	
+
 	public byte createSymbolicByte(byte currentValue, int uniqueId) {
 		if (!symbolicMode) {
 			return 0;
 		}
-		
+
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new IntegerVariable(name, 8, Byte.MIN_VALUE, Byte.MAX_VALUE));
@@ -396,12 +401,12 @@ public class SymbolicState implements State {
 			return newValue;
 		}
 	}
-	
+
 	public char createSymbolicChar(char currentValue, int uniqueId) {
 		if (!symbolicMode) {
 			return 0x00;
 		}
-		
+
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new IntegerVariable(name, 16, Character.MIN_VALUE, Character.MAX_VALUE));
@@ -417,15 +422,16 @@ public class SymbolicState implements State {
 			return newValue;
 		}
 	}
-	
+
+	@Override
 	public long createSymbolicLong(long currentValue, int uniqueId) {
 		if (!symbolicMode) {
-			return 0x00;
+			return 0;
 		}
-		
+
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntegerVariable(name, 64, Character.MIN_VALUE, Character.MAX_VALUE));
+		push(new IntegerVariable(name, 64, Long.MIN_VALUE, Long.MAX_VALUE));
 		Long concreteVal = concreteValues == null ? null : (Long) concreteValues.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 64);
 		if (concrete == null) {
@@ -438,7 +444,49 @@ public class SymbolicState implements State {
 			return newValue;
 		}
 	}
-	
+
+	public float createSymbolicFloat(float currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return 0;
+		}
+
+		String name = CREATE_VAR_PREFIX + uniqueId;
+		pop();
+		push(new RealVariable(name, 32, Float.MIN_VALUE, Float.MAX_VALUE));
+		Double concreteVal = concreteValues == null ? null : (Double) concreteValues.get(name);
+		RealConstant concrete = concreteVal == null ? null : new RealConstant(concreteVal, 32);
+		if (concrete == null) {
+			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			concreteValues.put(name, new Double(currentValue));
+			return currentValue;
+		} else {
+			float newValue = (float) concrete.getValue();
+			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
+			return newValue;
+		}
+	}
+
+	public double createSymbolicDouble(double currentValue, int uniqueId) {
+		if (!symbolicMode) {
+			return 0;
+		}
+
+		String name = CREATE_VAR_PREFIX + uniqueId;
+		pop();
+		push(new RealVariable(name, 64, Double.MIN_VALUE, Double.MAX_VALUE));
+		Double concreteVal = concreteValues == null ? null : (Double) concreteValues.get(name);
+		RealConstant concrete = concreteVal == null ? null : new RealConstant(concreteVal, 64);
+		if (concrete == null) {
+			log.trace(">>> create symbolic var {}, default value of {}", name, currentValue);
+			concreteValues.put(name, new Double(currentValue));
+			return currentValue;
+		} else {
+			double newValue = (double) concrete.getValue();
+			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
+			return newValue;
+		}
+	}
+
 	public String createSymbolicString(String currentValue, int uniqueId) {
 		if (!symbolicMode) {
 			return "";
@@ -592,9 +640,9 @@ public class SymbolicState implements State {
 			setLocal(address, new IntegerConstant(currentValue ? 1 : 0, 32));
 			return currentValue;
 		}
-		Class<?> type = trigger.getParamType(index);
-		int min = (Integer) coastal.getMinBound(name, type);
-		int max = (Integer) coastal.getMaxBound(name, type);
+		//Class<?> type = trigger.getParamType(index);
+		int min = 0;
+		int max = 1;
 		setLocal(address, new IntegerVariable(name, 32, min, max));
 		Long concrete = (Long) (concreteValues == null ? null : concreteValues.get(name));
 		return (concrete == null) ? currentValue : (concrete != 0);
@@ -999,11 +1047,12 @@ public class SymbolicState implements State {
 				String name = ((IntegerVariable) idx).getName();
 				i = (int) new IntegerConstant((Long) concreteValues.get(name), 32).getValue();
 			} else {
-				i = (int) ((IntegerConstant) idx).getValue();				
+				i = (int) ((IntegerConstant) idx).getValue();
 			}
 			int a = (int) ((IntegerConstant) pop()).getValue();
 			push(getArrayValue(a, i));
-			noExceptionExpression.add(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, getField(a, "length"))));
+			noExceptionExpression.add(
+					Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, getField(a, "length"))));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = new IntegerConstant(i, 32);
 			noException();
@@ -1029,7 +1078,8 @@ public class SymbolicState implements State {
 			}
 			a = (int) ((IntegerConstant) pop()).getValue();
 			setArrayValue(a, i, e);
-			noExceptionExpression.add(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, getField(a, "length"))));
+			noExceptionExpression.add(
+					Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, getField(a, "length"))));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = new IntegerConstant(i, 32);
 			noException();
@@ -1116,7 +1166,7 @@ public class SymbolicState implements State {
 			push(ldiv);
 			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			throwable = IntegerConstant.ZERO64;
 			break;
 		case Opcodes.FDIV:
 			e = pop();
@@ -1132,7 +1182,7 @@ public class SymbolicState implements State {
 			push(ddiv);
 			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			throwable = IntegerConstant.ZERO64;
 			break;
 		case Opcodes.LREM:
 			e = pop();
@@ -1163,18 +1213,20 @@ public class SymbolicState implements State {
 		case Opcodes.I2L:
 			push(Operation.i2l(pop()));
 			break;
-		case Opcodes.I2B:
-			push(Operation.i2b(pop()));
-			break;
-		case Opcodes.I2C:
-			push(Operation.i2c(pop()));
-			break;
-		case Opcodes.L2I:
-			push(Operation.l2i(pop()));
-			break;
-			
+//		case Opcodes.I2S:
+//			push(Operation.i2s(pop()));
+//			break;
+//		case Opcodes.I2B:
+//			push(Operation.i2b(pop()));
+//			break;
+//		case Opcodes.I2C:
+//			push(Operation.i2c(pop()));
+//			break;
+//		case Opcodes.L2I:
+//			push(Operation.l2i(pop()));
+//			break;
+
 		// case Opcodes.D2F:
-		// case Opcodes.I2S:
 		// break;
 		case Opcodes.LCMP:
 			e = pop();
@@ -1279,7 +1331,6 @@ public class SymbolicState implements State {
 			int n = 0;
 			if (e instanceof IntegerVariable) {
 				String name = ((IntegerVariable) e).getName();
-				log.trace(concreteValues.get(name) == null);
 				n = (int) new IntegerConstant((Long) concreteValues.get(name), 32).getValue();
 			} else {
 				n = (int) ((IntegerConstant) e).getValue();
@@ -1436,7 +1487,7 @@ public class SymbolicState implements State {
 
 	private void pushReturnValue(char type) {
 		if (type == 'Z') {
-			push(new IntegerVariable(getNewVariableName(), 8, 0, 1));
+			push(new IntegerVariable(getNewVariableName(), 32, 0, 1));
 		} else if (type == 'B') {
 			byte min = (byte) coastal.getDefaultMinValue(byte.class);
 			byte max = (byte) coastal.getDefaultMaxValue(byte.class);

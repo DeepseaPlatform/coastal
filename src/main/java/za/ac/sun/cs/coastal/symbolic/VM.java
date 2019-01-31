@@ -63,6 +63,14 @@ public class VM {
 	public static long createSymbolicLong(long oldValue, int uniqueId) {
 		return state.createSymbolicLong(oldValue, uniqueId);
 	}
+	
+	public static float createSymbolicFloat(float oldValue, int uniqueId) {
+		return state.createSymbolicFloat(oldValue, uniqueId);
+	}
+	
+	public static double createSymbolicDouble(double oldValue, int uniqueId) {
+		return state.createSymbolicDouble(oldValue, uniqueId);
+	}
 
 	// ======================================================================
 	//

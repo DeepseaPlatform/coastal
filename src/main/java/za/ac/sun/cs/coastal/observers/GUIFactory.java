@@ -263,7 +263,7 @@ public class GUIFactory implements ObserverFactory {
 			} else if ("quit".equals(e.getActionCommand())) {
 				setVisible(false);
 				dispose();
-				System.exit(0);// Platform.exit();
+				System.exit(0); // Platform.exit();
 			}
 		}
 

@@ -33,6 +33,10 @@ public interface State {
 	char createSymbolicChar(char currentValue, int uniqueId);
 	
 	long createSymbolicLong(long currentValue, int uniqueId);
+	
+	float createSymbolicFloat(float currentValue, int uniqueId);
+	
+	double createSymbolicDouble(double currentValue, int uniqueId);
 	// ======================================================================
 	//
 	// METHOD ROUTINES

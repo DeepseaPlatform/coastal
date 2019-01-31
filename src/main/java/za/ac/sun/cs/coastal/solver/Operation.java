@@ -204,33 +204,9 @@ public class Operation extends Expression {
 	public static Expression dcmpg(Expression a, Expression b) {
 		return new Operation(Operator.DCMPG, a, b);
 	}
-
-	public static Expression l2i(Expression a) {
-		if (a instanceof IntegerConstant) {
-			return new IntegerConstant((int)(((IntegerConstant) a).getValue()), 32);
-		}
-		return new Operation(Operator.L2I, a);
-	}
 	
 	public static Expression i2l(Expression a) {
-		if (a instanceof IntegerConstant) {
-			return new IntegerConstant((long)(((IntegerConstant) a).getValue()), 64);
-		}
 		return new Operation(Operator.I2L, a);
-	}
-	
-	public static Expression i2b(Expression a) {
-		if (a instanceof IntegerConstant) {
-			return new IntegerConstant((byte)(((IntegerConstant) a).getValue()), 8);
-		}
-		return new Operation(Operator.I2B, a);
-	}
-
-	public static Expression i2c(Expression a) {
-		if (a instanceof IntegerConstant) {
-			return new IntegerConstant((char)(((IntegerConstant) a).getValue()), 16);
-		}
-		return new Operation(Operator.I2C, a);
 	}
 	
 	public static Expression f2d(Expression a) {
@@ -502,10 +478,7 @@ public class Operation extends Expression {
 		DCMPG("DCMPG", 2, Fix.PREFIX, null, null),
 		// ---- Conversion operators ----
 		I2L("I2L", 1, Fix.PREFIX, null, null),
-		L2I("L2I", 1, Fix.PREFIX, null, null),
 		F2D("F2D", 1, Fix.PREFIX, null, null),
-		I2B("I2B", 1, Fix.PREFIX, null, null),
-		I2C("I2C", 1, Fix.PREFIX, null, null),
 		// ---- Arithmetic operators ----
 		ADD("+", 2, Fix.INFIX, "bvadd", "fp.add RNE"),
 		SUB("-", 2, Fix.INFIX, "bvsub", "fp.sub RNE"),
