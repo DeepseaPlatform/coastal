@@ -33,11 +33,12 @@
 			-->
 		</strategies>
 		<observers>
-			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
+			<observer>ceo.InstructionCoverageFactory</observer>
 		</observers>
 		<!-- 
-			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 			<observer>za.ac.sun.cs.coastal.observers.InstructionCoverageFactory</observer>
+			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
+			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 		-->
 	</coastal>
 </configuration>

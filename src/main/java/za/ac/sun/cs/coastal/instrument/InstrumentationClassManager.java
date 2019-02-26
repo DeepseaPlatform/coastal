@@ -74,6 +74,15 @@ public class InstrumentationClassManager {
 		broker.subscribe("coastal-stop", this::report);
 		showInstrumentation = coastal.getConfig().getBoolean("coastal.settings.show-instrumentation", false);
 		writeClassfile = coastal.getConfig().getString("coastal.settings.write-classfile", null);
+		
+		
+//		SWITCH ON TO FIND LOCATION OF BUG
+//		
+//		ALSO CHECK WHEN THIS WAS INTRODUCED
+		
+		
+		
+		
 		String[] paths = classPath.split(File.pathSeparator);
 		for (String path : paths) {
 			classPaths.add(path);

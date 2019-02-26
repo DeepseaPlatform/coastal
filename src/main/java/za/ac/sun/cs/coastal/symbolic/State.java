@@ -114,6 +114,8 @@ public interface State {
 
 	void jumpInsn(int value, int instr, int opcode) throws SymbolicException;
 	
+	void jumpInsn(Object value, int instr, int opcode) throws SymbolicException;
+	
 	void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException;
 	
 	void postJumpInsn(int instr, int opcode) throws SymbolicException;
@@ -154,4 +156,8 @@ public interface State {
 
 	void mark(String marker);
 
+	void printPC(String label);
+	
+	void printPC();
+	
 }

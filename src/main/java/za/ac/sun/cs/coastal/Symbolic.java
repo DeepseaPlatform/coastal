@@ -69,4 +69,21 @@ public class Symbolic {
 		// placeholder method
 	}
 
+	/**
+	 * Quick-and-dirty mehod to display the path condition in the log file.
+	 */
+	public static void printPC() {
+		// placeholder method
+	}
+	
+	/**
+	 * Quick-and-dirty mehod to display the path condition in the log file.
+	 * 
+	 * @param label
+	 *            a string to identify the PC
+	 */
+	public static void printPC(String label) {
+		// placeholder method
+	}
+
 }

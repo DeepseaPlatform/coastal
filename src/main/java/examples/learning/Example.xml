@@ -11,6 +11,7 @@
 		<bound max="1000" name="int" min="0"/>
 		</bounds>
 		<settings>
+			<trace-all>true</trace-all>
 			<echo-output>true</echo-output>
 			<draw-paths>true</draw-paths>
 		</settings>
@@ -29,10 +30,10 @@
 			<strategy full="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
 			-->
 		</strategies>
-		<observers>
-		<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
-		</observers>
 		<!-- 
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.MarkerCoverageFactory</observer>
+		</observers>
 			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 			<observer>za.ac.sun.cs.coastal.observers.InstructionCoverageFactory</observer>
 		-->

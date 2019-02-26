@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>tests.arrays.ANewArray</main>
+			<instrument>tests.arrays.ANewArray</instrument>
+			<trigger>tests.arrays.ANewArray.run(X: int)</trigger>
+		</target>
+	</coastal>
+</configuration>

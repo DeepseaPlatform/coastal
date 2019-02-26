@@ -47,12 +47,8 @@ public class Example {
 		int[] inputValues = {10,20,20};
 		boolean result = check(inputValues);
 		if (!result) {
-			Symbolic.mark("Not Accepted");
+			Symbolic.printPC("Not Accepted");
 		}
-		else {
-			
-		}
-		
 	}
 
 }
