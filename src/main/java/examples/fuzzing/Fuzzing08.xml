@@ -9,7 +9,7 @@
 		</target>
 		<settings>
 			<show-instrumentation>true</show-instrumentation>
-			<time-limit>10</time-limit>
+			<time-limit>0</time-limit>
 		</settings>
 		<divers threads="0"/>
 		<surfers threads="1"/>
@@ -33,13 +33,13 @@
 			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 			-->
 		</observers>
+		<!--
 		<delegates>
 			<delegate>
 				<for>java.lang.String</for>
 				<model>za.ac.sun.cs.coastal.model.String</model>
 			</delegate>
 		</delegates>
-		<!--
 		-->
 	</coastal>
 </configuration>

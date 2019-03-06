@@ -242,6 +242,10 @@ public class VM {
 		state.jumpInsn(value, instr, opcode);
 	}
 	
+	public static void jumpInsn(Object value, int instr, int opcode) throws SymbolicException {
+		state.jumpInsn(value, instr, opcode);
+	}
+	
 	public static void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException {
 		state.jumpInsn(value1, value2, instr, opcode);
 	}
@@ -326,4 +330,12 @@ public class VM {
 		state.mark(marker);
 	}
 
+	public static void printPC(String label) {
+		state.printPC(label);
+	}
+	
+	public static void printPC() {
+		state.printPC();
+	}
+	
 }

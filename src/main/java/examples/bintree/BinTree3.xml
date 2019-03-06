@@ -15,6 +15,9 @@
 			<bound name="v2" min="0" max="9"/>
 			<bound name="v3" min="0" max="9"/>
 		</bounds>
+		<settings>
+			<draw-paths>true</draw-paths>
+		</settings>
 		<strategies>
 			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
 			<!-- 

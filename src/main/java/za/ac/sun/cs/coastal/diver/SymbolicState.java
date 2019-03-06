@@ -575,6 +575,22 @@ public class SymbolicState implements State {
 		broker.publishThread("mark", marker);
 	}
 
+	@Override
+	public void printPC(String label) {
+		if (!symbolicMode) {
+		 	return;
+		}
+		log.trace("{}: {}", label, spc.getPathCondition().toString());
+	}
+	
+	@Override
+	public void printPC() {
+		if (!symbolicMode) {
+			return;
+		}
+		log.trace("spc: {}", spc.getPathCondition().toString());
+	}
+	
 	// ======================================================================
 	//
 	// SEMI-INSTRUCTIONS
@@ -1395,6 +1411,10 @@ public class SymbolicState implements State {
 			push(new IntegerConstant(id, 32));
 			break;
 		case Opcodes.CHECKCAST:
+      break;
+		case Opcodes.ANEWARRAY:
+			id = incrAndGetNewObjectId();
+			push(new IntegerConstant(id, 32));
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
@@ -1604,6 +1624,11 @@ public class SymbolicState implements State {
 		jumpInsn(instr, opcode);
 	}
 
+	@Override
+	public void jumpInsn(Object value, int instr, int opcode) throws SymbolicException {
+		jumpInsn(instr, opcode);
+	}
+	
 	@Override
 	public void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException {
 		jumpInsn(instr, opcode);

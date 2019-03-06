@@ -173,6 +173,16 @@ public class TraceState implements State {
 		broker.publishThread("mark", marker);
 	}
 
+	@Override
+	public void printPC(String label) {
+		// do nothing
+	}
+	
+	@Override
+	public void printPC() {
+		// do nothing
+	}
+	
 	// ======================================================================
 	//
 	// SEMI-INSTRUCTIONS
@@ -616,11 +626,9 @@ public class TraceState implements State {
 		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.IFEQ:
-		case Opcodes.IFNULL:
 			jumpInsn(instr, opcode, value == 0);
 			break;
 		case Opcodes.IFNE:
-		case Opcodes.IFNONNULL:
 			jumpInsn(instr, opcode, value != 0);
 			break;
 		case Opcodes.IFLT:
@@ -676,6 +684,25 @@ public class TraceState implements State {
 		case Opcodes.IF_ICMPLE:
 			incValues.add(Math.abs(value1 - value2) + 1);
 			jumpInsn(instr, opcode, value1 <= value2);
+			break;
+		default:
+			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			System.exit(1);
+		}
+	}
+	
+	@Override
+	public void jumpInsn(Object value, int instr, int opcode) throws SymbolicException {
+		if (!traceMode) {
+			return;
+		}
+		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		switch (opcode) {
+		case Opcodes.IFNULL:
+			jumpInsn(instr, opcode, value == null);
+			break;
+		case Opcodes.IFNONNULL:
+			jumpInsn(instr, opcode, value != null);
 			break;
 		default:
 			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);

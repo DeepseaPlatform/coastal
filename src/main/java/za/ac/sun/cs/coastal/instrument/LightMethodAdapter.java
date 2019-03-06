@@ -227,10 +227,10 @@ public class LightMethodAdapter extends MethodVisitor {
 			Label end = new Label();
 			mv.visitJumpInsn(Opcodes.GOTO, end);
 			mv.visitLabel(label);
+			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 			//--- } else {
 			//---   startMethod()
 			mv.visitLdcInsn(classManager.getMethodCounter());
-			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
 			//--- }
@@ -287,12 +287,17 @@ public class LightMethodAdapter extends MethodVisitor {
 		case Opcodes.IFLE:
 		case Opcodes.IFGT:
 		case Opcodes.IFGE:
+			mv.visitInsn(Opcodes.DUP);
+			mv.visitLdcInsn(classManager.getNextInstructionCounter());
+			mv.visitLdcInsn(opcode);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(III)V", false);
+			break;
 		case Opcodes.IFNULL:
 		case Opcodes.IFNONNULL:
 			mv.visitInsn(Opcodes.DUP);
 			mv.visitLdcInsn(classManager.getNextInstructionCounter());
 			mv.visitLdcInsn(opcode);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(III)V", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(Ljava/lang/Object;II)V", false);
 			break;
 		case Opcodes.IF_ACMPEQ:
 		case Opcodes.IF_ACMPNE:
