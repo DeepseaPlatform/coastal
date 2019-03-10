@@ -5,11 +5,12 @@ import static org.junit.Assert.assertNotNull;
 import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class SystemTestsRandomTesting extends SystemTests {
 
-	/*
 	@Test
 	public void testRandomTesting01A() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
@@ -135,6 +136,5 @@ public class SystemTestsRandomTesting extends SystemTests {
 		checkMarkerCoverage(reporter, 0, 3);
 		checkMarkerCoverage(reporter, 101, 4);
 	}
-	*/
 	
 }
