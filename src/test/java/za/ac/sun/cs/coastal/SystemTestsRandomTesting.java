@@ -9,6 +9,7 @@ import org.junit.Test;
 
 public class SystemTestsRandomTesting extends SystemTests {
 
+	/*
 	@Test
 	public void testRandomTesting01A() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
@@ -134,5 +135,6 @@ public class SystemTestsRandomTesting extends SystemTests {
 		checkMarkerCoverage(reporter, 0, 3);
 		checkMarkerCoverage(reporter, 101, 4);
 	}
+	*/
 	
 }
