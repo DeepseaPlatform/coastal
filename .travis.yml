@@ -9,4 +9,5 @@ before_install:
   - docker build -t deepseaplatform/dock .
 
 script:
-  - docker run deepseaplatform/dock /bin/bash -c "cd coastal ; ./gradlew check"
+  - docker run -v ${PWD}/coastal/build/reports/:/coastal/build/reports/ deepseaplatform/dock /bin/bash -c "cd coastal ; ./gradlew check"
+  - ls -R ${PWD}/coastal/vuild/reports/tests/
