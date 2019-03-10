@@ -5,7 +5,8 @@
 		<target>
 			<main>Main</main>
 			<instrument>Main</instrument>
-			<instrument>SNode</instrument>
+			<instrument>Actions</instrument>
+			<instrument>MinePumpSystem</instrument>
 			<trigger>Main.main(String[])</trigger>
 		</target>
 		<settings>

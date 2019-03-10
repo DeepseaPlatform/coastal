@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
 <configuration>
 	<coastal>
 		<target>
 			<main>Main</main>
 			<instrument>Main</instrument>
-			<instrument>SNode</instrument>
 			<trigger>Main.main(String[])</trigger>
 		</target>
 		<settings>

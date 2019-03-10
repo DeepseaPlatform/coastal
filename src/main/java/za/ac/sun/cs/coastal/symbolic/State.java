@@ -23,7 +23,20 @@ public interface State {
 	void pushExtraConjunct(Expression extraConjunct);
 	
 	int createSymbolicInt(int currentValue, int uniqueId);
-
+	
+	short createSymbolicShort(short currentValue, int uniqueId);
+	
+	boolean createSymbolicBoolean(boolean currentValue, int uniqueId);
+	
+	byte createSymbolicByte(byte currentValue, int uniqueId);
+	
+	char createSymbolicChar(char currentValue, int uniqueId);
+	
+	long createSymbolicLong(long currentValue, int uniqueId);
+	
+	float createSymbolicFloat(float currentValue, int uniqueId);
+	
+	double createSymbolicDouble(double currentValue, int uniqueId);
 	// ======================================================================
 	//
 	// METHOD ROUTINES

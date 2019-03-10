@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>examples.remainder.Remainder</main>
+			<instrument>examples.remainder</instrument>
+			<trigger>examples.remainder.Remainder.exe(a: int, b: int)</trigger>
+		</target>
+		<bounds>
+			<bound name="a" min="-20" max="20"/>
+			<bound name="b" min="-20" max="20"/>
+		</bounds>
+		<settings>
+			<echo-output>true</echo-output>
+			<write-classfile>/tmp/X.class</write-classfile>
+		</settings>
+		<divers threads="1"/>
+		<surfers threads="0"/>
+		<strategies>
+			
+			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>
+			
+			<!-- strategy threads="1">
+				za.ac.sun.cs.coastal.strategy.hybrid.CybridFuzzerFactory
+				<options>
+					<random-seed>888</random-seed>
+					<attenuation>0.95</attenuation>
+					<mutation-count>1</mutation-count>
+					<elimination-ratio>0.5</elimination-ratio>
+					<keep-top>3</keep-top>
+					<draw-final-tree>false</draw-final-tree>
+				</options>
+			</strategy -->
+		</strategies>
+		<observers>
+			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
+			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>
+		</observers>
+	</coastal>
+</configuration>

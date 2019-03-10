@@ -363,12 +363,43 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 			if (owner.equals(VERIFIER)) {
-				if (name.equals("nondetInt")) {
+				switch (name) {
+				case "nondetInt":
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
 					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicInt", "(II)I", false);
-				} else {
-					//TODO
+					break;
+				case "nondetShort":
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicShort", "(SI)S", false);
+					break;
+				case "nondetBoolean":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicBoolean", "(ZI)Z", false);
+					break;
+				case "nondetByte":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicByte", "(BI)B", false);
+					break;
+				case "nondetChar":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicChar", "(CI)C", false);
+					break;
+				case "nondetLong":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicLong", "(JI)J", false);
+					break;
+				case "nondetFloat":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicFloat", "(FI)F", false);
+					break;
+				case "nondetDouble":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicDouble", "(DI)D", false);
+					break;
+				case "nondetString":
+				default:
+					log.fatal("Unimplemented verifier method {}.{}", owner, name);
+					System.exit(1);					
 				}
 			} else {
 				String className = owner.replace('/', '.');

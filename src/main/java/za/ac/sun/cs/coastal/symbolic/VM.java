@@ -43,6 +43,34 @@ public class VM {
 	public static int createSymbolicInt(int oldValue, int uniqueId) {
 		return state.createSymbolicInt(oldValue, uniqueId);
 	}
+	
+	public static short createSymbolicShort(short oldValue, int uniqueId) {
+		return state.createSymbolicShort(oldValue, uniqueId);
+	}
+	
+	public static boolean createSymbolicBoolean(boolean oldValue, int uniqueId) {
+		return state.createSymbolicBoolean(oldValue, uniqueId);
+	}
+	
+	public static byte createSymbolicByte(byte oldValue, int uniqueId) {
+		return state.createSymbolicByte(oldValue, uniqueId);
+	}
+	
+	public static char createSymbolicChar(char oldValue, int uniqueId) {
+		return state.createSymbolicChar(oldValue, uniqueId);
+	}
+	
+	public static long createSymbolicLong(long oldValue, int uniqueId) {
+		return state.createSymbolicLong(oldValue, uniqueId);
+	}
+	
+	public static float createSymbolicFloat(float oldValue, int uniqueId) {
+		return state.createSymbolicFloat(oldValue, uniqueId);
+	}
+	
+	public static double createSymbolicDouble(double oldValue, int uniqueId) {
+		return state.createSymbolicDouble(oldValue, uniqueId);
+	}
 
 	// ======================================================================
 	//

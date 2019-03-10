@@ -623,6 +623,7 @@ public class TraceState implements State {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.IFEQ:
 			jumpInsn(instr, opcode, value == 0);
@@ -654,6 +655,7 @@ public class TraceState implements State {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.IF_ACMPEQ:
 		case Opcodes.IF_ICMPEQ:
@@ -715,6 +717,7 @@ public class TraceState implements State {
 			return;
 		}
 		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.GOTO:
 			break;
@@ -730,6 +733,7 @@ public class TraceState implements State {
 	/* Missing offset because destination not yet known. */
 	private void jumpInsn(int instr, int opcode, boolean result) throws SymbolicException {
 		if (recordMode) {
+			broker.publishThread("jump-insn", new Tuple(instr, opcode));
 			if (pathTreeNode != null) {
 				int ptn = pathTreeNode.getId();
 				if (result) {
@@ -848,6 +852,48 @@ public class TraceState implements State {
 	@Override
 	public int createSymbolicInt(int currentValue, int uniqueId) {
 		// TODO Get a concrete value
+		return 0;
+	}
+	
+	@Override
+	public short createSymbolicShort(short currentValue, int uniqueId) {
+		// TODO Get a concrete value
+		return 0;
+	}
+
+	@Override
+	public boolean createSymbolicBoolean(boolean currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public byte createSymbolicByte(byte currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public char createSymbolicChar(char currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public long createSymbolicLong(long currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public float createSymbolicFloat(float currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double createSymbolicDouble(double currentValue, int uniqueId) {
+		// TODO Auto-generated method stub
 		return 0;
 	}
 

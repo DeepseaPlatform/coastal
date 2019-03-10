@@ -98,7 +98,7 @@ public class GUIFactory implements ObserverFactory {
 			private final JLabel[] nameLabels;
 
 			private final JLabel[] valueLabels;
-			
+
 			TaskPanel(Reportable reportable) {
 				this.reportable = reportable;
 				// Set the label
@@ -114,7 +114,8 @@ public class GUIFactory implements ObserverFactory {
 				topPanel.add(topLabel, BorderLayout.CENTER);
 				add(topPanel, BorderLayout.PAGE_START);
 				// Create a border to reuse
-				final Border border = BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.BLACK, 1), BorderFactory.createEmptyBorder(2, 2, 2, 2));
+				final Border border = BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(Color.BLACK, 1),
+						BorderFactory.createEmptyBorder(2, 2, 2, 2));
 				final Dimension prefDim = new Dimension(200, 25);
 				// Create the property labels
 				String[] propertyNames = reportable.getPropertyNames();
@@ -176,7 +177,7 @@ public class GUIFactory implements ObserverFactory {
 
 		@Override
 		public void run() {
-			SwingUtilities.invokeLater(() -> createAndShowGUI()); 
+			SwingUtilities.invokeLater(() -> createAndShowGUI());
 		}
 
 		public void createAndShowGUI() {
@@ -243,7 +244,7 @@ public class GUIFactory implements ObserverFactory {
 			bottomPanel.setMinimumSize(bottomDim);
 			bottomPanel.setMaximumSize(bottomDim);
 			bottomPanel.setPreferredSize(bottomDim);
-			
+
 			add(topPanel, BorderLayout.PAGE_START);
 			add(middlePanel, BorderLayout.CENTER);
 			add(bottomPanel, BorderLayout.PAGE_END);
@@ -261,7 +262,8 @@ public class GUIFactory implements ObserverFactory {
 				coastal.getBroker().publish("emergency-stop", this);
 			} else if ("quit".equals(e.getActionCommand())) {
 				setVisible(false);
-				dispose(); // Platform.exit();
+				dispose();
+				System.exit(0); // Platform.exit();
 			}
 		}
 
