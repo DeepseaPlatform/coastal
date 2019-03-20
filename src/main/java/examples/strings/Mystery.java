@@ -11,8 +11,8 @@ public class Mystery {
 
 	private static void runExample() {		
 		char[] s = new char[18];
-		s[0] = 0;s[1] = 0;s[2] = 0;s[3] = 60;s[4] = 97;s[5] = 32;s[6] = 104;s[7] = 114;s[8] = 101;
-		s[9] = 102;s[10] = 61;s[11] = 34;s[12] = 50;s[13] = 51;s[14] = 52;s[15] = 53;s[16] = 54;s[17] = 55;
+		s[0] = 0; s[1] = 0; s[2] = 0; s[3] = 60; s[4] = 97; s[5] = 32; s[6] = 104; s[7] = 114; s[8] = 101;
+		s[9] = 102; s[10] = 61; s[11] = 34; s[12] = 50; s[13] = 51; s[14] = 52; s[15] = 53; s[16] = 54; s[17] = 55;
 		String str = new String(s);
 		System.out.println("Input : " + str);
 		String result = preserveSomeHtmlTagsAndRemoveWhitespaces(str);
@@ -23,7 +23,7 @@ public class Mystery {
 		char[] str = s.toCharArray();
 		String output = "";
 		for (int i = 0; i < str.length; i++) {
-			output += "s[" + i + "] = " + (int)str[i] + ";"; 
+			output += "s[" + i + "] = " + (int) str[i] + ";"; 
  		}
 		System.out.println("OUPUT: " + output);
 	}
@@ -45,7 +45,6 @@ public class Mystery {
 				printInput(body);
 				Symbolic.printPC("HERE");
 				Symbolic.stop("BUG");
-				
 				return "EXCEPTION: Infinite loop";
 			}
 			old = i;
