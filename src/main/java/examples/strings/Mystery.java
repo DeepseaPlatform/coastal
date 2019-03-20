@@ -5,29 +5,29 @@ import za.ac.sun.cs.coastal.Symbolic;
 public class Mystery {
 	
 	public static void main(String[] args) {
-		System.out.println("start");
-		//preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<a href=\">    @");
-		//preserveSomeHtmlTagsAndRemoveWhitespaces("blah");
-		//preserveSomeHtmlTagsAndRemoveWhitespaces(" <<  <a hRef=\"\">    ");
-		//preserveSomeHtmlTagsAndRemoveWhitespaces("<<<<<<<<<<<<<<<");
 		preserveSomeHtmlTagsAndRemoveWhitespaces("012345678901234567");
-		//preserveSomeHtmlTagsAndRemoveWhitespaces("   <A HREF=\"<<<<<<");
-		System.out.println("end");
-		// {S_H_0=0, S_H_2=0, S_H_1=0, S_H_8=69, S_H_7=82, S_H_9=70, S_H_4=65, S_H_11=34, S_H_10=61, S_H_3=60, S_H_6=72, S_H_5=32}
-		// S_H_0=0
-		// S_H_1=0
-		// S_H_2=0
-		// S_H_3=60
-		// S_H_4=65
-		// S_H_5=32
-		// S_H_6=72
-		// S_H_7=82
-		// S_H_8=69
-		// S_H_9=70
-		// S_H_10=61
-		// S_H_11=34
+		runExample();
 	}
 
+	private static void runExample() {		
+		char[] s = new char[18];
+		s[0] = 0;s[1] = 0;s[2] = 0;s[3] = 60;s[4] = 97;s[5] = 32;s[6] = 104;s[7] = 114;s[8] = 101;
+		s[9] = 102;s[10] = 61;s[11] = 34;s[12] = 50;s[13] = 51;s[14] = 52;s[15] = 53;s[16] = 54;s[17] = 55;
+		String str = new String(s);
+		System.out.println("Input : " + str);
+		String result = preserveSomeHtmlTagsAndRemoveWhitespaces(str);
+		System.out.println("output: " + result);
+	}
+	
+	private static void printInput(String s) {
+		char[] str = s.toCharArray();
+		String output = "";
+		for (int i = 0; i < str.length; i++) {
+			output += "s[" + i + "] = " + (int)str[i] + ";"; 
+ 		}
+		System.out.println("OUPUT: " + output);
+	}
+	
 	public static String preserveSomeHtmlTagsAndRemoveWhitespaces(String body) {
 		if (body == null) {
 			return body;
@@ -42,7 +42,10 @@ public class Mystery {
 				//	Debug.printPC("Current PC: ");
 				//}
 				// throw new RuntimeException("Infinite loop");
+				printInput(body);
+				Symbolic.printPC("HERE");
 				Symbolic.stop("BUG");
+				
 				return "EXCEPTION: Infinite loop";
 			}
 			old = i;

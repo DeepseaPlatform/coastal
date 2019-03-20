@@ -32,9 +32,6 @@
 			<strategy full="false">za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory</strategy>
 			-->
 		</strategies>
-		<observers>
-			<observer>ceo.InstructionCoverageFactory</observer>
-		</observers>
 		<!-- 
 			<observer>za.ac.sun.cs.coastal.observers.InstructionCoverageFactory</observer>
 			<observer>za.ac.sun.cs.coastal.observers.LineCoverageFactory</observer>

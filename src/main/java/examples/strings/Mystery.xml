@@ -7,6 +7,9 @@
 			<instrument>examples.strings</instrument>
 			<trigger>examples.strings.Mystery.preserveSomeHtmlTagsAndRemoveWhitespaces(S: String)</trigger>
 		</target>
+		<settings>
+			<echo-output>true</echo-output>
+		</settings>
 		<divers threads="1"/>
 		<strategies>
 			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.BreadthFirstFactory</strategy>
