@@ -24,22 +24,19 @@ import za.ac.sun.cs.coastal.solver.Operation.Operator;
 
 public class Solver {
 
-	protected static final String DEFAULT_Z3_ARGS = "-smt2 -in";
+	protected static final String DEFAULT_Z3_PATH = "/usr/local/bin/z3";
 
+	protected static final String DEFAULT_Z3_ARGS = "-smt2 -in";
+	
 	protected final Logger log;
 
 	protected final String z3Command;
 
 	public Solver(COASTAL coastal) {
 		log = coastal.getLog();
-		z3Command = "/usr/local/bin/z3" + ' ' + DEFAULT_Z3_ARGS;
-		//		String drive = new File("").getAbsolutePath() + "/";
-		//		String sub = "lib/z3/build/z3";
-		//		String z3Path = drive + sub;
-		//		DEFAULT_Z3_PATH = z3Path;
-		//		String p = properties.getProperty("green.z3.path", DEFAULT_Z3_PATH);
-		//		String a = properties.getProperty("green.z3.args", DEFAULT_Z3_ARGS);
-		//		z3Command = p + ' ' + a;
+		String z3Path = coastal.getConfig().getString("coastal.settings.z3-path", DEFAULT_Z3_PATH);
+		String z3Args = coastal.getConfig().getString("coastal.settings.z3-path[@args]", DEFAULT_Z3_ARGS);
+		z3Command = z3Path + ' ' + z3Args;
 	}
 
 	public Map<String, Object> solve(Expression expression) {
@@ -192,12 +189,12 @@ public class Solver {
 			Operator op = operation.getOperator();
 			int arity = op.getArity();
 			if (arity == 2) {
-				Class<? extends Expression> lt = null, rt = null;
-				int ls = 0, rs = 0;
+				Class<? extends Expression> lt = null; // rt = null;
+				int ls = 0; // rs = 0;
 				if (!stack.isEmpty()) {
 					r = stack.pop();
-					rt = r.getType();
-					rs = r.getSize();
+					// rt = r.getType();
+					// rs = r.getSize();
 				}
 				if (!stack.isEmpty()) {
 					l = stack.pop();
@@ -284,11 +281,11 @@ public class Solver {
 			}
 		}
 
-		private void checkCompatible(Class<? extends Expression> lt, int ls, Class<? extends Expression> rt, int rs) {
-			assert ls == rs;
-			assert ((lt == IntegerConstant.class) || (lt == IntegerVariable.class)) == ((rt == IntegerConstant.class)
-					|| (rt == IntegerVariable.class));
-		}
+//		private void checkCompatible(Class<? extends Expression> lt, int ls, Class<? extends Expression> rt, int rs) {
+//			assert ls == rs;
+//			assert ((lt == IntegerConstant.class) || (lt == IntegerVariable.class)) == ((rt == IntegerConstant.class)
+//					|| (rt == IntegerVariable.class));
+//		}
 
 		private void addLcmp() {
 			if (!addedLcmp) {

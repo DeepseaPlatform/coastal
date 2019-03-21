@@ -127,6 +127,11 @@ The configuration consists of 8 sections, all of them optional:
 			<time-limit>0</time-limit>
 			<path-limit>0</path-limit>
 			<conjunct-limit>0</conjunct-limit>
+			
+			<!--
+			Default location and command-line arguments for Z3.
+			-->
+			<z3-path args="-smt2 -in">/usr/local/bin/z3</z3-path>
 		</settings>
 
 		<!--

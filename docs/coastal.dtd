@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!ELEMENT configuration (coastal,green?)>
+<!ELEMENT configuration (coastal)>
 <!ELEMENT coastal (target?,bounds?,settings?,divers?,surfers?,strategies?,observers?,delegates?)>
 
 <!-- settings for strategies, delegates, and observers -->
@@ -22,7 +22,7 @@
 <!ATTLIST bound max CDATA #REQUIRED>
 
 <!-- general settings -->
-<!ELEMENT settings (trace-all?,echo-output?,draw-paths?,concrete-values?,show-instrumentation?,write-classfile?,max-threads?,run-limit?,time-limit?,path-limit?,conjunct-limit?)>
+<!ELEMENT settings (trace-all?,echo-output?,draw-paths?,concrete-values?,show-instrumentation?,write-classfile?,max-threads?,run-limit?,time-limit?,path-limit?,conjunct-limit?,z3-path?)>
 <!ELEMENT trace-all (#PCDATA)>
 <!ELEMENT echo-output (#PCDATA)>
 <!ELEMENT draw-paths (#PCDATA)>
@@ -35,6 +35,8 @@
 <!ELEMENT time-limit (#PCDATA)>
 <!ELEMENT path-limit (#PCDATA)>
 <!ELEMENT conjunct-limit (#PCDATA)>
+<!ELEMENT z3-path (#PCDATA)>
+<!ATTLIST z3-path args CDATA #IMPLIED>
 
 <!ELEMENT divers EMPTY>
 <!ATTLIST divers threads NMTOKEN #IMPLIED>
@@ -65,8 +67,3 @@
 <!ELEMENT delegate (for,model)>
 <!ELEMENT for (#PCDATA)>
 <!ELEMENT model (#PCDATA|options)*>
-
-<!-- GREEN settings -->
-<!ELEMENT green (z3)>
-<!ELEMENT z3 (path)>
-<!ELEMENT path (#PCDATA)>
