@@ -587,7 +587,8 @@ public class SymbolicState implements State {
 		if (!symbolicMode) {
 		 	return;
 		}
-		log.info("{}: {}", label, spc.getPathCondition().toString());
+		broker.publish("print-pc", new Tuple(this, label, spc.getPathCondition().toString()));
+		log.trace("{}: {}", label, spc.getPathCondition().toString());
 	}
 	
 	@Override
@@ -595,7 +596,8 @@ public class SymbolicState implements State {
 		if (!symbolicMode) {
 			return;
 		}
-		log.info("spc: {}", spc.getPathCondition().toString());
+		broker.publish("print-pc", new Tuple(this, null, spc.getPathCondition().toString()));
+		log.trace("{}: {}", null, spc.getPathCondition().toString());
 	}
 	
 	// ======================================================================
