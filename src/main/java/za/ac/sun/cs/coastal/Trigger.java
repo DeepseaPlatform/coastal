@@ -277,7 +277,6 @@ public final class Trigger {
 		int n = 0;
 		String[] pn;
 		Class<?>[] pt;
-		int symbolicCount = 0;
 		if (ps.length() > 0) {
 			String[] pz = ps.split(",");
 			n = pz.length;
@@ -290,7 +289,6 @@ public final class Trigger {
 					pn[i] = null;
 					pt[i] = parseType(p.substring(c + 1).trim());
 				} else {
-					symbolicCount++;
 					pn[i] = p.substring(0, c).trim();
 					pt[i] = parseType(p.substring(c + 1).trim());
 					if (parameters.containsKey(pn[i]) && (parameters.get(pn[i]) != pt[i])) {
@@ -307,13 +305,6 @@ public final class Trigger {
 			pn = new String[0];
 			pt = new Class<?>[0];
 		}
-//		if (symbolicCount == 0) {
-//			Banner bn = new Banner('@');
-//			bn.println("COASTAL PROBLEM\n");
-//			bn.println("IGNORED NON-SYMBOLIC TRIGGER \"" + desc + "\"");
-//			bn.display(System.out);
-//			return null;
-//		}
 		String tm = "", tc = "";
 		int dot = m.lastIndexOf('.');
 		if (dot != -1) {
