@@ -49,7 +49,7 @@ public class StopControllerFactory implements ObserverFactory {
 		private String stopMessage = null;
 
 		private String triggerValues = null;
-		
+
 		StopManager(COASTAL coastal) {
 			log = coastal.getLog();
 			this.coastal = coastal;
