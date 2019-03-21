@@ -436,8 +436,8 @@ public class CybridFuzzerFactory implements StrategyFactory {
 					newModel.put(name, Double.valueOf(rng.nextDouble(min, max)));
 					submitModel(payload, newModel);
 				} else if (type == String.class) {
-					long min = (Long) coastal.getMinBound(name, type);
-					long max = (Long) coastal.getMaxBound(name, type);
+					int min = (Integer) coastal.getMinBound(name, char.class);
+					int max = (Integer) coastal.getMaxBound(name, char.class);
 					int length = coastal.getParameterSize(name);
 					for (int i = 0; i < length; i++) {
 						Map<String, Object> newModel = new HashMap<>(model);

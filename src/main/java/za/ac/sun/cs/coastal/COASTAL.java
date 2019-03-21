@@ -812,6 +812,7 @@ public class COASTAL {
 		defaultMinBounds.put(long.class, Long.MIN_VALUE + 1L);
 		defaultMinBounds.put(float.class, -Float.MAX_VALUE);
 		defaultMinBounds.put(double.class, -Double.MAX_VALUE);
+		// defaultMinBounds.put(String.class, Character.MIN_VALUE);
 		defaultMinBounds.put(boolean[].class, 0);
 		defaultMinBounds.put(byte[].class, Byte.MIN_VALUE);
 		defaultMinBounds.put(short[].class, Short.MIN_VALUE);
@@ -820,6 +821,7 @@ public class COASTAL {
 		defaultMinBounds.put(long[].class, Long.MIN_VALUE + 1L);
 		defaultMinBounds.put(float[].class, -Float.MAX_VALUE);
 		defaultMinBounds.put(double[].class, -Double.MAX_VALUE);
+		// defaultMinBounds.put(String[].class, Character.MIN_VALUE);
 		defaultMaxBounds.put(boolean.class, 1);
 		defaultMaxBounds.put(byte.class, Byte.MAX_VALUE);
 		defaultMaxBounds.put(short.class, Short.MAX_VALUE);
@@ -828,6 +830,7 @@ public class COASTAL {
 		defaultMaxBounds.put(long.class, Long.MAX_VALUE);
 		defaultMaxBounds.put(float.class, Float.MAX_VALUE);
 		defaultMaxBounds.put(double.class, Double.MAX_VALUE);
+		// defaultMaxBounds.put(String.class, Character.MAX_VALUE);
 		defaultMaxBounds.put(boolean[].class, 1);
 		defaultMaxBounds.put(byte[].class, Byte.MAX_VALUE);
 		defaultMaxBounds.put(short[].class, Short.MAX_VALUE);
@@ -836,6 +839,7 @@ public class COASTAL {
 		defaultMaxBounds.put(long[].class, Long.MAX_VALUE);
 		defaultMaxBounds.put(float[].class, Float.MAX_VALUE);
 		defaultMaxBounds.put(double[].class, Double.MAX_VALUE);
+		// defaultMaxBounds.put(String[].class, Character.MAX_VALUE);
 		for (int i = 0; true; i++) {
 			String key = "coastal.bounds.bound(" + i + ")";
 			String var = getConfig().getString(key + "[@name]");
@@ -921,6 +925,16 @@ public class COASTAL {
 				double u = (Double) defaultMaxBounds.get(double[].class);
 				defaultMinBounds.put(double[].class, new Double((double) getConfig().getDouble(key + "[@min]", l)));
 				defaultMaxBounds.put(double[].class, new Double((double) getConfig().getDouble(key + "[@max]", u)));
+//			} else if (var.equals("String")) {
+//				char l = (Character) defaultMinBounds.get(String.class);
+//				char u = (Character) defaultMaxBounds.get(String.class);
+//				defaultMinBounds.put(String.class, new Character((char) getConfig().getInt(key + "[@min]", l)));
+//				defaultMaxBounds.put(String.class, new Character((char) getConfig().getInt(key + "[@max]", u)));
+//			} else if (var.equals("String[]")) {
+//				char l = (Character) defaultMinBounds.get(String[].class);
+//				char u = (Character) defaultMaxBounds.get(String[].class);
+//				defaultMinBounds.put(String[].class, new Character((char) getConfig().getInt(key + "[@min]", l)));
+//				defaultMaxBounds.put(String[].class, new Character((char) getConfig().getInt(key + "[@max]", u)));
 			} else {
 				addBound(minBounds, key + "[@min]", var);
 				addBound(maxBounds, key + "[@max]", var);
