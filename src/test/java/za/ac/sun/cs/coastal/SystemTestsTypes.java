@@ -1,5 +1,6 @@
 package za.ac.sun.cs.coastal;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class SystemTestsTypes extends SystemTests {
@@ -86,7 +87,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkMarkerCoverage(reporter, 4, 22);
 	}
 
-	@Test
+	@Ignore @Test
 	public void testFloat01() {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Float01.xml");
 		checkDivers(reporter, 1, 5);
@@ -100,7 +101,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkMarkerCoverage(reporter, 3, 1005);
 	}
 	
-	@Test
+	@Ignore @Test
 	public void testFloat02() {
 		Reporter reporter = setup("tests/Test01.xml", "tests/types/Float02.xml");
 		checkDivers(reporter, 1, 6);
