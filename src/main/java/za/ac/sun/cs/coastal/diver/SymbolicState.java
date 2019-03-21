@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.function.Function;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 
@@ -100,6 +101,10 @@ public class SymbolicState implements State {
 	private Expression throwable = null;
 
 	private final Map<String, Object> concreteValues;
+
+	private final Map<Integer, Object> inputValues = new HashMap<>();
+
+	private int triggeringIndex = -1;
 
 	private boolean mayContinue = true;
 
@@ -545,7 +550,8 @@ public class SymbolicState implements State {
 		if (!symbolicMode) {
 			return;
 		}
-		broker.publish("stop", new Tuple(this, null));
+		String triggerValues = (triggeringIndex == -1) ? null : gatherInputs(triggeringIndex);
+		broker.publish("stop", new Tuple(this, null, triggerValues));
 	}
 
 	@Override
@@ -554,7 +560,8 @@ public class SymbolicState implements State {
 			return;
 		}
 		pop();
-		broker.publish("stop", new Tuple(this, message));
+		String triggerValues = (triggeringIndex == -1) ? null : gatherInputs(triggeringIndex);
+		broker.publish("stop", new Tuple(this, message, triggerValues));
 	}
 
 	@Override
@@ -580,7 +587,7 @@ public class SymbolicState implements State {
 		if (!symbolicMode) {
 		 	return;
 		}
-		log.trace("{}: {}", label, spc.getPathCondition().toString());
+		log.info("{}: {}", label, spc.getPathCondition().toString());
 	}
 	
 	@Override
@@ -588,7 +595,7 @@ public class SymbolicState implements State {
 		if (!symbolicMode) {
 			return;
 		}
-		log.trace("spc: {}", spc.getPathCondition().toString());
+		log.info("spc: {}", spc.getPathCondition().toString());
 	}
 	
 	// ======================================================================
@@ -661,42 +668,58 @@ public class SymbolicState implements State {
 		int max = 1;
 		setLocal(address, new IntegerVariable(name, 32, min, max));
 		Long concrete = (Long) (concreteValues == null ? null : concreteValues.get(name));
-		return (concrete == null) ? currentValue : (concrete != 0);
+		boolean value = (concrete == null) ? currentValue : (concrete != 0);
+		inputValues.put(index, value);
+		return value;
 	}
 
 	@Override
 	public byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
-		return (byte) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
+		int value = (int) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
+		inputValues.put(index, value);
+		return (byte) value;
 	}
 
 	@Override
 	public short getConcreteShort(int triggerIndex, int index, int address, short currentValue) {
-		return (short) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
+		int value = (int) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
+		inputValues.put(index, value);
+		return (short) value;
 	}
 
 	@Override
 	public char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
-		return (char) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
+		int value = (int) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
+		inputValues.put(index, value);
+		return (char) value;
 	}
 
 	@Override
 	public int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
-		return (int) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
+		int value = (int) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
+		inputValues.put(index, value);
+		return (int) value;
 	}
 
 	@Override
 	public long getConcreteLong(int triggerIndex, int index, int address, long currentValue) {
-		return (long) getConcreteIntegral(triggerIndex, index, address, 64, currentValue);
+		long value = (long) getConcreteIntegral(triggerIndex, index, address, 64, currentValue);
+		inputValues.put(index, value);
+		return (long) value;
 	}
 
 	@Override
 	public float getConcreteFloat(int triggerIndex, int index, int address, float currentValue) {
-		return (float) getConcreteReal(triggerIndex, index, address, 32, currentValue);
+		float value = (float) getConcreteReal(triggerIndex, index, address, 32, currentValue);
+		inputValues.put(index, value);
+		return (float) value;
 	}
 
 	@Override
 	public double getConcreteDouble(int triggerIndex, int index, int address, double currentValue) {
-		return (double) getConcreteReal(triggerIndex, index, address, 64, currentValue);
+		double value = (double) getConcreteReal(triggerIndex, index, address, 64, currentValue);
+		inputValues.put(index, value);
+		return (double) value;
 	}
 
 	@Override
@@ -712,6 +735,7 @@ public class SymbolicState implements State {
 				setStringChar(stringId, i, chValue);
 			}
 			setLocal(address, new IntegerConstant(stringId, 32));
+			inputValues.put(index, currentValue);
 			return currentValue;
 		} else {
 			char minChar = (Character) coastal.getDefaultMinValue(char.class);
@@ -728,6 +752,7 @@ public class SymbolicState implements State {
 				setArrayValue(stringId, i, entryExpr);
 			}
 			setLocal(address, new IntegerConstant(stringId, 32));
+			inputValues.put(index, new String(chars));
 			return new String(chars);
 		}
 	}
@@ -744,6 +769,7 @@ public class SymbolicState implements State {
 				setArrayValue(arrayId, i, new IntegerConstant(unconvert.apply(Array.get(currentArray, i)), size));
 			}
 			setLocal(index, new IntegerConstant(arrayId, 32));
+			inputValues.put(index, currentArray);
 			return currentArray;
 		} else {
 			Class<?> type = trigger.getParamType(index);
@@ -775,6 +801,7 @@ public class SymbolicState implements State {
 				setArrayValue(arrayId, i, entryExpr);
 			}
 			setLocal(index, new IntegerConstant(arrayId, 32));
+			inputValues.put(index, newArray);
 			return newArray;
 		}
 	}
@@ -791,6 +818,7 @@ public class SymbolicState implements State {
 				setArrayValue(arrayId, i, new RealConstant(unconvert.apply(Array.get(currentArray, i)), size));
 			}
 			setLocal(index, new IntegerConstant(arrayId, 32));
+			inputValues.put(index, currentArray);
 			return currentArray;
 		} else {
 			Class<?> type = trigger.getParamType(index);
@@ -809,6 +837,7 @@ public class SymbolicState implements State {
 				setArrayValue(arrayId, i, entryExpr);
 			}
 			setLocal(index, new IntegerConstant(arrayId, 32));
+			inputValues.put(index, newArray);
 			return newArray;
 		}
 	}
@@ -917,7 +946,7 @@ public class SymbolicState implements State {
 	}
 
 	@Override
-	public void triggerMethod(int methodNumber) {
+	public void triggerMethod(int methodNumber, int triggerIndex) {
 		if (!recordMode) {
 			recordMode = mayRecord;
 			if (recordMode) {
@@ -926,6 +955,7 @@ public class SymbolicState implements State {
 				symbolicMode = true;
 				frames.push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
 				dumpFrames();
+				triggeringIndex = triggerIndex;
 			}
 		}
 		broker.publishThread("enter-method", methodNumber);
@@ -963,6 +993,67 @@ public class SymbolicState implements State {
 			}
 			dangerFlag = false;
 		}
+	}
+
+	private String gatherInputs(int triggerIndex) {
+		StringBuilder inputs = new StringBuilder();
+		Trigger trigger = coastal.getTrigger(triggerIndex);
+		inputs.append(trigger.getMethodName()).append('(');
+		int argc = trigger.getParamCount();
+		for (int argi = 0; argi < argc; argi++) {
+			if (argi > 0) {
+				inputs.append(", ");
+			}
+			String argName = trigger.getParamName(argi);
+			if (argName == null) {
+				inputs.append('*');
+				continue;
+			}
+			inputs.append(argName).append("==");
+			inputs.append(gatherConcreteValue(trigger, argi));
+		}
+		inputs.append(')');
+		return inputs.toString();
+	}
+	
+	private String gatherConcreteValue(Trigger trigger, int index) {
+		return gatherConcreteValue(trigger.getParamType(index), inputValues.get(index));
+	}
+
+	private static String gatherConcreteValue(Class<?> argType, Object value) {
+		StringBuilder repr = new StringBuilder();
+		if (argType == boolean.class) {
+			repr.append((Boolean) value);
+		} else if (argType == byte.class) {
+			repr.append((Integer) value);
+		} else if (argType == short.class) {
+			repr.append((Integer) value);
+		} else if (argType == char.class) {
+			repr.append('\'').append(StringEscapeUtils.escapeJava("" + (Character) value)).append('\'');
+		} else if (argType == int.class) {
+			repr.append((Integer) value);
+		} else if (argType == long.class) {
+			repr.append((Long) value);
+		} else if (argType == float.class) {
+			repr.append((Float) value);
+		} else if (argType == double.class) {
+			repr.append((Double) value);
+		} else if (argType == String.class) {
+			repr.append('"').append(StringEscapeUtils.escapeJava((String) value)).append('"');
+		} else if (argType.isArray()) {
+			Class<?> elmentType = argType.getComponentType();
+			repr.append('[');
+			for (int i = 0, n = Array.getLength(value); i < n; i++) {
+				if (i > 0) {
+					repr.append(", ");
+				}
+				repr.append(gatherConcreteValue(elmentType, Array.get(value, i)));
+			}
+			repr.append(']');
+		} else {
+			repr.append("???");
+		}
+		return repr.toString();
 	}
 
 	// ======================================================================

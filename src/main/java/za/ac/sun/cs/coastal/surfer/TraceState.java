@@ -460,7 +460,7 @@ public class TraceState implements State {
 	}
 
 	@Override
-	public void triggerMethod(int methodNumber) {
+	public void triggerMethod(int methodNumber, int triggerIndex) {
 		if (!recordMode) {
 			recordMode = mayRecord;
 			if (recordMode) {

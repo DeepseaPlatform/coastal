@@ -81,7 +81,7 @@ public interface State {
 	
 	String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue);
 	
-	void triggerMethod(int methodNumber);
+	void triggerMethod(int methodNumber, int triggerIndex);
 
 	void startMethod(int methodNumber, int argCount);
 

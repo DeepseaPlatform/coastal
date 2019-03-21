@@ -6,7 +6,7 @@ public class Mystery {
 	
 	public static void main(String[] args) {
 		preserveSomeHtmlTagsAndRemoveWhitespaces("012345678901234567");
-		runExample();
+		// runExample();
 	}
 
 	private static void runExample() {		
@@ -42,7 +42,7 @@ public class Mystery {
 				//	Debug.printPC("Current PC: ");
 				//}
 				// throw new RuntimeException("Infinite loop");
-				printInput(body);
+				// printInput(body);
 				Symbolic.printPC("HERE");
 				Symbolic.stop("BUG");
 				return "EXCEPTION: Infinite loop";

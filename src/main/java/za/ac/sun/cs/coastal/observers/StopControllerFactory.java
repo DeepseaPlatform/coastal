@@ -34,7 +34,7 @@ public class StopControllerFactory implements ObserverFactory {
 	//
 	// ======================================================================
 
-	private static final String[] PROPERTY_NAMES = new String[] { "was-stopped", "message" };
+	private static final String[] PROPERTY_NAMES = new String[] { "was-stopped", "message", "trigger" };
 
 	private static class StopManager implements ObserverManager {
 
@@ -48,6 +48,8 @@ public class StopControllerFactory implements ObserverFactory {
 
 		private String stopMessage = null;
 
+		private String triggerValues = null;
+		
 		StopManager(COASTAL coastal) {
 			log = coastal.getLog();
 			this.coastal = coastal;
@@ -67,11 +69,15 @@ public class StopControllerFactory implements ObserverFactory {
 			Tuple tuple = (Tuple) object;
 			coastal.stopWork();
 			stopMessage = (String) tuple.get(1);
-			if (stopMessage == null) {
-				new Banner('!').println("PROGRAM TERMINATION POINT REACHED").display(log);
-			} else {
-				new Banner('!').println("PROGRAM TERMINATION POINT REACHED").println(stopMessage).display(log);
+			triggerValues = (String) tuple.get(2);
+			Banner banner = new Banner('!').println("PROGRAM TERMINATION POINT REACHED");
+			if (stopMessage != null) {
+				banner.println("\n").println(stopMessage);
 			}
+			if (triggerValues != null) {
+				banner.println("\nTRIGGER:").println(triggerValues);
+			}
+			banner.display(log);
 			wasStopped = true;
 		}
 
@@ -87,9 +93,10 @@ public class StopControllerFactory implements ObserverFactory {
 
 		@Override
 		public Object[] getPropertyValues() {
-			Object[] propertyValues = new Object[2];
+			Object[] propertyValues = new Object[3];
 			propertyValues[0] = wasStopped;
 			propertyValues[1] = (stopMessage == null) ? "?" : stopMessage;
+			propertyValues[2] = (triggerValues == null) ? "?" : triggerValues;
 			return propertyValues;
 		}
 

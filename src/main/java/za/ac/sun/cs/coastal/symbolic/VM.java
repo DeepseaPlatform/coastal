@@ -154,8 +154,8 @@ public class VM {
 		return state.getConcreteStringArray(triggerIndex, index, address, currentValue);
 	}
 
-	public static void triggerMethod(int methodNumber) {
-		state.triggerMethod(methodNumber);
+	public static void triggerMethod(int methodNumber, int triggerIndex) {
+		state.triggerMethod(methodNumber, triggerIndex);
 	}
 
 	public static void startMethod(int methodNumber, int argCount) {
