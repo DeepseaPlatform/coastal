@@ -1166,6 +1166,11 @@ public class SymbolicState implements State {
 			throwable = new IntegerConstant(i, 32);
 			noException();
 			break;
+		case Opcodes.AALOAD:
+			i = (int) ((IntegerConstant) pop()).getValue();
+			a = (int) ((IntegerConstant) pop()).getValue();
+			push(getArrayValue(a, i));
+			break;
 		case Opcodes.BALOAD:
 			i = (int) ((IntegerConstant) pop()).getValue();
 			a = (int) ((IntegerConstant) pop()).getValue();
@@ -1192,6 +1197,12 @@ public class SymbolicState implements State {
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = new IntegerConstant(i, 32);
 			noException();
+			break;
+		case Opcodes.AASTORE:
+			e = pop();
+			i = (int) ((IntegerConstant) pop()).getValue();
+			a = (int) ((IntegerConstant) pop()).getValue();
+			setArrayValue(a, i, e);
 			break;
 		case Opcodes.BASTORE:
 			e = pop();
@@ -1504,9 +1515,11 @@ public class SymbolicState implements State {
 			push(new IntegerConstant(id, 32));
 			break;
 		case Opcodes.CHECKCAST:
-      break;
+			break;
 		case Opcodes.ANEWARRAY:
+			int size = (int) ((IntegerConstant) pop()).getValue();
 			id = incrAndGetNewObjectId();
+			setArrayLength(id, size);
 			push(new IntegerConstant(id, 32));
 			break;
 		default:

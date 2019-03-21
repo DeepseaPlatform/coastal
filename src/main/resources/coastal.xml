@@ -184,14 +184,5 @@ The configuration consists of 8 sections, all of them optional:
 		</delegates>
 
 	</coastal>
-
-	<!--
-	The following setting is passed to the GREEN constraint solver.
-	-->
-	<green>
-		<z3>
-			<path>/usr/local/bin/z3</path>
-		</z3>
-	</green>
 </configuration>
 
