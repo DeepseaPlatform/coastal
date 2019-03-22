@@ -193,6 +193,9 @@ public abstract class PathBasedFactory implements StrategyFactory {
 					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
 					List<Model> mdls = refine(spc);
+					// We start at -1 (and not at 0) to account for the
+					// fact that one item of work has been removed from
+					// the global work count.
 					int d = -1;
 					while (mdls != null) {
 						int m = coastal.addDiverModels(mdls);

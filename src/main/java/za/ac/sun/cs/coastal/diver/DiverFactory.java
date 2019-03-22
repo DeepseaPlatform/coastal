@@ -32,9 +32,9 @@ public class DiverFactory implements TaskFactory {
 	}
 
 	@Override
-	public Diver createTask(COASTAL coastal, TaskManager manager) {
+	public Diver[] createTask(COASTAL coastal, TaskManager manager) {
 		diverTaskCount++;
-		return new Diver(coastal, (DiverManager) manager);
+		return new Diver[] { new Diver(coastal, (DiverManager) manager) };
 	}
 
 	// ======================================================================
@@ -235,6 +235,8 @@ public class DiverFactory implements TaskFactory {
 					if (t instanceof AssertionError) {
 						log.trace("test");
 						broker.publish("assert-failed", new Tuple(this, null));
+					} else {
+						t.printStackTrace();
 					}
 					try {
 						VM.startCatch(-1);

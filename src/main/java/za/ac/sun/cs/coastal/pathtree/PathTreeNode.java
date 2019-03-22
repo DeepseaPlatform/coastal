@@ -23,7 +23,7 @@ public final class PathTreeNode {
 	 * actual execution of the program; instead, it could represent an
 	 * infeasible execution.
 	 */
-	private final Execution execution;
+	private Execution execution;
 
 	/**
 	 * The child nodes of this node.
@@ -87,12 +87,12 @@ public final class PathTreeNode {
 	/**
 	 * Create a new path tree node for the given execution.
 	 * 
-	 * @param trace
+	 * @param execution
 	 *            the execution to create the node for
 	 * @return a new path tree node
 	 */
-	public static PathTreeNode createNode(Execution trace) {
-		return new PathTreeNode(trace, trace.getNrOfOutcomes(), false, false);
+	public static PathTreeNode createNode(Execution execution) {
+		return new PathTreeNode(execution, execution.getNrOfOutcomes(), false, false);
 	}
 
 	/**
@@ -113,6 +113,15 @@ public final class PathTreeNode {
 		return new PathTreeNode(null, 0, true, false);
 	}
 
+	/**
+	 * Change the execution associated with this node.
+	 * 
+	 * @param execution new execution to add to the node
+	 */
+	public void updateExecution(Execution execution) {
+		this.execution = execution;
+	}
+	
 	/**
 	 * Return the identifier of this node.
 	 * 

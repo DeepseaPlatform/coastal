@@ -18,9 +18,9 @@ public class DepthFirstFactory extends PathBasedFactory {
 	}
 
 	@Override
-	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
 		((DepthFirstStrategyManager) manager).incrementTaskCount();
-		return new DepthFirstStrategy(coastal, (StrategyManager) manager);
+		return new Strategy[] { new DepthFirstStrategy(coastal, (StrategyManager) manager) };
 	}
 
 	// ======================================================================

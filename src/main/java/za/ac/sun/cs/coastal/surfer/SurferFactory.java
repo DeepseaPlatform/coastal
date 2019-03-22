@@ -34,9 +34,9 @@ public class SurferFactory implements TaskFactory {
 	}
 
 	@Override
-	public Surfer createTask(COASTAL coastal, TaskManager manager) {
+	public Surfer[] createTask(COASTAL coastal, TaskManager manager) {
 		surferTaskCount++;
-		return new Surfer(coastal, (SurferManager) manager);
+		return new Surfer[] { new Surfer(coastal, (SurferManager) manager) };
 	}
 
 	// ======================================================================

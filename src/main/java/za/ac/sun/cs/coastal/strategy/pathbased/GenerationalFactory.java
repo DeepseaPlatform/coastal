@@ -25,13 +25,15 @@ public class GenerationalFactory extends PathBasedFactory {
 	}
 
 	@Override
-	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
 		((GenerationalManager) manager).incrementTaskCount();
+		Strategy strategy = null;
 		if (((GenerationalManager) manager).full) {
-			return new GenerationalFullStrategy(coastal, (StrategyManager) manager);
+			strategy = new GenerationalFullStrategy(coastal, (StrategyManager) manager);
 		} else {
-			return new GenerationalStrategy(coastal, (StrategyManager) manager);
+			strategy = new GenerationalStrategy(coastal, (StrategyManager) manager);
 		}
+		return new Strategy[] { strategy };
 	}
 
 	// ======================================================================

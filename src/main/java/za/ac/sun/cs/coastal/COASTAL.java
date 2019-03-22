@@ -56,8 +56,8 @@ import za.ac.sun.cs.coastal.symbolic.Model;
 public class COASTAL {
 
 	/**
-	 * The logger for this analysis run. This is not created but set by the
-	 * outside world.
+	 * The logger for this analysis run. This is not created but set by the outside
+	 * world.
 	 */
 	private final Logger log;
 
@@ -109,14 +109,13 @@ public class COASTAL {
 	private final Map<String, Class<?>> parameters = new HashMap<>();
 
 	/**
-	 * Mapping from parameter names (of all triggers) to their sizes (for
-	 * arrays).
+	 * Mapping from parameter names (of all triggers) to their sizes (for arrays).
 	 */
 	private final Map<String, Integer> parameterSize = new HashMap<>();
 
 	/**
-	 * A trigger that describes the entry point. This is (basically) the name of
-	 * the main method and the parameter types.
+	 * A trigger that describes the entry point. This is (basically) the name of the
+	 * main method and the parameter types.
 	 */
 	private Trigger mainEntrypoint;
 
@@ -195,16 +194,11 @@ public class COASTAL {
 		/**
 		 * Construct a new task summary.
 		 * 
-		 * @param coastal
-		 *            instance of COASTAL
-		 * @param factory
-		 *            the task factory
-		 * @param initThreads
-		 *            initial number of threads
-		 * @param minThreads
-		 *            minimum number of threads
-		 * @param maxThreads
-		 *            maximum number of threads
+		 * @param coastal     instance of COASTAL
+		 * @param factory     the task factory
+		 * @param initThreads initial number of threads
+		 * @param minThreads  minimum number of threads
+		 * @param maxThreads  maximum number of threads
 		 */
 		TaskInfo(final COASTAL coastal, final TaskFactory factory, final int initThreads, final int minThreads,
 				final int maxThreads) {
@@ -216,13 +210,13 @@ public class COASTAL {
 		}
 
 		/**
-		 * Create a new task of this kind.
+		 * Create a new task of this kind. Sometimes, each task is in fact an array of
+		 * tasks, which work together.
 		 * 
-		 * @param coastal
-		 *            instance of COASTAL
-		 * @return the new task
+		 * @param coastal instance of COASTAL
+		 * @return the new task(s) as an array
 		 */
-		public Task create(COASTAL coastal) {
+		public Task[] create(COASTAL coastal) {
 			threadCount++;
 			return factory.createTask(coastal, manager);
 		}
@@ -280,16 +274,14 @@ public class COASTAL {
 	private final List<TaskInfo> tasks = new ArrayList<>();
 
 	/**
-	 * The manager for all divers. Divers are also included in the task
-	 * summaries ({@link #tasks}), but it is handy to have direct access to
-	 * their manager.
+	 * The manager for all divers. Divers are also included in the task summaries
+	 * ({@link #tasks}), but it is handy to have direct access to their manager.
 	 */
 	private DiverManager diverManager;
 
 	/**
-	 * The manager for all surfers. Surfers are also included in the task
-	 * summaries ({@link #tasks}), but it is handy to have direct access to
-	 * their manager.
+	 * The manager for all surfers. Surfers are also included in the task summaries
+	 * ({@link #tasks}), but it is handy to have direct access to their manager.
 	 */
 	private SurferManager surferManager;
 
@@ -305,26 +297,24 @@ public class COASTAL {
 	private final List<Tuple> allObservers = new ArrayList<>();
 
 	/**
-	 * A list of observer factories and managers that must be started once per
-	 * run.
+	 * A list of observer factories and managers that must be started once per run.
 	 */
 	private final List<Tuple> observersPerRun = new ArrayList<>();
 
 	/**
-	 * A list of observer factories and managers that must be started once per
-	 * task.
+	 * A list of observer factories and managers that must be started once per task.
 	 */
 	private final List<Tuple> observersPerTask = new ArrayList<>();
 
 	/**
-	 * A list of observer factories and managers that must be started once for
-	 * each diver.
+	 * A list of observer factories and managers that must be started once for each
+	 * diver.
 	 */
 	private final List<Tuple> observersPerDiver = new ArrayList<>();
 
 	/**
-	 * A list of observer factories and managers that must be started once for
-	 * each surfer.
+	 * A list of observer factories and managers that must be started once for each
+	 * surfer.
 	 */
 	private final List<Tuple> observersPerSurfer = new ArrayList<>();
 
@@ -447,8 +437,8 @@ public class COASTAL {
 
 	/**
 	 * The task completion manager that collects the "results" from divers and
-	 * strategies. In this case, there are no actual results; instead, all
-	 * products are either consumed or collected by the reporter.
+	 * strategies. In this case, there are no actual results; instead, all products
+	 * are either consumed or collected by the reporter.
 	 */
 	private final CompletionService<Void> completionService;
 
@@ -464,12 +454,11 @@ public class COASTAL {
 	// ======================================================================
 
 	/**
-	 * The outstanding number of models that have not been processed by divers,
-	 * or whose resulting path conditions have not been processed by a strategy.
-	 * This is not merely the number of items in the models queue or the pcs
-	 * queue: work may also be presented by a model of path condition currently
-	 * being processed. The strategy adjusts the work after it has processed a
-	 * path condition.
+	 * The outstanding number of models that have not been processed by divers, or
+	 * whose resulting path conditions have not been processed by a strategy. This
+	 * is not merely the number of items in the models queue or the pcs queue: work
+	 * may also be presented by a model of path condition currently being processed.
+	 * The strategy adjusts the work after it has processed a path condition.
 	 */
 	private final AtomicLong work = new AtomicLong(0);
 
@@ -485,41 +474,38 @@ public class COASTAL {
 	//
 	// ======================================================================
 
-	/* @formatter:off
+	/*
+	 * @formatter:off
 	 * 
-	 * private final Logger log;
-	 * private final ImmutableConfiguration config;
-	 * private final Broker broker;
-	 * private final Reporter reporter;
-	 * private final PathTree pathTree;
-	 * private final InstrumentationClassManager classManager;
+	 * private final Logger log; private final ImmutableConfiguration config;
+	 * private final Broker broker; private final Reporter reporter; private final
+	 * PathTree pathTree; private final InstrumentationClassManager classManager;
 	 * 
 	 * // TARGET INFORMATION
 	 * 
-	 * private final List<String> prefixes = new ArrayList<>();
-	 * private final List<Trigger> triggers = new ArrayList<>();
-	 * private final Map<String, Class<?>> parameters = new HashMap<>();
-	 * private final Map<String, Integer> parameterSize = new HashMap<>();
+	 * private final List<String> prefixes = new ArrayList<>(); private final
+	 * List<Trigger> triggers = new ArrayList<>(); private final Map<String,
+	 * Class<?>> parameters = new HashMap<>(); private final Map<String, Integer>
+	 * parameterSize = new HashMap<>();
 	 * 
 	 * // VARIABLE BOUNDS
 	 * 
 	 * private final Map<Class<?>, Object> defaultMinValue = new HashMap<>();
 	 * private final Map<Class<?>, Object> defaultMaxValue = new HashMap<>();
-	 * private final Map<String, Integer> minBounds = new HashMap<>();
-	 * private final Map<String, Integer> maxBounds = new HashMap<>();
+	 * private final Map<String, Integer> minBounds = new HashMap<>(); private final
+	 * Map<String, Integer> maxBounds = new HashMap<>();
 	 * 
 	 * // DIVERS, SURFERS, STRATEGIES
 	 *
-	 * private final List<TaskInfo> tasks = new ArrayList<>();
-	 * private DiverManager diverManager;
-	 * private SurferManager surferManager;
+	 * private final List<TaskInfo> tasks = new ArrayList<>(); private DiverManager
+	 * diverManager; private SurferManager surferManager;
 	 *
 	 * // OBSERVERS
 	 * 
-	 * private final List<Tuple> observersPerRun = new ArrayList<>();
-	 * private final List<Tuple> observersPerTask = new ArrayList<>();
-	 * private final List<Tuple> observersPerDiver = new ArrayList<>();
-	 * private final List<Tuple> observersPerSurfer = new ArrayList<>();
+	 * private final List<Tuple> observersPerRun = new ArrayList<>(); private final
+	 * List<Tuple> observersPerTask = new ArrayList<>(); private final List<Tuple>
+	 * observersPerDiver = new ArrayList<>(); private final List<Tuple>
+	 * observersPerSurfer = new ArrayList<>();
 	 * 
 	 * // DELEGATES
 	 * 
@@ -527,47 +513,41 @@ public class COASTAL {
 	 * 
 	 * // STANDARD OUT AND ERR
 	 * 
-	 * private final PrintStream systemOut = System.out;
-	 * private final PrintStream systemErr = System.err;
-	 * private static final PrintStream NUL = new PrintStream(...)
+	 * private final PrintStream systemOut = System.out; private final PrintStream
+	 * systemErr = System.err; private static final PrintStream NUL = new
+	 * PrintStream(...)
 	 * 
 	 * // QUEUES
 	 * 
-	 * private final BlockingQueue<Model> diverModelQueue;
-	 * private final BlockingQueue<Model> surferModelQueue;
-	 * private final BlockingQueue<SegmentedPC> pcQueue;
-	 * private final BlockingQueue<Trace> traceQueue;
+	 * private final BlockingQueue<Model> diverModelQueue; private final
+	 * BlockingQueue<Model> surferModelQueue; private final
+	 * BlockingQueue<SegmentedPC> pcQueue; private final BlockingQueue<Trace>
+	 * traceQueue;
 	 * 
 	 * // TIMING INFORMATION
 	 * 
-	 * private Calendar startingTime;
-	 * private Calendar stoppingTime;
-	 * private long nextReportingTime = 0;
-	 * private final long timeLimit;
+	 * private Calendar startingTime; private Calendar stoppingTime; private long
+	 * nextReportingTime = 0; private final long timeLimit;
 	 * 
 	 * // TASK MANAGEMENT
 	 * 
-	 * private final int maxThreads;
-	 * private final ExecutorService executor;
-	 * private final CompletionService<Void> completionService;
-	 * private final List<Future<Void>> futures;
+	 * private final int maxThreads; private final ExecutorService executor; private
+	 * final CompletionService<Void> completionService; private final
+	 * List<Future<Void>> futures;
 	 * 
 	 * // SHARED VARIABLES
 	 * 
-	 * private final AtomicLong work = new AtomicLong(0);
-	 * private final AtomicBoolean workDone = new AtomicBoolean(false);
+	 * private final AtomicLong work = new AtomicLong(0); private final
+	 * AtomicBoolean workDone = new AtomicBoolean(false);
 	 *
 	 * @formatter:on
 	 */
-	
-	
+
 	/**
 	 * Initialize the final fields for this analysis run of COASTAL.
 	 * 
-	 * @param log
-	 *            the logger to use for this analysis run
-	 * @param config
-	 *            the configuration to use for this analysis run
+	 * @param log    the logger to use for this analysis run
+	 * @param config the configuration to use for this analysis run
 	 */
 	public COASTAL(Logger log, ImmutableConfiguration config) {
 		this.log = log;
@@ -593,8 +573,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Parse the COASTAL configuration and extract the targets, triggers,
-	 * delegates, bounds, and observers.
+	 * Parse the COASTAL configuration and extract the targets, triggers, delegates,
+	 * bounds, and observers.
 	 */
 	private void parseConfig() {
 		parseConfigTarget();
@@ -715,18 +695,16 @@ public class COASTAL {
 	/**
 	 * Unescapes a string that contains standard Java escape sequences.
 	 * <ul>
-	 * <li><strong>&#92;b &#92;f &#92;n &#92;r &#92;t &#92;" &#92;'</strong> :
-	 * BS, FF, NL, CR, TAB, double and single quote.</li>
-	 * <li><strong>&#92;X &#92;XX &#92;XXX</strong> : Octal character
-	 * specification (0 - 377, 0x00 - 0xFF).</li>
-	 * <li><strong>&#92;uXXXX</strong> : Hexadecimal based Unicode
-	 * character.</li>
+	 * <li><strong>&#92;b &#92;f &#92;n &#92;r &#92;t &#92;" &#92;'</strong> : BS,
+	 * FF, NL, CR, TAB, double and single quote.</li>
+	 * <li><strong>&#92;X &#92;XX &#92;XXX</strong> : Octal character specification
+	 * (0 - 377, 0x00 - 0xFF).</li>
+	 * <li><strong>&#92;uXXXX</strong> : Hexadecimal based Unicode character.</li>
 	 * </ul>
 	 * 
 	 * @since 0.0.3
 	 * 
-	 * @param st
-	 *            A string optionally containing standard java escape sequences.
+	 * @param st A string optionally containing standard java escape sequences.
 	 * @return The translated string.
 	 */
 	public static String unescape(String st) {
@@ -945,12 +923,9 @@ public class COASTAL {
 	/**
 	 * Add a minimum/maximum bounds for a variable.
 	 * 
-	 * @param bounds
-	 *            the mapping of variable names to bounds
-	 * @param key
-	 *            the configuration key that stores the bound
-	 * @param var
-	 *            the name of the variable
+	 * @param bounds the mapping of variable names to bounds
+	 * @param key    the configuration key that stores the bound
+	 * @param var    the name of the variable
 	 */
 	private void addBound(Map<String, Object> bounds, String key, String var) {
 		if (getConfig().containsKey(key)) {
@@ -1094,8 +1069,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the configuration for this analysis of COASTAL. This configuration
-	 * is immutable.
+	 * Return the configuration for this analysis of COASTAL. This configuration is
+	 * immutable.
 	 * 
 	 * @return the configuration
 	 */
@@ -1113,8 +1088,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the reporter for this analysis run of COASTAL. This is used mainly
-	 * for testing purposes.
+	 * Return the reporter for this analysis run of COASTAL. This is used mainly for
+	 * testing purposes.
 	 * 
 	 * @return the reporter
 	 */
@@ -1132,8 +1107,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return an instance of {@link Reportable} that reports information about
-	 * the path tree.
+	 * Return an instance of {@link Reportable} that reports information about the
+	 * path tree.
 	 * 
 	 * @return a reporter for path tree properties
 	 */
@@ -1169,8 +1144,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return an instance of {@link Reportable} that reports information about
-	 * the COASTAL analysis run.
+	 * Return an instance of {@link Reportable} that reports information about the
+	 * COASTAL analysis run.
 	 * 
 	 * @return a reporter for analysis run properties
 	 */
@@ -1223,11 +1198,10 @@ public class COASTAL {
 
 	/**
 	 * Check is a potential target is an actual target. The potential target is
-	 * simply a class name that is compared to all known targets to see if any
-	 * are prefixes of the potential target.
+	 * simply a class name that is compared to all known targets to see if any are
+	 * prefixes of the potential target.
 	 * 
-	 * @param potentialTarget
-	 *            the name of class
+	 * @param potentialTarget the name of class
 	 * @return true if and only if the potential target is prefixed by a known
 	 *         target
 	 */
@@ -1241,13 +1215,11 @@ public class COASTAL {
 	}
 
 	/**
-	 * Find the index of the trigger with the corresponding name and signature.
-	 * If no such trigger exists, return -1.
+	 * Find the index of the trigger with the corresponding name and signature. If
+	 * no such trigger exists, return -1.
 	 * 
-	 * @param name
-	 *            the method name of the (potential) trigger
-	 * @param signature
-	 *            the signature of the (potential) trigger
+	 * @param name      the method name of the (potential) trigger
+	 * @param signature the signature of the (potential) trigger
 	 * @return the index of the trigger in the list of triggers, or -1
 	 */
 	public int findTrigger(String name, String signature) {
@@ -1264,19 +1236,17 @@ public class COASTAL {
 	/**
 	 * Return the trigger with a specified index.
 	 * 
-	 * @param index
-	 *            the index we are searching for
-	 * @return the corresponding trigger or {@code null} if there is no such
-	 *         trigger
+	 * @param index the index we are searching for
+	 * @return the corresponding trigger or {@code null} if there is no such trigger
 	 */
 	public Trigger getTrigger(int index) {
 		return triggers.get(index);
 	}
 
 	/**
-	 * Return the mapping of variable names to types. This contains all the
-	 * symbolic parameters mentioned in triggers (as well as any additional
-	 * symbolic variables created during some previous run of the program).
+	 * Return the mapping of variable names to types. This contains all the symbolic
+	 * parameters mentioned in triggers (as well as any additional symbolic
+	 * variables created during some previous run of the program).
 	 * 
 	 * @return the variable/type mapping
 	 */
@@ -1287,8 +1257,7 @@ public class COASTAL {
 	/**
 	 * Return the recorded size of the parameter. This is used for arrays.
 	 * 
-	 * @param name
-	 *            the name of the parameter
+	 * @param name the name of the parameter
 	 * @return the recorded size of the parameter or zero
 	 */
 	public int getParameterSize(String name) {
@@ -1299,10 +1268,8 @@ public class COASTAL {
 	/**
 	 * Record size of a parameter. This is used for arrays.
 	 * 
-	 * @param name
-	 *            the name of the parameter
-	 * @param size
-	 *            the size of the parameter
+	 * @param name the name of the parameter
+	 * @param size the size of the parameter
 	 */
 	public void setParameterSize(String name, int size) {
 		if (parameters.containsKey(name)) {
@@ -1323,8 +1290,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the actual arguments that should be passed to the main entry point
-	 * in the main class for this run.
+	 * Return the actual arguments that should be passed to the main entry point in
+	 * the main class for this run.
 	 *
 	 * @since 0.0.3
 	 * 
@@ -1337,8 +1304,7 @@ public class COASTAL {
 	/**
 	 * Find a delegate for a specified class name.
 	 * 
-	 * @param className
-	 *            the name of the class to search for
+	 * @param className the name of the class to search for
 	 * @return the delegate object or {@code null} if there is none
 	 */
 	public Object findDelegate(String className) {
@@ -1347,22 +1313,18 @@ public class COASTAL {
 
 	/**
 	 * A convenient constant for use in
-	 * {@link #findDelegate(String, String, String)}. This represents the empty
-	 * list of parameters.
+	 * {@link #findDelegate(String, String, String)}. This represents the empty list
+	 * of parameters.
 	 */
 	private static final Class<?>[] EMPTY_PARAMETERS = new Class<?>[0];
 
 	/**
 	 * Find a delegate method.
 	 * 
-	 * @param owner
-	 *            the method class name
-	 * @param name
-	 *            the method name
-	 * @param descriptor
-	 *            the method signature
-	 * @return a Java reflection of the method or {@code null} if it was not
-	 *         found
+	 * @param owner      the method class name
+	 * @param name       the method name
+	 * @param descriptor the method signature
+	 * @return a Java reflection of the method or {@code null} if it was not found
 	 */
 	public Method findDelegate(String owner, String name, String descriptor) {
 		Object delegate = findDelegate(owner);
@@ -1398,8 +1360,7 @@ public class COASTAL {
 
 	/**
 	 * Return an iterable collection of observers that are flagged to be
-	 * instantiated once for each task (strategy), ecluding the divers and
-	 * surfers.
+	 * instantiated once for each task (strategy), ecluding the divers and surfers.
 	 * 
 	 * @return collection of observers started once for each task
 	 */
@@ -1443,11 +1404,10 @@ public class COASTAL {
 	// ======================================================================
 
 	/**
-	 * Return the lower bound for symbolic variables without an explicit bound
-	 * of their own.
+	 * Return the lower bound for symbolic variables without an explicit bound of
+	 * their own.
 	 * 
-	 * @param type
-	 *            the type of the variable
+	 * @param type the type of the variable
 	 * @return the lower bound for symbolic variables
 	 */
 	public Object getDefaultMinValue(Class<?> type) {
@@ -1457,10 +1417,8 @@ public class COASTAL {
 	/**
 	 * Return the lower bound for the specified symbolic variable.
 	 * 
-	 * @param variable
-	 *            the name of the variable
-	 * @param type
-	 *            the type of the variable
+	 * @param variable the name of the variable
+	 * @param type     the type of the variable
 	 * @return the lower bound for the variable
 	 */
 	public Object getMinBound(String variable, Class<?> type) {
@@ -1468,19 +1426,16 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the lower bound for a specific variable, or -- if there is no
-	 * explicit bound -- for another variable. If there is no explicit bound,
-	 * the specified default value is returned.
+	 * Return the lower bound for a specific variable, or -- if there is no explicit
+	 * bound -- for another variable. If there is no explicit bound, the specified
+	 * default value is returned.
 	 * 
-	 * This is used for array where the specific variable is the array index and
-	 * the more general variable is the array as a whole.
+	 * This is used for array where the specific variable is the array index and the
+	 * more general variable is the array as a whole.
 	 * 
-	 * @param variable1
-	 *            the name of the specific variable
-	 * @param variable2
-	 *            the name of the more general variable
-	 * @param type
-	 *            the type of the variables
+	 * @param variable1 the name of the specific variable
+	 * @param variable2 the name of the more general variable
+	 * @param type      the type of the variables
 	 * @return the lower bound for either variable
 	 */
 	public Object getMinBound(String variable1, String variable2, Class<?> type) {
@@ -1488,13 +1443,11 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the lower bound for the specified symbolic variable. If there is
-	 * no explicit bound, the specified default value is returned.
+	 * Return the lower bound for the specified symbolic variable. If there is no
+	 * explicit bound, the specified default value is returned.
 	 * 
-	 * @param variable
-	 *            the name of the variable
-	 * @param defaultValue
-	 *            the default lower bound
+	 * @param variable     the name of the variable
+	 * @param defaultValue the default lower bound
 	 * @return the lower bound for the variable
 	 */
 	public Object getMinBound(String variable, Object defaultValue) {
@@ -1506,11 +1459,10 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the upper bound for symbolic variables without an explicit bound
-	 * of their own.
+	 * Return the upper bound for symbolic variables without an explicit bound of
+	 * their own.
 	 * 
-	 * @param type
-	 *            the type of the variable
+	 * @param type the type of the variable
 	 * @return the upper bound for symbolic variables
 	 */
 	public Object getDefaultMaxValue(Class<?> type) {
@@ -1520,10 +1472,8 @@ public class COASTAL {
 	/**
 	 * Return the upper bound for the specified symbolic variable.
 	 * 
-	 * @param variable
-	 *            the name of the variable
-	 * @param type
-	 *            the type of the variable
+	 * @param variable the name of the variable
+	 * @param type     the type of the variable
 	 * @return the upper bound for the variable
 	 */
 	public Object getMaxBound(String variable, Class<?> type) {
@@ -1531,19 +1481,16 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the upper bound for a specific variable, or -- if there is no
-	 * explicit bound -- for another variable. If there is no explicit bound,
-	 * the specified default value is returned.
+	 * Return the upper bound for a specific variable, or -- if there is no explicit
+	 * bound -- for another variable. If there is no explicit bound, the specified
+	 * default value is returned.
 	 * 
-	 * This is used for array where the specific variable is the array index and
-	 * the more general variable is the array as a whole.
+	 * This is used for array where the specific variable is the array index and the
+	 * more general variable is the array as a whole.
 	 * 
-	 * @param variable1
-	 *            the name of the specific variable
-	 * @param variable2
-	 *            the name of the more general variable
-	 * @param type
-	 *            the type of the variables
+	 * @param variable1 the name of the specific variable
+	 * @param variable2 the name of the more general variable
+	 * @param type      the type of the variables
 	 * @return the upper bound for either variable
 	 */
 	public Object getMaxBound(String variable1, String variable2, Class<?> type) {
@@ -1551,13 +1498,11 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the upper bound for the specified symbolic integer variable. If
-	 * there is no explicit bound, the specified default value is returned.
+	 * Return the upper bound for the specified symbolic integer variable. If there
+	 * is no explicit bound, the specified default value is returned.
 	 * 
-	 * @param variable
-	 *            the name of the variable
-	 * @param defaultValue
-	 *            the default upper bound
+	 * @param variable     the name of the variable
+	 * @param defaultValue the default upper bound
 	 * @return the upper bound for the variable
 	 */
 	public Object getMaxBound(String variable, Object defaultValue) {
@@ -1591,8 +1536,8 @@ public class COASTAL {
 	// ======================================================================
 
 	/**
-	 * Return the normal standard output. This is recorded at the start of the
-	 * run and (possibly) set to null to suppress the program's normal output.
+	 * Return the normal standard output. This is recorded at the start of the run
+	 * and (possibly) set to null to suppress the program's normal output.
 	 * 
 	 * @return the pre-recorded standard output
 	 */
@@ -1601,8 +1546,8 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the normal standard error. This is recorded at the start of the
-	 * run and (possibly) set to null to suppress the program's normal output.
+	 * Return the normal standard error. This is recorded at the start of the run
+	 * and (possibly) set to null to suppress the program's normal output.
 	 * 
 	 * @return the pre-recorded standard error
 	 */
@@ -1628,11 +1573,10 @@ public class COASTAL {
 	}
 
 	/**
-	 * Add a list of models to the diver model queue. Only those models that
-	 * have not been enqueued before are added to the queue.
+	 * Add a list of models to the diver model queue. Only those models that have
+	 * not been enqueued before are added to the queue.
 	 * 
-	 * @param mdls
-	 *            the list of models to add
+	 * @param mdls the list of models to add
 	 * @return the number of models actually added to the queue
 	 */
 	public int addDiverModels(List<Model> mdls) {
@@ -1651,24 +1595,66 @@ public class COASTAL {
 	}
 
 	/**
+	 * Add a list of models to the diver model queue. Only those models that have
+	 * not been enqueued before are added to the queue. This is a special case where
+	 * there is really only a single model.
+	 * 
+	 * @param mdl the model to add
+	 * @return the number of models actually added to the queue
+	 */
+	public int addDiverModels(Model mdl) {
+		int n = 0;
+		try {
+			if (visitedDiverModels.add(mdl.getConcreteValues().toString())) {
+				diverModelQueue.put(mdl);
+				n++;
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return n;
+	}
+
+	/**
+	 * Add a list of models to the diver model queue. Only those models that have
+	 * not been enqueued before are added to the queue. This is a special case where
+	 * there is really only a single model and it does not even have a priority. A
+	 * "true" model is created with priority 0, which is a common case.
+	 * 
+	 * @param mdl the model to add as a name-value mapping
+	 * @return the number of models actually added to the queue
+	 */
+	public int addDiverModels(Map<String, Object> mdl) {
+		Model m = new Model(0, mdl);
+		int n = 0;
+		try {
+			if (visitedDiverModels.add(m.getConcreteValues().toString())) {
+				diverModelQueue.put(m);
+				n++;
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return n;
+	}
+
+	/**
 	 * Return the next available diver model.
 	 * 
 	 * @return the model as a variable-value mapping
-	 * @throws InterruptedException
-	 *             if the action of removing the model was interrupted
+	 * @throws InterruptedException if the action of removing the model was
+	 *                              interrupted
 	 */
 	public Map<String, Object> getNextDiverModel() throws InterruptedException {
 		return diverModelQueue.take().getConcreteValues();
 	}
 
 	/**
-	 * Add the first model to the queue of models. This kicks off the analysis
-	 * run.
+	 * Add the first model to the queue of models. This kicks off the analysis run.
 	 * 
 	 * THIS METHOD IS A PART OF THE DESIGN THAT NEEDS TO BE REFACTORED!!
 	 * 
-	 * @param firstModel
-	 *            the very first model to add
+	 * @param firstModel the very first model to add
 	 */
 	public void addFirstModel(Model firstModel) {
 		try {
@@ -1692,11 +1678,10 @@ public class COASTAL {
 	}
 
 	/**
-	 * Add a list of models to the surfer model queue. Only those models that
-	 * have not been enqueued before are added to the queue.
+	 * Add a list of models to the surfer model queue. Only those models that have
+	 * not been enqueued before are added to the queue.
 	 * 
-	 * @param mdls
-	 *            the list of models to add
+	 * @param mdls the list of models to add
 	 * @return the number of models actually added to the queue
 	 */
 	public int addSurferModels(List<Model> mdls) {
@@ -1715,11 +1700,10 @@ public class COASTAL {
 	}
 
 	/**
-	 * Add a single model to the surfer model queue. The operation will only
-	 * succeed if the model has not been enqueued before.
+	 * Add a single model to the surfer model queue. The operation will only succeed
+	 * if the model has not been enqueued before.
 	 * 
-	 * @param mdl
-	 *            the model to add
+	 * @param mdl the model to add
 	 * @return {@code true} if the model has been added successfully
 	 */
 	public boolean addSurferModel(Model mdl) {
@@ -1738,8 +1722,8 @@ public class COASTAL {
 	 * Return the next available surfer model.
 	 * 
 	 * @return the model
-	 * @throws InterruptedException
-	 *             if the action of removing the model was interrupted
+	 * @throws InterruptedException if the action of removing the model was
+	 *                              interrupted
 	 */
 	public Model getNextSurferModel() throws InterruptedException {
 		return surferModelQueue.take();
@@ -1759,8 +1743,7 @@ public class COASTAL {
 	/**
 	 * Add a new entry to the queue of path conditions.
 	 * 
-	 * @param spc
-	 *            the path condition to add
+	 * @param spc the path condition to add
 	 */
 	public void addPc(SegmentedPC spc) {
 		try {
@@ -1778,8 +1761,8 @@ public class COASTAL {
 	 * Return the next available path condition.
 	 * 
 	 * @return the next path condition
-	 * @throws InterruptedException
-	 *             if the action of removing the path condition was interrupted
+	 * @throws InterruptedException if the action of removing the path condition was
+	 *                              interrupted
 	 */
 	public SegmentedPC getNextPc() throws InterruptedException {
 		return pcQueue.take();
@@ -1799,8 +1782,7 @@ public class COASTAL {
 	/**
 	 * Add a new entry to the queue of traces.
 	 * 
-	 * @param trace
-	 *            the trace to add
+	 * @param trace the trace to add
 	 */
 	public void addTrace(Trace trace) {
 		try {
@@ -1818,8 +1800,8 @@ public class COASTAL {
 	 * Return the next available trace.
 	 * 
 	 * @return the next trace
-	 * @throws InterruptedException
-	 *             if the action of removing the trace was interrupted
+	 * @throws InterruptedException if the action of removing the trace was
+	 *                              interrupted
 	 */
 	public Trace getNextTrace() throws InterruptedException {
 		return traceQueue.take();
@@ -1830,13 +1812,13 @@ public class COASTAL {
 	 * 
 	 * @param timeout number of milliseconds to wait
 	 * @return the next trace or {@code null}
-	 * @throws InterruptedException
-	 *             if the action of removing the trace was interrupted
+	 * @throws InterruptedException if the action of removing the trace was
+	 *                              interrupted
 	 */
 	public Trace getNextTrace(long timeout) throws InterruptedException {
 		return traceQueue.poll(timeout, TimeUnit.MILLISECONDS);
 	}
-	
+
 	// ======================================================================
 	//
 	// TIMING INFORMATION
@@ -1847,10 +1829,8 @@ public class COASTAL {
 	 * Wait for a change in the status of the workDone flag or until a specified
 	 * time has elapsed.
 	 * 
-	 * @param delay
-	 *            time to wait in milliseconds
-	 * @throws InterruptedException
-	 *             if the thread was interrupted while delaying
+	 * @param delay time to wait in milliseconds
+	 * @throws InterruptedException if the thread was interrupted while delaying
 	 */
 	private void idle(long delay) throws InterruptedException {
 		if ((System.currentTimeMillis() - startingTime.getTimeInMillis()) / 1000 > timeLimit) {
@@ -1866,8 +1846,7 @@ public class COASTAL {
 	/**
 	 * Update the count of outstanding work items by a given amount.
 	 * 
-	 * @param delta
-	 *            how much to add to the number of work items
+	 * @param delta how much to add to the number of work items
 	 */
 	public void updateWork(long delta) {
 		long w = work.addAndGet(delta);
@@ -1885,7 +1864,7 @@ public class COASTAL {
 			workDone.notifyAll();
 		}
 	}
-	
+
 	/**
 	 * Set the flag to indicate that the analysis run must stop.
 	 *
@@ -1898,7 +1877,7 @@ public class COASTAL {
 			workDone.notifyAll();
 		}
 	}
-	
+
 	/**
 	 * Stop the still-executing tasks and the thread manager itself.
 	 */
@@ -1931,11 +1910,10 @@ public class COASTAL {
 	}
 
 	/**
-	 * Start the analysis run, and show banners if and only the parameter flag
-	 * is true.
+	 * Start the analysis run, and show banners if and only the parameter flag is
+	 * true.
 	 * 
-	 * @param showBanner
-	 *            a flag to tell whether or not to show banners
+	 * @param showBanner a flag to tell whether or not to show banners
 	 */
 	public void start(boolean showBanner) {
 		startingTime = Calendar.getInstance();
@@ -1991,13 +1969,15 @@ public class COASTAL {
 	}
 
 	/**
-	 * Start the tasks described by the task summaries {@link #tasks}, as read
-	 * from the configuration.
+	 * Start the tasks described by the task summaries {@link #tasks}, as read from
+	 * the configuration.
 	 */
 	private void startTasks() {
 		for (TaskInfo task : tasks) {
 			for (int i = 0; i < task.getInitThreads(); i++) {
-				futures.add(completionService.submit(task.create(this)));
+				for (Task taskComponent : task.create(this)) {
+					futures.add(completionService.submit(taskComponent));
+				}
 			}
 		}
 	}
@@ -2005,8 +1985,7 @@ public class COASTAL {
 	/**
 	 * Perform periodic reporting to the console.
 	 * 
-	 * @param object
-	 *            dummy object
+	 * @param object dummy object
 	 */
 	private void tick(Object object) {
 		long elapsedTime = System.currentTimeMillis() - getStartingTime();
@@ -2042,8 +2021,7 @@ public class COASTAL {
 	/**
 	 * Execute an emergency stop.
 	 * 
-	 * @param object
-	 *            dummy object
+	 * @param object dummy object
 	 */
 	private void emergencyStop(Object object) {
 		new Banner('@').println("EMERGENCY STOP").display(log);
@@ -2053,8 +2031,7 @@ public class COASTAL {
 	/**
 	 * Reports some statistics about the analysis run at the end of the run.
 	 * 
-	 * @param object
-	 *            dummy object
+	 * @param object dummy object
 	 */
 	private void report(Object object) {
 		getBroker().publish("report", new Tuple("COASTAL.diver-models", visitedDiverModels.size()));
@@ -2079,8 +2056,7 @@ public class COASTAL {
 	/**
 	 * The main function and entry point for COASTAL.
 	 * 
-	 * @param args
-	 *            the command-line arguments
+	 * @param args the command-line arguments
 	 */
 	public static void main(String[] args) {
 		args = parseOptions(args);
@@ -2096,11 +2072,10 @@ public class COASTAL {
 
 	/**
 	 * Parse the command-line options. Meaningful options are processed, setting
-	 * various internal flags. Unrecognized options are placed in a new array
-	 * which is assumed to contain configuration files.
+	 * various internal flags. Unrecognized options are placed in a new array which
+	 * is assumed to contain configuration files.
 	 * 
-	 * @param args
-	 *            the original command-line arguments
+	 * @param args the original command-line arguments
 	 * @return unprocessed command-line arguments
 	 */
 	private static String[] parseOptions(String[] args) {

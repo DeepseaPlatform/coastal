@@ -11,6 +11,7 @@
 			<bound name="a" min="32" max="128"/>
 		</bounds>
 		<settings>
+		<echo-output>true</echo-output>
 			<time-limit>120</time-limit>
 		</settings>
 		<divers threads="0"/>

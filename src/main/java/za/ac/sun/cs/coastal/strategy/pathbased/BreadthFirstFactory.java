@@ -21,9 +21,9 @@ public class BreadthFirstFactory extends PathBasedFactory {
 	}
 
 	@Override
-	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
 		((BreadthFirstStrategyManager) manager).incrementTaskCount();
-		return new BreadthFirstStrategy(coastal, (StrategyManager) manager);
+		return new Strategy[] { new BreadthFirstStrategy(coastal, (StrategyManager) manager) };
 	}
 
 	// ======================================================================

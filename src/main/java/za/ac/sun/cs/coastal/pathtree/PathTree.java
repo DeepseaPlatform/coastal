@@ -1,5 +1,7 @@
 package za.ac.sun.cs.coastal.pathtree;
 
+import java.util.Comparator;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -16,7 +18,7 @@ import za.ac.sun.cs.coastal.symbolic.Execution;
 /**
  * Representation of all execution paths in a single tree.
  */
-public class PathTree {
+public class PathTree implements Comparator<PathTreeNode> {
 
 	/**
 	 * The one-and-only logger.
@@ -63,6 +65,11 @@ public class PathTree {
 	 * A lock for updating the root of the tree.
 	 */
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(false);
+
+	/**
+	 * A queue to keep track of the deepest nodes that are not fully explored.
+	 */
+	private final PriorityBlockingQueue<PathTreeNode> deepest = new PriorityBlockingQueue<>(10, this);
 
 	/**
 	 * Constructor.
@@ -162,27 +169,56 @@ public class PathTree {
 		PathTreeNode parent = root;
 		visitedNodes[0] = root;
 		int i = path[0].getOutcomeIndex();
-		for (int j = 1; j < depth; j++) {
-			if (path[j] instanceof Trace) {
+		if (path[0] instanceof Trace) {
+			for (int j = 1; j < depth; j++) {
 				log.trace("::: insert(parent:{}, cur/depth:{}/{})", getId(parent), j, depth);
-			} else {
+				PathTreeNode n = parent.getChild(i);
+				if (n == null) {
+					parent.lock();
+					if (parent.getChild(i) == null) {
+						n = PathTreeNode.createNode(path[j]);
+						parent.setChild(i, n);
+					} else {
+						n = parent.getChild(i);
+					}
+					parent.unlock();
+				}
+				parent = n;
+				visitedNodes[j] = n;
+				i = path[j].getOutcomeIndex();
+			}
+		} else {
+			for (int j = 1; j < depth; j++) {
 				Expression conjunct = ((SegmentedPC) path[j]).getActiveConjunct();
 				log.trace("::: insert(parent:{}, conjunct:{}, cur/depth:{}/{})", getId(parent), conjunct, j, depth);
-			}
-			PathTreeNode n = parent.getChild(i);
-			if (n == null) {
-				parent.lock();
-				if (parent.getChild(i) == null) {
-					n = PathTreeNode.createNode(path[j]);
-					parent.setChild(i, n);
-				} else {
-					n = parent.getChild(i);
+				PathTreeNode n = parent.getChild(i);
+				if (n == null) {
+					parent.lock();
+					if (parent.getChild(i) == null) {
+						n = PathTreeNode.createNode(path[j]);
+						parent.setChild(i, n);
+					} else {
+						n = parent.getChild(i);
+					}
+					parent.unlock();
 				}
-				parent.unlock();
+				parent = n;
+				visitedNodes[j] = n;
+				i = path[j].getOutcomeIndex();
 			}
-			parent = n;
-			visitedNodes[j] = n;
-			i = path[j].getOutcomeIndex();
+			// We are adding a SegmentedPC.  If the tree contains Traces update it.
+			int k = 0;
+			while ((k < depth) && !(visitedNodes[k].getExecution() instanceof Trace)) {
+				k++;
+			}
+			while (k < depth) {
+				visitedNodes[k].lock();
+				if (visitedNodes[k].getExecution() instanceof Trace) {
+					visitedNodes[k].updateExecution(path[k]);
+				}
+				visitedNodes[k].unlock();
+				k++;
+			}
 		}
 		// At this point:
 		// parent == node{i_d-1}, j == depth, i == i_d-1 == path[j-1].getOutcomeIndex()
@@ -231,9 +267,16 @@ public class PathTree {
 				}
 			}
 		}
+		if ((n != null) && !n.isFullyExplored()) {
+			deepest.add(n);
+			log.info(":::");
+			for (String ll : stringRepr()) {
+				log.info("::: {}", ll);
+			}
+		}
 		return n;
 	}
-	
+
 	// ======================================================================
 	//
 	// STRING REPRESENTATION
@@ -285,6 +328,25 @@ public class PathTree {
 
 	public String getShape() {
 		return (root == null) ? "0" : root.getShape();
+	}
+
+	// ======================================================================
+	//
+	// SUPPORT FOR DEEPEST NODES
+	//
+	// ======================================================================
+
+	public PathTreeNode getDeepestNode() {
+		PathTreeNode node = null;
+		do {
+			node = deepest.poll();
+		} while ((node != null) && node.isFullyExplored());
+		return node;
+	}
+
+	@Override
+	public int compare(PathTreeNode node1, PathTreeNode node2) {
+		return Integer.compare(node2.getExecution().getDepth(), node1.getExecution().getDepth());
 	}
 
 }

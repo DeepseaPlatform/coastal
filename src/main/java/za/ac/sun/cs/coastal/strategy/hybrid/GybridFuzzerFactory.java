@@ -35,9 +35,9 @@ public class GybridFuzzerFactory implements StrategyFactory {
 	}
 
 	@Override
-	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
 		((GybridFuzzerManager) manager).incrementTaskCount();
-		return new GybridFuzzerStrategy(coastal, (StrategyManager) manager);
+		return new Strategy[] { new GybridFuzzerStrategy(coastal, (StrategyManager) manager) };
 	}
 
 	// ======================================================================

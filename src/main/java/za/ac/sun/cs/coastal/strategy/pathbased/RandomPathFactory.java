@@ -20,9 +20,9 @@ public class RandomPathFactory extends PathBasedFactory {
 	}
 
 	@Override
-	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
 		((RandomStrategyManager) manager).incrementTaskCount();
-		return new RandomPathStrategy(coastal, (StrategyManager) manager);
+		return new Strategy[] { new RandomPathStrategy(coastal, (StrategyManager) manager) };
 	}
 
 	// ======================================================================

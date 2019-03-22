@@ -29,9 +29,9 @@ public class RandomTestingFactory extends TraceBasedFactory {
 	}
 
 	@Override
-	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
 		((RandomTestingManager) manager).incrementTaskCount();
-		return new RandomTestingStrategy(coastal, (StrategyManager) manager);
+		 return new Strategy[] { new RandomTestingStrategy(coastal, (StrategyManager) manager) };
 	}
 
 	// ======================================================================

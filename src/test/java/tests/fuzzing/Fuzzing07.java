@@ -6,8 +6,8 @@ public class Fuzzing07 {
 
     public static void main(String[] args) throws Exception {
     	analyse("123456789012");
-    	analyse("DEADHELPBEEF");
-    	analyse("deadhelpbeef");
+    	//analyse("DEADHELPBEEF");
+    	//analyse("deadhelpbeef");
     }
 
 	public static void analyse(String word) {
