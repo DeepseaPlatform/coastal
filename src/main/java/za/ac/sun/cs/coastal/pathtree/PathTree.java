@@ -36,6 +36,11 @@ public class PathTree implements Comparator<PathTreeNode> {
 	private final boolean drawPaths;
 
 	/**
+	 * Flag to indicate whether deepest paths should be recorded.
+	 */
+	private boolean recordDeepest = false;
+
+	/**
 	 * The root of the tree.
 	 */
 	private PathTreeNode root = null;
@@ -82,6 +87,15 @@ public class PathTree implements Comparator<PathTreeNode> {
 		this.broker = coastal.getBroker();
 		broker.subscribe("coastal-stop", this::report);
 		drawPaths = coastal.getConfig().getBoolean("coastal.settings.draw-paths", false);
+	}
+
+	/**
+	 * Set the status of the {@code recordDeepest} flag.
+	 * 
+	 * @param recordDeepest the new value for the flag
+	 */
+	public void setRecordDeepest(boolean recordDeepest) {
+		this.recordDeepest = recordDeepest;
 	}
 
 	/**
@@ -238,7 +252,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 				}
 			}
 		}
-		if ((n != null) && !n.isFullyExplored()) {
+		if (recordDeepest && (n != null) && !n.isFullyExplored()) {
 			deepest.add(n);
 		}
 		return n;
