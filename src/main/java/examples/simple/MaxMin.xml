@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>examples.simple.MaxMin</main>
+			<instrument>examples.simple</instrument>
+			<trigger>examples.simple.MaxMin.run(A: int, B: int)</trigger>
+		</target>
+		<settings>
+			<echo-output>true</echo-output>
+			
+		</settings>
+		<delegates>
+			<delegate>
+				<for>java.lang.Math</for>
+				<model>za.ac.sun.cs.coastal.model.Math</model>
+			</delegate>
+		</delegates>
+	</coastal>
+</configuration>
