@@ -1,5 +1,7 @@
 package za.ac.sun.cs.coastal.pathtree;
 
+import java.util.Comparator;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -16,7 +18,7 @@ import za.ac.sun.cs.coastal.symbolic.Execution;
 /**
  * Representation of all execution paths in a single tree.
  */
-public class PathTree {
+public class PathTree implements Comparator<PathTreeNode> {
 
 	/**
 	 * The one-and-only logger.
@@ -63,6 +65,11 @@ public class PathTree {
 	 * A lock for updating the root of the tree.
 	 */
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock(false);
+
+	/**
+	 * A queue to keep track of the deepest nodes that are not fully explored.
+	 */
+	private final PriorityBlockingQueue<PathTreeNode> deepest = new PriorityBlockingQueue<>(10, this);
 
 	/**
 	 * Constructor.
@@ -231,9 +238,12 @@ public class PathTree {
 				}
 			}
 		}
+		if ((n != null) && !n.isFullyExplored()) {
+			deepest.add(n);
+		}
 		return n;
 	}
-	
+
 	// ======================================================================
 	//
 	// STRING REPRESENTATION
@@ -285,6 +295,33 @@ public class PathTree {
 
 	public String getShape() {
 		return (root == null) ? "0" : root.getShape();
+	}
+
+	// ======================================================================
+	//
+	// SUPPORT FOR DEEPEST NODES
+	//
+	// ======================================================================
+
+	public PathTreeNode getDeepestNode() {
+		PathTreeNode node = null;
+		do {
+			node = deepest.poll();
+		} while ((node != null) && node.isFullyExplored());
+		return node;
+	}
+
+	@Override
+	public int compare(PathTreeNode node1, PathTreeNode node2) {
+		Execution exec1 = node1.getExecution();
+		if (exec1 == null) {
+			return 1;
+		}
+		Execution exec2 = node2.getExecution();
+		if (exec2 == null) {
+			return -1;
+		}
+		return Integer.compare(exec2.getDepth(), exec1.getDepth());
 	}
 
 }
