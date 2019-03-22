@@ -216,13 +216,14 @@ public class COASTAL {
 		}
 
 		/**
-		 * Create a new task of this kind.
+		 * Create a new task of this kind. Sometimes, each task is in fact an array of
+		 * tasks, which work together.
 		 * 
 		 * @param coastal
 		 *            instance of COASTAL
-		 * @return the new task
+		 * @return the new task(s) as an array
 		 */
-		public Task create(COASTAL coastal) {
+		public Task[] create(COASTAL coastal) {
 			threadCount++;
 			return factory.createTask(coastal, manager);
 		}
@@ -1997,7 +1998,9 @@ public class COASTAL {
 	private void startTasks() {
 		for (TaskInfo task : tasks) {
 			for (int i = 0; i < task.getInitThreads(); i++) {
-				futures.add(completionService.submit(task.create(this)));
+				for (Task taskComponent : task.create(this)) {
+					futures.add(completionService.submit(taskComponent));
+				}
 			}
 		}
 	}

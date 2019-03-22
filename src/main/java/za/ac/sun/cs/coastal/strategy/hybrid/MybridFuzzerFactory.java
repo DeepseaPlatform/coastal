@@ -36,9 +36,9 @@ public class MybridFuzzerFactory implements StrategyFactory {
 	}
 
 	@Override
-	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
 		((MybridFuzzerManager) manager).incrementTaskCount();
-		return new MybridFuzzerStrategy(coastal, (StrategyManager) manager);
+		return new Strategy[] { new MybridFuzzerStrategy(coastal, (StrategyManager) manager) };
 	}
 
 	// ======================================================================

@@ -8,9 +8,11 @@ import za.ac.sun.cs.coastal.TaskFactory;
 
 public interface StrategyFactory extends TaskFactory {
 
+	@Override
 	StrategyManager createManager(COASTAL coastal);
 
-	Strategy createTask(COASTAL coastal, TaskManager manager);
+	@Override
+	Strategy[] createTask(COASTAL coastal, TaskManager manager);
 
 	// ======================================================================
 	//

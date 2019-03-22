@@ -37,9 +37,9 @@ public class HybridFuzzerFactory implements StrategyFactory {
 	}
 
 	@Override
-	public Strategy createTask(COASTAL coastal, TaskManager manager) {
+	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
 		((HybridFuzzerManager) manager).incrementTaskCount();
-		return new HybridFuzzerStrategy(coastal, (StrategyManager) manager);
+		return new Strategy[] { new HybridFuzzerStrategy(coastal, (StrategyManager) manager) };
 	}
 
 	// ======================================================================

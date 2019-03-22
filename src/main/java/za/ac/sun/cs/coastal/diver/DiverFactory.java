@@ -32,9 +32,9 @@ public class DiverFactory implements TaskFactory {
 	}
 
 	@Override
-	public Diver createTask(COASTAL coastal, TaskManager manager) {
+	public Diver[] createTask(COASTAL coastal, TaskManager manager) {
 		diverTaskCount++;
-		return new Diver(coastal, (DiverManager) manager);
+		return new Diver[] { new Diver(coastal, (DiverManager) manager) };
 	}
 
 	// ======================================================================
