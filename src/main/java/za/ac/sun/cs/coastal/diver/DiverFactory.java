@@ -191,6 +191,11 @@ public class DiverFactory implements TaskFactory {
 					SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
 					String banner = "starting dive " + manager.getNextDiveCount() + " @" + Banner.getElapsed(coastal);
 					log.trace(Banner.getBannerLine(banner, '-'));
+					if (concreteValues == null) {
+						log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
+					} else {
+						log.trace(Banner.getBannerLine(concreteValues.toString(), '*'));
+					}
 					ClassLoader classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
 					performRun(classLoader);
 					manager.recordTime(System.currentTimeMillis() - t1);

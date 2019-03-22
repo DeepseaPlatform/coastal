@@ -217,6 +217,11 @@ public class SurferFactory implements TaskFactory {
 					manager.recordWaitTime(t1 - t0);
 					String banner = "starting surf " + manager.getNextSurfCount(); // + " @" + Banner.getElapsed(coastal)
 					log.trace(Banner.getBannerLine(banner, '-'));
+					if (concreteValues == null) {
+						log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
+					} else {
+						log.trace(Banner.getBannerLine(concreteValues.toString(), '*'));
+					}
 					boolean aborted = false;
 					// ------- BEGIN MANUAL INLINE
 					// performRun(classLoader, trigger);
