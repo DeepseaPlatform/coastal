@@ -25,9 +25,9 @@ import za.ac.sun.cs.coastal.symbolic.SymbolicException;
 
 public class TraceState implements State {
 
-	public static final String INDEX_SEPARATOR = "_D_"; // "$"
-
-	public static final String CHAR_SEPARATOR = "_H_"; // "#"
+//	public static final String INDEX_SEPARATOR = "_D_"; // "$"
+//
+//	public static final String CHAR_SEPARATOR = "_H_"; // "#"
 
 	private final COASTAL coastal;
 
