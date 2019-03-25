@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.solver.Operation.Operator;
-import za.ac.sun.cs.coastal.symbolic.InputSet;
+import za.ac.sun.cs.coastal.symbolic.Input;
 
 public class Solver {
 
@@ -40,7 +40,7 @@ public class Solver {
 		z3Command = z3Path + ' ' + z3Args;
 	}
 
-	public InputSet solve(Expression expression) {
+	public Input solve(Expression expression) {
 		try {
 			Translator t = new Translator();
 			expression.accept(t);
@@ -482,7 +482,7 @@ public class Solver {
 	//
 	// ======================================================================
 
-	private InputSet retrieveModel(String output, Map<String, Variable> variables) {
+	private Input retrieveModel(String output, Map<String, Variable> variables) {
 		output = output.replaceAll("^\\s*\\(model\\s+(.*)\\s*\\)\\s*$", "$1@");
 		output = output.replaceAll("\\)\\s*\\(define-fun", ")@(define-fun");
 		output = output.replaceAll("\\(define-fun\\s+([$!\\w-]+)\\s*\\(\\)\\s*((\\w+)|(\\([^)]+\\)))\\s+([^@]+)\\s*\\)@",
@@ -496,7 +496,7 @@ public class Solver {
 			}
 		}
 
-		InputSet model = new InputSet();
+		Input model = new Input();
 		for (Variable variable : variables.values()) {
 			String name = variable.getName();
 			if (assignment.containsKey(name)) {

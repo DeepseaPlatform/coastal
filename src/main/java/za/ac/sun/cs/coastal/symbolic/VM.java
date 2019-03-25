@@ -1,6 +1,7 @@
 package za.ac.sun.cs.coastal.symbolic;
 
 import za.ac.sun.cs.coastal.solver.Expression;
+import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 
 public class VM {
 

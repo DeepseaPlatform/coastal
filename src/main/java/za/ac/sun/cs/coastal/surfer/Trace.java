@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import za.ac.sun.cs.coastal.symbolic.Execution;
-import za.ac.sun.cs.coastal.symbolic.InputSet;
+import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Payload;
 
 public abstract class Trace implements Execution {
@@ -21,7 +21,7 @@ public abstract class Trace implements Execution {
 
 	protected Payload payload;
 
-	protected InputSet model = null;
+	protected Input model = null;
 
 	protected Set<Integer> setValues = null;
 	
@@ -57,11 +57,11 @@ public abstract class Trace implements Execution {
 		root.payload = payload;
 	}
 	
-	public InputSet getModel() {
+	public Input getModel() {
 		return root.model;
 	}
 	
-	public void setModel(InputSet model) {
+	public void setModel(Input model) {
 		root.model = model;
 	}
 

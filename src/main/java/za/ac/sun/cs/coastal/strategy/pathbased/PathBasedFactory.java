@@ -16,7 +16,7 @@ import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.solver.Solver;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.symbolic.Execution;
-import za.ac.sun.cs.coastal.symbolic.InputSet;
+import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Model;
 
 public abstract class PathBasedFactory implements StrategyFactory {
@@ -242,7 +242,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 				String sig = spc.getSignature();
 				log.trace("... trying   <{}> {}", sig, pc.toString());
 				long t = System.currentTimeMillis();
-				InputSet model = solver.solve(pc);
+				Input model = solver.solve(pc);
 				manager.recordSolverTime(System.currentTimeMillis() - t);
 				if (model == null) {
 					log.trace("... no model");

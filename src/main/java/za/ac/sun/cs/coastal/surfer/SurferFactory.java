@@ -14,12 +14,12 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
-import za.ac.sun.cs.coastal.symbolic.AbortedRunException;
-import za.ac.sun.cs.coastal.symbolic.InputSet;
-import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
+import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.coastal.symbolic.SymbolicException;
 import za.ac.sun.cs.coastal.symbolic.VM;
+import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 
 public class SurferFactory implements TaskFactory {
 
@@ -212,7 +212,7 @@ public class SurferFactory implements TaskFactory {
 				while (!Thread.currentThread().isInterrupted()) {
 					long t0 = System.currentTimeMillis();
 					Model model = coastal.getNextSurferModel();
-					InputSet concreteValues = model.getConcreteValues();
+					Input concreteValues = model.getConcreteValues();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					String banner = "starting surf " + manager.getNextSurfCount(); // + " @" + Banner.getElapsed(coastal)

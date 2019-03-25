@@ -18,7 +18,7 @@ import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.surfer.TraceState;
-import za.ac.sun.cs.coastal.symbolic.InputSet;
+import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.Payload;
 
@@ -354,7 +354,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			modelsAdded = -1;
 			manager.insertPath(trace, false);
 			parameters = coastal.getParameters();
-			InputSet model = trace.getModel();
+			Input model = trace.getModel();
 			if (score > highScore) {
 				highScore = score;
 				log.info("NEW HIGH SCORE: {} {}", score, model);
@@ -372,8 +372,8 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			modelsAdded = -1;
 			manager.insertPath(trace1, false);
 			manager.insertPath(trace2, false);
-			InputSet model1 = trace1.getModel();
-			InputSet model2 = trace2.getModel();
+			Input model1 = trace1.getModel();
+			Input model2 = trace2.getModel();
 			if (score1 > highScore) {
 				highScore = score1;
 				log.info("NEW HIGH SCORE: {} {}", score1, model1);
@@ -384,8 +384,8 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			}
 			int score = Math.max(score1, score2);
 			for (int i = 0; i < pairRepeat; i++) {
-				InputSet newModel1 = new InputSet(model1);
-				InputSet newModel2 = new InputSet(model2);
+				Input newModel1 = new Input(model1);
+				Input newModel2 = new Input(model2);
 				if (!trace1.toString().equals(trace2.toString())) {
 					for (String name : model1.getNames()) {
 						Object value1 = model1.get(name);
@@ -414,7 +414,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}
 
-		protected void mutatem(int score, InputSet model) {
+		protected void mutatem(int score, Input model) {
 			for (Map.Entry<String, Class<?>> entry : parameters.entrySet()) {
 				String name = entry.getKey();
 				Class<?> type = entry.getValue();
@@ -434,7 +434,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 					update(score, model, name, (Integer) coastal.getMinBound(name, type),
 							(Integer) coastal.getMaxBound(name, type));
 				} else if (type == long.class) {
-					InputSet newModel = new InputSet(model);
+					Input newModel = new Input(model);
 					long min = (Long) coastal.getMinBound(name, type);
 					long max = (Long) coastal.getMaxBound(name, type);
 					newModel.put(name, randomLong(min, max));
@@ -444,7 +444,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 						modelsAdded++;
 					}
 				} else if (type == float.class) {
-					InputSet newModel = new InputSet(model);
+					Input newModel = new Input(model);
 					double min = (Float) coastal.getMinBound(name, type);
 					double max = (Float) coastal.getMaxBound(name, type);
 					newModel.put(name, Double.valueOf(rng.nextDouble(min, max)));
@@ -454,7 +454,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 						modelsAdded++;
 					}
 				} else if (type == double.class) {
-					InputSet newModel = new InputSet(model);
+					Input newModel = new Input(model);
 					double min = (Double) coastal.getMinBound(name, type);
 					double max = (Double) coastal.getMaxBound(name, type);
 					newModel.put(name, Double.valueOf(rng.nextDouble(min, max)));
@@ -468,7 +468,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 					long max = (Long) coastal.getMaxBound(name, type);
 					int length = coastal.getParameterSize(name);
 					for (int i = 0; i < length; i++) {
-						InputSet newModel = new InputSet(model);
+						Input newModel = new Input(model);
 						newModel.put(name + TraceState.CHAR_SEPARATOR + i, randomLong(min, max));
 						Model mdl = new Model(score, newModel);
 						mdl.setPayload(new GybridPayload(score));
@@ -489,8 +489,8 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			}
 		}
 
-		private void update(int score, InputSet model, String name, int min, int max) {
-			InputSet newModel = new InputSet(model);
+		private void update(int score, Input model, String name, int min, int max) {
+			Input newModel = new Input(model);
 			newModel.put(name, Long.valueOf(randomInt(min, max)));
 			Model mdl = new Model(score, newModel);
 			mdl.setPayload(new GybridPayload(score));
@@ -501,7 +501,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 				for (int set : setValues) {
 					int cur = ((Long) model.get(name)).intValue();
 					if ((set >= min) && (set <= max) && (set != cur)) {
-						newModel = new InputSet(model);
+						newModel = new Input(model);
 						newModel.put(name, Long.valueOf(set));
 						mdl = new Model(score, newModel);
 						mdl.setPayload(new GybridPayload(score));
@@ -515,7 +515,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 				for (int inc : incValues) {
 					int set = ((Long) model.get(name)).intValue() + inc;
 					if ((set >= min) && (set <= max)) {
-						newModel = new InputSet(model);
+						newModel = new Input(model);
 						newModel.put(name, Long.valueOf(set));
 						mdl = new Model(score, newModel);
 						mdl.setPayload(new GybridPayload(score));
@@ -525,7 +525,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 					}
 					set = ((Long) model.get(name)).intValue() - inc;
 					if ((set >= min) && (set <= max)) {
-						newModel = new InputSet(model);
+						newModel = new Input(model);
 						newModel.put(name, Long.valueOf(set));
 						mdl = new Model(score, newModel);
 						mdl.setPayload(new GybridPayload(score));

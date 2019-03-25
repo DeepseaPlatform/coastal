@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.symbolic;
+package za.ac.sun.cs.coastal.symbolic.exceptions;
 
 public class LimitConjunctException extends SymbolicException {
 

@@ -16,7 +16,7 @@ public class Model {
 	 * are still represented by symbolic GREEN expressions, but as the type
 	 * indicates, the expressions are constant values.
 	 */
-	private final InputSet concreteValues;
+	private final Input concreteValues;
 
 	/**
 	 * Additional information about this model.
@@ -31,7 +31,7 @@ public class Model {
 	 * @param concreteValues
 	 *            the variable-value mapping for this model
 	 */
-	public Model(int priority, InputSet concreteValues) {
+	public Model(int priority, Input concreteValues) {
 		this.priority = priority;
 		this.concreteValues = concreteValues;
 		this.payload = null;
@@ -47,7 +47,7 @@ public class Model {
 	 * @param payload
 	 *            additional payload information
 	 */
-	public Model(int priority, InputSet concreteValues, Payload payload) {
+	public Model(int priority, Input concreteValues, Payload payload) {
 		this.priority = priority;
 		this.concreteValues = concreteValues;
 		this.payload = payload;
@@ -67,7 +67,7 @@ public class Model {
 	 * 
 	 * @return the model's variable-value mapping
 	 */
-	public InputSet getConcreteValues() {
+	public Input getConcreteValues() {
 		return concreteValues;
 	}
 

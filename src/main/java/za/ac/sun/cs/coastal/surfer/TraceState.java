@@ -16,11 +16,11 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.surfer.Trace.TraceIf;
-import za.ac.sun.cs.coastal.symbolic.AbortedRunException;
-import za.ac.sun.cs.coastal.symbolic.CompletedRunException;
-import za.ac.sun.cs.coastal.symbolic.InputSet;
+import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.State;
-import za.ac.sun.cs.coastal.symbolic.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.CompletedRunException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 
 public class TraceState implements State {
 
@@ -44,7 +44,7 @@ public class TraceState implements State {
 
 	private Trace trace = null;
 
-	private InputSet concreteValues;
+	private Input concreteValues;
 
 	private boolean useCurrentValues;
 
@@ -58,23 +58,23 @@ public class TraceState implements State {
 
 //	private String lastLabel = "NONE";
 
-	public TraceState(COASTAL coastal, InputSet concreteValues) throws InterruptedException {
+	public TraceState(COASTAL coastal, Input concreteValues) throws InterruptedException {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();
 		useCurrentValues = (concreteValues == null);
-		this.concreteValues = (concreteValues == null) ? new InputSet() : concreteValues;
+		this.concreteValues = (concreteValues == null) ? new Input() : concreteValues;
 		pathTreeNode = coastal.getPathTree().getRoot();
 	}
 
-	public void reset(InputSet concreteValues) {
+	public void reset(Input concreteValues) {
 		traceMode = false;
 		recordMode = false;
 		mayRecord = true;
 		frameCount = 0;
 		trace = null;
 		useCurrentValues = (concreteValues == null);
-		this.concreteValues = (concreteValues == null) ? new InputSet() : concreteValues;
+		this.concreteValues = (concreteValues == null) ? new Input() : concreteValues;
 		pathTreeNode = coastal.getPathTree().getRoot();
 		mayContinue = true;
 		setValues.clear();
@@ -102,7 +102,7 @@ public class TraceState implements State {
 		return trace;
 	}
 
-	public InputSet getConcreteValues() {
+	public Input getConcreteValues() {
 		return concreteValues;
 	}
 

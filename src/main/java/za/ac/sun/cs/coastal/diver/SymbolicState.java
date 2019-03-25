@@ -30,10 +30,10 @@ import za.ac.sun.cs.coastal.solver.IntegerVariable;
 import za.ac.sun.cs.coastal.solver.Operation;
 import za.ac.sun.cs.coastal.solver.RealConstant;
 import za.ac.sun.cs.coastal.solver.RealVariable;
-import za.ac.sun.cs.coastal.symbolic.InputSet;
-import za.ac.sun.cs.coastal.symbolic.LimitConjunctException;
+import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.State;
-import za.ac.sun.cs.coastal.symbolic.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 
 public class SymbolicState implements State {
 
@@ -101,7 +101,7 @@ public class SymbolicState implements State {
 
 	private Expression throwable = null;
 
-	private final InputSet concreteValues;
+	private final Input concreteValues;
 
 	private final Map<Integer, Object> inputValues = new HashMap<>();
 
@@ -115,7 +115,7 @@ public class SymbolicState implements State {
 
 	private final Stack<Expression> pendingSwitch = new Stack<>();
 
-	public SymbolicState(COASTAL coastal, InputSet concreteValues) throws InterruptedException {
+	public SymbolicState(COASTAL coastal, Input concreteValues) throws InterruptedException {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();

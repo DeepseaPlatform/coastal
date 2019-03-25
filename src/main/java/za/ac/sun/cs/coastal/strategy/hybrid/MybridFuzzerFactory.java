@@ -19,7 +19,7 @@ import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.Trace;
-import za.ac.sun.cs.coastal.symbolic.InputSet;
+import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.Payload;
 
@@ -388,7 +388,7 @@ public class MybridFuzzerFactory implements StrategyFactory {
 			parameters = coastal.getParameters();
 			keys = new ArrayList<>(parameters.keySet());
 			Collections.sort(keys);
-			InputSet model = trace.getModel();
+			Input model = trace.getModel();
 			BitOutputStream bos = new BitOutputStream();
 			for (String name : keys) {
 				Class<?> type = parameters.get(name);
@@ -429,7 +429,7 @@ public class MybridFuzzerFactory implements StrategyFactory {
 		 */
 		private void generateNewModel(byte[] base, int score) {
 			BitInputStream bis = new BitInputStream(base);
-			InputSet model = new InputSet();
+			Input model = new Input();
 			for (String name : keys) {
 				Class<?> type = parameters.get(name);
 				if (type == null) {

@@ -1,30 +1,34 @@
 package za.ac.sun.cs.coastal.symbolic;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
-public class InputSet {
+/**
+ * The inputs to a run of the system-under-test. The most important component of
+ * this is a mapping from variables names to values. For now, there are no other
+ * components. In the future, the input may be extended to include details about
+ * the environment.
+ */
+public class Input {
 
 	/**
 	 * Mapping from variable names to variable values.
 	 */
-	private final Map<String, Object> inputs;
+	private final InputMap inputMap;
 
 	/**
-	 * Construct a new, empty set of inputs.
+	 * Construct a new, empty input.
 	 */
-	public InputSet() {
-		inputs = new HashMap<>();
+	public Input() {
+		inputMap = new InputMap();
 	}
 
 	/**
-	 * Construct a new set of inputs based on an existing set.
+	 * Construct a new input based on an existing input.
 	 * 
-	 * @param inputSet the older set of inputs
+	 * @param input the older input
 	 */
-	public InputSet(InputSet inputSet) {
-		inputs = new HashMap<>(inputSet.inputs);
+	public Input(Input input) {
+		inputMap = new InputMap(input.inputMap);
 	}
 
 	/**
@@ -34,7 +38,7 @@ public class InputSet {
 	 * @return the value of the variable (or {@code null})
 	 */
 	public Object get(String name) {
-		return inputs.get(name);
+		return inputMap.get(name);
 	}
 
 	/**
@@ -45,7 +49,7 @@ public class InputSet {
 	 * @return the old value of the variable (or {@code null})
 	 */
 	public Object put(String name, Object value) {
-		return inputs.put(name, value);
+		return inputMap.put(name, value);
 	}
 
 	/**
@@ -54,15 +58,17 @@ public class InputSet {
 	 * @return all names with values
 	 */
 	public Set<String> getNames() {
-		return inputs.keySet();
+		return inputMap.getNames();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return inputs.toString();
+		return inputMap.toString();
 	}
 
 }

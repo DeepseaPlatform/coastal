@@ -15,9 +15,9 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
-import za.ac.sun.cs.coastal.symbolic.InputSet;
-import za.ac.sun.cs.coastal.symbolic.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.VM;
+import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 
 public class DiverFactory implements TaskFactory {
 
@@ -185,7 +185,7 @@ public class DiverFactory implements TaskFactory {
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
-					InputSet concreteValues = coastal.getNextDiverInputs();
+					Input concreteValues = coastal.getNextDiverInputs();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
