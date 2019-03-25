@@ -21,6 +21,7 @@ import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.Trace;
+import za.ac.sun.cs.coastal.symbolic.InputSet;
 import za.ac.sun.cs.coastal.symbolic.Model;
 
 public class HybridFuzzerFactory implements StrategyFactory {
@@ -381,7 +382,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 			parameters = coastal.getParameters();
 			keys = new ArrayList<>(parameters.keySet());
 			Collections.sort(keys);
-			Map<String, Object> model = trace.getModel();
+			InputSet model = trace.getModel();
 			BitOutputStream bos = new BitOutputStream();
 			for (String name : keys) {
 				Class<?> type = parameters.get(name);
@@ -421,7 +422,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 		 */
 		private void generateNewModel(byte[] base, int score) {
 			BitInputStream bis = new BitInputStream(base);
-			Map<String, Object> model = new HashMap<>();
+			InputSet model = new InputSet();
 			for (String name : keys) {
 				Class<?> type = parameters.get(name);
 				if (type == null) {

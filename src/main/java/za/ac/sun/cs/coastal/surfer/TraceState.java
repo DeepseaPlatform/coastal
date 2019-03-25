@@ -1,9 +1,7 @@
 package za.ac.sun.cs.coastal.surfer;
 
 import java.lang.reflect.Array;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -20,6 +18,7 @@ import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.surfer.Trace.TraceIf;
 import za.ac.sun.cs.coastal.symbolic.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.CompletedRunException;
+import za.ac.sun.cs.coastal.symbolic.InputSet;
 import za.ac.sun.cs.coastal.symbolic.State;
 import za.ac.sun.cs.coastal.symbolic.SymbolicException;
 
@@ -45,7 +44,7 @@ public class TraceState implements State {
 
 	private Trace trace = null;
 
-	private Map<String, Object> concreteValues;
+	private InputSet concreteValues;
 
 	private boolean useCurrentValues;
 
@@ -59,23 +58,23 @@ public class TraceState implements State {
 
 //	private String lastLabel = "NONE";
 
-	public TraceState(COASTAL coastal, Map<String, Object> concreteValues) throws InterruptedException {
+	public TraceState(COASTAL coastal, InputSet concreteValues) throws InterruptedException {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();
 		useCurrentValues = (concreteValues == null);
-		this.concreteValues = (concreteValues == null) ? new HashMap<>() : concreteValues;
+		this.concreteValues = (concreteValues == null) ? new InputSet() : concreteValues;
 		pathTreeNode = coastal.getPathTree().getRoot();
 	}
 
-	public void reset(Map<String, Object> concreteValues) {
+	public void reset(InputSet concreteValues) {
 		traceMode = false;
 		recordMode = false;
 		mayRecord = true;
 		frameCount = 0;
 		trace = null;
 		useCurrentValues = (concreteValues == null);
-		this.concreteValues = (concreteValues == null) ? new HashMap<>() : concreteValues;
+		this.concreteValues = (concreteValues == null) ? new InputSet() : concreteValues;
 		pathTreeNode = coastal.getPathTree().getRoot();
 		mayContinue = true;
 		setValues.clear();
@@ -103,7 +102,7 @@ public class TraceState implements State {
 		return trace;
 	}
 
-	public Map<String, Object> getConcreteValues() {
+	public InputSet getConcreteValues() {
 		return concreteValues;
 	}
 

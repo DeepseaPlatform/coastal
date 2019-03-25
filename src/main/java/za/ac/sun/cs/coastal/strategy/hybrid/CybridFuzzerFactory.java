@@ -19,6 +19,7 @@ import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.surfer.TraceState;
+import za.ac.sun.cs.coastal.symbolic.InputSet;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.Payload;
 
@@ -391,14 +392,14 @@ public class CybridFuzzerFactory implements StrategyFactory {
 			modelsAdded = -1;
 			manager.insertPath(trace, false);
 			parameters = coastal.getParameters();
-			Map<String, Object> model = trace.getModel();
+			InputSet model = trace.getModel();
 			mutate(payload, model);
 			log.trace("+++ added {} surfer models", modelsAdded);
 			coastal.updateWork(modelsAdded);
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}
 
-		protected void mutate(GybridPayload payload, Map<String, Object> model) {
+		protected void mutate(GybridPayload payload, InputSet model) {
 			for (Map.Entry<String, Class<?>> entry : parameters.entrySet()) {
 				String name = entry.getKey();
 				Class<?> type = entry.getValue();
@@ -418,19 +419,19 @@ public class CybridFuzzerFactory implements StrategyFactory {
 					update(payload, model, name, (Integer) coastal.getMinBound(name, type),
 							(Integer) coastal.getMaxBound(name, type));
 				} else if (type == long.class) {
-					Map<String, Object> newModel = new HashMap<>(model);
+					InputSet newModel = new InputSet(model);
 					long min = (Long) coastal.getMinBound(name, type);
 					long max = (Long) coastal.getMaxBound(name, type);
 					newModel.put(name, randomLong(min, max));
 					submitModel(payload, newModel);
 				} else if (type == float.class) {
-					Map<String, Object> newModel = new HashMap<>(model);
+					InputSet newModel = new InputSet(model);
 					double min = (Float) coastal.getMinBound(name, type);
 					double max = (Float) coastal.getMaxBound(name, type);
 					newModel.put(name, Double.valueOf(rng.nextDouble(min, max)));
 					submitModel(payload, newModel);
 				} else if (type == double.class) {
-					Map<String, Object> newModel = new HashMap<>(model);
+					InputSet newModel = new InputSet(model);
 					double min = (Double) coastal.getMinBound(name, type);
 					double max = (Double) coastal.getMaxBound(name, type);
 					newModel.put(name, Double.valueOf(rng.nextDouble(min, max)));
@@ -440,7 +441,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 					int max = (Integer) coastal.getMaxBound(name, char.class);
 					int length = coastal.getParameterSize(name);
 					for (int i = 0; i < length; i++) {
-						Map<String, Object> newModel = new HashMap<>(model);
+						InputSet newModel = new InputSet(model);
 						newModel.put(name + TraceState.CHAR_SEPARATOR + i, randomLong(min, max));
 						submitModel(payload, newModel);
 					}
@@ -457,9 +458,9 @@ public class CybridFuzzerFactory implements StrategyFactory {
 			}
 		}
 
-		private void update(GybridPayload payload, Map<String, Object> model, String name, int min, int max) {
+		private void update(GybridPayload payload, InputSet model, String name, int min, int max) {
 			for (int i = 0, n = mutationCount / 2; i < n; i++) {
-				Map<String, Object> newModel = new HashMap<>(model);
+				InputSet newModel = new InputSet(model);
 				newModel.put(name, Long.valueOf(randomInt(min, max)));
 				submitModel(payload, newModel);
 			}
@@ -467,7 +468,7 @@ public class CybridFuzzerFactory implements StrategyFactory {
 				int cur = ((Long) model.get(name)).intValue();
 				for (int set : setValues) {
 					if ((set >= min) && (set <= max) && (set != cur)) {
-						Map<String, Object> newModel = new HashMap<>(model);
+						InputSet newModel = new InputSet(model);
 						newModel.put(name, Long.valueOf(set));
 						submitModel(payload, newModel);
 					}
@@ -477,26 +478,26 @@ public class CybridFuzzerFactory implements StrategyFactory {
 				for (int inc : incValues) {
 					int set = ((Long) model.get(name)).intValue() + inc;
 					if ((set >= min) && (set <= max)) {
-						Map<String, Object> newModel = new HashMap<>(model);
+						InputSet newModel = new InputSet(model);
 						newModel.put(name, Long.valueOf(set));
 						submitModel(payload, newModel);
 					}
 					set = ((Long) model.get(name)).intValue() - inc;
 					if ((set >= min) && (set <= max)) {
-						Map<String, Object> newModel = new HashMap<>(model);
+						InputSet newModel = new InputSet(model);
 						newModel.put(name, Long.valueOf(set));
 						submitModel(payload, newModel);
 					}
 				}
 			}
 			for (int i = 0, n = (mutationCount + 1) / 2; i < n; i++) {
-				Map<String, Object> newModel = new HashMap<>(model);
+				InputSet newModel = new InputSet(model);
 				newModel.put(name, Long.valueOf(randomInt(min, max)));
 				submitModel(payload, newModel);
 			}
 		}
 
-		private void submitModel(GybridPayload payload, Map<String, Object> model) {
+		private void submitModel(GybridPayload payload, InputSet model) {
 			Model mdl = new Model(payload.score, model);
 			mdl.setPayload(payload);
 			if (coastal.addSurferModel(mdl)) {

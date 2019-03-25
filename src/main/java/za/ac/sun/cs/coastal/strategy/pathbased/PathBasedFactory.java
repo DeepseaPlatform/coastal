@@ -3,7 +3,6 @@ package za.ac.sun.cs.coastal.strategy.pathbased;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -17,6 +16,7 @@ import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.solver.Solver;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.symbolic.Execution;
+import za.ac.sun.cs.coastal.symbolic.InputSet;
 import za.ac.sun.cs.coastal.symbolic.Model;
 
 public abstract class PathBasedFactory implements StrategyFactory {
@@ -242,7 +242,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 				String sig = spc.getSignature();
 				log.trace("... trying   <{}> {}", sig, pc.toString());
 				long t = System.currentTimeMillis();
-				Map<String, Object> model = solver.solve(pc);
+				InputSet model = solver.solve(pc);
 				manager.recordSolverTime(System.currentTimeMillis() - t);
 				if (model == null) {
 					log.trace("... no model");

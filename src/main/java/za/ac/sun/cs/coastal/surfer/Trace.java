@@ -1,10 +1,10 @@
 package za.ac.sun.cs.coastal.surfer;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import za.ac.sun.cs.coastal.symbolic.Execution;
+import za.ac.sun.cs.coastal.symbolic.InputSet;
 import za.ac.sun.cs.coastal.symbolic.Payload;
 
 public abstract class Trace implements Execution {
@@ -21,7 +21,7 @@ public abstract class Trace implements Execution {
 
 	protected Payload payload;
 
-	protected Map<String, Object> model = null;
+	protected InputSet model = null;
 
 	protected Set<Integer> setValues = null;
 	
@@ -57,11 +57,11 @@ public abstract class Trace implements Execution {
 		root.payload = payload;
 	}
 	
-	public Map<String, Object> getModel() {
+	public InputSet getModel() {
 		return root.model;
 	}
 	
-	public void setModel(Map<String, Object> model) {
+	public void setModel(InputSet model) {
 		root.model = model;
 	}
 

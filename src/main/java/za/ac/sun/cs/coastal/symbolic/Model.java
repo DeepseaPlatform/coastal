@@ -1,7 +1,5 @@
 package za.ac.sun.cs.coastal.symbolic;
 
-import java.util.Map;
-
 /**
  * An encapsulation of a model (a mapping from symbolic variables to concrete
  * values) and their priorities.
@@ -18,7 +16,7 @@ public class Model {
 	 * are still represented by symbolic GREEN expressions, but as the type
 	 * indicates, the expressions are constant values.
 	 */
-	private final Map<String, Object> concreteValues;
+	private final InputSet concreteValues;
 
 	/**
 	 * Additional information about this model.
@@ -33,7 +31,7 @@ public class Model {
 	 * @param concreteValues
 	 *            the variable-value mapping for this model
 	 */
-	public Model(int priority, Map<String, Object> concreteValues) {
+	public Model(int priority, InputSet concreteValues) {
 		this.priority = priority;
 		this.concreteValues = concreteValues;
 		this.payload = null;
@@ -49,7 +47,7 @@ public class Model {
 	 * @param payload
 	 *            additional payload information
 	 */
-	public Model(int priority, Map<String, Object> concreteValues, Payload payload) {
+	public Model(int priority, InputSet concreteValues, Payload payload) {
 		this.priority = priority;
 		this.concreteValues = concreteValues;
 		this.payload = payload;
@@ -69,7 +67,7 @@ public class Model {
 	 * 
 	 * @return the model's variable-value mapping
 	 */
-	public Map<String, Object> getConcreteValues() {
+	public InputSet getConcreteValues() {
 		return concreteValues;
 	}
 

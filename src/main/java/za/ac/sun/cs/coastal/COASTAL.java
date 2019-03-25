@@ -47,6 +47,7 @@ import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.SurferFactory;
 import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
 import za.ac.sun.cs.coastal.surfer.Trace;
+import za.ac.sun.cs.coastal.symbolic.InputSet;
 import za.ac.sun.cs.coastal.symbolic.Model;
 
 /**
@@ -1658,7 +1659,7 @@ public class COASTAL {
 	 * @throws InterruptedException
 	 *             if the action of removing the model was interrupted
 	 */
-	public Map<String, Object> getNextDiverModel() throws InterruptedException {
+	public InputSet getNextDiverInputs() throws InterruptedException {
 		return diverModelQueue.take().getConcreteValues();
 	}
 
@@ -1960,7 +1961,7 @@ public class COASTAL {
 		getBroker().publish("coastal-start", this);
 		getBroker().subscribe("tick", this::tick);
 		getBroker().subscribe("emergency-stop", this::emergencyStop);
-		addFirstModel(new Model(0, null));
+		addFirstModel(new Model(0, new InputSet()));
 		try {
 			// Start surfers, divers, and strategies
 			startTasks();

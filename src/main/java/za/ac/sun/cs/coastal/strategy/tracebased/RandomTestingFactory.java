@@ -1,7 +1,6 @@
 package za.ac.sun.cs.coastal.strategy.tracebased;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +12,7 @@ import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.surfer.TraceState;
+import za.ac.sun.cs.coastal.symbolic.InputSet;
 import za.ac.sun.cs.coastal.symbolic.Model;
 
 public class RandomTestingFactory extends TraceBasedFactory {
@@ -88,7 +88,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 		private final PathTree pathTree;
 
-		private final Map<String, Object> concreteValues = new HashMap<>();
+		private final InputSet concreteValues = new InputSet();
 
 		private final int maxNumberOfModels;
 

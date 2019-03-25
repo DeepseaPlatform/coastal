@@ -2,7 +2,6 @@ package za.ac.sun.cs.coastal.diver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.configuration2.ImmutableConfiguration;
@@ -16,6 +15,7 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
+import za.ac.sun.cs.coastal.symbolic.InputSet;
 import za.ac.sun.cs.coastal.symbolic.SymbolicException;
 import za.ac.sun.cs.coastal.symbolic.VM;
 
@@ -185,7 +185,7 @@ public class DiverFactory implements TaskFactory {
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
-					Map<String, Object> concreteValues = coastal.getNextDiverModel();
+					InputSet concreteValues = coastal.getNextDiverInputs();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
