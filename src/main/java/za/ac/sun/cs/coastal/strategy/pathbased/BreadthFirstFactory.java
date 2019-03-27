@@ -6,9 +6,9 @@ import java.util.Queue;
 import org.apache.commons.configuration2.ImmutableConfiguration;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
+import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class BreadthFirstFactory extends PathBasedFactory {
 
@@ -69,21 +69,18 @@ public class BreadthFirstFactory extends PathBasedFactory {
 		}
 
 		@Override
-		public SegmentedPC findNewPath(PathTree pathTree) {
-			Queue<SegmentedPC> workingPCs = new LinkedList<>();
+		public Path findNewPath(PathTree pathTree) {
 			Queue<PathTreeNode> workingSet = new LinkedList<>();
 			workingSet.add(pathTree.getRoot());
 			while (!workingSet.isEmpty()) {
-				SegmentedPC parent = workingPCs.isEmpty() ? null : workingPCs.remove();
 				PathTreeNode node = workingSet.remove();
 				int n = node.getChildCount();
 				for (int i = 0; i < n; i++) {
-					PathTreeNode ch = node.getChild(i);
-					if (ch == null) {
-						return (SegmentedPC) node.getExecutionForChild(i, parent);
-					} else if (!ch.isComplete()) {
-						workingPCs.add((SegmentedPC) node.getExecutionForChild(i, parent));
-						workingSet.add(ch);
+					PathTreeNode childNode = node.getChild(i);
+					if (childNode == null) {
+						return node.getPathForChild(i);
+					} else if (!childNode.isComplete()) {
+						workingSet.add(childNode);
 					}
 				}
 			}

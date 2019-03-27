@@ -35,7 +35,6 @@ import za.ac.sun.cs.coastal.TaskFactory.Task;
 import za.ac.sun.cs.coastal.TaskFactory.TaskManager;
 import za.ac.sun.cs.coastal.diver.DiverFactory;
 import za.ac.sun.cs.coastal.diver.DiverFactory.DiverManager;
-import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
@@ -46,7 +45,7 @@ import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.SurferFactory;
 import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
-import za.ac.sun.cs.coastal.surfer.Trace;
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Model;
 
@@ -395,14 +394,14 @@ public class COASTAL {
 	private final BlockingQueue<Model> surferModelQueue;
 
 	/**
-	 * A queue of path conditions produced by divers and consumed by strategies.
+	 * A queue of executions produced by divers and consumed by strategies.
 	 */
-	private final BlockingQueue<SegmentedPC> pcQueue;
+	private final BlockingQueue<Execution> pcQueue;
 
 	/**
-	 * A queue of traces produced by surfers and consumed by strategies.
+	 * A queue of executions produced by surfers and consumed by strategies.
 	 */
-	private final BlockingQueue<Trace> traceQueue;
+	private final BlockingQueue<Execution> traceQueue;
 
 	// ======================================================================
 	//
@@ -1641,7 +1640,7 @@ public class COASTAL {
 		int n = 0;
 		try {
 			for (Model m : mdls) {
-				if (visitedDiverModels.add(m.getConcreteValues().toString())) {
+				if (visitedDiverModels.add(m.getInput().toString())) {
 					diverModelQueue.put(m);
 					n++;
 				}
@@ -1659,8 +1658,8 @@ public class COASTAL {
 	 * @throws InterruptedException
 	 *             if the action of removing the model was interrupted
 	 */
-	public Input getNextDiverInputs() throws InterruptedException {
-		return diverModelQueue.take().getConcreteValues();
+	public Input getNextDiverInput() throws InterruptedException {
+		return diverModelQueue.take().getInput();
 	}
 
 	/**
@@ -1705,7 +1704,7 @@ public class COASTAL {
 		int n = 0;
 		try {
 			for (Model m : mdls) {
-				if (visitedSurferModels.add(m.getConcreteValues().toString())) {
+				if (visitedSurferModels.add(m.getInput().toString())) {
 					surferModelQueue.put(m);
 					n++;
 				}
@@ -1726,7 +1725,7 @@ public class COASTAL {
 	 */
 	public boolean addSurferModel(Model mdl) {
 		try {
-			if (visitedSurferModels.add(mdl.getConcreteValues().toString())) {
+			if (visitedSurferModels.add(mdl.getInput().toString())) {
 				surferModelQueue.put(mdl);
 				return true;
 			}
@@ -1759,17 +1758,17 @@ public class COASTAL {
 	}
 
 	/**
-	 * Add a new entry to the queue of path conditions.
+	 * Add a new entry to the diver queue of executions.
 	 * 
-	 * @param spc
-	 *            the path condition to add
+	 * @param execution
+	 *            the execution to add
 	 */
-	public void addPc(SegmentedPC spc) {
+	public void addPc(Execution execution) {
 		try {
-			if (spc == null) {
-				pcQueue.put(SegmentedPC.NULL);
+			if (execution == null) {
+				pcQueue.put(Execution.NULL);
 			} else {
-				pcQueue.put(spc);
+				pcQueue.put(execution);
 			}
 		} catch (InterruptedException e) {
 			// ignore silently
@@ -1777,13 +1776,13 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the next available path condition.
+	 * Return the next available execution produced by a diver.
 	 * 
-	 * @return the next path condition
+	 * @return the next execution
 	 * @throws InterruptedException
-	 *             if the action of removing the path condition was interrupted
+	 *             if the action of removing the execution was interrupted
 	 */
-	public SegmentedPC getNextPc() throws InterruptedException {
+	public Execution getNextPc() throws InterruptedException {
 		return pcQueue.take();
 	}
 
@@ -1799,17 +1798,17 @@ public class COASTAL {
 	}
 
 	/**
-	 * Add a new entry to the queue of traces.
+	 * Add a new entry to the surfer queue of executions.
 	 * 
-	 * @param trace
-	 *            the trace to add
+	 * @param execution
+	 *            the execution to add
 	 */
-	public void addTrace(Trace trace) {
+	public void addTrace(Execution execution) {
 		try {
-			if (trace == null) {
-				traceQueue.put(Trace.NULL);
+			if (execution == null) {
+				traceQueue.put(Execution.NULL);
 			} else {
-				traceQueue.put(trace);
+				traceQueue.put(execution);
 			}
 		} catch (InterruptedException e) {
 			// ignore silently
@@ -1817,25 +1816,25 @@ public class COASTAL {
 	}
 
 	/**
-	 * Return the next available trace.
+	 * Return the next available execution produced by a surfer.
 	 * 
-	 * @return the next trace
+	 * @return the next execution
 	 * @throws InterruptedException
-	 *             if the action of removing the trace was interrupted
+	 *             if the action of removing the execution was interrupted
 	 */
-	public Trace getNextTrace() throws InterruptedException {
+	public Execution getNextTrace() throws InterruptedException {
 		return traceQueue.take();
 	}
 
 	/**
-	 * Return the next available trace.
+	 * Return the next available execution produced by a surfer, as long as a timeout has not expired.  If the timeout expires, return {@code null}.
 	 * 
 	 * @param timeout number of milliseconds to wait
-	 * @return the next trace or {@code null}
+	 * @return the next execution or {@code null}
 	 * @throws InterruptedException
-	 *             if the action of removing the trace was interrupted
+	 *             if the action of removing the execution was interrupted
 	 */
-	public Trace getNextTrace(long timeout) throws InterruptedException {
+	public Execution getNextTrace(long timeout) throws InterruptedException {
 		return traceQueue.poll(timeout, TimeUnit.MILLISECONDS);
 	}
 	

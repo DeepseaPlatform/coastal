@@ -11,8 +11,10 @@ import za.ac.sun.cs.coastal.diver.SegmentedPC.SegmentedPCIf;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.solver.Expression;
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Model;
+import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class GenerationalFactory extends PathBasedFactory {
 
@@ -99,32 +101,32 @@ public class GenerationalFactory extends PathBasedFactory {
 		}
 
 		@Override
-		protected List<Model> refine0(SegmentedPC spc) {
-			if ((spc == null) || (spc == SegmentedPC.NULL)) {
+		protected List<Model> refine0(Execution execution) {
+			if (execution == null) {
 				return null;
 			}
 			List<Model> models = new ArrayList<>();
-			log.trace("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
-			PathTreeNode bottom = manager.insertPath0(spc, false);
+			Path path = execution.getPath();
+			log.trace("explored <{}> {}", path.getSignature(), path.getPathCondition().toString());
+			PathTreeNode bottom = manager.insertPath0(execution, false);
 			if (bottom != null) {
-				List<SegmentedPC> altSpcs = new ArrayList<>();
+				List<Path> altPaths = new ArrayList<>();
 				bottom = bottom.getParent();
-				for (SegmentedPC pointer = spc; (pointer != null)
-						&& !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
-					altSpcs.add(generateAltSpc(spc, pointer));
+				for (Path pointer = path; (pointer != null) && !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
+					altPaths.add(generateAltSpc(execution, path));
 					bottom.setGenerated();
 					bottom = bottom.getParent();
 				}
 				int priority = priorityStart;
-				for (SegmentedPC altSpc : altSpcs) {
-					Expression pc = altSpc.getPathCondition();
-					String sig = altSpc.getSignature();
+				for (Path altPath : altPaths) {
+					Expression pc = altPath.getPathCondition();
+					String sig = altPath.getSignature();
 					log.trace("trying   <{}> {}", sig, pc.toString());
 					Input model = solver.solve(pc);
 					if (model == null) {
 						log.trace("no model");
-						log.trace("(The spc is {})", altSpc.getPathCondition().toString());
-						manager.insertPath(altSpc, true);
+						log.trace("(The spc is {})", altPath.getPathCondition().toString());
+						manager.insertPath(altPath, true);
 					} else {
 						String modelString = model.toString();
 						log.trace("new model: {}", modelString);
@@ -142,20 +144,20 @@ public class GenerationalFactory extends PathBasedFactory {
 			return models;
 		}
 
-		private SegmentedPC generateAltSpc(SegmentedPC spc, SegmentedPC pointer) {
+		private Path generateAltSpc(Execution execution, Path pointer) {
 			SegmentedPC parent = null;
-			boolean value = ((SegmentedPCIf) spc).getValue();
-			if (spc == pointer) {
-				parent = spc.getParent();
+			boolean value = ((SegmentedPCIf) execution).getValue();
+			if (execution == pointer) {
+				parent = execution.getParent();
 				value = !value;
 			} else {
-				parent = generateAltSpc(spc.getParent(), pointer);
+				parent = generateAltSpc(execution.getParent(), pointer);
 			}
-			return new SegmentedPCIf(parent, spc.getExpression(), spc.getPassiveConjunct(), value);
+			return new SegmentedPCIf(parent, execution.getExpression(), execution.getPassiveConjunct(), value);
 		}
 
 		@Override
-		protected SegmentedPC findNewPath(PathTree pathTree) {
+		protected Path findNewPath(PathTree pathTree) {
 			return null;
 		}
 
@@ -253,7 +255,7 @@ public class GenerationalFactory extends PathBasedFactory {
 		}
 
 		@Override
-		protected SegmentedPC findNewPath(PathTree pathTree) {
+		protected Path findNewPath(PathTree pathTree) {
 			return null;
 		}
 

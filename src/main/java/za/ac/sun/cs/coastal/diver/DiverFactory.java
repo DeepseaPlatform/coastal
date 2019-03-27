@@ -185,7 +185,7 @@ public class DiverFactory implements TaskFactory {
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
-					Input concreteValues = coastal.getNextDiverInputs();
+					Input concreteValues = coastal.getNextDiverInput();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
@@ -199,7 +199,7 @@ public class DiverFactory implements TaskFactory {
 					ClassLoader classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
 					performRun(classLoader);
 					manager.recordTime(System.currentTimeMillis() - t1);
-					coastal.addPc(symbolicState.getSegmentedPathCondition());
+					coastal.addPc(symbolicState.getExecution());
 					broker.publishThread("dive-end", this);
 					if (!symbolicState.mayContinue()) {
 						coastal.stopWork();

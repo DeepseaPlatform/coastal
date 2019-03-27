@@ -26,7 +26,7 @@ public class Math {
 		Expression var = new IntegerVariable(state.getNewVariableName(), 32, min, max);
 		Expression pc = Operation.or(Operation.and(Operation.ge(arg0, arg1), Operation.eq(arg0, var)),
 				Operation.and(Operation.lt(arg0, arg1), Operation.eq(arg1, var)));
-		state.pushExtraConjunct(pc);
+		state.pushExtraCondition(pc);
 		state.push(var);
 		return true;
 	}

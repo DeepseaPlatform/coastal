@@ -9,6 +9,7 @@ import static org.junit.Assert.assertNotEquals;
 import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.junit.runner.RunWith;
@@ -290,7 +291,7 @@ public class SVComp {
 		this.testExpectedOutcome = expectedOutcome;
 	}
 
-	@Test
+	@Ignore @Test
 	public void testSVComp() {
 		final Logger log = LogManager.getLogger("COASTAL");
 		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,

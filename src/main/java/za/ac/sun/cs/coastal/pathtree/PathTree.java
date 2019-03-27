@@ -8,12 +8,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.symbolic.Execution;
+import za.ac.sun.cs.coastal.symbolic.Path;
 
 /**
  * Representation of all execution paths in a single tree.
@@ -29,7 +29,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 	 * The message broker.
 	 */
 	protected final Broker broker;
-	
+
 	/**
 	 * Flag to indicate whether paths should be drawn after updates.
 	 */
@@ -51,8 +51,8 @@ public class PathTree implements Comparator<PathTreeNode> {
 	private final AtomicLong insertedCount = new AtomicLong(0);
 
 	/**
-	 * The number of paths whose insertion was unnecessary because they
-	 * constitute a revisit of an already-inserted path.
+	 * The number of paths whose insertion was unnecessary because they constitute a
+	 * revisit of an already-inserted path.
 	 */
 	private final AtomicLong revisitCount = new AtomicLong(0);
 
@@ -60,7 +60,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 	 * Accumulator of all the path tree insertion times.
 	 */
 	protected final AtomicLong insertTime = new AtomicLong(0);
-	
+
 	/**
 	 * A count of the number of infeasible paths.
 	 */
@@ -79,8 +79,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 	/**
 	 * Constructor.
 	 * 
-	 * @param coastal
-	 *            reference to the analysis run controller
+	 * @param coastal reference to the analysis run controller
 	 */
 	public PathTree(COASTAL coastal) {
 		log = coastal.getLog();
@@ -107,18 +106,38 @@ public class PathTree implements Comparator<PathTreeNode> {
 		return root;
 	}
 
+	/**
+	 * Return the number of paths inserted.
+	 * 
+	 * @return the number of paths inserted
+	 */
 	public long getInsertedCount() {
 		return insertedCount.get();
 	}
 
+	/**
+	 * Return the number of paths revisited.
+	 * 
+	 * @return the number of paths revisited
+	 */
 	public long getRevisitCount() {
 		return revisitCount.get();
 	}
-	
+
+	/**
+	 * Return the number of infeasible paths.
+	 * 
+	 * @return the number of infeasible paths
+	 */
 	public long getInfeasibleCount() {
 		return infeasibleCount.get();
 	}
-	
+
+	/**
+	 * Publish a report about the use of the path tree.
+	 * 
+	 * @param object dummy
+	 */
 	public void report(Object object) {
 		broker.publish("report", new Tuple("PathTree.inserted-count", insertedCount.get()));
 		broker.publish("report", new Tuple("PathTree.revisit-count", revisitCount.get()));
@@ -131,7 +150,19 @@ public class PathTree implements Comparator<PathTreeNode> {
 	// PATH INSERTION
 	//
 	// ======================================================================
-	
+
+	/**
+	 * Insert a single path in the path tree. The execution that this path
+	 * represents is given as a parameter. This may not be an actual execution, in
+	 * the sense that it may be that the path associated with the execution is
+	 * infeasible (in other words, there is no model for the path). In this case,
+	 * the execution will contain a path, but no inputs. The {@code isInfeasible}
+	 * flag indicates when this is the case.
+	 * 
+	 * @param execution    the execution associated with the path
+	 * @param isInfeasible whether or not the execution was infeasible
+	 * @return the terminal node of the newly-inserted path in the path tree
+	 */
 	public PathTreeNode insertPath(Execution execution, boolean isInfeasible) {
 		long t = System.currentTimeMillis();
 		insertedCount.incrementAndGet();
@@ -141,11 +172,12 @@ public class PathTree implements Comparator<PathTreeNode> {
 		/*
 		 * Step 1: Deconstruct the path condition.
 		 */
-		final int depth = execution.getDepth();
-		final Execution[] path = new Execution[depth];
+		final Path path = execution.getPath();
+		final int depth = path.getDepth();
+		final Path[] paths = new Path[depth];
 		int idx = depth;
-		for (Execution e = execution; e != null; e = e.getParent()) {
-			path[--idx] = e;
+		for (Path p = path; p != null; p = p.getParent()) {
+			paths[--idx] = p;
 		}
 		assert idx == 0;
 		log.trace("::: depth:{}", depth);
@@ -157,13 +189,13 @@ public class PathTree implements Comparator<PathTreeNode> {
 			try {
 				if (root == null) {
 					log.trace("::: creating root");
-					root = PathTreeNode.createNode(path[0]);
+					root = PathTreeNode.createRoot(paths[0]);
 				}
 			} finally {
 				lock.writeLock().unlock();
 			}
 		}
-		PathTreeNode lastNode = insert(path, isInfeasible);
+		PathTreeNode lastNode = insert(execution, paths, isInfeasible);
 		/*
 		 * Step 3: Dump the tree if required
 		 */
@@ -176,58 +208,65 @@ public class PathTree implements Comparator<PathTreeNode> {
 		insertTime.addAndGet(System.currentTimeMillis() - t);
 		return lastNode;
 	}
-	
-	private PathTreeNode insert(Execution[] path, boolean isInfeasible) {
-		int depth = path.length;
+
+	/**
+	 * Helper routine to insert a path into the path tree. The major difference is
+	 * that this routine assumes that the root exists, and that the path that
+	 * corresponds to the execution has been separated into its prefixes.
+	 * 
+	 * @param execution    the execution associated with the path
+	 * @param paths        the prefixes of the path that corresponds to the
+	 *                     execution
+	 * @param isInfeasible whether or not the execution was infeasible
+	 * @return
+	 */
+	private PathTreeNode insert(Execution execution, Path[] paths, boolean isInfeasible) {
+		int depth = paths.length;
 		PathTreeNode[] visitedNodes = new PathTreeNode[depth];
 		PathTreeNode parent = root;
 		visitedNodes[0] = root;
-		int i = path[0].getOutcomeIndex();
+		long alt = paths[0].getChoice().getAlternative();
 		for (int j = 1; j < depth; j++) {
-			if (path[j] instanceof Trace) {
+			if (paths[j].getChoice().getBranch() instanceof Trace) {
 				log.trace("::: insert(parent:{}, cur/depth:{}/{})", getId(parent), j, depth);
 			} else {
-				Expression conjunct = ((SegmentedPC) path[j]).getActiveConjunct();
+				Expression conjunct = paths[j].getChoice().getActiveConjunct();
 				log.trace("::: insert(parent:{}, conjunct:{}, cur/depth:{}/{})", getId(parent), conjunct, j, depth);
 			}
-			PathTreeNode n = parent.getChild(i);
+			PathTreeNode n = parent.getChild(alt);
 			if (n == null) {
 				parent.lock();
-				if (parent.getChild(i) == null) {
-					n = PathTreeNode.createNode(path[j]);
-					parent.setChild(i, n);
+				if (parent.getChild(alt) == null) {
+					n = parent.createChild(paths[j], alt);
 				} else {
-					n = parent.getChild(i);
+					n = parent.getChild(alt);
 				}
 				parent.unlock();
 			}
 			parent = n;
 			visitedNodes[j] = n;
-			i = path[j].getOutcomeIndex();
+			alt = paths[j].getChoice().getAlternative();
 		}
 		// At this point:
 		// parent == node{i_d-1}, j == depth, i == i_d-1 == path[j-1].getOutcomeIndex()
-		PathTreeNode n = parent.getChild(i);
+		PathTreeNode n = parent.getChild(alt);
 		if (n == null) {
 			parent.lock();
-			if (parent.getChild(i) == null) {
+			if (parent.getChild(alt) == null) {
 				if (isInfeasible) {
-					n = PathTreeNode.createInfeasible();
+					n = parent.createInfeasible(alt, execution);
 				} else {
-					n = PathTreeNode.createLeaf();
+					n = parent.createLeaf(alt, execution);
 				}
-				parent.setChild(i, n);
 			}
 			parent.unlock();
 		} else {
 			n = null;
 			revisitCount.incrementAndGet();
 			if (isInfeasible) {
-				assert true;
-				// TO DO ----> assert ( NODE REALLY IS INFEASIBLE ) 
+				assert parent.isInfeasible();
 			} else {
-				assert true;
-				// TO DO ----> assert ( NODE REALLY IS LEAF ) 
+				assert parent.isLeaf();
 			}
 		}
 		for (int j = depth - 1; j >= 0; j--) {
@@ -235,8 +274,8 @@ public class PathTree implements Comparator<PathTreeNode> {
 			if (!node.isFullyExplored()) {
 				int k = node.getChildCount();
 				boolean full = true;
-				for (i = 0; i < k; i++) {
-					PathTreeNode x = node.getChild(i);
+				for (alt = 0; alt < k; alt++) {
+					PathTreeNode x = node.getChild(alt);
 					if ((x == null) || !x.isComplete()) {
 						full = false;
 						break;
@@ -264,6 +303,13 @@ public class PathTree implements Comparator<PathTreeNode> {
 	//
 	// ======================================================================
 
+	/**
+	 * Return a formatted string to represent the {@code id} of a
+	 * {@link PathTreeNode}.
+	 * 
+	 * @param node the node to compute the representation for
+	 * @return a string representation of the node's {@code id}
+	 */
 	private String getId(PathTreeNode node) {
 		if (node == null) {
 			return "NUL";
@@ -272,6 +318,12 @@ public class PathTree implements Comparator<PathTreeNode> {
 		}
 	}
 
+	/**
+	 * Compute a string representation of the path tree. The tree is neatly
+	 * formatted using ASCII graphics, and returned as an array of strings.
+	 * 
+	 * @return an array of strings that stores an ASCII image of the path tree
+	 */
 	public String[] stringRepr() {
 		int h = root.height() * 4 - 1;
 		int w = root.width();
@@ -327,15 +379,15 @@ public class PathTree implements Comparator<PathTreeNode> {
 
 	@Override
 	public int compare(PathTreeNode node1, PathTreeNode node2) {
-		Execution exec1 = node1.getExecution();
-		if (exec1 == null) {
+		Path path1 = node1.getPath();
+		if (path1 == null) {
 			return 1;
 		}
-		Execution exec2 = node2.getExecution();
-		if (exec2 == null) {
+		Path path2 = node2.getPath();
+		if (path2 == null) {
 			return -1;
 		}
-		return Integer.compare(exec2.getDepth(), exec1.getDepth());
+		return Integer.compare(path2.getDepth(), path1.getDepth());
 	}
 
 }

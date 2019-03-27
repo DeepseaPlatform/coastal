@@ -57,7 +57,7 @@ public class String {
 			guard = Operation.and(guard, subguard);
 			state.push(var);
 		}
-		state.pushExtraConjunct(guard);
+		state.pushExtraCondition(guard);
 		return true;
 	}
 
@@ -69,7 +69,7 @@ public class String {
 			state.push(MONE);
 		} else {
 			Expression var = new IntegerVariable(state.getNewVariableName(), 32, -1, thisLength - 1);
-			state.pushExtraConjunct(firstOccurrenceGuard(state, thisAddress, chr, var, 0, thisLength));
+			state.pushExtraCondition(firstOccurrenceGuard(state, thisAddress, chr, var, 0, thisLength));
 			state.push(var);
 		}
 		return true;
@@ -88,7 +88,7 @@ public class String {
 				state.push(MONE);
 			} else {
 				Expression var = new IntegerVariable(state.getNewVariableName(), 32, -1, thisLength - 1);
-				state.pushExtraConjunct(firstOccurrenceGuard(state, thisAddress, chr, var, ofs, thisLength));
+				state.pushExtraCondition(firstOccurrenceGuard(state, thisAddress, chr, var, ofs, thisLength));
 				state.push(var);
 			}
 		} else {
@@ -103,7 +103,7 @@ public class String {
 					pc = Operation.or(pc, guard);
 				}
 			}
-			state.pushExtraConjunct(pc);
+			state.pushExtraCondition(pc);
 			state.push(var);
 		}
 		return true;
@@ -163,7 +163,7 @@ public class String {
 				Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
 				Expression pc = Operation.or(Operation.and(guard, Operation.eq(var, IntegerConstant.ONE32)),
 						Operation.and(Operation.not(guard), Operation.eq(var, IntegerConstant.ZERO32)));
-				state.pushExtraConjunct(pc);
+				state.pushExtraCondition(pc);
 				state.push(var);
 			}
 		} else {
@@ -203,7 +203,7 @@ public class String {
 				Expression posGuard = Operation.and(guard, Operation.eq(var, IntegerConstant.ONE32));
 				Expression negGuard = Operation.and(Operation.not(guard), Operation.eq(var, IntegerConstant.ZERO32));
 				Expression pc = Operation.or(posGuard, negGuard);
-				state.pushExtraConjunct(pc);
+				state.pushExtraCondition(pc);
 				state.push(var);
 			}
 		} else {
@@ -235,7 +235,7 @@ public class String {
 				Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
 				Expression pc = Operation.or(Operation.and(guard, Operation.eq(var, IntegerConstant.ONE32)),
 						Operation.and(Operation.not(guard), Operation.eq(var, IntegerConstant.ZERO32)));
-				state.pushExtraConjunct(pc);
+				state.pushExtraCondition(pc);
 				state.push(var);
 			}
 		} else {

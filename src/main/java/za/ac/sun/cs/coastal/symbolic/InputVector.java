@@ -6,19 +6,21 @@ import java.util.Set;
 
 /**
  * The inputs to a run of the system-under-test in the form of a mapping from
- * variable indices (as {@link Integer}s) to variable values (as {@link Object}s).
+ * variable indices (as {@link Integer}s) to variable values (as
+ * {@link Object}s). This differs from {@link InputMap} which maps variables
+ * names (as {@link String}) to values.
  */
-public class InputMap {
+public class InputVector {
 
 	/**
 	 * Mapping from variable indices to variable values.
 	 */
-	private final Map<String, Object> inputVector;
+	private final Map<Integer, Object> inputVector;
 
 	/**
 	 * Construct a new, empty set of inputs.
 	 */
-	public InputMap() {
+	public InputVector() {
 		inputVector = new HashMap<>();
 	}
 
@@ -27,37 +29,37 @@ public class InputMap {
 	 * 
 	 * @param inputVector the older set of inputs
 	 */
-	public InputMap(InputMap inputVector) {
+	public InputVector(InputVector inputVector) {
 		this.inputVector = new HashMap<>(inputVector.inputVector);
 	}
 
 	/**
-	 * Return the variable value associated with a name.
+	 * Return the variable value associated with an index.
 	 * 
-	 * @param name the name of the variable
+	 * @param index the name of the variable
 	 * @return the value of the variable (or {@code null})
 	 */
-	public Object get(String name) {
-		return inputVector.get(name);
+	public Object get(int index) {
+		return inputVector.get(index);
 	}
 
 	/**
-	 * Associates a new value with a variable name.
+	 * Associates a new value with a variable index.
 	 * 
-	 * @param name  the new of the variable
+	 * @param index the index of the variable
 	 * @param value the new value of the variable
 	 * @return the old value of the variable (or {@code null})
 	 */
-	public Object put(String name, Object value) {
-		return inputVector.put(name, value);
+	public Object put(int index, Object value) {
+		return inputVector.put(index, value);
 	}
 
 	/**
-	 * Returns the set of all names that are mapped.
+	 * Returns the set of all indices that are mapped.
 	 * 
-	 * @return all names with values
+	 * @return all indices with values
 	 */
-	public Set<String> getNames() {
+	public Set<Integer> getIndices() {
 		return inputVector.keySet();
 	}
 

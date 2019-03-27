@@ -38,7 +38,7 @@ public class VM {
 	}
 
 	public static void pushExtraConjunct(Expression extraConjunct) {
-		state.pushExtraConjunct(extraConjunct);
+		state.pushExtraCondition(extraConjunct);
 	}
 	
 	public static int createSymbolicInt(int oldValue, int uniqueId) {
@@ -79,8 +79,8 @@ public class VM {
 	//
 	// ======================================================================
 
-	public static boolean getRecordMode() {
-		return state.getRecordMode();
+	public static boolean getRecordingMode() {
+		return state.getRecordingMode();
 	}
 
 	public static boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) {

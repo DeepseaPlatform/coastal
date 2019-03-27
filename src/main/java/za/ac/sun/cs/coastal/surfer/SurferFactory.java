@@ -14,6 +14,7 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.VM;
@@ -212,21 +213,21 @@ public class SurferFactory implements TaskFactory {
 				while (!Thread.currentThread().isInterrupted()) {
 					long t0 = System.currentTimeMillis();
 					Model model = coastal.getNextSurferModel();
-					Input concreteValues = model.getConcreteValues();
+					Input input = model.getInput();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					String banner = "starting surf " + manager.getNextSurfCount(); // + " @" + Banner.getElapsed(coastal)
 					log.trace(Banner.getBannerLine(banner, '-'));
-					if (concreteValues == null) {
+					if (input == null) {
 						log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
 					} else {
-						log.trace(Banner.getBannerLine(concreteValues.toString(), '*'));
+						log.trace(Banner.getBannerLine(input.toString(), '*'));
 					}
 					boolean aborted = false;
 					// ------- BEGIN MANUAL INLINE
 					// performRun(classLoader, trigger);
 					if (safeMode && (meth != null)) {
-						traceState.reset(concreteValues);
+						traceState.reset(input);
 						try {
 							meth.invoke(null, coastal.getMainArguments());
 						} catch (SecurityException | IllegalAccessException | IllegalArgumentException x) {
@@ -245,7 +246,7 @@ public class SurferFactory implements TaskFactory {
 							}
 						}
 					} else {
-						traceState = new TraceState(coastal, concreteValues);
+						traceState = new TraceState(coastal, input);
 						ClassLoader classLoader = coastal.getClassManager().createLightClassLoader(traceState);
 						try {
 							Class<?> clas = classLoader.loadClass(trigger.getClassName());
@@ -275,10 +276,9 @@ public class SurferFactory implements TaskFactory {
 						log.trace("!!! execution aborted, fully explored");
 						manager.incrementAbortCount();
 					} else {
-						Trace trace = traceState.getTrace();
-						trace.setModel(traceState.getConcreteValues());
-						trace.setPayload(model.getPayload());
-						coastal.addTrace(traceState.getTrace());
+						Execution execution = traceState.getExecution();
+						execution.copyPayload(model);
+						coastal.addTrace(execution);
 					}
 					broker.publishThread("surfer-end", this);
 					if (!traceState.mayContinue()) {

@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
@@ -18,6 +17,7 @@ import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Model;
+import za.ac.sun.cs.coastal.symbolic.Path;
 
 public abstract class PathBasedFactory implements StrategyFactory {
 
@@ -76,14 +76,18 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			return pathTree;
 		}
 
-		public PathTreeNode insertPath0(SegmentedPC spc, boolean infeasible) {
-			return pathTree.insertPath(spc, infeasible);
+		public PathTreeNode insertPath0(Execution execution, boolean infeasible) {
+			return pathTree.insertPath(execution, infeasible);
 		}
 
-		public boolean insertPath(SegmentedPC spc, boolean infeasible) {
-			return (pathTree.insertPath(spc, infeasible) == null);
+		public boolean insertPath(Execution execution, boolean infeasible) {
+			return (pathTree.insertPath(execution, infeasible) == null);
 		}
 
+		public boolean insertPath(Path path, boolean infeasible) {
+			return (pathTree.insertPath(new Execution(path, null), infeasible) == null);
+		}
+		
 		/**
 		 * Increment the number of refinements.
 		 */
@@ -187,12 +191,12 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
-					SegmentedPC spc = coastal.getNextPc();
+					Execution execution = coastal.getNextPc();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
-					List<Model> mdls = refine(spc);
+					List<Model> mdls = refine(execution);
 					// We start at -1 (and not at 0) to account for the
 					// fact that one item of work has been removed from
 					// the global work count.
@@ -216,52 +220,52 @@ public abstract class PathBasedFactory implements StrategyFactory {
 
 		protected List<Model> refine(Execution execution) {
 			long t0 = System.currentTimeMillis();
-			List<Model> newModels = refine0((SegmentedPC) execution);
+			List<Model> newModels = refine0(execution);
 			manager.recordTime(System.currentTimeMillis() - t0);
 			return newModels;
 		}
 
-		protected List<Model> refine0(SegmentedPC spc) {
-			if ((spc == null) || (spc == SegmentedPC.NULL)) {
+		protected List<Model> refine0(Execution execution) {
+			if (execution == null) {
 				return null;
 			}
-			log.trace("... explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
-			manager.insertPath(spc, false); // ignore revisited return value
+			log.trace("... explored <{}> {}", execution.getPath().getSignature(), execution.getPath().getPathCondition().toString());
+			manager.insertPath(execution, false); // ignore revisited return value
 			return refine1();
 		}
 
 		protected List<Model> refine1() {
 			while (true) {
-				SegmentedPC spc = findNewPath(manager.getPathTree());
-				if (spc == null) {
+				Path path = findNewPath(manager.getPathTree());
+				if (path == null) {
 					log.trace("... no further paths");
 					return null;
 					// log.trace("...Tree shape: {}", pathTree.getShape());
 				}
-				Expression pc = spc.getPathCondition();
-				String sig = spc.getSignature();
+				Expression pc = path.getPathCondition();
+				String sig = path.getSignature();
 				log.trace("... trying   <{}> {}", sig, pc.toString());
 				long t = System.currentTimeMillis();
 				Input model = solver.solve(pc);
 				manager.recordSolverTime(System.currentTimeMillis() - t);
 				if (model == null) {
 					log.trace("... no model");
-					log.trace("(The spc is {})", spc.getPathCondition().toString());
-					manager.insertPath(spc, true);
+					log.trace("(The spc is {})", path.getPathCondition().toString());
+					manager.insertPath(path, true);
 				} else {
 					String modelString = model.toString();
 					log.trace("... new model: {}", modelString);
 					if (visitedModels.add(modelString)) {
 						return Collections.singletonList(new Model(0, model));
 					} else {
-						manager.insertPath(spc, false);
+						manager.insertPath(path, false);
 						log.trace("... model {} has been visited before, retrying", modelString);
 					}
 				}
 			}
 		}
 
-		protected abstract SegmentedPC findNewPath(PathTree pathTree);
+		protected abstract Path findNewPath(PathTree pathTree);
 
 	}
 

@@ -1,5 +1,8 @@
 package za.ac.sun.cs.coastal.symbolic;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * An encapsulation of a model (a mapping from symbolic variables to concrete
  * values) and their priorities.
@@ -12,45 +15,26 @@ public class Model {
 	private final int priority;
 
 	/**
-	 * A mapping from symbolic variables to concrete values. The concrete values
-	 * are still represented by symbolic GREEN expressions, but as the type
-	 * indicates, the expressions are constant values.
+	 * The input values for a run of the system under test.
 	 */
-	private final Input concreteValues;
+	private final Input input;
 
 	/**
-	 * Additional information about this model.
+	 * Additional payload information.
 	 */
-	private Payload payload;
-
-	/**
-	 * Construct a new model.
-	 * 
-	 * @param priority
-	 *            the priority for this model
-	 * @param concreteValues
-	 *            the variable-value mapping for this model
-	 */
-	public Model(int priority, Input concreteValues) {
-		this.priority = priority;
-		this.concreteValues = concreteValues;
-		this.payload = null;
-	}
+	private final Map<String, Object> payload = new HashMap<>();
 
 	/**
 	 * Construct a new model.
 	 * 
 	 * @param priority
 	 *            the priority for this model
-	 * @param concreteValues
+	 * @param input
 	 *            the variable-value mapping for this model
-	 * @param payload
-	 *            additional payload information
 	 */
-	public Model(int priority, Input concreteValues, Payload payload) {
+	public Model(int priority, Input input) {
 		this.priority = priority;
-		this.concreteValues = concreteValues;
-		this.payload = payload;
+		this.input = input;
 	}
 
 	/**
@@ -67,28 +51,48 @@ public class Model {
 	 * 
 	 * @return the model's variable-value mapping
 	 */
-	public Input getConcreteValues() {
-		return concreteValues;
+	public Input getInput() {
+		return input;
 	}
 
 	/**
-	 * Set the payload for this model.
+	 * Return the value of a payload field.
 	 * 
-	 * @param payload the paylaod information
+	 * @param key key for the payload field
+	 * @return value of the payload field 
 	 */
-	public void setPayload(Payload payload) {
-		this.payload = payload;
-	}
-
-	/**
-	 * Return the payload for this model.
-	 * 
-	 * @return the payload information
-	 */
-	public Payload getPayload() {
-		return payload;
+	public Object getPayload(String key) {
+		return payload.get(key);
 	}
 	
+	/**
+	 * Set the value of a payload field.
+	 * 
+	 * @param key key for the payload field
+	 * @param value new value for the payload field
+	 */
+	public void setPayload(String key, Object value) {
+		payload.put(key, value);
+	}
+
+	/**
+	 * Set several payload field by copying them from another model.
+	 * 
+	 * @param model source model for payload fields
+	 */
+	public void copyPayload(Model model) {
+		payload.putAll(model.getPayload());
+	}
+	
+	/**
+	 * Return the payload in its "raw" form.  Warning: this exposes the payload to other components.
+	 * 
+	 * @return payload
+	 */
+	public Map<String, Object> getPayload() {
+		return payload;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -98,7 +102,7 @@ public class Model {
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append(priority).append(':');
-		b.append(concreteValues);
+		b.append(input);
 		return b.toString();
 	}
 

@@ -5,9 +5,9 @@ import java.util.Random;
 import org.apache.commons.configuration2.ImmutableConfiguration;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.diver.SegmentedPC;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
+import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class RandomPathFactory extends PathBasedFactory {
 
@@ -74,24 +74,22 @@ public class RandomPathFactory extends PathBasedFactory {
 		}
 
 		@Override
-		public SegmentedPC findNewPath(PathTree pathTree) {
-			SegmentedPC pc = null;
-			PathTreeNode cur = pathTree.getRoot();
+		public Path findNewPath(PathTree pathTree) {
+			PathTreeNode curNode = pathTree.getRoot();
 			outer: while (true) {
-				int n = cur.getChildCount();
+				int n = curNode.getChildCount();
 				int i = rng.nextInt(n);
 				for (int j = 0; j < n; j++, i = (i + 1) % n) {
-					PathTreeNode ch = cur.getChild(i);
-					if ((ch != null) && !ch.isComplete()) {
-						pc = (SegmentedPC) cur.getExecutionForChild(i, pc);
-						cur = ch;
+					PathTreeNode childNode = curNode.getChild(i);
+					if ((childNode != null) && !childNode.isComplete()) {
+						curNode = childNode;
 						continue outer;
 					}
 				}
 				for (int j = 0; j < n; j++, i = (i + 1) % n) {
-					PathTreeNode ch = cur.getChild(i);
-					if (ch == null) {
-						return (SegmentedPC) cur.getExecutionForChild(i, pc);
+					PathTreeNode childNode = curNode.getChild(i);
+					if (childNode == null) {
+						return curNode.getPathForChild(i);
 					}
 				}
 				return null;
