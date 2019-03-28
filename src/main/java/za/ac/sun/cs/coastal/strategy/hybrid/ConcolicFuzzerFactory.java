@@ -623,7 +623,8 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 		}
 
 		private boolean plant() {
-			PathTreeNode node = manager.getPathTree().getDeepestNode();
+			// PathTreeNode node = manager.getPathTree().getDeepestNode();
+			PathTreeNode node = findNewPath(manager.getPathTree());
 			if (node == null) {
 				return false;
 			}
@@ -631,6 +632,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 //			if (parent == null) {
 //				return false;
 //			}
+			// DEBUG !! log.info("--->>> NODE ID {}", node.getId());
 			Execution execution = node.getExecution();
 			if (execution == null) {
 				return false;
@@ -641,6 +643,30 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 			}
 			coastal.updateWork(coastal.addDiverInputs(Collections.singletonList(input)));
 			return true;
+		}
+
+		private PathTreeNode findNewPath(PathTree pathTree) {
+			PathTreeNode curNode = pathTree.getRoot();
+			if (curNode == null) {
+				return null;
+			}
+			outer: while (true) {
+				int n = curNode.getChildCount();
+				for (int i = 0; i < n; i++) {
+					PathTreeNode childNode = curNode.getChild(i);
+					if ((childNode != null) && !childNode.isComplete()) {
+						curNode = childNode;
+						continue outer;
+					}
+				}
+				for (int i = 0; i < n; i++) {
+					PathTreeNode childNode = curNode.getChild(i);
+					if ((childNode != null) && childNode.isComplete()) {
+						return childNode;
+					}
+				}
+				return null;
+			}
 		}
 	}
 
@@ -669,19 +695,15 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 				while (true) {
 					Execution execution = coastal.getNextPc();
 					// log.info("------>>>>>> {}",  execution.toString());
-					int d = -1;
 					Path path = execution.getPath();
-					while (path != null) {
-						Path parent = path.getParent();
-						Choice lastChoice = path.getChoice();
-						long alternative = lastChoice.getAlternative();
-						Path newPath = new Path(parent, lastChoice.getAlternative(1 - alternative));
-						Input input = solver.solve(newPath.getPathCondition());
-						if (input != null) {
-							input.copyPayload(execution.getInput());
-							d += coastal.addSurferInputs(Collections.singletonList(input));
-						}
-						path = parent;
+					Choice lastChoice = path.getChoice();
+					long alternative = lastChoice.getAlternative();
+					Path newPath = new Path(path.getParent(), lastChoice.getAlternative(1 - alternative));
+					Input input = solver.solve(newPath.getPathCondition());
+					int d = -1;
+					if (input != null) {
+						input.copyPayload(execution.getInput());
+						d += coastal.addSurferInputs(Collections.singletonList(input));
 					}
 					coastal.updateWork(d);
 					PathTreeNode root = manager.getPathTree().getRoot();
