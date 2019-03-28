@@ -265,13 +265,13 @@ public class PathTree implements Comparator<PathTreeNode> {
 			}
 			parent.unlock();
 		} else {
+			if (isInfeasible) {
+				assert n.isInfeasible();
+			} else {
+				assert n.isLeaf();
+			}
 			n = null;
 			revisitCount.incrementAndGet();
-			if (isInfeasible) {
-				assert parent.isInfeasible();
-			} else {
-				assert parent.isLeaf();
-			}
 		}
 		for (int j = depth - 1; j >= 0; j--) {
 			PathTreeNode node = visitedNodes[j];
