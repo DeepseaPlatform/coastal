@@ -1,5 +1,6 @@
-package za.ac.sun.cs.coastal.strategy.tracebased;
+package za.ac.sun.cs.coastal.strategy.hybrid;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
+import za.ac.sun.cs.coastal.solver.Solver;
 import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.TraceState;
@@ -22,32 +24,36 @@ import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Path;
 
-public class FeedbackFuzzerFactory implements StrategyFactory {
+public class ConcolicFuzzerFactory implements StrategyFactory {
 
 	protected final ImmutableConfiguration options;
 
-	public FeedbackFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
+	public ConcolicFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
 		this.options = options;
 	}
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new FeedbackFuzzerManager(coastal, options);
+		return new ConcolicFuzzerManager(coastal, options);
 	}
 
 	@Override
 	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
-		((FeedbackFuzzerManager) manager).incrementTaskCount();
-		return new Strategy[] { new FeedbackFuzzerStrategy(coastal, (StrategyManager) manager) };
+		((ConcolicFuzzerManager) manager).incrementTaskCount();
+		Strategy concolicFuzzerStrategy = new ConcolicFuzzerStrategy(coastal, (StrategyManager) manager);
+		Strategy concolicFuzzerPlanter = new ConcolicFuzzerPlanter(coastal, (StrategyManager) manager);
+		Strategy concolicFuzzerHarvester = new ConcolicFuzzerHarvester(coastal, (StrategyManager) manager);
+		return new Strategy[] { concolicFuzzerStrategy, concolicFuzzerPlanter, concolicFuzzerHarvester };
+		// return new Strategy[] { concolicFuzzerStrategy, concolicFuzzerPlanter };
 	}
 
 	// ======================================================================
 	//
-	// FEEDBACK FUZZER STRATEGY MANAGER
+	// HYBRID CONCOLIC FUZZER STRATEGY MANAGER
 	//
 	// ======================================================================
 
-	public static class FeedbackFuzzerManager implements StrategyManager {
+	public static class ConcolicFuzzerManager implements StrategyManager {
 
 		private static final int DEFAULT_QUEUE_LIMIT = 10000000;
 
@@ -101,11 +107,12 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 
 		protected final Map<String, Integer> edgesSeen = new HashMap<>();
 
-		public FeedbackFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
+		public ConcolicFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
 			this.coastal = coastal;
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
 			pathTree = coastal.getPathTree();
+			pathTree.setRecordDeepest(true);
 			queueLimit = ConfigHelper.zero(options.getInt("queue-limit", 0), DEFAULT_QUEUE_LIMIT);
 			randomSeed = ConfigHelper.zero(options.getInt("random-seed", 0), System.currentTimeMillis());
 			attenuation = ConfigHelper.minmax(options.getDouble("attenuation", 0.5), 0.0, 1.0);
@@ -229,7 +236,7 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 
 		@Override
 		public String getName() {
-			return "FeedbackFuzzer";
+			return "ConcolicFuzzer";
 		}
 
 		@Override
@@ -255,11 +262,11 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 
 	// ======================================================================
 	//
-	// FEEDBACK FUZZER STRATEGY
+	// HYBRID CONCOLIC FUZZER STRATEGY
 	//
 	// ======================================================================
 
-	public static class FeedbackFuzzerStrategy extends Strategy {
+	public static class ConcolicFuzzerStrategy extends Strategy {
 
 		public static final int[] COUNT_TO_BUCKET = new int[128];
 
@@ -282,7 +289,7 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 			}
 		}
 
-		protected final FeedbackFuzzerManager manager;
+		protected final ConcolicFuzzerManager manager;
 
 		protected final Broker broker;
 
@@ -306,9 +313,9 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 
 		protected final int keepTop;
 
-		public FeedbackFuzzerStrategy(COASTAL coastal, StrategyManager manager) {
+		public ConcolicFuzzerStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
-			this.manager = (FeedbackFuzzerManager) manager;
+			this.manager = (ConcolicFuzzerManager) manager;
 			broker = coastal.getBroker();
 			queueLimit = this.manager.getQueueLimit();
 			rng = new MTRandom(this.manager.getRandomSeed());
@@ -325,7 +332,7 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ strategy task starting");
+			log.trace("^^^ strategy task (ConcolicFuzzerStrategy) starting");
 			try {
 				ExecutionCollection keepers = new ExecutionCollection(keepTop);
 				ExecutionCollection allTime = new ExecutionCollection(keepTop);
@@ -350,16 +357,16 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 							(int) (eliminationRatio * coastal.getTraceQueueLength()));
 					for (int i = 0; i < eliminate; i++) {
 						t0 = System.currentTimeMillis();
-						Execution executionx = coastal.getNextTrace(200);
+						Execution tracex = coastal.getNextTrace(200);
 						t1 = System.currentTimeMillis();
 						manager.recordWaitTime(t1 - t0);
-						if (executionx == null) {
+						if (tracex == null) {
 							log.trace("+++ out of traces");
 							break;
 						}
-						int scorex = calculateScore(executionx);
-						keepers.add(scorex, executionx);
-						allTime.add(scorex, executionx);
+						int scorex = calculateScore(tracex);
+						keepers.add(scorex, tracex);
+						allTime.add(scorex, tracex);
 					}
 					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
@@ -380,19 +387,19 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 					}
 				}
 			} catch (InterruptedException e) {
-				log.trace("^^^ strategy task canceled");
+				log.trace("^^^ strategy task (ConcolicFuzzerStrategy) canceled");
 				throw e;
 			}
-			log.trace("^^^ strategy task finished");
+			log.trace("^^^ strategy task (ConcolicFuzzerStrategy) finished");
 			return null;
 		}
 
-		protected void refine(Execution execution, int score) {
+		protected void refine(Execution trace, int score) {
 			long t0 = System.currentTimeMillis();
 			inputsAdded = -1;
-			manager.insertPath(execution, false);
+			manager.insertPath(trace, false);
 			parameters = coastal.getParameters();
-			Input input = execution.getInput();
+			Input input = trace.getInput();
 			mutate(score, input);
 			log.trace("+++ added {} surfer models", inputsAdded);
 			coastal.updateWork(inputsAdded);
@@ -545,8 +552,8 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 		 * counts. Finally, the score of the trace's parent trace is added but scaled by
 		 * a factor.
 		 * 
-		 * @param execution execution to calculate a score for
-		 * @return score for the execution
+		 * @param execution the trace to calculate a score for
+		 * @return the score
 		 */
 		private int calculateScore(Execution execution) {
 			int oldScore = execution.getInput().getPayload("score", 0);
@@ -571,6 +578,126 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 				}
 			}
 			return manager.scoreEdges(edges) + edges.size() + (int) (attenuation * oldScore);
+		}
+
+	}
+
+	// ======================================================================
+	//
+	// HYBRID CONCOLIC FUZZER PLANTER
+	//
+	// ======================================================================
+
+	public static class ConcolicFuzzerPlanter extends Strategy {
+
+		protected final ConcolicFuzzerManager manager;
+
+		protected ConcolicFuzzerPlanter(COASTAL coastal, StrategyManager manager) {
+			super(coastal, manager);
+			this.manager = (ConcolicFuzzerManager) manager;
+		}
+
+		@Override
+		public Void call() throws Exception {
+			log.trace("^^^ strategy task (ConcolicFuzzerPlanter) starting");
+			try {
+				while (true) {
+					if (!plant(manager.getPathTree().getDeepestNode())) {
+						Thread.sleep(1000);
+					}
+					PathTreeNode root = manager.getPathTree().getRoot();
+					if ((root != null) && root.isFullyExplored()) {
+						break;
+					}
+				}
+			} catch (ClassCastException e) {
+				log.info("CLASSCASTEXCEPTION", e);
+				throw e;
+			} catch (InterruptedException e) {
+				log.trace("^^^ strategy task (ConcolicFuzzerPlanter) canceled");
+				throw e;
+			}
+			log.trace("^^^ strategy task (ConcolicFuzzerPlanter) finished");
+			return null;
+		}
+
+		private boolean plant(PathTreeNode node) {
+			if (node == null) {
+				return false;
+			}
+			PathTreeNode parent = node.getParent();
+			if (parent == null) {
+				return false;
+			}
+			log.info("--->>> {}", parent.getId());
+			Execution execution = parent.getExecution();
+			if (execution == null) {
+				return false;
+			}
+			Input input = execution.getInput();
+			if (input == null) {
+				return false;
+			}
+			log.info("--->>> {}", input.toString());
+			coastal.updateWork(coastal.addDiverInputs(Collections.singletonList(input)));
+			return true;
+		}
+	}
+
+	// ======================================================================
+	//
+	// HYBRID CONCOLIC FUZZER HARVESTER
+	//
+	// ======================================================================
+
+	public static class ConcolicFuzzerHarvester extends Strategy {
+
+		protected final ConcolicFuzzerManager manager;
+
+		protected final Solver solver;
+
+		protected ConcolicFuzzerHarvester(COASTAL coastal, StrategyManager manager) {
+			super(coastal, manager);
+			this.manager = (ConcolicFuzzerManager) manager;
+			solver = new Solver(coastal);
+		}
+
+		@Override
+		public Void call() throws Exception {
+			log.trace("^^^ strategy task (ConcolicFuzzerHarvester) starting");
+			try {
+				while (true) {
+					Execution execution = coastal.getNextPc();
+					log.info("------>>>>>> {}",  execution.toString());
+					manager.getPathTree().insertPath(execution, false);
+//					PathTreeNode bottom = manager.getPathTree().insertPath(spc, false);
+//					if (bottom != null) {
+//						bottom = bottom.getParent();
+//						SegmentedPC parent = spc.getParent();
+//						Expression pc = spc.getExpression();
+//						Expression passive = spc.getPassiveConjunct();
+//						boolean value = ((SegmentedPCIf) spc).getValue();
+//						SegmentedPC altSpc = new SegmentedPCIf(parent, pc, passive, !value);
+//						Map<String, Object> model = solver.solve(altSpc.getPathCondition());
+//						if (model != null) {
+//							Model mdl = new Model(100, model);
+//							mdl.setPayload(new ConcolicPayload(100));
+//							if (coastal.addSurferModel(mdl)) {
+//								// modelsAdded++;
+//							}
+//						}
+//					}
+					PathTreeNode root = manager.getPathTree().getRoot();
+					if ((root != null) && root.isFullyExplored()) {
+						break;
+					}
+				}
+			} catch (InterruptedException e) {
+				log.trace("^^^ strategy task (ConcolicFuzzerHarvester) canceled");
+				throw e;
+			}
+			log.trace("^^^ strategy task (ConcolicFuzzerHarvester) finished");
+			return null;
 		}
 
 	}
