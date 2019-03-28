@@ -11,6 +11,7 @@
 			<bound name="a" min="32" max="128"/>
 		</bounds>
 		<settings>
+			<draw-paths>true</draw-paths>
 			<time-limit>120</time-limit>
 		</settings>
 		<divers threads="1"/>

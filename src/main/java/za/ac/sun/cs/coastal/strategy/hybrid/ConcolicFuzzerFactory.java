@@ -669,15 +669,19 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 				while (true) {
 					Execution execution = coastal.getNextPc();
 					// log.info("------>>>>>> {}",  execution.toString());
-					Path path = execution.getPath();
-					Choice lastChoice = path.getChoice();
-					long alternative = lastChoice.getAlternative();
-					Path newPath = new Path(path.getParent(), lastChoice.getAlternative(1 - alternative));
 					int d = -1;
-					Input input = solver.solve(newPath.getPathCondition());
-					if (input != null) {
-						input.copyPayload(execution.getInput());
-						d += coastal.addSurferInputs(Collections.singletonList(input));
+					Path path = execution.getPath();
+					while (path != null) {
+						Path parent = path.getParent();
+						Choice lastChoice = path.getChoice();
+						long alternative = lastChoice.getAlternative();
+						Path newPath = new Path(parent, lastChoice.getAlternative(1 - alternative));
+						Input input = solver.solve(newPath.getPathCondition());
+						if (input != null) {
+							input.copyPayload(execution.getInput());
+							d += coastal.addSurferInputs(Collections.singletonList(input));
+						}
+						path = parent;
 					}
 					coastal.updateWork(d);
 					PathTreeNode root = manager.getPathTree().getRoot();
