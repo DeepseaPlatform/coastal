@@ -43,6 +43,16 @@ public abstract class Trace extends Branch {
 			return null;
 		}
 
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.coastal.symbolic.Branch#toString0()
+		 */
+		@Override
+		protected String toString0() {
+			return "IF";
+		}
+
 	}
 
 //	public static final Trace NULL = new TraceIf(null, "ORIGIN", true);

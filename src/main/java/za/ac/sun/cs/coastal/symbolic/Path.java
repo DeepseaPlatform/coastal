@@ -44,7 +44,7 @@ public final class Path {
 	 * 
 	 * @return the prefix of this path
 	 */
-	public final Path getParent() {
+	public Path getParent() {
 		return parent;
 	}
 
@@ -53,7 +53,7 @@ public final class Path {
 	 * 
 	 * @return the depth of this path
 	 */
-	public final int getDepth() {
+	public int getDepth() {
 		return depth;
 	}
 
@@ -62,7 +62,7 @@ public final class Path {
 	 * 
 	 * @return the last choice of this path
 	 */
-	public final Choice getChoice() {
+	public Choice getChoice() {
 		return choice;
 	}
 
@@ -159,9 +159,9 @@ public final class Path {
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	public final String toString() {
+	public String toString() {
 		if (stringRep == null) {
-			stringRep = "????"; // toString0();
+			stringRep = toString0();
 		}
 		return stringRep;
 	}
@@ -171,6 +171,14 @@ public final class Path {
 	 * 
 	 * @return a string representation of this path
 	 */
-	// protected abstract String toString0();
+	private String toString0() {
+		StringBuilder rep = new StringBuilder();
+		rep.append('[').append(getChoice());
+		if (getParent() != null) {
+			rep.append(',').append(getParent().toString());
+		}
+		rep.append(']');
+		return rep.toString();
+	}
 
 }

@@ -165,6 +165,11 @@ public class PathTree implements Comparator<PathTreeNode> {
 	 */
 	public PathTreeNode insertPath(Execution execution, boolean isInfeasible) {
 		long t = System.currentTimeMillis();
+		final Path path = execution.getPath();
+		if (path == null) {
+			insertTime.addAndGet(System.currentTimeMillis() - t);
+			return null;
+		}
 		insertedCount.incrementAndGet();
 		if (isInfeasible) {
 			infeasibleCount.incrementAndGet();
@@ -172,7 +177,6 @@ public class PathTree implements Comparator<PathTreeNode> {
 		/*
 		 * Step 1: Deconstruct the path condition.
 		 */
-		final Path path = execution.getPath();
 		final int depth = path.getDepth();
 		final Path[] paths = new Path[depth];
 		int idx = depth;

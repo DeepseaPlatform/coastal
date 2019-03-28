@@ -26,20 +26,29 @@ import za.ac.sun.cs.coastal.symbolic.Branch;
 public abstract class SegmentedPC extends Branch {
 
 	/**
-	 * Additional conjuncts that additional constraints on the branch that will not be negated.
+	 * Additional conjuncts that additional constraints on the branch that will not
+	 * be negated.
 	 */
-	protected final Expression passiveConjunct;
+	private final Expression passiveConjunct;
 
 	private SegmentedPC(Expression passiveConjunct) {
 		this.passiveConjunct = passiveConjunct;
 	}
 
 	/**
+	 * Return the passive conjunct.
+	 * 
+	 * @return passive conjunct
+	 */
+	protected final Expression getPassiveConjunct() {
+		return passiveConjunct;
+	}
+
+	/**
 	 * Check whether or not the given expression is constant (= consists only of
 	 * constant expressions and operators).
 	 * 
-	 * @param expression
-	 *            the input expression to check
+	 * @param expression the input expression to check
 	 * @return {@code true} if and only if the expression is a constant
 	 */
 	public static final boolean isConstant(Expression expression) {
@@ -57,6 +66,13 @@ public abstract class SegmentedPC extends Branch {
 		}
 	}
 
+	/**
+	 * Return an expression for the active conjunct (in its positive form). This
+	 * excludes the passive conjunct; callers are only interested in how decisions
+	 * are made at this branching point.
+	 * 
+	 * @return expression for the active conjunct
+	 */
 	public abstract Expression getExpression();
 
 	// ======================================================================
@@ -84,16 +100,16 @@ public abstract class SegmentedPC extends Branch {
 		 * The positive forms of the active and passive conjuncts.
 		 */
 		private final Expression positiveCondition;
-		
+
 		/**
 		 * The negative forms of the active and passive conjuncts.
 		 */
 		private final Expression negativeCondition;
-		
+
 		/**
 		 * Construct a new binary branch.
 		 * 
-		 * @param activeConjunct the active conjunct
+		 * @param activeConjunct  the active conjunct
 		 * @param passiveConjunct the passive conjunct
 		 */
 		public Binary(Expression activeConjunct, Expression passiveConjunct) {
@@ -104,12 +120,14 @@ public abstract class SegmentedPC extends Branch {
 				this.positiveCondition = this.positiveConjunct;
 				this.negativeCondition = this.negativeConjunct;
 			} else {
-				this.positiveCondition = Operation.and(this.positiveConjunct, this.passiveConjunct);
-				this.negativeCondition = Operation.and(this.negativeConjunct, this.passiveConjunct);
+				this.positiveCondition = Operation.and(this.positiveConjunct, getPassiveConjunct());
+				this.negativeCondition = Operation.and(this.negativeConjunct, getPassiveConjunct());
 			}
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getNumberOfAlternatives()
 		 */
 		@Override
@@ -117,7 +135,9 @@ public abstract class SegmentedPC extends Branch {
 			return 2;
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getAlternative(int)
 		 */
 		@Override
@@ -126,7 +146,9 @@ public abstract class SegmentedPC extends Branch {
 			return (alternative == 0) ? "F" : "T";
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getPCContribution(int)
 		 */
 		@Override
@@ -135,7 +157,9 @@ public abstract class SegmentedPC extends Branch {
 			return (alternative == 0) ? negativeConjunct : positiveConjunct;
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getPCContribution(int)
 		 */
 		@Override
@@ -143,9 +167,10 @@ public abstract class SegmentedPC extends Branch {
 			assert (alternative == 0) || (alternative == 1);
 			return (alternative == 0) ? negativeCondition : positiveCondition;
 		}
-		
+
 		/**
-		 * Return the negation of the expression (which is assumed to be a boolean expression). 
+		 * Return the negation of the expression (which is assumed to be a boolean
+		 * expression).
 		 * 
 		 * @param expression the expression to negate
 		 * @return the negated expression
@@ -179,12 +204,29 @@ public abstract class SegmentedPC extends Branch {
 			return Operation.not(expression);
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see za.ac.sun.cs.coastal.diver.SegmentedPC#getExpression()
 		 */
 		@Override
 		public Expression getExpression() {
 			return positiveConjunct;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.coastal.symbolic.Branch#toString0()
+		 */
+		@Override
+		protected String toString0() {
+			StringBuilder rep = new StringBuilder();
+			rep.append(getExpression().toString());
+			if (getPassiveConjunct() != null) {
+				rep.append('{').append(getPassiveConjunct()).append('}');
+			}
+			return rep.toString();
 		}
 
 	}
@@ -213,14 +255,16 @@ public abstract class SegmentedPC extends Branch {
 			this.max = max;
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getNumberOfAlternatives()
 		 */
 		@Override
 		public long getNumberOfAlternatives() {
 			return (max - min + 2);
 		}
-		
+
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -231,7 +275,9 @@ public abstract class SegmentedPC extends Branch {
 			return ((alternative < 0) || (alternative >= max - min + 1)) ? "DF" : Long.toString(alternative + min);
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getPCContribution(int)
 		 */
 		@Override
@@ -245,25 +291,39 @@ public abstract class SegmentedPC extends Branch {
 			}
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getPCContribution(int)
 		 */
 		@Override
 		public Expression getPCContribution(long alternative) {
 			Expression condition = getAlternative(alternative);
-			if (passiveConjunct == null) {
+			if (getPassiveConjunct() == null) {
 				return condition;
 			} else {
-				return Operation.and(condition, this.passiveConjunct);
+				return Operation.and(condition, this.getPassiveConjunct());
 			}
 		}
 
-		/* (non-Javadoc)
+		/*
+		 * (non-Javadoc)
+		 * 
 		 * @see za.ac.sun.cs.coastal.diver.SegmentedPC#getExpression()
 		 */
 		@Override
 		public Expression getExpression() {
 			return expression;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.coastal.symbolic.Branch#toString0()
+		 */
+		@Override
+		protected String toString0() {
+			return getExpression().toString();
 		}
 
 	}

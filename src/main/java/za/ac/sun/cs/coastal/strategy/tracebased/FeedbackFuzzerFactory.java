@@ -1,7 +1,8 @@
-package za.ac.sun.cs.coastal.strategy.hybrid;
+package za.ac.sun.cs.coastal.strategy.tracebased;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -16,40 +17,39 @@ import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
-import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.surfer.TraceState;
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
-import za.ac.sun.cs.coastal.symbolic.Model;
-import za.ac.sun.cs.coastal.symbolic.Payload;
+import za.ac.sun.cs.coastal.symbolic.Path;
 
-public class GybridFuzzerFactory implements StrategyFactory {
+public class FeedbackFuzzerFactory implements StrategyFactory {
 
 	protected final ImmutableConfiguration options;
 
-	public GybridFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
+	public FeedbackFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
 		this.options = options;
 	}
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new GybridFuzzerManager(coastal, options);
+		return new FeedbackFuzzerManager(coastal, options);
 	}
 
 	@Override
 	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
-		((GybridFuzzerManager) manager).incrementTaskCount();
-		return new Strategy[] { new GybridFuzzerStrategy(coastal, (StrategyManager) manager) };
+		((FeedbackFuzzerManager) manager).incrementTaskCount();
+		return new Strategy[] { new FeedbackFuzzerStrategy(coastal, (StrategyManager) manager) };
 	}
 
 	// ======================================================================
 	//
-	// HYBRID FUZZER STRATEGY MANAGER
+	// FEEDBACK FUZZER STRATEGY MANAGER
 	//
 	// ======================================================================
 
-	public static class GybridFuzzerManager implements StrategyManager {
+	public static class FeedbackFuzzerManager implements StrategyManager {
 
-		private static final int DEFAULT_QUEUE_LIMIT = 100000;
+		private static final int DEFAULT_QUEUE_LIMIT = 10000000;
 
 		private static final int NEW_EDGE_SCORE = 100;
 
@@ -67,9 +67,15 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 		protected final double attenuation;
 
-		protected final int firstRepeat;
+		protected final int mutationCount;
 
-		protected final int pairRepeat;
+		protected final int eliminationCount;
+
+		protected final double eliminationRatio;
+
+		protected final int keepTop;
+
+		protected final boolean drawTree;
 
 		protected int taskCount = 0;
 
@@ -95,31 +101,34 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 		protected final Map<String, Integer> edgesSeen = new HashMap<>();
 
-		public GybridFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
+		public FeedbackFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
 			this.coastal = coastal;
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
 			pathTree = coastal.getPathTree();
 			queueLimit = ConfigHelper.zero(options.getInt("queue-limit", 0), DEFAULT_QUEUE_LIMIT);
-			randomSeed = ConfigHelper.zero(options.getInt("seed", 0), System.currentTimeMillis());
+			randomSeed = ConfigHelper.zero(options.getInt("random-seed", 0), System.currentTimeMillis());
 			attenuation = ConfigHelper.minmax(options.getDouble("attenuation", 0.5), 0.0, 1.0);
-			firstRepeat = ConfigHelper.zero(options.getInt("first-repeat", 0), 100);
-			pairRepeat = ConfigHelper.zero(options.getInt("pair-repeat", 0), 50);
+			mutationCount = ConfigHelper.zero(options.getInt("mutation-count", 0), 100);
+			eliminationCount = options.getInt("elimination-count", 0);
+			eliminationRatio = ConfigHelper.minmax(options.getDouble("elimination-ratio", 0), 0.0, 1.0);
+			keepTop = ConfigHelper.minmax(options.getInt("keep-top", 1), 1, Integer.MAX_VALUE);
+			drawTree = options.getBoolean("draw-final-tree", false);
 		}
 
 		public PathTree getPathTree() {
 			return pathTree;
 		}
 
-		public PathTreeNode insertPath0(Trace trace, boolean infeasible) {
-			return pathTree.insertPath(trace, infeasible);
+		public PathTreeNode insertPath0(Execution execution, boolean infeasible) {
+			return pathTree.insertPath(execution, infeasible);
 		}
 
-		public boolean insertPath(Trace trace, boolean infeasible) {
-			return (pathTree.insertPath(trace, infeasible) == null);
+		public boolean insertPath(Execution execution, boolean infeasible) {
+			return (pathTree.insertPath(execution, infeasible) == null);
 		}
 
-		public int getQueueLimit() {
+		protected int getQueueLimit() {
 			return queueLimit;
 		}
 
@@ -131,12 +140,20 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			return attenuation;
 		}
 
-		protected int getFirstRepeat() {
-			return firstRepeat;
+		protected int getMutationCount() {
+			return mutationCount;
 		}
 
-		protected int getPairRepeat() {
-			return pairRepeat;
+		protected int getEliminationCount() {
+			return eliminationCount;
+		}
+
+		protected double getEliminationRatio() {
+			return eliminationRatio;
+		}
+
+		protected int getKeepTop() {
+			return keepTop;
 		}
 
 		/**
@@ -147,22 +164,20 @@ public class GybridFuzzerFactory implements StrategyFactory {
 		}
 
 		/**
-		 * Add a reported dive time to the accumulator that tracks how long the
-		 * dives took.
+		 * Add a reported dive time to the accumulator that tracks how long the dives
+		 * took.
 		 * 
-		 * @param time
-		 *            the time for this dive
+		 * @param time the time for this dive
 		 */
 		public void recordTime(long time) {
 			strategyTime.addAndGet(time);
 		}
 
 		/**
-		 * Add a reported strategy wait time. This is used to determine if it
-		 * makes sense to create additional threads (or destroy them).
+		 * Add a reported strategy wait time. This is used to determine if it makes
+		 * sense to create additional threads (or destroy them).
 		 * 
-		 * @param time
-		 *            the wait time for this strategy
+		 * @param time the wait time for this strategy
 		 */
 		public void recordWaitTime(long time) {
 			strategyWaitTime.addAndGet(time);
@@ -201,6 +216,12 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			broker.publish("report", new Tuple(name + ".refinements", refineCount.get()));
 			broker.publish("report", new Tuple(name + ".wait-time", swt));
 			broker.publish("report", new Tuple(name + ".total-time", strategyTime.get()));
+			if (drawTree) {
+				int i = 0;
+				for (String ll : pathTree.stringRepr()) {
+					broker.publish("report", new Tuple(String.format("%s.tree%03d", name, i++), ll));
+				}
+			}
 		}
 
 		private static final String[] PROPERTY_NAMES = new String[] { "#tasks", "#refinements", "waiting time",
@@ -208,7 +229,7 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 		@Override
 		public String getName() {
-			return "GybridFuzzer";
+			return "FeedbackFuzzer";
 		}
 
 		@Override
@@ -234,11 +255,11 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 	// ======================================================================
 	//
-	// HYBRID FUZZER STRATEGY
+	// FEEDBACK FUZZER STRATEGY
 	//
 	// ======================================================================
 
-	public static class GybridFuzzerStrategy extends Strategy {
+	public static class FeedbackFuzzerStrategy extends Strategy {
 
 		public static final int[] COUNT_TO_BUCKET = new int[128];
 
@@ -261,13 +282,13 @@ public class GybridFuzzerFactory implements StrategyFactory {
 			}
 		}
 
-		protected final GybridFuzzerManager manager;
+		protected final FeedbackFuzzerManager manager;
 
 		protected final Broker broker;
 
 		protected final Set<String> visitedModels = new HashSet<>();
 
-		protected int modelsAdded;
+		protected int inputsAdded;
 
 		protected Map<String, Class<?>> parameters = null;
 
@@ -277,144 +298,108 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 		private final double attenuation;
 
-		protected final int firstRepeat;
+		protected final int mutationCount;
 
-		protected final int pairRepeat;
+		protected final int eliminationCount;
 
-		private int highScore = 0;
+		protected final double eliminationRatio;
 
-		public GybridFuzzerStrategy(COASTAL coastal, StrategyManager manager) {
+		protected final int keepTop;
+
+		public FeedbackFuzzerStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
-			this.manager = (GybridFuzzerManager) manager;
+			this.manager = (FeedbackFuzzerManager) manager;
 			broker = coastal.getBroker();
 			queueLimit = this.manager.getQueueLimit();
 			rng = new MTRandom(this.manager.getRandomSeed());
 			attenuation = this.manager.getAttenuation();
-			firstRepeat = this.manager.getFirstRepeat();
-			pairRepeat = this.manager.getPairRepeat();
+			mutationCount = this.manager.getMutationCount();
+			eliminationCount = this.manager.getEliminationCount();
+			eliminationRatio = this.manager.getEliminationRatio();
+			keepTop = this.manager.getKeepTop();
 		}
 
 		private Set<Integer> setValues = new HashSet<>();
 		private Set<Integer> incValues = new HashSet<>();
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public Void call() throws Exception {
 			log.trace("^^^ strategy task starting");
 			try {
+				ExecutionCollection keepers = new ExecutionCollection(keepTop);
+				ExecutionCollection allTime = new ExecutionCollection(keepTop);
 				long t0 = System.currentTimeMillis();
-				Trace trace = coastal.getNextTrace();
-				int score = calculateScore(trace);
+				Execution execution0 = coastal.getNextTrace();
 				long t1 = System.currentTimeMillis();
 				manager.recordWaitTime(t1 - t0);
 				manager.incrementRefinements();
 				log.trace("+++ starting refinement");
-				setValues = trace.getSetValues();
-				incValues = trace.getIncValues();
-//				Set<Integer> sv = trace.getSetValues();
-//				if (sv != null) {
-//					setValues.addAll(sv);
-//				}
-//				Set<Integer> iv = trace.getIncValues();
-//				if (iv != null) {
-//					incValues.addAll(iv);
-//				}
-				refineFirst(trace, score);
+				int score0 = calculateScore(execution0);
+				keepers.add(score0, execution0);
+				allTime.add(score0, execution0);
+				setValues.addAll((Set<Integer>) execution0.getPayload("setValues"));
+				incValues.addAll((Set<Integer>) execution0.getPayload("incValues"));
+				refine(execution0, score0);
 				while (true) {
-					t0 = System.currentTimeMillis();
-					Trace trace1 = null, trace2 = null;
-					int score1 = 0, score2 = 0;
-					do {
-						trace1 = coastal.getNextTrace();
-						score1 = calculateScore(trace1);
-					} while (score1 <= 0);
-					setValues = trace1.getSetValues();
-					incValues = trace1.getIncValues();
-					int tries = 5;
-					do {
-						trace2 = coastal.getNextTrace();
-						score2 = calculateScore(trace2);
-					} while ((tries-- > 0) && (score2 <= 0));
-					//} while ((tries-- > 0) && ((score2 <= 0) || trace1.toString().equals(trace2.toString())));
-					setValues.addAll(trace2.getSetValues());
-					incValues.addAll(trace2.getIncValues());
-					t1 = System.currentTimeMillis();
-					manager.recordWaitTime(t1 - t0);
+					while (coastal.getSurferModelQueueLength() > queueLimit) {
+						Thread.sleep(200);
+					}
+					keepers.clear();
+					int eliminate = Math.max(eliminationCount,
+							(int) (eliminationRatio * coastal.getTraceQueueLength()));
+					for (int i = 0; i < eliminate; i++) {
+						t0 = System.currentTimeMillis();
+						Execution executionx = coastal.getNextTrace(200);
+						t1 = System.currentTimeMillis();
+						manager.recordWaitTime(t1 - t0);
+						if (executionx == null) {
+							log.trace("+++ out of traces");
+							break;
+						}
+						int scorex = calculateScore(executionx);
+						keepers.add(scorex, executionx);
+						allTime.add(scorex, executionx);
+					}
 					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
-					refinePair(trace1, score1, trace2, score2);
+					ExecutionCollection candidates = (keepers.size() > 0) ? keepers : allTime;
+					setValues.clear();
+					incValues.clear();
+					for (Execution execution : candidates.executions()) {
+						setValues.addAll((Set<Integer>) execution.getPayload("setValues"));
+						incValues.addAll((Set<Integer>) execution.getPayload("incValues"));
+					}
+					for (int j = 0, n = candidates.size(); j < n; j++) {
+						refine(candidates.getExecution(j), candidates.getScore(j));
+					}
+					PathTreeNode root = manager.getPathTree().getRoot();
+					if ((root != null) && root.isFullyExplored()) {
+						coastal.stopWork("PATH TREE FULLY EXPLORED");
+						break;
+					}
 				}
 			} catch (InterruptedException e) {
 				log.trace("^^^ strategy task canceled");
 				throw e;
 			}
+			log.trace("^^^ strategy task finished");
+			return null;
 		}
 
-		protected void refineFirst(Trace trace, int score) {
+		protected void refine(Execution execution, int score) {
 			long t0 = System.currentTimeMillis();
-			modelsAdded = -1;
-			manager.insertPath(trace, false);
+			inputsAdded = -1;
+			manager.insertPath(execution, false);
 			parameters = coastal.getParameters();
-			Input model = trace.getModel();
-			if (score > highScore) {
-				highScore = score;
-				log.info("NEW HIGH SCORE: {} {}", score, model);
-			}
-			for (int i = 0; i < firstRepeat; i++) {
-				mutatem(score, model);
-			}
-			log.trace("+++ added {} surfer models", modelsAdded);
-			coastal.updateWork(modelsAdded);
+			Input input = execution.getInput();
+			mutate(score, input);
+			log.trace("+++ added {} surfer models", inputsAdded);
+			coastal.updateWork(inputsAdded);
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}
 
-		protected void refinePair(Trace trace1, int score1, Trace trace2, int score2) {
-			long t0 = System.currentTimeMillis();
-			modelsAdded = -1;
-			manager.insertPath(trace1, false);
-			manager.insertPath(trace2, false);
-			Input model1 = trace1.getModel();
-			Input model2 = trace2.getModel();
-			if (score1 > highScore) {
-				highScore = score1;
-				log.info("NEW HIGH SCORE: {} {}", score1, model1);
-			}
-			if (score2 > highScore) {
-				highScore = score2;
-				log.info("NEW HIGH SCORE: {} {}", score2, model2);
-			}
-			int score = Math.max(score1, score2);
-			for (int i = 0; i < pairRepeat; i++) {
-				Input newModel1 = new Input(model1);
-				Input newModel2 = new Input(model2);
-				if (!trace1.toString().equals(trace2.toString())) {
-					for (String name : model1.getNames()) {
-						Object value1 = model1.get(name);
-						Object value2 = model2.get(name);
-						assert (value2 != null);
-						if (rng.nextInt(100) < 5) {
-							Object value = null;
-							if (value1 instanceof Long) {
-								value = (((Long) value1) + ((Long) value2)) / 2;
-							} else {
-								value = (((Double) value1) + ((Double) value2)) / 2;
-							}
-							newModel1.put(name, value);
-							newModel2.put(name, value);
-						} else if (rng.nextBoolean()) {
-							newModel1.put(name, value2);
-							newModel2.put(name, value1);
-						}
-					}
-				}
-				mutatem(score, newModel1);
-				mutatem(score, newModel2);
-			}
-			log.trace("+++ added {} surfer models", modelsAdded);
-			coastal.updateWork(modelsAdded);
-			manager.recordTime(System.currentTimeMillis() - t0);
-		}
-
-		protected void mutatem(int score, Input model) {
+		protected void mutate(int score, Input model) {
 			for (Map.Entry<String, Class<?>> entry : parameters.entrySet()) {
 				String name = entry.getKey();
 				Class<?> type = entry.getValue();
@@ -438,43 +423,27 @@ public class GybridFuzzerFactory implements StrategyFactory {
 					long min = (Long) coastal.getMinBound(name, type);
 					long max = (Long) coastal.getMaxBound(name, type);
 					newModel.put(name, randomLong(min, max));
-					Model mdl = new Model(score, newModel);
-					mdl.setPayload(new GybridPayload(score));
-					if (coastal.addSurferModel(mdl)) {
-						modelsAdded++;
-					}
+					submitInput(score, newModel);
 				} else if (type == float.class) {
 					Input newModel = new Input(model);
 					double min = (Float) coastal.getMinBound(name, type);
 					double max = (Float) coastal.getMaxBound(name, type);
 					newModel.put(name, Double.valueOf(rng.nextDouble(min, max)));
-					Model mdl = new Model(score, newModel);
-					mdl.setPayload(new GybridPayload(score));
-					if (coastal.addSurferModel(mdl)) {
-						modelsAdded++;
-					}
+					submitInput(score, newModel);
 				} else if (type == double.class) {
 					Input newModel = new Input(model);
 					double min = (Double) coastal.getMinBound(name, type);
 					double max = (Double) coastal.getMaxBound(name, type);
 					newModel.put(name, Double.valueOf(rng.nextDouble(min, max)));
-					Model mdl = new Model(score, newModel);
-					mdl.setPayload(new GybridPayload(score));
-					if (coastal.addSurferModel(mdl)) {
-						modelsAdded++;
-					}
+					submitInput(score, newModel);
 				} else if (type == String.class) {
-					long min = (Long) coastal.getMinBound(name, type);
-					long max = (Long) coastal.getMaxBound(name, type);
+					int min = (Integer) coastal.getMinBound(name, char.class);
+					int max = (Integer) coastal.getMaxBound(name, char.class);
 					int length = coastal.getParameterSize(name);
 					for (int i = 0; i < length; i++) {
 						Input newModel = new Input(model);
 						newModel.put(name + TraceState.CHAR_SEPARATOR + i, randomLong(min, max));
-						Model mdl = new Model(score, newModel);
-						mdl.setPayload(new GybridPayload(score));
-						if (coastal.addSurferModel(mdl)) {
-							modelsAdded++;
-						}
+						submitInput(score, newModel);
 					}
 				} else if (type == char[].class) {
 					int min = (Character) coastal.getMinBound(name, type);
@@ -490,24 +459,18 @@ public class GybridFuzzerFactory implements StrategyFactory {
 		}
 
 		private void update(int score, Input model, String name, int min, int max) {
-			Input newModel = new Input(model);
-			newModel.put(name, Long.valueOf(randomInt(min, max)));
-			Model mdl = new Model(score, newModel);
-			mdl.setPayload(new GybridPayload(score));
-			if (coastal.addSurferModel(mdl)) {
-				modelsAdded++;
+			for (int i = 0, n = mutationCount / 2; i < n; i++) {
+				Input newModel = new Input(model);
+				newModel.put(name, Long.valueOf(randomInt(min, max)));
+				submitInput(score, newModel);
 			}
 			if (setValues != null) {
+				int cur = ((Long) model.get(name)).intValue();
 				for (int set : setValues) {
-					int cur = ((Long) model.get(name)).intValue();
 					if ((set >= min) && (set <= max) && (set != cur)) {
-						newModel = new Input(model);
+						Input newModel = new Input(model);
 						newModel.put(name, Long.valueOf(set));
-						mdl = new Model(score, newModel);
-						mdl.setPayload(new GybridPayload(score));
-						if (coastal.addSurferModel(mdl)) {
-							modelsAdded++;
-						}
+						submitInput(score, newModel);
 					}
 				}
 			}
@@ -515,25 +478,29 @@ public class GybridFuzzerFactory implements StrategyFactory {
 				for (int inc : incValues) {
 					int set = ((Long) model.get(name)).intValue() + inc;
 					if ((set >= min) && (set <= max)) {
-						newModel = new Input(model);
+						Input newModel = new Input(model);
 						newModel.put(name, Long.valueOf(set));
-						mdl = new Model(score, newModel);
-						mdl.setPayload(new GybridPayload(score));
-						if (coastal.addSurferModel(mdl)) {
-							modelsAdded++;
-						}
+						submitInput(score, newModel);
 					}
 					set = ((Long) model.get(name)).intValue() - inc;
 					if ((set >= min) && (set <= max)) {
-						newModel = new Input(model);
+						Input newModel = new Input(model);
 						newModel.put(name, Long.valueOf(set));
-						mdl = new Model(score, newModel);
-						mdl.setPayload(new GybridPayload(score));
-						if (coastal.addSurferModel(mdl)) {
-							modelsAdded++;
-						}
+						submitInput(score, newModel);
 					}
 				}
+			}
+			for (int i = 0, n = (mutationCount + 1) / 2; i < n; i++) {
+				Input newModel = new Input(model);
+				newModel.put(name, Long.valueOf(randomInt(min, max)));
+				submitInput(score, newModel);
+			}
+		}
+
+		private void submitInput(int score, Input input) {
+			input.setPayload("score", score);
+			if (coastal.addSurferModel(input)) {
+				inputsAdded++;
 			}
 		}
 
@@ -559,9 +526,9 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 		/**
 		 * Calculate the score for a trace. First, the trace is scanned for its
-		 * "blocks", which are line numbers that represent basic blocks.
-		 * Consecutive blocks form tuples, the tuples are counted, and the
-		 * counts are converted according to the "bucket scale":
+		 * "blocks", which are line numbers that represent basic blocks. Consecutive
+		 * blocks form tuples, the tuples are counted, and the counts are converted
+		 * according to the "bucket scale":
 		 * 
 		 * <ul>
 		 * <li>1 occurrence = bucket 1</li>
@@ -574,27 +541,26 @@ public class GybridFuzzerFactory implements StrategyFactory {
 		 * <li>&ge;128 occurrences = bucket 8</li>
 		 * </ul>
 		 *
-		 * This information is passed to the manager, which returns a score
-		 * based on the counts. Finally, the score of the trace's parent trace
-		 * is added but scaled by a factor.
+		 * This information is passed to the manager, which returns a score based on the
+		 * counts. Finally, the score of the trace's parent trace is added but scaled by
+		 * a factor.
 		 * 
-		 * @param trace
-		 *            the trace to calculate a score for
-		 * @return the score
+		 * @param execution execution to calculate a score for
+		 * @return score for the execution
 		 */
-		private int calculateScore(Trace trace) {
-			GybridPayload pl = (GybridPayload) trace.getPayload();
-			int oldScore = (pl == null) ? 0 : pl.score;
+		private int calculateScore(Execution execution) {
+			int oldScore = execution.getInput().getPayload("score", 0);
+			Path path = execution.getPath();
 			Map<String, Integer> edges = new HashMap<>();
-			while (trace != null) {
-				String edge = trace.getBlock();
+			while (path != null) {
+				String edge = (String) path.getChoice().getPayload("block");
 				Integer count = edges.get(edge);
 				if (count == null) {
 					edges.put(edge, 1);
 				} else {
 					edges.put(edge, count + 1);
 				}
-				trace = trace.getParent();
+				path = path.getParent();
 			}
 			for (String edge : edges.keySet()) {
 				int count = edges.get(edge);
@@ -609,12 +575,155 @@ public class GybridFuzzerFactory implements StrategyFactory {
 
 	}
 
-	public static class GybridPayload implements Payload {
-		public int score;
+	// ======================================================================
+	//
+	// SIZE-LIMITED COLLECTION OF EXECUTIONS
+	//
+	// ======================================================================
 
-		public GybridPayload(int score) {
-			this.score = score;
+	/**
+	 * Sorted collection of a fixed number of top scoring executions.
+	 */
+	public static class ExecutionCollection {
+
+		/**
+		 * Capacity of collection, i.e., maximum number of executions to keep.
+		 */
+		protected final int capacity;
+
+		/**
+		 * Array of top scores.
+		 */
+		protected final int[] scores;
+
+		/**
+		 * Array of top executions.
+		 */
+		protected final Execution[] executions;
+
+		/**
+		 * Number of items in collection.
+		 */
+		protected int size;
+
+		/**
+		 * Construct a new collection.
+		 * 
+		 * @param capacity capacity of the new collection
+		 */
+		public ExecutionCollection(int capacity) {
+			assert capacity > 0;
+			this.capacity = capacity;
+			scores = new int[capacity];
+			executions = new Execution[capacity];
+			size = 0;
 		}
+
+		/**
+		 * Clear the collection.
+		 */
+		public void clear() {
+			size = 0;
+		}
+
+		/**
+		 * Return the number of executions in the collection
+		 * 
+		 * @return size of the collection
+		 */
+		public int size() {
+			return size;
+		}
+
+		/**
+		 * Add a new execution to the collection. If the execution's score is among the
+		 * top scores, it is added. If necessary, a low-scoring execution is thrown
+		 * away.
+		 * 
+		 * @param score     score for the new execution
+		 * @param execution new execution
+		 */
+		public void add(int score, Execution execution) {
+			if (size == 0) {
+				scores[0] = score;
+				executions[0] = execution;
+				size = 1;
+			} else {
+				int position = 0;
+				while ((position < size) && (score <= scores[position])) {
+					position++;
+				}
+//				if ((position < capacity) && !trace.toString().equals(traces[position].toString())) {
+				if (position < capacity) {
+					if (size < capacity) {
+						size++;
+					}
+					for (int i = size - 1; i > position; i--) {
+						scores[i] = scores[i - 1];
+						executions[i] = executions[i - 1];
+					}
+					scores[position] = score;
+					executions[position] = execution;
+				}
+			}
+		}
+
+		public Iterable<Execution> executions() {
+			return new Iterable<Execution>() {
+				@Override
+				public Iterator<Execution> iterator() {
+					return new Iterator<Execution>() {
+						private int index = 0;
+
+						@Override
+						public Execution next() {
+							return executions[index++];
+						}
+
+						@Override
+						public boolean hasNext() {
+							return index < size;
+						}
+					};
+				}
+			};
+		}
+
+		/**
+		 * Return the score of the index-th spot in the collection.
+		 * 
+		 * @param index position of the desired score
+		 * @return score in the desired position
+		 */
+		public int getScore(int index) {
+			return scores[index];
+		}
+
+		/**
+		 * Return the execution of the index-th spot in the collection.
+		 * 
+		 * @param index position of the desired execution
+		 * @return execution in the desired position
+		 */
+		public Execution getExecution(int index) {
+			return executions[index];
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.lang.Object#toString()
+		 */
+		@Override
+		public String toString() {
+			StringBuilder b = new StringBuilder();
+			b.append(size).append('/').append(capacity);
+			for (int i = 0; i < size; i++) {
+				b.append(' ').append(scores[i]).append(':').append(executions[i].toString());
+			}
+			return b.toString();
+		}
+
 	}
 
 }

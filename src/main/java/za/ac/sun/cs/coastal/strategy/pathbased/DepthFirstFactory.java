@@ -68,6 +68,9 @@ public class DepthFirstFactory extends PathBasedFactory {
 		@Override
 		public Path findNewPath(PathTree pathTree) {
 			PathTreeNode curNode = pathTree.getRoot();
+			if (curNode == null) {
+				return null;
+			}
 			outer: while (true) {
 				int n = curNode.getChildCount();
 				for (int i = 0; i < n; i++) {

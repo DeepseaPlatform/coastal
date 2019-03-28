@@ -16,7 +16,6 @@ import za.ac.sun.cs.coastal.solver.Solver;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
-import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.Path;
 
 public abstract class PathBasedFactory implements StrategyFactory {
@@ -87,7 +86,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		public boolean insertPath(Path path, boolean infeasible) {
 			return (pathTree.insertPath(new Execution(path, null), infeasible) == null);
 		}
-		
+
 		/**
 		 * Increment the number of refinements.
 		 */
@@ -104,22 +103,20 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		}
 
 		/**
-		 * Add a reported dive time to the accumulator that tracks how long the
-		 * dives took.
+		 * Add a reported dive time to the accumulator that tracks how long the dives
+		 * took.
 		 * 
-		 * @param time
-		 *            the time for this dive
+		 * @param time the time for this dive
 		 */
 		public void recordTime(long time) {
 			strategyTime.addAndGet(time);
 		}
 
 		/**
-		 * Add a reported strategy wait time. This is used to determine if it
-		 * makes sense to create additional threads (or destroy them).
+		 * Add a reported strategy wait time. This is used to determine if it makes
+		 * sense to create additional threads (or destroy them).
 		 * 
-		 * @param time
-		 *            the wait time for this strategy
+		 * @param time the wait time for this strategy
 		 */
 		public void recordWaitTime(long time) {
 			strategyWaitTime.addAndGet(time);
@@ -176,7 +173,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 
 		protected final Solver solver;
 
-		protected final Set<String> visitedModels = new HashSet<>();
+		protected final Set<String> visitedInputs = new HashSet<>();
 
 		public PathBasedStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
@@ -196,18 +193,18 @@ public abstract class PathBasedFactory implements StrategyFactory {
 					manager.recordWaitTime(t1 - t0);
 					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
-					List<Model> mdls = refine(execution);
+					List<Input> inputs = refine(execution);
 					// We start at -1 (and not at 0) to account for the
 					// fact that one item of work has been removed from
 					// the global work count.
 					int d = -1;
-					while (mdls != null) {
-						int m = coastal.addDiverModels(mdls);
+					while (inputs != null) {
+						int m = coastal.addDiverInputs(inputs);
 						if (m > 0) {
 							d += m;
 							break;
 						}
-						mdls = refine1();
+						inputs = refine1();
 					}
 					log.trace("+++ added {} models", d);
 					coastal.updateWork(d);
@@ -218,23 +215,30 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			}
 		}
 
-		protected List<Model> refine(Execution execution) {
+		protected List<Input> refine(Execution execution) {
 			long t0 = System.currentTimeMillis();
-			List<Model> newModels = refine0(execution);
+			List<Input> newModels = refine0(execution);
 			manager.recordTime(System.currentTimeMillis() - t0);
 			return newModels;
 		}
 
-		protected List<Model> refine0(Execution execution) {
+		protected List<Input> refine0(Execution execution) {
 			if (execution == null) {
 				return null;
 			}
-			log.trace("... explored <{}> {}", execution.getPath().getSignature(), execution.getPath().getPathCondition().toString());
-			manager.insertPath(execution, false); // ignore revisited return value
-			return refine1();
+			Path path = execution.getPath();
+			if (path == null) {
+				log.trace("... explored <> EMPTY PATH");
+				manager.insertPath(execution, false); // ignore revisited return value
+				return null;
+			} else {
+				log.trace("... explored <{}> {}", path.getSignature(), path.getPathCondition().toString());
+				manager.insertPath(execution, false); // ignore revisited return value
+				return refine1();
+			}
 		}
 
-		protected List<Model> refine1() {
+		protected List<Input> refine1() {
 			while (true) {
 				Path path = findNewPath(manager.getPathTree());
 				if (path == null) {
@@ -246,20 +250,20 @@ public abstract class PathBasedFactory implements StrategyFactory {
 				String sig = path.getSignature();
 				log.trace("... trying   <{}> {}", sig, pc.toString());
 				long t = System.currentTimeMillis();
-				Input model = solver.solve(pc);
+				Input input = solver.solve(pc);
 				manager.recordSolverTime(System.currentTimeMillis() - t);
-				if (model == null) {
+				if (input == null) {
 					log.trace("... no model");
 					log.trace("(The spc is {})", path.getPathCondition().toString());
 					manager.insertPath(path, true);
 				} else {
-					String modelString = model.toString();
-					log.trace("... new model: {}", modelString);
-					if (visitedModels.add(modelString)) {
-						return Collections.singletonList(new Model(0, model));
+					String inputString = input.toMapString();
+					log.trace("... new model: {}", inputString);
+					if (visitedInputs.add(inputString)) {
+						return Collections.singletonList(input);
 					} else {
 						manager.insertPath(path, false);
-						log.trace("... model {} has been visited before, retrying", modelString);
+						log.trace("... model {} has been visited before, retrying", inputString);
 					}
 				}
 			}

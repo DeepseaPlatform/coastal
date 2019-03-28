@@ -237,7 +237,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		log.trace("visitCode()");
 		if (triggerIndex >= 0) {
 			//--- IF (symbolicMode) {
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getRecordMode", "()Z", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getRecordingMode", "()Z", false);
 			Label label = new Label();
 			mv.visitJumpInsn(Opcodes.IFNE, label);
 			//---   triggerMethod()

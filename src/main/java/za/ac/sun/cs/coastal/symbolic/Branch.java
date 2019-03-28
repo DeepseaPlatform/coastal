@@ -32,41 +32,47 @@ public abstract class Branch {
 	 * @return expression for the alternative
 	 */
 	public abstract Expression getAlternative(long alternative);
-	
-//	/**
-//	 * Return a {@link Choice} that represents an alternative taken at this branch.
-//	 * 
-//	 * @param alternative number of the alternative
-//	 * @return choice that corresponds to the alternative
-//	 */
-//	public abstract Choice getChoice(long alternative);
 
+	/**
+	 * Return an expression that describes the contribution that this branch makes
+	 * to the path condition when a given alternative is taken at this branching
+	 * point. This may include, for example, the correct active conjunct and the
+	 * passive conjunct.
+	 * 
+	 * @param alternative which alternative to describe
+	 * @return branch's contribution to the path condition
+	 */
 	protected abstract Expression getPCContribution(long alternative);
 
-//	/**
-//	 * Compute (if necessary) and return the path condition that consists of
-//	 * this {@code SegmentedPC} and the path condition of its parent.
-//	 * 
-//	 * @return the path condition for this instance
-//	 */
-//	public Expression getPathCondition() {
-//		if (pathCondition == null) {
-//			SegmentedPC p = getParent();
-//			if (p != null) {
-//				pathCondition = p.getPathCondition();
-//			}
-//			Expression apc = getActiveConjunct();
-//			if ((apc != null)) { // && !isConstant(apc) && !p.contains(apc)) {
-//				// Do we even need isConstant and p.contains()?
-//				// Perhaps duplicate and constant conjuncts are no longer relevant?
-//				pathCondition = (pathCondition == null) ? apc : Operation.and(apc, pathCondition);
-//			}
-//			Expression ppc = getPassiveConjunct();
-//			if (ppc != null) {
-//				pathCondition = (pathCondition == null) ? ppc : Operation.and(ppc, pathCondition);
-//			}
-//		}
-//		return pathCondition;
-//	}
+	// ======================================================================
+	//
+	// STRING REPRESENTATION
+	//
+	// ======================================================================
+
+	/**
+	 * String representation of this choice.
+	 */
+	protected String stringRep = null;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public final String toString() {
+		if (stringRep == null) {
+			stringRep = toString0();
+		}
+		return stringRep;
+	}
+
+	/**
+	 * Return a string representation of this branch.
+	 * 
+	 * @return string representation of this branch
+	 */
+	protected abstract String toString0();
 
 }

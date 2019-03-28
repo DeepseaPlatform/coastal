@@ -16,7 +16,6 @@ import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
-import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.VM;
 import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
@@ -192,7 +191,6 @@ public class SurferFactory implements TaskFactory {
 			safeMode = !coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		}
 
-		@SuppressWarnings("null")
 		@Override
 		public Void call() throws Exception {
 			log.trace("^^^ surfer task starting");
@@ -212,8 +210,7 @@ public class SurferFactory implements TaskFactory {
 				TraceState traceState = new TraceState(coastal, null);
 				while (!Thread.currentThread().isInterrupted()) {
 					long t0 = System.currentTimeMillis();
-					Model model = coastal.getNextSurferModel();
-					Input input = model.getInput();
+					Input input = coastal.getNextSurferInput();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					String banner = "starting surf " + manager.getNextSurfCount(); // + " @" + Banner.getElapsed(coastal)
@@ -277,7 +274,7 @@ public class SurferFactory implements TaskFactory {
 						manager.incrementAbortCount();
 					} else {
 						Execution execution = traceState.getExecution();
-						execution.copyPayload(model);
+						execution.copyPayload(input);
 						coastal.addTrace(execution);
 					}
 					broker.publishThread("surfer-end", this);

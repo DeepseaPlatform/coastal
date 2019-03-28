@@ -10,10 +10,9 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.MTRandom;
-import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.surfer.TraceState;
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
-import za.ac.sun.cs.coastal.symbolic.Model;
 
 public class RandomTestingFactory extends TraceBasedFactory {
 
@@ -104,15 +103,15 @@ public class RandomTestingFactory extends TraceBasedFactory {
 		}
 
 		@Override
-		protected List<Model> refine0(Trace trace) {
+		protected List<Input> refine0(Execution execution) {
 			if (numberOfModels >= maxNumberOfModels) {
 				return null;
 			}
-			if ((trace == null) || (trace == Trace.NULL)) {
+			if (execution == null) {
 				return null;
 			}
-			log.trace("... explored <{}>", trace.getSignature());
-			manager.insertPath(trace, false);
+			log.trace("... explored <{}>", execution.getPath().getSignature());
+			manager.insertPath(execution, false);
 			if (pathTree.getRoot().isFullyExplored()) {
 				return null;
 			}
@@ -120,7 +119,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 		}
 
 		@Override
-		protected List<Model> refine1() {
+		protected List<Input> refine1() {
 			for (Map.Entry<String, Class<?>> parameter : coastal.getParameters().entrySet()) {
 				String name = parameter.getKey();
 				Class<?> type = parameter.getValue();
@@ -239,7 +238,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 			String modelString = concreteValues.toString();
 			log.trace("... new model: {}", modelString);
 			numberOfModels++;
-			return Collections.singletonList(new Model(0, concreteValues));
+			return Collections.singletonList(concreteValues);
 		}
 
 		private int randomInt(int min, int max) {

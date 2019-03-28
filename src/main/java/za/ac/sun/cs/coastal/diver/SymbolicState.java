@@ -2,8 +2,6 @@ package za.ac.sun.cs.coastal.diver;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.lang.IllegalAccessException;
-import java.lang.IllegalArgumentException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -92,21 +90,23 @@ public final class SymbolicState extends State {
 	/**
 	 * A store for data about the heap and static variables.
 	 * 
-	 * TODO: Add a description of of the mapping.  Give examples. 
+	 * TO DO: Add a description of of the mapping. Give examples.
 	 */
 	private final Map<String, Expression> instanceData = new HashMap<>();
 
 	/**
-	 * Extra constraints that are added to the next branching point as the "passive conjunct".
+	 * Extra constraints that are added to the next branching point as the "passive
+	 * conjunct".
 	 * 
-	 * TODO: Add a description of circumstances that create such constraints. 
+	 * TO DO: Add a description of circumstances that create such constraints.
 	 */
 	private Expression pendingExtraCondition = null;
 
 	/**
-	 * List of conditions that describe that no exception has taken place since the last branching point.
+	 * List of conditions that describe that no exception has taken place since the
+	 * last branching point.
 	 * 
-	 * TODO: Add more detail about how this conditions are used.
+	 * TO DO: Add more detail about how this conditions are used.
 	 */
 	private final List<Expression> noExceptionExpression = new ArrayList<>();
 
@@ -170,13 +170,9 @@ public final class SymbolicState extends State {
 		mayContinue = false;
 	}
 
-//	public SegmentedPC getSegmentedPathCondition() {
-//		return spc;
-//	}
-
 	/**
 	 * Return the result of the execution.
-	 *  
+	 * 
 	 * @return result of the execution
 	 */
 	public Execution getExecution() {
@@ -555,7 +551,7 @@ public final class SymbolicState extends State {
 	 * @param index   the index of the element
 	 * @param value   the new symbolic value of the array element
 	 */
-	private final void setArrayValue(int arrayId, int index, Expression value) {
+	private void setArrayValue(int arrayId, int index, Expression value) {
 		if (index < 0) {
 			return;
 		}
@@ -584,7 +580,7 @@ public final class SymbolicState extends State {
 	 * 
 	 * @return new string identifier
 	 */
-	private final int createString() {
+	private int createString() {
 		return incrAndGetNewObjectId();
 	}
 
@@ -675,7 +671,7 @@ public final class SymbolicState extends State {
 	 * @param conjunct   the conjunct to add
 	 * @param truthValue the value of the conjunct
 	 */
-	private final void pushConjunct(Expression conjunct, boolean truthValue) {
+	private void pushConjunct(Expression conjunct, boolean truthValue) {
 		Branch branch = new SegmentedPC.Binary(conjunct, pendingExtraCondition);
 		path = new Path(path, new Choice(branch, truthValue ? 1 : 0));
 		pendingExtraCondition = null;
@@ -975,7 +971,7 @@ public final class SymbolicState extends State {
 	 *                     override the values)
 	 * @return value that will be used during the execution
 	 */
-	private final long getConcreteIntegral(int triggerIndex, int index, int address, int sizeInBits,
+	private long getConcreteIntegral(int triggerIndex, int index, int address, int sizeInBits,
 			long currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -1024,7 +1020,7 @@ public final class SymbolicState extends State {
 	 *                     override the values)
 	 * @return value that will be used during the execution
 	 */
-	private final double getConcreteReal(int triggerIndex, int index, int address, int sizeInBits,
+	private double getConcreteReal(int triggerIndex, int index, int address, int sizeInBits,
 			double currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -1047,7 +1043,7 @@ public final class SymbolicState extends State {
 	 * boolean)
 	 */
 	@Override
-	public final boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) {
+	public boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
@@ -1070,7 +1066,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#getConcreteByte(int, int, int, byte)
 	 */
 	@Override
-	public final byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
+	public byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
 		int value = (int) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
 		input.put(index, value);
 		return (byte) value;
@@ -1083,7 +1079,7 @@ public final class SymbolicState extends State {
 	 * short)
 	 */
 	@Override
-	public final short getConcreteShort(int triggerIndex, int index, int address, short currentValue) {
+	public short getConcreteShort(int triggerIndex, int index, int address, short currentValue) {
 		int value = (int) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
 		input.put(index, value);
 		return (short) value;
@@ -1095,7 +1091,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#getConcreteChar(int, int, int, char)
 	 */
 	@Override
-	public final char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
+	public char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
 		int value = (int) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
 		input.put(index, value);
 		return (char) value;
@@ -1107,7 +1103,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#getConcreteInt(int, int, int, int)
 	 */
 	@Override
-	public final int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
+	public int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
 		int value = (int) getConcreteIntegral(triggerIndex, index, address, 32, currentValue);
 		input.put(index, value);
 		return (int) value;
@@ -1119,7 +1115,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#getConcreteLong(int, int, int, long)
 	 */
 	@Override
-	public final long getConcreteLong(int triggerIndex, int index, int address, long currentValue) {
+	public long getConcreteLong(int triggerIndex, int index, int address, long currentValue) {
 		long value = (long) getConcreteIntegral(triggerIndex, index, address, 64, currentValue);
 		input.put(index, value);
 		return (long) value;
@@ -1132,7 +1128,7 @@ public final class SymbolicState extends State {
 	 * float)
 	 */
 	@Override
-	public final float getConcreteFloat(int triggerIndex, int index, int address, float currentValue) {
+	public float getConcreteFloat(int triggerIndex, int index, int address, float currentValue) {
 		float value = (float) getConcreteReal(triggerIndex, index, address, 32, currentValue);
 		input.put(index, value);
 		return (float) value;
@@ -1145,7 +1141,7 @@ public final class SymbolicState extends State {
 	 * double)
 	 */
 	@Override
-	public final double getConcreteDouble(int triggerIndex, int index, int address, double currentValue) {
+	public double getConcreteDouble(int triggerIndex, int index, int address, double currentValue) {
 		double value = (double) getConcreteReal(triggerIndex, index, address, 64, currentValue);
 		input.put(index, value);
 		return (double) value;
@@ -1158,7 +1154,7 @@ public final class SymbolicState extends State {
 	 * java.lang.String)
 	 */
 	@Override
-	public final String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
+	public String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = currentValue.length();
@@ -1217,7 +1213,7 @@ public final class SymbolicState extends State {
 	 *                     desired type
 	 * @return array of concrete values that will be used during the execution
 	 */
-	private final Object getConcreteIntegralArray(int triggerIndex, int index, int address, int sizeInBits,
+	private Object getConcreteIntegralArray(int triggerIndex, int index, int address, int sizeInBits,
 			Object currentArray, Function<Object, Long> unconvert, Function<Long, Object> convert) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -1289,7 +1285,7 @@ public final class SymbolicState extends State {
 	 *                     desired type
 	 * @return array of concrete values that will be used during the execution
 	 */
-	private final Object getConcreteRealArray(int triggerIndex, int index, int address, int sizeInBits,
+	private Object getConcreteRealArray(int triggerIndex, int index, int address, int sizeInBits,
 			Object currentArray, Function<Object, Double> unconvert, Function<Double, Object> convert) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
@@ -1332,7 +1328,7 @@ public final class SymbolicState extends State {
 	 * int, boolean[])
 	 */
 	@Override
-	public final boolean[] getConcreteBooleanArray(int triggerIndex, int index, int address, boolean[] currentValue) {
+	public boolean[] getConcreteBooleanArray(int triggerIndex, int index, int address, boolean[] currentValue) {
 		return (boolean[]) getConcreteIntegralArray(triggerIndex, index, address, 32, currentValue,
 				o -> ((Boolean) o) ? 1L : 0, x -> (x != 0));
 	}
@@ -1344,7 +1340,7 @@ public final class SymbolicState extends State {
 	 * byte[])
 	 */
 	@Override
-	public final byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) {
+	public byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) {
 		return (byte[]) getConcreteIntegralArray(triggerIndex, index, address, 32, currentValue, o -> (long) (Byte) o,
 				x -> (byte) x.intValue());
 	}
@@ -1356,7 +1352,7 @@ public final class SymbolicState extends State {
 	 * short[])
 	 */
 	@Override
-	public final short[] getConcreteShortArray(int triggerIndex, int index, int address, short[] currentValue) {
+	public short[] getConcreteShortArray(int triggerIndex, int index, int address, short[] currentValue) {
 		return (short[]) getConcreteIntegralArray(triggerIndex, index, address, 32, currentValue, o -> (long) (Short) o,
 				x -> (short) x.intValue());
 	}
@@ -1368,7 +1364,7 @@ public final class SymbolicState extends State {
 	 * char[])
 	 */
 	@Override
-	public final char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
+	public char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
 		return (char[]) getConcreteIntegralArray(triggerIndex, index, address, 32, currentValue,
 				o -> (long) (Character) o, x -> (char) x.intValue());
 	}
@@ -1380,7 +1376,7 @@ public final class SymbolicState extends State {
 	 * int[])
 	 */
 	@Override
-	public final int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
+	public int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
 		return (int[]) getConcreteIntegralArray(triggerIndex, index, address, 32, currentValue, o -> (long) (Integer) o,
 				x -> (int) x.intValue());
 	}
@@ -1392,7 +1388,7 @@ public final class SymbolicState extends State {
 	 * long[])
 	 */
 	@Override
-	public final long[] getConcreteLongArray(int triggerIndex, int index, int address, long[] currentValue) {
+	public long[] getConcreteLongArray(int triggerIndex, int index, int address, long[] currentValue) {
 		return (long[]) getConcreteIntegralArray(triggerIndex, index, address, 64, currentValue, o -> (long) (Long) o,
 				x -> (long) x.intValue());
 	}
@@ -1404,7 +1400,7 @@ public final class SymbolicState extends State {
 	 * float[])
 	 */
 	@Override
-	public final float[] getConcreteFloatArray(int triggerIndex, int index, int address, float[] currentValue) {
+	public float[] getConcreteFloatArray(int triggerIndex, int index, int address, float[] currentValue) {
 		return (float[]) getConcreteRealArray(triggerIndex, index, address, 32, currentValue, o -> (double) (Float) o,
 				x -> (float) x.doubleValue());
 	}
@@ -1416,7 +1412,7 @@ public final class SymbolicState extends State {
 	 * int, double[])
 	 */
 	@Override
-	public final double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue) {
+	public double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue) {
 		return (double[]) getConcreteRealArray(triggerIndex, index, address, 64, currentValue, o -> (double) (Double) o,
 				x -> (double) x.doubleValue());
 	}
@@ -1438,7 +1434,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#triggerMethod(int, int)
 	 */
 	@Override
-	public final void triggerMethod(int methodNumber, int triggerIndex) {
+	public void triggerMethod(int methodNumber, int triggerIndex) {
 		if (!getRecordingMode()) {
 			setRecordingMode(mayRecord);
 			if (getRecordingMode()) {
@@ -1454,7 +1450,7 @@ public final class SymbolicState extends State {
 	}
 
 	/**
-	 * A small stack where method parameters are stored temporarily. 
+	 * A small stack where method parameters are stored temporarily.
 	 */
 	private final Stack<Expression> params = new Stack<>();
 
@@ -1464,7 +1460,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#startMethod(int, int)
 	 */
 	@Override
-	public final void startMethod(int methodNumber, int argCount) {
+	public void startMethod(int methodNumber, int argCount) {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -1494,7 +1490,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#returnValue(boolean)
 	 */
 	@Override
-	public final void returnValue(boolean returnValue) {
+	public void returnValue(boolean returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
 		} else {
@@ -1509,7 +1505,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#returnValue(char)
 	 */
 	@Override
-	public final void returnValue(char returnValue) {
+	public void returnValue(char returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
 		} else {
@@ -1524,7 +1520,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#returnValue(double)
 	 */
 	@Override
-	public final void returnValue(double returnValue) {
+	public void returnValue(double returnValue) {
 		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE double");
 		System.exit(1);
 	}
@@ -1535,7 +1531,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#returnValue(float)
 	 */
 	@Override
-	public final void returnValue(float returnValue) {
+	public void returnValue(float returnValue) {
 		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE float");
 		System.exit(1);
 	}
@@ -1546,7 +1542,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#returnValue(int)
 	 */
 	@Override
-	public final void returnValue(int returnValue) {
+	public void returnValue(int returnValue) {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -1564,7 +1560,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#returnValue(long)
 	 */
 	@Override
-	public final void returnValue(long returnValue) {
+	public void returnValue(long returnValue) {
 		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE long");
 		System.exit(1);
 	}
@@ -1575,7 +1571,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#returnValue(short)
 	 */
 	@Override
-	public final void returnValue(short returnValue) {
+	public void returnValue(short returnValue) {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
 		} else {
@@ -2369,7 +2365,7 @@ public final class SymbolicState extends State {
 			Branch lastBranch = lastChoice.getBranch();
 			assert lastBranch instanceof SegmentedPC.Binary;
 			long otherAlternative = 1 - lastChoice.getAlternative();
-			path = new Path(path, new Choice(lastBranch, otherAlternative));
+			path = new Path(path.getParent(), new Choice(lastBranch, otherAlternative));
 			checkLimitConjuncts();
 			log.trace(">>> path is now: {}", path.getPathCondition().toString());
 		}
@@ -2682,7 +2678,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#stop()
 	 */
 	@Override
-	public final void stop() {
+	public void stop() {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2696,7 +2692,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#stop(java.lang.String)
 	 */
 	@Override
-	public final void stop(String message) {
+	public void stop(String message) {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2711,7 +2707,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#mark(int)
 	 */
 	@Override
-	public final void mark(int marker) {
+	public void mark(int marker) {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2725,7 +2721,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#mark(java.lang.String)
 	 */
 	@Override
-	public final void mark(String marker) {
+	public void mark(String marker) {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2739,7 +2735,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#printPC(java.lang.String)
 	 */
 	@Override
-	public final void printPC(String label) {
+	public void printPC(String label) {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2754,7 +2750,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#printPC()
 	 */
 	@Override
-	public final void printPC() {
+	public void printPC() {
 		if (!getTrackingMode()) {
 			return;
 		}

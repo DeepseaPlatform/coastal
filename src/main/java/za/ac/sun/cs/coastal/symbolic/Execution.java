@@ -1,8 +1,5 @@
 package za.ac.sun.cs.coastal.symbolic;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Summary of a single execution of a system-under-test. The most important
  * parts of the execution are:
@@ -18,7 +15,7 @@ import java.util.Map;
  * this case, the system may construct an "infeasible" execution to insert in
  * the path tree.
  */
-public class Execution {
+public final class Execution extends PayloadCarrierImpl {
 
 	/**
 	 * A sentinel execution that is used in situations where {@code null} is not
@@ -35,11 +32,6 @@ public class Execution {
 	 * The input that triggered the execution.
 	 */
 	protected final Input input;
-
-	/**
-	 * Additional payload information.
-	 */
-	protected final Map<String, Object> payload = new HashMap<>();
 
 	/**
 	 * Construct the sentinel execution.
@@ -78,33 +70,4 @@ public class Execution {
 		return input;
 	}
 
-	/**
-	 * Return the value of a payload field.
-	 * 
-	 * @param key key for the payload field
-	 * @return value of the payload field 
-	 */
-	public Object getPayload(String key) {
-		return payload.get(key);
-	}
-	
-	/**
-	 * Set the value of a payload field.
-	 * 
-	 * @param key key for the payload field
-	 * @param value new value for the payload field
-	 */
-	public void setPayload(String key, Object value) {
-		payload.put(key, value);
-	}
-
-	/**
-	 * Set several payload field by copying them from another model.
-	 * 
-	 * @param model source model for payload fields
-	 */
-	public void copyPayload(Model model) {
-		payload.putAll(model.getPayload());
-	}
-	
 }

@@ -1,4 +1,4 @@
-package za.ac.sun.cs.coastal.strategy.hybrid;
+package za.ac.sun.cs.coastal.strategy.tracebased;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,36 +20,36 @@ import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
-import za.ac.sun.cs.coastal.surfer.Trace;
+import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
-import za.ac.sun.cs.coastal.symbolic.Model;
+import za.ac.sun.cs.coastal.symbolic.Path;
 
-public class HybridFuzzerFactory implements StrategyFactory {
+public class AFLStyleFuzzerFactory implements StrategyFactory {
 
 	protected final ImmutableConfiguration options;
 
-	public HybridFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
+	public AFLStyleFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
 		this.options = options;
 	}
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new HybridFuzzerManager(coastal, options);
+		return new AFLStyleFuzzerManager(coastal, options);
 	}
 
 	@Override
 	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
-		((HybridFuzzerManager) manager).incrementTaskCount();
-		return new Strategy[] { new HybridFuzzerStrategy(coastal, (StrategyManager) manager) };
+		((AFLStyleFuzzerManager) manager).incrementTaskCount();
+		return new Strategy[] { new AFLStyleFuzzerStrategy(coastal, (StrategyManager) manager) };
 	}
 
 	// ======================================================================
 	//
-	// HYBRID FUZZER STRATEGY MANAGER
+	// AFL STYLE FUZZER STRATEGY MANAGER
 	//
 	// ======================================================================
 
-	public static class HybridFuzzerManager implements StrategyManager {
+	public static class AFLStyleFuzzerManager implements StrategyManager {
 
 		private static final int DEFAULT_QUEUE_LIMIT = 100000;
 
@@ -87,7 +87,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 
 		protected final Map<String, Integer> edgesSeen = new HashMap<>();
 
-		public HybridFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
+		public AFLStyleFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
 			this.coastal = coastal;
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
@@ -100,12 +100,12 @@ public class HybridFuzzerFactory implements StrategyFactory {
 			return pathTree;
 		}
 
-		public PathTreeNode insertPath0(Trace trace, boolean infeasible) {
-			return pathTree.insertPath(trace, infeasible);
+		public PathTreeNode insertPath0(Execution execution, boolean infeasible) {
+			return pathTree.insertPath(execution, infeasible);
 		}
 
-		public boolean insertPath(Trace trace, boolean infeasible) {
-			return (pathTree.insertPath(trace, infeasible) == null);
+		public boolean insertPath(Execution execution, boolean infeasible) {
+			return (pathTree.insertPath(execution, infeasible) == null);
 		}
 
 		public int getQueueLimit() {
@@ -124,22 +124,20 @@ public class HybridFuzzerFactory implements StrategyFactory {
 		}
 
 		/**
-		 * Add a reported dive time to the accumulator that tracks how long the
-		 * dives took.
+		 * Add a reported dive time to the accumulator that tracks how long the dives
+		 * took.
 		 * 
-		 * @param time
-		 *            the time for this dive
+		 * @param time the time for this dive
 		 */
 		public void recordTime(long time) {
 			strategyTime.addAndGet(time);
 		}
 
 		/**
-		 * Add a reported strategy wait time. This is used to determine if it
-		 * makes sense to create additional threads (or destroy them).
+		 * Add a reported strategy wait time. This is used to determine if it makes
+		 * sense to create additional threads (or destroy them).
 		 * 
-		 * @param time
-		 *            the wait time for this strategy
+		 * @param time the wait time for this strategy
 		 */
 		public void recordWaitTime(long time) {
 			strategyWaitTime.addAndGet(time);
@@ -184,7 +182,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 
 		@Override
 		public String getName() {
-			return "HybridFuzzer";
+			return "AFLStyleFuzzer";
 		}
 
 		@Override
@@ -210,11 +208,11 @@ public class HybridFuzzerFactory implements StrategyFactory {
 
 	// ======================================================================
 	//
-	// HYBRID FUZZER STRATEGY
+	// AFL STYLE FUZZER STRATEGY
 	//
 	// ======================================================================
 
-	public static class HybridFuzzerStrategy extends Strategy {
+	public static class AFLStyleFuzzerStrategy extends Strategy {
 
 		private static final int[] INTERESTING_8 = { -128, -1, 0, 1, 16, 32, 64, 100, 127 };
 
@@ -244,7 +242,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 			}
 		}
 
-		protected final HybridFuzzerManager manager;
+		protected final AFLStyleFuzzerManager manager;
 
 		protected final Broker broker;
 
@@ -262,9 +260,9 @@ public class HybridFuzzerFactory implements StrategyFactory {
 
 		private final MTRandom rng;
 
-		public HybridFuzzerStrategy(COASTAL coastal, StrategyManager manager) {
+		public AFLStyleFuzzerStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
-			this.manager = (HybridFuzzerManager) manager;
+			this.manager = (AFLStyleFuzzerManager) manager;
 			broker = coastal.getBroker();
 			queueLimit = this.manager.getQueueLimit();
 			rng = new MTRandom(this.manager.getRandomSeed());
@@ -276,12 +274,12 @@ public class HybridFuzzerFactory implements StrategyFactory {
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
-					Trace trace = coastal.getNextTrace();
+					Execution execution = coastal.getNextTrace();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
-					refine(trace);
+					refine(execution);
 				}
 			} catch (InterruptedException e) {
 				log.trace("^^^ strategy task canceled");
@@ -289,19 +287,19 @@ public class HybridFuzzerFactory implements StrategyFactory {
 			}
 		}
 
-		protected void refine(Trace trace) {
+		protected void refine(Execution execution) {
 			long t0 = System.currentTimeMillis();
 			modelsAdded = -1;
-			refine0(trace);
+			refine0(execution);
 			log.trace("+++ added {} surfer models", modelsAdded);
 			coastal.updateWork(modelsAdded);
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}
 
-		protected void refine0(Trace trace) {
-			int score = calculateScore(trace);
+		protected void refine0(Execution execution) {
+			int score = calculateScore(execution);
 			if ((score > 0) || (coastal.getSurferModelQueueLength() < queueLimit)) {
-				byte[] base = extractBase(trace);
+				byte[] base = extractBase(execution);
 				flipBits(base, score);
 				flipBytes(base, score);
 				arithInc(base, score);
@@ -313,9 +311,9 @@ public class HybridFuzzerFactory implements StrategyFactory {
 
 		/**
 		 * Calculate the score for a trace. First, the trace is scanned for its
-		 * "blocks", which are line numbers that represent basic blocks.
-		 * Consecutive blocks form tuples, the tuples are counted, and the
-		 * counts are converted according to the "bucket scale":
+		 * "blocks", which are line numbers that represent basic blocks. Consecutive
+		 * blocks form tuples, the tuples are counted, and the counts are converted
+		 * according to the "bucket scale":
 		 * 
 		 * <ul>
 		 * <li>1 occurrence = bucket 1</li>
@@ -328,20 +326,20 @@ public class HybridFuzzerFactory implements StrategyFactory {
 		 * <li>&ge;128 occurrences = bucket 8</li>
 		 * </ul>
 		 *
-		 * This information is passed to the manager, which returns a score
-		 * based on the counts.
+		 * This information is passed to the manager, which returns a score based on the
+		 * counts.
 		 * 
-		 * @param trace
-		 *            the trace to calculate a score for
+		 * @param execution the trace to calculate a score for
 		 * @return the score
 		 */
-		private int calculateScore(Trace trace) {
+		private int calculateScore(Execution execution) {
 			int oldScore = 0; // trace.getScore();
+			Path path = execution.getPath();
 			Map<String, Integer> edges = new HashMap<>();
-			String prevBlock = trace.getBlock();
-			trace = trace.getParent();
-			while (trace != null) {
-				String block = trace.getBlock();
+			String prevBlock = (String) path.getChoice().getPayload("block");
+			path = path.getParent();
+			while (path != null) {
+				String block = (String) path.getChoice().getPayload("block");
 				String edge = block + ":" + prevBlock;
 				Integer count = edges.get(edge);
 				if (count == null) {
@@ -350,7 +348,7 @@ public class HybridFuzzerFactory implements StrategyFactory {
 					edges.put(edge, count + 1);
 				}
 				prevBlock = block;
-				trace = trace.getParent();
+				path = path.getParent();
 			}
 			String edg = "X:" + prevBlock;
 			Integer cnt = edges.get(edg);
@@ -371,22 +369,21 @@ public class HybridFuzzerFactory implements StrategyFactory {
 		}
 
 		/**
-		 * Convert the variable/value assignments that generated trace to an
-		 * array of bytes.
+		 * Convert the variable/value assignments that generated trace to an array of
+		 * bytes.
 		 * 
-		 * @param trace
-		 *            the trace
+		 * @param execution the trace
 		 * @return an array of bytes
 		 */
-		private byte[] extractBase(Trace trace) {
+		private byte[] extractBase(Execution execution) {
 			parameters = coastal.getParameters();
 			keys = new ArrayList<>(parameters.keySet());
 			Collections.sort(keys);
-			Input model = trace.getModel();
+			Input input = execution.getInput();
 			BitOutputStream bos = new BitOutputStream();
 			for (String name : keys) {
 				Class<?> type = parameters.get(name);
-				Object value = model.get(name);
+				Object value = input.get(name);
 				if (type == null) {
 					continue;
 				} else if (type == boolean.class) {
@@ -415,30 +412,28 @@ public class HybridFuzzerFactory implements StrategyFactory {
 		/**
 		 * Convert an array of bytes to a set of variable/value assignments.
 		 * 
-		 * @param base
-		 *            the array of bytes
-		 * @param score
-		 *            the variable/value assignment
+		 * @param base  the array of bytes
+		 * @param score the variable/value assignment
 		 */
 		private void generateNewModel(byte[] base, int score) {
 			BitInputStream bis = new BitInputStream(base);
-			Input model = new Input();
+			Input input = new Input();
 			for (String name : keys) {
 				Class<?> type = parameters.get(name);
 				if (type == null) {
 					continue;
 				} else if (type == boolean.class) {
-					model.put(name, bis.read(1));
+					input.put(name, bis.read(1));
 				} else if (type == byte.class) {
-					model.put(name, bis.read(8));
+					input.put(name, bis.read(8));
 				} else if (type == char.class) {
-					model.put(name, bis.read(16));
+					input.put(name, bis.read(16));
 				} else if (type == short.class) {
-					model.put(name, bis.read(16));
+					input.put(name, bis.read(16));
 				} else if (type == int.class) {
-					model.put(name, bis.read(32));
+					input.put(name, bis.read(32));
 				} else if (type == long.class) {
-					model.put(name, bis.read(64));
+					input.put(name, bis.read(64));
 				} else if (type == String.class) {
 					// ????
 					System.exit(1);
@@ -447,7 +442,8 @@ public class HybridFuzzerFactory implements StrategyFactory {
 					System.exit(1);
 				}
 			}
-			if (coastal.addSurferModel(new Model(score, model))) {
+			input.setPayload("score", score);
+			if (coastal.addSurferModel(input)) {
 				modelsAdded++;
 			}
 		}
@@ -673,51 +669,54 @@ public class HybridFuzzerFactory implements StrategyFactory {
 						q = rng.nextInt(256);
 						base[p] = (byte) q;
 						break;
-					//              case 11:
-					//              case 12:
-					//                  if (fixedInput) {
-					//                      j--;
-					//                      continue;
-					//                  }                   
-					//                  // Delete bytes.
-					//                  if (base.length < 2) {
-					//                      continue;
-					//                  }
-					//                  byteNum = rand.nextInt(base.length);
-					//                  base = Mutations.removeByte(base, byteNum);
-					//                  break;
-					//                  
-					//              case 13:
-					//                  // Insert or clone random bytes
-					//                  if (fixedInput) {
-					//                      j--;
-					//                      continue;
-					//                  }                   
-					//                  boolean clone = (rand.nextInt(4) > 0);
-					//                  int blockSize = rand.nextInt(base.length); // how much you want to clone or insert
-					//                  int blockStart = rand.nextInt(base.length - blockSize + 1); // where do you start from
-					//                  int newPos = rand.nextInt(base.length); // where are we putting the new stuff
-					//                  base = Mutations.CloningOrInserting(base, clone, blockStart, newPos, blockSize);
-					//                  break;
-					//                  
-					//              case 14:
-					//                  // Overwrite bytes
-					//                  // Random chunk or fixed bytes.
-					//                  if (rand.nextInt(4) == 0) {
-					//                      // Fixed bytes.
-					//                      byteNum = rand.nextInt(base.length);
-					//                      base = Mutations.replaceByte(base, (byte) (rand.nextInt(255) + 1), byteNum);
-					//                  } else {
-					//                      // Random chunk.
-					//                      byteNum = rand.nextInt(base.length);
-					//                      tmp = rand.nextInt(base.length);
-					//                      if (byteNum == tmp) {
-					//                          continue;
-					//                      }
-					//                      base = Mutations.replaceByte(base, base[tmp], byteNum);
+					// case 11:
+					// case 12:
+					// if (fixedInput) {
+					// j--;
+					// continue;
+					// }
+					// // Delete bytes.
+					// if (base.length < 2) {
+					// continue;
+					// }
+					// byteNum = rand.nextInt(base.length);
+					// base = Mutations.removeByte(base, byteNum);
+					// break;
 					//
-					//                  }
-					//                  break;
+					// case 13:
+					// // Insert or clone random bytes
+					// if (fixedInput) {
+					// j--;
+					// continue;
+					// }
+					// boolean clone = (rand.nextInt(4) > 0);
+					// int blockSize = rand.nextInt(base.length); // how much you want to clone or
+					// insert
+					// int blockStart = rand.nextInt(base.length - blockSize + 1); // where do you
+					// start from
+					// int newPos = rand.nextInt(base.length); // where are we putting the new stuff
+					// base = Mutations.CloningOrInserting(base, clone, blockStart, newPos,
+					// blockSize);
+					// break;
+					//
+					// case 14:
+					// // Overwrite bytes
+					// // Random chunk or fixed bytes.
+					// if (rand.nextInt(4) == 0) {
+					// // Fixed bytes.
+					// byteNum = rand.nextInt(base.length);
+					// base = Mutations.replaceByte(base, (byte) (rand.nextInt(255) + 1), byteNum);
+					// } else {
+					// // Random chunk.
+					// byteNum = rand.nextInt(base.length);
+					// tmp = rand.nextInt(base.length);
+					// if (byteNum == tmp) {
+					// continue;
+					// }
+					// base = Mutations.replaceByte(base, base[tmp], byteNum);
+					//
+					// }
+					// break;
 					default:
 						break;
 					}
@@ -799,6 +798,128 @@ public class HybridFuzzerFactory implements StrategyFactory {
 			newBase[byteNo + 2] = (byte) (newBase[byteNo + 2] + amount);
 			newBase[byteNo + 3] = (byte) (newBase[byteNo + 3] + amount);
 			return newBase;
+		}
+
+	}
+
+	// ======================================================================
+	//
+	// BIT INPUT STREAM
+	//
+	// ======================================================================
+
+	public static final class BitInputStream {
+
+		private final byte[] bytes;
+
+		private int availInByte = 8;
+
+		private int nextByte = 0;
+
+		public BitInputStream(byte[] bytes) {
+			this.bytes = bytes;
+		}
+
+		public long read(int bits) {
+			if (bits <= availInByte) {
+				long result = bytes[nextByte] & ((1 << bits) - 1);
+				if (bits < availInByte) {
+					bytes[nextByte] >>>= bits;
+					availInByte -= bits;
+				} else {
+					availInByte = 8;
+					nextByte++;
+				}
+				return result;
+			} else {
+				long result = bytes[nextByte];
+				int offset = availInByte;
+				nextByte++;
+				bits -= availInByte;
+				availInByte = 8;
+				while (bits >= 8) {
+					result |= bytes[nextByte] << offset;
+					offset += 8;
+					nextByte++;
+					bits -= 8;
+				}
+				if (bits > 0) {
+					result |= bytes[nextByte] & ((1 << bits) - 1);
+					bytes[nextByte] >>>= bits;
+					availInByte -= bits;
+				}
+				return result;
+			}
+		}
+
+	}
+
+	// ======================================================================
+	//
+	// BIT OUTPUT STREAM
+	//
+	// ======================================================================
+
+	public static final class BitOutputStream {
+
+		private static final int INITIAL_SIZE = 4;
+
+		private byte[] bytes = new byte[INITIAL_SIZE];
+
+		private int size = INITIAL_SIZE;
+
+		private int free = size * 8;
+
+		private int freeInByte = 8;
+
+		private int firstFreeByte = 0;
+
+		public void write(long value, int bits) {
+			while (bits > free) {
+				resize();
+			}
+			if (freeInByte >= bits) {
+				long toCopy = (value << (8 - freeInByte)) & 0xffL;
+				bytes[firstFreeByte] |= (byte) toCopy;
+				free -= bits;
+				freeInByte -= bits;
+				if (freeInByte == 0) {
+					freeInByte = 8;
+					firstFreeByte++;
+				}
+			} else {
+				long toCopy = (value << (8 - freeInByte)) & 0xffL;
+				bytes[firstFreeByte] |= (byte) toCopy;
+				value >>>= freeInByte;
+				free -= freeInByte;
+				bits -= freeInByte;
+				freeInByte = 8;
+				firstFreeByte++;
+				while (bits >= 8) {
+					bytes[firstFreeByte] |= (byte) (value & 0xffL);
+					value >>>= 8;
+					free -= 8;
+					bits -= 8;
+					firstFreeByte++;
+				}
+				if (bits > 0) {
+					bytes[firstFreeByte] |= (byte) (value & 0xffL);
+					free -= bits;
+					freeInByte -= bits;
+				}
+			}
+		}
+
+		private void resize() {
+			int newSize = size + (size >> 2);
+			byte[] newBytes = Arrays.copyOf(bytes, newSize);
+			free += (newSize - size) * 8;
+			bytes = newBytes;
+			size = newSize;
+		}
+
+		public byte[] toByteArray() {
+			return bytes;
 		}
 
 	}

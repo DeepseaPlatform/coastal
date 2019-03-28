@@ -23,26 +23,26 @@ public abstract class State {
 	 * Separator for fields. For example, the characters of a symbolic object with
 	 * address 0 are called {@code 0/a}, {@code 0/b}, {@code 0/c}, ...
 	 */
-	public final static String FIELD_SEPARATOR = "/";
+	public static final String FIELD_SEPARATOR = "/";
 
 	/**
 	 * Separator for array elements. For example, the elements of an array named
 	 * {@code A} are called {@code A_D_0}, {@code A_D_1}, {@code A_D_2}, ...
 	 */
-	public final static String INDEX_SEPARATOR = "$"; // "_D_"
+	public static final String INDEX_SEPARATOR = "$"; // "_D_"
 
 	/**
 	 * Separator for string characters. For example, the characters of a string
 	 * named {@code X} are called {@code X_H_0}, {@code X_H_1}, {@code X_H_2}, ...
 	 */
-	public final static String CHAR_SEPARATOR = "!"; // "_H_"
+	public static final String CHAR_SEPARATOR = "!"; // "_H_"
 
 	/**
 	 * Prefix for new symbolic variables.
 	 */
-	public final static String NEW_VAR_PREFIX = "$"; // "U_D_"
+	public static final String NEW_VAR_PREFIX = "$"; // "U_D_"
 
-	public final static String CREATE_VAR_PREFIX = "N_D_"; // "@"
+	public static final String CREATE_VAR_PREFIX = "N_D_"; // "@"
 
 	// ======================================================================
 	//

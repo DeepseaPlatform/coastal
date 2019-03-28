@@ -613,7 +613,7 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public float[] getConcreteFloatArray(int triggerIndex, int index, int address, float[] currentValue) {
-		// TODO: is this correct? should this be getConcreteRealArray???
+		// TO DO: is this correct? should this be getConcreteRealArray???
 		return (float[]) getConcreteIntegralArray(triggerIndex, index, address, currentValue,
 				x -> (float) x.intValue());
 	}
@@ -626,7 +626,7 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue) {
-		// TODO: is this correct? should this be getConcreteRealArray???
+		// TO DO: is this correct? should this be getConcreteRealArray???
 		return (double[]) getConcreteIntegralArray(triggerIndex, index, address, currentValue,
 				x -> (double) x.intValue());
 	}
@@ -1039,7 +1039,7 @@ public final class TraceState extends State {
 	 * @param result
 	 * @throws SymbolicException
 	 */
-	private final void jumpInsn(int instr, int opcode, boolean result) throws SymbolicException {
+	private void jumpInsn(int instr, int opcode, boolean result) throws SymbolicException {
 		if (getRecordingMode()) {
 			broker.publishThread("jump-insn", new Tuple(instr, opcode));
 			if (pathTreeNode != null) {
@@ -1057,7 +1057,9 @@ public final class TraceState extends State {
 				}
 			}
 			Branch branch = new Trace.Binary();
-			path = new Path(path, new Choice(branch, result ? 1 : 0));
+			Choice choice = new Choice(branch, result ? 1 : 0);
+			choice.setPayload("block", Integer.toString(instr));
+			path = new Path(path, choice);
 		}
 	}
 

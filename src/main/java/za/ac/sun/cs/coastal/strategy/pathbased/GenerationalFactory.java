@@ -6,14 +6,12 @@ import java.util.List;
 import org.apache.commons.configuration2.ImmutableConfiguration;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.diver.SegmentedPC;
-import za.ac.sun.cs.coastal.diver.SegmentedPC.SegmentedPCIf;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.solver.Expression;
+import za.ac.sun.cs.coastal.symbolic.Choice;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
-import za.ac.sun.cs.coastal.symbolic.Model;
 import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class GenerationalFactory extends PathBasedFactory {
@@ -84,98 +82,11 @@ public class GenerationalFactory extends PathBasedFactory {
 
 	// ======================================================================
 	//
-	// STRATEGY THAT NEGATES EACH CONJUNCT ALONG PATH
+	// ABSTRACT PARENT GENERATIOANL STRATEGY
 	//
 	// ======================================================================
 
-	private static class GenerationalFullStrategy extends PathBasedStrategy {
-
-		private final int priorityStart;
-
-		private final int priorityDelta;
-
-		GenerationalFullStrategy(COASTAL coastal, StrategyManager manager) {
-			super(coastal, manager);
-			priorityStart = ((GenerationalManager) manager).priorityStart;
-			priorityDelta = ((GenerationalManager) manager).priorityDelta;
-		}
-
-		@Override
-		protected List<Model> refine0(Execution execution) {
-			if (execution == null) {
-				return null;
-			}
-			List<Model> models = new ArrayList<>();
-			Path path = execution.getPath();
-			log.trace("explored <{}> {}", path.getSignature(), path.getPathCondition().toString());
-			PathTreeNode bottom = manager.insertPath0(execution, false);
-			if (bottom != null) {
-				List<Path> altPaths = new ArrayList<>();
-				bottom = bottom.getParent();
-				for (Path pointer = path; (pointer != null) && !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
-					altPaths.add(generateAltSpc(execution, path));
-					bottom.setGenerated();
-					bottom = bottom.getParent();
-				}
-				int priority = priorityStart;
-				for (Path altPath : altPaths) {
-					Expression pc = altPath.getPathCondition();
-					String sig = altPath.getSignature();
-					log.trace("trying   <{}> {}", sig, pc.toString());
-					Input model = solver.solve(pc);
-					if (model == null) {
-						log.trace("no model");
-						log.trace("(The spc is {})", altPath.getPathCondition().toString());
-						manager.insertPath(altPath, true);
-					} else {
-						String modelString = model.toString();
-						log.trace("new model: {}", modelString);
-						if (visitedModels.add(modelString)) {
-							models.add(new Model(priority, model));
-							priority += priorityDelta;
-						} else {
-							log.trace("model {} has been visited before", modelString);
-						}
-					}
-				}
-			} else {
-				log.trace("revisited path -- no new models generated");
-			}
-			return models;
-		}
-
-		private Path generateAltSpc(Execution execution, Path pointer) {
-			SegmentedPC parent = null;
-			boolean value = ((SegmentedPCIf) execution).getValue();
-			if (execution == pointer) {
-				parent = execution.getParent();
-				value = !value;
-			} else {
-				parent = generateAltSpc(execution.getParent(), pointer);
-			}
-			return new SegmentedPCIf(parent, execution.getExpression(), execution.getPassiveConjunct(), value);
-		}
-
-		@Override
-		protected Path findNewPath(PathTree pathTree) {
-			return null;
-		}
-
-	}
-
-	// ======================================================================
-	//
-	// STRATEGY THAT NEGATES EACH CONJUNCT ALONG TRUNCATED PATH
-	//
-	// ======================================================================
-
-	/**
-	 * A generational strategy: a path condition such as
-	 * {@code A && B && C && D} is negated and truncated conjunct by conjunct to
-	 * produce {@code A && B && C && !D}, {@code A && B && !C}, {@code A && !B},
-	 * {@code !A}.
-	 */
-	private static class GenerationalStrategy extends PathBasedStrategy {
+	private abstract static class GenerationalAbstractStrategy extends PathBasedStrategy {
 
 		/**
 		 * The priority of the longest generated new path condition.
@@ -196,44 +107,46 @@ public class GenerationalFactory extends PathBasedFactory {
 		 * @param manager
 		 *            a generational task manager
 		 */
-		GenerationalStrategy(COASTAL coastal, StrategyManager manager) {
+		GenerationalAbstractStrategy(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 			priorityStart = ((GenerationalManager) manager).priorityStart;
 			priorityDelta = ((GenerationalManager) manager).priorityDelta;
 		}
 
 		@Override
-		protected List<Model> refine0(SegmentedPC spc) {
-			if ((spc == null) || (spc == SegmentedPC.NULL)) {
+		protected final List<Input> refine0(Execution execution) {
+			if (execution == null) {
 				return null;
 			}
-			List<Model> models = new ArrayList<>();
-			log.trace("explored <{}> {}", spc.getSignature(), spc.getPathCondition().toString());
-			PathTreeNode bottom = manager.insertPath0(spc, false);
+			List<Input> inputs = new ArrayList<>();
+			Path path = execution.getPath();
+			log.trace("explored <{}> {}", path.getSignature(), path.getPathCondition().toString());
+			PathTreeNode bottom = manager.insertPath0(execution, false);
 			if (bottom != null) {
-				List<SegmentedPC> altSpcs = new ArrayList<>();
+				List<Path> altPaths = new ArrayList<>();
 				bottom = bottom.getParent();
-				for (SegmentedPC pointer = spc; (pointer != null)
-						&& !bottom.hasBeenGenerated(); pointer = pointer.getParent()) {
-					altSpcs.add(generateAltSpc(pointer));
+				int depth = bottom.getPath().getDepth();
+				for (Path pointer = path; (pointer != null) && !bottom.hasBeenGenerated(); pointer = pointer.getParent(), depth--) {
+					altPaths.addAll(generateAltPaths(path, pointer, depth));
 					bottom.setGenerated();
 					bottom = bottom.getParent();
 				}
 				int priority = priorityStart;
-				for (SegmentedPC altSpc : altSpcs) {
-					Expression pc = altSpc.getPathCondition();
-					String sig = altSpc.getSignature();
+				for (Path altPath : altPaths) {
+					Expression pc = altPath.getPathCondition();
+					String sig = altPath.getSignature();
 					log.trace("trying   <{}> {}", sig, pc.toString());
-					Input model = solver.solve(pc);
-					if (model == null) {
+					Input input = solver.solve(pc);
+					if (input == null) {
 						log.trace("no model");
-						log.trace("(The spc is {})", altSpc.getPathCondition().toString());
-						manager.insertPath(altSpc, true);
+						log.trace("(The path is {})", altPath.getPathCondition().toString());
+						manager.insertPath(altPath, true);
 					} else {
-						String modelString = model.toString();
+						String modelString = input.toString();
 						log.trace("new model: {}", modelString);
-						if (visitedModels.add(modelString)) {
-							models.add(new Model(priority, model));
+						if (visitedInputs.add(modelString)) {
+							input.setPayload("priority", priority);
+							inputs.add(input);
 							priority += priorityDelta;
 						} else {
 							log.trace("model {} has been visited before", modelString);
@@ -243,20 +156,77 @@ public class GenerationalFactory extends PathBasedFactory {
 			} else {
 				log.trace("revisited path -- no new models generated");
 			}
-			return models;
+			return inputs;
 		}
 
-		private SegmentedPC generateAltSpc(SegmentedPC pointer) {
-			SegmentedPC parent = pointer.getParent();
-			Expression pc = pointer.getExpression();
-			Expression passive = pointer.getPassiveConjunct();
-			boolean value = ((SegmentedPCIf) pointer).getValue();
-			return new SegmentedPCIf(parent, pc, passive, !value);
-		}
+		protected abstract List<Path> generateAltPaths(Path path, Path pointer, int depth);
 
 		@Override
-		protected Path findNewPath(PathTree pathTree) {
+		public final Path findNewPath(PathTree pathTree) {
 			return null;
+		}
+
+	}
+
+	// ======================================================================
+	//
+	// STRATEGY THAT NEGATES EACH CONJUNCT ALONG PATH
+	//
+	// ======================================================================
+
+	private static class GenerationalFullStrategy extends GenerationalAbstractStrategy {
+
+		GenerationalFullStrategy(COASTAL coastal, StrategyManager manager) {
+			super(coastal, manager);
+		}
+
+		protected final List<Path> generateAltPaths(Path path, Path pointer, int targetDepth) {
+			List<Path> altPaths = new ArrayList<>();
+			Choice lastChoice = pointer.getChoice();
+			for (long i = 0, n = lastChoice.getBranch().getNumberOfAlternatives(); i < n; i++) {
+				if (i != lastChoice.getAlternative()) {
+					altPaths.add(generateAltPath(path, targetDepth, i));
+				}
+			}
+			return altPaths;
+		}
+
+		private Path generateAltPath(Path path, int targetDepth, long alternative) {
+			if (targetDepth > 0) {
+				return new Path(generateAltPath(path.getParent(), targetDepth - 1, alternative), path.getChoice());
+			} else {
+				return new Path(path.getParent(), path.getChoice().getAlternative(alternative));
+			}
+		}
+	}
+
+	// ======================================================================
+	//
+	// STRATEGY THAT NEGATES EACH CONJUNCT ALONG TRUNCATED PATH
+	//
+	// ======================================================================
+
+	/**
+	 * A generational strategy: a path condition such as
+	 * {@code A && B && C && D} is negated and truncated conjunct by conjunct to
+	 * produce {@code A && B && C && !D}, {@code A && B && !C}, {@code A && !B},
+	 * {@code !A}.
+	 */
+	private static class GenerationalStrategy extends GenerationalAbstractStrategy {
+
+		GenerationalStrategy(COASTAL coastal, StrategyManager manager) {
+			super(coastal, manager);
+		}
+
+		protected final List<Path> generateAltPaths(Path path, Path pointer, int targetDepth) {
+			List<Path> altPaths = new ArrayList<>();
+			Choice lastChoice = pointer.getChoice();
+			for (long i = 0, n = lastChoice.getBranch().getNumberOfAlternatives(); i < n; i++) {
+				if (i != lastChoice.getAlternative()) {
+					altPaths.add(new Path(pointer.getParent(), lastChoice.getAlternative(i)));
+				}
+			}
+			return altPaths;
 		}
 
 	}

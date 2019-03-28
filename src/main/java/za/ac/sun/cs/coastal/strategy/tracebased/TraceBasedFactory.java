@@ -11,9 +11,8 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
-import za.ac.sun.cs.coastal.surfer.Trace;
 import za.ac.sun.cs.coastal.symbolic.Execution;
-import za.ac.sun.cs.coastal.symbolic.Model;
+import za.ac.sun.cs.coastal.symbolic.Input;
 
 public abstract class TraceBasedFactory implements StrategyFactory {
 
@@ -62,12 +61,12 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 			return pathTree;
 		}
 
-		public PathTreeNode insertPath0(Trace trace, boolean infeasible) {
-			return pathTree.insertPath(trace, infeasible);
+		public PathTreeNode insertPath0(Execution execution, boolean infeasible) {
+			return pathTree.insertPath(execution, infeasible);
 		}
 
-		public boolean insertPath(Trace trace, boolean infeasible) {
-			return (pathTree.insertPath(trace, infeasible) == null);
+		public boolean insertPath(Execution execution, boolean infeasible) {
+			return (pathTree.insertPath(execution, infeasible) == null);
 		}
 
 		/**
@@ -160,20 +159,20 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
-					Trace trace = coastal.getNextTrace();
+					Execution execution = coastal.getNextTrace();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
-					List<Model> mdls = refine(trace);
+					List<Input> inputs = refine(execution);
 					int d = -1;
-					while (mdls != null) {
-						int m = coastal.addSurferModels(mdls);
+					while (inputs != null) {
+						int m = coastal.addSurferInputs(inputs);
 						if (m > 0) {
 							d += m;
 							break;
 						}
-						mdls = refine1();
+						inputs = refine1();
 					}
 					log.trace("+++ added {} surfer models", d);
 					coastal.updateWork(d);
@@ -184,16 +183,16 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 			}
 		}
 
-		protected List<Model> refine(Execution execution) {
+		protected List<Input> refine(Execution execution) {
 			long t0 = System.currentTimeMillis();
-			List<Model> newModels = refine0((Trace) execution);
+			List<Input> newModels = refine0(execution);
 			manager.recordTime(System.currentTimeMillis() - t0);
 			return newModels;
 		}
 
-		protected abstract List<Model> refine0(Trace trace);
+		protected abstract List<Input> refine0(Execution execution);
 
-		protected abstract List<Model> refine1();
+		protected abstract List<Input> refine1();
 
 	}
 

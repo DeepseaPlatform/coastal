@@ -71,7 +71,11 @@ public class BreadthFirstFactory extends PathBasedFactory {
 		@Override
 		public Path findNewPath(PathTree pathTree) {
 			Queue<PathTreeNode> workingSet = new LinkedList<>();
-			workingSet.add(pathTree.getRoot());
+			PathTreeNode root = pathTree.getRoot();
+			if (root == null) {
+				return null;
+			}
+			workingSet.add(root);
 			while (!workingSet.isEmpty()) {
 				PathTreeNode node = workingSet.remove();
 				int n = node.getChildCount();

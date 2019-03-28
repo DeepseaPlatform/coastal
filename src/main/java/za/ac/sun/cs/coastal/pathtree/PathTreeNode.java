@@ -135,7 +135,7 @@ public abstract class PathTreeNode {
 	public final Path getPathForChild(long childIndex) {
 		Path path = getPath();
 		Choice lastChoice = path.getChoice();
-		return new Path(path, new Choice(lastChoice.getBranch(), childIndex));
+		return new Path(path.getParent(), new Choice(lastChoice.getBranch(), childIndex));
 	}
 
 	/**
@@ -306,7 +306,6 @@ public abstract class PathTreeNode {
 		int childrenWidth = -SPACING;
 		for (int i = 0; i < numChildren; i++) {
 			PathTreeNode child = getChild(i);
-			child = getChild(i);
 			childrenWidth += SPACING + ((child == null) ? 1 : child.width());
 		}
 		// Decide where to start the label/condition/children
@@ -325,7 +324,6 @@ public abstract class PathTreeNode {
 			int curx = childX;
 			for (int i = 0; i < numChildren; i++) {
 				PathTreeNode child = getChild(i);
-				child = getChild(i);
 				if (child == null) {
 					// We shall draw this leaf ourselves
 					stringWrite(lines, curx, y + 4, "?");
@@ -463,7 +461,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#getBranch()
 		 */
 		@Override
-		public final Branch getBranch() {
+		public Branch getBranch() {
 			return branch;
 		}
 
@@ -473,7 +471,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#getPath()
 		 */
 		@Override
-		public final Path getPath() {
+		public Path getPath() {
 			return path;
 		}
 
@@ -483,7 +481,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#getChildCount()
 		 */
 		@Override
-		public final int getChildCount() {
+		public int getChildCount() {
 			return children.length;
 		}
 
@@ -492,7 +490,7 @@ public abstract class PathTreeNode {
 		 * 
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#getChild(long)
 		 */
-		public final PathTreeNode getChild(long childIndex) {
+		public PathTreeNode getChild(long childIndex) {
 			if ((childIndex < 0) || (childIndex >= children.length)) {
 				return null;
 			} else {
@@ -506,7 +504,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#isFullyExplored()
 		 */
 		@Override
-		public final boolean isFullyExplored() {
+		public boolean isFullyExplored() {
 			return fullyExplored;
 		}
 
@@ -516,7 +514,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#setFullyExplored()
 		 */
 		@Override
-		public final void setFullyExplored() {
+		public void setFullyExplored() {
 			fullyExplored = true;
 		}
 
@@ -526,7 +524,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#hasBeenGenerated()
 		 */
 		@Override
-		public final boolean hasBeenGenerated() {
+		public boolean hasBeenGenerated() {
 			return isGenerated;
 		}
 
@@ -536,7 +534,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#setGenerated()
 		 */
 		@Override
-		public final void setGenerated() {
+		public void setGenerated() {
 			isGenerated = true;
 		}
 
@@ -546,7 +544,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#lock()
 		 */
 		@Override
-		public final void lock() {
+		public void lock() {
 			lock.lock();
 		}
 
@@ -556,7 +554,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#unlock()
 		 */
 		@Override
-		public final void unlock() {
+		public void unlock() {
 			lock.unlock();
 		}
 
@@ -565,7 +563,7 @@ public abstract class PathTreeNode {
 		 * 
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#getExecution()
 		 */
-		public final Execution getExecution() {
+		public Execution getExecution() {
 			throw new RuntimeException("INNER NODE DO NOT HAVE ASSOCIATED EXECUTIONS");
 		}
 
@@ -577,7 +575,7 @@ public abstract class PathTreeNode {
 	//
 	// ======================================================================
 
-	private static abstract class PathTreeNodeTerminal extends PathTreeNode {
+	private abstract static class PathTreeNodeTerminal extends PathTreeNode {
 
 		/**
 		 * The execution associated with this terminal node.
@@ -593,6 +591,7 @@ public abstract class PathTreeNode {
 		private PathTreeNodeTerminal(PathTreeNodeInner parent, long index, Execution execution) {
 			super(parent, index);
 			this.execution = execution;
+			parent.children[(int) index] = this;
 		}
 
 		/*
@@ -730,7 +729,7 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#isLeaf()
 		 */
 		@Override
-		public final boolean isLeaf() {
+		public boolean isLeaf() {
 			return true;
 		}
 
@@ -760,40 +759,11 @@ public abstract class PathTreeNode {
 		 * @see za.ac.sun.cs.coastal.pathtree.PathTreeNode#isInfeasible()
 		 */
 		@Override
-		public final boolean isInfeasible() {
+		public boolean isInfeasible() {
 			return true;
 		}
 
 	}
-
-//	/**
-//	 * Create a new path tree node for the given execution.
-//	 * 
-//	 * @param execution
-//	 *            the execution to create the node for
-//	 * @return a new path tree node
-//	 */
-//	public static PathTreeNode createNode(Execution execution) {
-//		return new PathTreeNode(execution, execution.getNrOfOutcomes(), false, false);
-//	}
-
-//	/**
-//	 * Create an infeasible node.
-//	 * 
-//	 * @return a new (infeasible) path tree node
-//	 */
-//	public static PathTreeNode createInfeasible() {
-//		return new PathTreeNode(null, 0, false, true);
-//	}
-
-//	/**
-//	 * Create a new leaf node.
-//	 * 
-//	 * @return a new leaf node
-//	 */
-//	public static PathTreeNode createLeaf() {
-//		return new PathTreeNode(null, 0, true, false);
-//	}
 
 //	/**
 //	 * Change the execution associated with this node.

@@ -12,7 +12,7 @@ import java.util.Set;
  * For now, there are no other components. In the future, the input may be
  * extended to include details about the environment.
  */
-public class Input {
+public final class Input extends PayloadCarrierImpl {
 
 	/**
 	 * Mapping from variable names to variable values.
@@ -40,6 +40,21 @@ public class Input {
 	public Input(Input input) {
 		inputMap = new InputMap(input.inputMap);
 		inputVector = new InputVector(input.inputVector);
+	}
+
+	/**
+	 * Return the priority of this input. First the method checks is there is a
+	 * "priority" payload. If not, it checks for a "score" payload. If either is
+	 * present, it is returned. Otherwise, the method returns 0.
+	 * 
+	 * @return priority of this input
+	 */
+	public int getPriority() {
+		Integer priority = (Integer) getPayload("priority");
+		if (priority == null) {
+			priority = (Integer) getPayload("score");
+		}
+		return priority;
 	}
 
 	/**
@@ -109,7 +124,16 @@ public class Input {
 	 */
 	@Override
 	public String toString() {
-		return inputVector.toString();
+		StringBuilder rep = new StringBuilder();
+		rep.append('<').append(toMapString());
+		rep.append('-').append(inputVector.toString());
+		rep.append('-').append(getPayload().toString());
+		rep.append('>');
+		return rep.toString();
+	}
+
+	public String toMapString() {
+		return inputMap.toString();
 	}
 
 }

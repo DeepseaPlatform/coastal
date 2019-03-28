@@ -6,7 +6,7 @@ import za.ac.sun.cs.coastal.solver.Expression;
  * An encapsulation of a branch taken during an execution of the
  * system-under-test.
  */
-public final class Choice {
+public final class Choice extends PayloadCarrierImpl {
 
 	/**
 	 * The branching point associated with this choice.
@@ -35,7 +35,7 @@ public final class Choice {
 	 * 
 	 * @return the branch associated with this choice
 	 */
-	public final Branch getBranch() {
+	public Branch getBranch() {
 		return branch;
 	}
 
@@ -49,11 +49,21 @@ public final class Choice {
 	}
 
 	/**
+	 * Return an alternative choice.
+	 * 
+	 * @param alternative index of the alternative
+	 * @return alternative choice
+	 */
+	public Choice getAlternative(long alternative) {
+		return new Choice(branch, alternative);
+	}
+	
+	/**
 	 * The active conjunct associated with this choice.
 	 * 
 	 * @return the active conjunct associated with this choice
 	 */
-	public final Expression getActiveConjunct() {
+	public Expression getActiveConjunct() {
 		return getBranch().getAlternative(alternative);
 	}
 	
@@ -76,5 +86,40 @@ public final class Choice {
 	public String getSignatureContribution() {
 		return getBranch().getAlternativeRepr(alternative);
 	}
-	
+
+	// ======================================================================
+	//
+	// STRING REPRESENTATION
+	//
+	// ======================================================================
+
+	/**
+	 * String representation of this choice.
+	 */
+	private String stringRep = null;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		if (stringRep == null) {
+			stringRep = toString0();
+		}
+		return stringRep;
+	}
+
+	/**
+	 * Return a string representation of this choice.
+	 * 
+	 * @return string representation of this choice
+	 */
+	private String toString0() {
+		StringBuilder rep = new StringBuilder();
+		rep.append(getBranch()).append('#').append(getAlternative());
+		return rep.toString();
+	}
+
 }
