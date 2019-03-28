@@ -17,7 +17,7 @@
 		<surfers threads="5"/>
 		<strategies>
 			<strategy threads="1">
-				za.ac.sun.cs.coastal.strategy.hybrid.CybridFuzzerFactory
+				za.ac.sun.cs.coastal.strategy.hybrid.ConcolicFuzzerFactory
 				<options>
 					<random-seed>888</random-seed>
 					<attenuation>0.95</attenuation>
