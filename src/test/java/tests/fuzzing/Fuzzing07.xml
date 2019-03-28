@@ -35,5 +35,11 @@
 			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 			-->
 		</observers>
+		<delegates>
+			<delegate>
+				<for>java.lang.String</for>
+				<model>za.ac.sun.cs.coastal.model.String</model>
+			</delegate>
+		</delegates>
 	</coastal>
 </configuration>
