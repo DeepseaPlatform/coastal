@@ -11,10 +11,11 @@
 			<bound name="a" min="32" max="128"/>
 		</bounds>
 		<settings>
-			<time-limit>120</time-limit>
+			<draw-paths>true</draw-paths>
+			<time-limit>1200</time-limit>
 		</settings>
-		<divers threads="0"/>
-		<surfers threads="5"/>
+		<divers threads="1"/>
+		<surfers threads="1"/>
 		<strategies>
 			<strategy threads="1">
 				za.ac.sun.cs.coastal.strategy.hybrid.ConcolicFuzzerFactory
@@ -30,7 +31,9 @@
 		</strategies>
 		<observers>
 			<observer>za.ac.sun.cs.coastal.observers.StopControllerFactory</observer>
+			<!-- 
 			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
+			-->
 		</observers>
 	</coastal>
 </configuration>
