@@ -42,6 +42,8 @@ public final class Input extends PayloadCarrierImpl {
 		inputVector = new InputVector(input.inputVector);
 	}
 
+	public int getSize() { return inputMap.getSize(); }
+
 	/**
 	 * Return the priority of this input. First the method checks is there is a
 	 * "priority" payload. If not, it checks for a "score" payload. If either is

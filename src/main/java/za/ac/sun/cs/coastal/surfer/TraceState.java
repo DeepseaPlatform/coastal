@@ -45,7 +45,7 @@ public final class TraceState extends State {
 	 */
 	public TraceState(COASTAL coastal, Input input) { // throws InterruptedException
 		super(coastal, input);
-		useCurrentValues = (input == null);
+		useCurrentValues = (input == null) || (input.getSize() == 0);
 		pathTreeNode = coastal.getPathTree().getRoot();
 	}
 
@@ -55,7 +55,7 @@ public final class TraceState extends State {
 		mayRecord = true;
 		frameCount = 0;
 		path = null;
-		useCurrentValues = (input == null);
+		useCurrentValues = (input == null) || (input.getSize() == 0);
 		this.input = (input == null) ? new Input() : input;
 		pathTreeNode = coastal.getPathTree().getRoot();
 		mayContinue = true;

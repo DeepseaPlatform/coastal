@@ -13,14 +13,16 @@ public class InputMap {
 	/**
 	 * Mapping from variable indices to variable values.
 	 */
-	private final Map<String, Object> inputVector;
+	private final Map<String, Object> inputMap;
 
 	/**
 	 * Construct a new, empty set of inputs.
 	 */
 	public InputMap() {
-		inputVector = new HashMap<>();
+		inputMap = new HashMap<>();
 	}
+
+	public int getSize() { return inputMap.size(); }
 
 	/**
 	 * Construct a new set of inputs based on an existing set.
@@ -28,7 +30,7 @@ public class InputMap {
 	 * @param inputVector the older set of inputs
 	 */
 	public InputMap(InputMap inputVector) {
-		this.inputVector = new HashMap<>(inputVector.inputVector);
+		this.inputMap = new HashMap<>(inputVector.inputMap);
 	}
 
 	/**
@@ -38,7 +40,7 @@ public class InputMap {
 	 * @return the value of the variable (or {@code null})
 	 */
 	public Object get(String name) {
-		return inputVector.get(name);
+		return inputMap.get(name);
 	}
 
 	/**
@@ -49,7 +51,7 @@ public class InputMap {
 	 * @return the old value of the variable (or {@code null})
 	 */
 	public Object put(String name, Object value) {
-		return inputVector.put(name, value);
+		return inputMap.put(name, value);
 	}
 
 	/**
@@ -58,7 +60,7 @@ public class InputMap {
 	 * @return all names with values
 	 */
 	public Set<String> getNames() {
-		return inputVector.keySet();
+		return inputMap.keySet();
 	}
 
 	/*
@@ -68,7 +70,7 @@ public class InputMap {
 	 */
 	@Override
 	public String toString() {
-		return inputVector.toString();
+		return inputMap.toString();
 	}
 
 }
