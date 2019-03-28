@@ -12,7 +12,7 @@
 		</bounds>
 		<settings>
 			<draw-paths>true</draw-paths>
-			<time-limit>1200</time-limit>
+			<time-limit>20</time-limit>
 		</settings>
 		<divers threads="1"/>
 		<surfers threads="5"/>
