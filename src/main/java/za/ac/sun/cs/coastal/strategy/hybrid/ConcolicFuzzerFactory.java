@@ -20,6 +20,7 @@ import za.ac.sun.cs.coastal.solver.Solver;
 import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.strategy.StrategyFactory;
 import za.ac.sun.cs.coastal.surfer.TraceState;
+import za.ac.sun.cs.coastal.symbolic.Choice;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Path;
@@ -669,7 +670,18 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 				while (true) {
 					Execution execution = coastal.getNextPc();
 					log.info("------>>>>>> {}",  execution.toString());
-					manager.getPathTree().insertPath(execution, false);
+					Path path = execution.getPath();
+					Choice lastChoice = path.getChoice();
+					long alternative = lastChoice.getAlternative();
+					Path newPath = new Path(path.getParent(), lastChoice.getAlternative(1 - alternative));
+					int d = -1;
+					Input input = solver.solve(newPath.getPathCondition());
+					if (input != null) {
+						input.copyPayload(execution.getInput());
+						d += coastal.addSurferInputs(Collections.singletonList(input));
+					}
+					coastal.updateWork(d);
+//					manager.getPathTree().insertPath(execution, false);
 //					PathTreeNode bottom = manager.getPathTree().insertPath(spc, false);
 //					if (bottom != null) {
 //						bottom = bottom.getParent();
