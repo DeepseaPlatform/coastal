@@ -15,7 +15,7 @@
 			<time-limit>1200</time-limit>
 		</settings>
 		<divers threads="1"/>
-		<surfers threads="1"/>
+		<surfers threads="5"/>
 		<strategies>
 			<strategy threads="1">
 				za.ac.sun.cs.coastal.strategy.hybrid.ConcolicFuzzerFactory

@@ -185,16 +185,16 @@ public class DiverFactory implements TaskFactory {
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
-					Input concreteValues = coastal.getNextDiverInput();
+					Input input = coastal.getNextDiverInput();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
-					SymbolicState symbolicState = new SymbolicState(coastal, concreteValues);
+					SymbolicState symbolicState = new SymbolicState(coastal, input);
 					String banner = "starting dive " + manager.getNextDiveCount() + " @" + Banner.getElapsed(coastal);
 					log.trace(Banner.getBannerLine(banner, '-'));
-					if (concreteValues == null) {
+					if (input == null) {
 						log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
 					} else {
-						log.trace(Banner.getBannerLine(concreteValues.toString(), '*'));
+						log.trace(Banner.getBannerLine(input.toString(), '*'));
 					}
 					ClassLoader classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
 					performRun(classLoader);

@@ -296,6 +296,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 			}
 		}
 		if (recordDeepest && (n != null) && !n.isFullyExplored()) {
+			log.trace("%%%%%%% DEEPEST NODE ADDED: {}", n);
 			deepest.add(n);
 		}
 		return n;
@@ -329,6 +330,9 @@ public class PathTree implements Comparator<PathTreeNode> {
 	 * @return an array of strings that stores an ASCII image of the path tree
 	 */
 	public String[] stringRepr() {
+		if (root == null) {
+			return new String[] { "EMPTY PATH TREE" };
+		}
 		int h = root.height() * 4 - 1;
 		int w = root.width();
 		/*

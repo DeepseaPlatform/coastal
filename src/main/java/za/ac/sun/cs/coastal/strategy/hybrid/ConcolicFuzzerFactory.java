@@ -358,16 +358,16 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 							(int) (eliminationRatio * coastal.getTraceQueueLength()));
 					for (int i = 0; i < eliminate; i++) {
 						t0 = System.currentTimeMillis();
-						Execution tracex = coastal.getNextTrace(200);
+						Execution executionx = coastal.getNextTrace(200);
 						t1 = System.currentTimeMillis();
 						manager.recordWaitTime(t1 - t0);
-						if (tracex == null) {
+						if (executionx == null) {
 							log.trace("+++ out of traces");
 							break;
 						}
-						int scorex = calculateScore(tracex);
-						keepers.add(scorex, tracex);
-						allTime.add(scorex, tracex);
+						int scorex = calculateScore(executionx);
+						keepers.add(scorex, executionx);
+						allTime.add(scorex, executionx);
 					}
 					manager.incrementRefinements();
 					log.trace("+++ starting refinement");
@@ -395,12 +395,12 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 			return null;
 		}
 
-		protected void refine(Execution trace, int score) {
+		protected void refine(Execution execution, int score) {
 			long t0 = System.currentTimeMillis();
 			inputsAdded = -1;
-			manager.insertPath(trace, false);
+			manager.insertPath(execution, false);
 			parameters = coastal.getParameters();
-			Input input = trace.getInput();
+			Input input = execution.getInput();
 			mutate(score, input);
 			log.trace("+++ added {} surfer models", inputsAdded);
 			coastal.updateWork(inputsAdded);
@@ -603,8 +603,8 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 			log.trace("^^^ strategy task (ConcolicFuzzerPlanter) starting");
 			try {
 				while (true) {
-					if (!plant(manager.getPathTree().getDeepestNode())) {
-						Thread.sleep(1000);
+					if (!plant()) {
+						Thread.sleep(200);
 					}
 					PathTreeNode root = manager.getPathTree().getRoot();
 					if ((root != null) && root.isFullyExplored()) {
@@ -622,24 +622,23 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 			return null;
 		}
 
-		private boolean plant(PathTreeNode node) {
+		private boolean plant() {
+			PathTreeNode node = manager.getPathTree().getDeepestNode();
 			if (node == null) {
 				return false;
 			}
-			PathTreeNode parent = node.getParent();
-			if (parent == null) {
-				return false;
-			}
-			log.info("--->>> {}", parent.getId());
-			Execution execution = parent.getExecution();
+//			PathTreeNode parent = node.getParent();
+//			if (parent == null) {
+//				return false;
+//			}
+			Execution execution = node.getExecution();
 			if (execution == null) {
 				return false;
 			}
 			Input input = execution.getInput();
-			if (input == null) {
+			if ((input == null) || (input.getSize() == 0)) {
 				return false;
 			}
-			log.info("--->>> {}", input.toString());
 			coastal.updateWork(coastal.addDiverInputs(Collections.singletonList(input)));
 			return true;
 		}
@@ -669,7 +668,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 			try {
 				while (true) {
 					Execution execution = coastal.getNextPc();
-					log.info("------>>>>>> {}",  execution.toString());
+					// log.info("------>>>>>> {}",  execution.toString());
 					Path path = execution.getPath();
 					Choice lastChoice = path.getChoice();
 					long alternative = lastChoice.getAlternative();
@@ -681,24 +680,6 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 						d += coastal.addSurferInputs(Collections.singletonList(input));
 					}
 					coastal.updateWork(d);
-//					manager.getPathTree().insertPath(execution, false);
-//					PathTreeNode bottom = manager.getPathTree().insertPath(spc, false);
-//					if (bottom != null) {
-//						bottom = bottom.getParent();
-//						SegmentedPC parent = spc.getParent();
-//						Expression pc = spc.getExpression();
-//						Expression passive = spc.getPassiveConjunct();
-//						boolean value = ((SegmentedPCIf) spc).getValue();
-//						SegmentedPC altSpc = new SegmentedPCIf(parent, pc, passive, !value);
-//						Map<String, Object> model = solver.solve(altSpc.getPathCondition());
-//						if (model != null) {
-//							Model mdl = new Model(100, model);
-//							mdl.setPayload(new ConcolicPayload(100));
-//							if (coastal.addSurferModel(mdl)) {
-//								// modelsAdded++;
-//							}
-//						}
-//					}
 					PathTreeNode root = manager.getPathTree().getRoot();
 					if ((root != null) && root.isFullyExplored()) {
 						break;
@@ -792,7 +773,6 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 				while ((position < size) && (score <= scores[position])) {
 					position++;
 				}
-//				if ((position < capacity) && !trace.toString().equals(traces[position].toString())) {
 				if (position < capacity) {
 					if (size < capacity) {
 						size++;
