@@ -236,7 +236,7 @@ public class DiverFactory implements TaskFactory {
 						// ignore, since run is over in any case
 					}
 				} else if (!(t instanceof SymbolicException)) {
-					log.trace("!@#$%$#@! PROGRAM EXCEPTION:", t);
+					log.info("!@#$%$#@! PROGRAM EXCEPTION:", t);
 					if (t instanceof AssertionError) {
 						log.trace("test");
 						broker.publish("assert-failed", new Tuple(this, null));
