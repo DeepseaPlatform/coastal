@@ -632,7 +632,9 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 //			if (parent == null) {
 //				return false;
 //			}
-			// DEBUG !! log.info("--->>> NODE ID {}", node.getId());
+			if (node.getId() == 7) {
+				log.trace("At node 7");
+			}
 			Execution execution = node.getExecution();
 			if (execution == null) {
 				return false;
@@ -703,6 +705,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 					int d = -1;
 					if (input != null) {
 						input.copyPayload(execution.getInput());
+						input.setPayload("score", 100000);
 						d += coastal.addSurferInputs(Collections.singletonList(input));
 					}
 					coastal.updateWork(d);
