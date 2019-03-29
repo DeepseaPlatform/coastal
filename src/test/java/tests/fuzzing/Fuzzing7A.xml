@@ -13,11 +13,11 @@
 		<settings>
 			<time-limit>120</time-limit>
 		</settings>
-		<divers threads="1"/>
+		<divers threads="0"/>
 		<surfers threads="5"/>
 		<strategies>
 			<strategy threads="1">
-				za.ac.sun.cs.coastal.strategy.hybrid.ConcolicFuzzerFactory
+				za.ac.sun.cs.coastal.strategy.tracebased.FeedbackFuzzerFactory
 				<options>
 					<random-seed>888</random-seed>
 					<attenuation>0.95</attenuation>

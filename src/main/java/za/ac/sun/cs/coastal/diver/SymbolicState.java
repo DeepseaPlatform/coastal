@@ -146,8 +146,10 @@ public final class SymbolicState extends State {
 	private final Stack<Expression> pendingSwitch = new Stack<>();
 
 	/**
-	 * @param coastal
-	 * @param input
+	 * Create a new instance of the symbolic state.
+	 * 
+	 * @param coastal instance of COASTAL that started this run
+	 * @param input input values for the run
 	 */
 	public SymbolicState(COASTAL coastal, Input input) { // throws InterruptedException
 		super(coastal, input);
@@ -157,14 +159,16 @@ public final class SymbolicState extends State {
 	}
 
 	/**
-	 * @return
+	 * Return the value of the {@link #mayContinue} flag that indicates whether clients (such as diver, surfers, and strategies) should continue work on the problem.
+	 * 
+	 * @return value of the {@link #mayContinue} flag
 	 */
 	public boolean mayContinue() {
 		return mayContinue;
 	}
 
 	/**
-	 * 
+	 * Set the {@link #mayContinue} flag to {@code false}.
 	 */
 	public void discontinue() {
 		mayContinue = false;

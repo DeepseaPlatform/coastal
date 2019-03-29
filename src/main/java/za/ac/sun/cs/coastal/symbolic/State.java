@@ -68,8 +68,9 @@ public abstract class State {
 	/**
 	 * The input that triggered this execution.
 	 * 
-	 * This field is not final, because {@link TraceState} resets it without
-	 * creating a new instance.
+	 * This field is not final, because
+	 * {@link za.ac.sun.cs.coastal.surfer.TraceState} resets it without creating a
+	 * new instance.
 	 */
 	protected Input input;
 
@@ -100,6 +101,7 @@ public abstract class State {
 	 * Construct a new state to record an execution.
 	 * 
 	 * @param coastal the COASTAL instance that initiated the execution
+	 * @param input input values for the run
 	 */
 	public State(COASTAL coastal, Input input) { // throws InterruptedException
 		this.coastal = coastal;
@@ -832,13 +834,8 @@ public abstract class State {
 	 */
 	public abstract void tableSwitchInsn(int instr, int opcode) throws SymbolicException;
 
-	/**
+	/*
 	 * ????????
-	 * 
-	 * @param min
-	 * @param max
-	 * @param value
-	 * @throws SymbolicException if a symbolic exception occurs during the method
 	 */
 	public abstract void tableCaseInsn(int min, int max, int value) throws SymbolicException;
 

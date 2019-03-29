@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.objectweb.asm.Opcodes;
 
 import za.ac.sun.cs.coastal.COASTAL;
@@ -31,6 +32,11 @@ public final class TraceState extends State {
 
 	private boolean mayRecord = true;
 
+	/**
+	 * 
+	 */
+	private int triggeringIndex = -1;
+
 	private boolean mayContinue = true;
 
 	private PathTreeNode pathTreeNode;
@@ -40,8 +46,10 @@ public final class TraceState extends State {
 	private final Set<Integer> incValues = new HashSet<>();
 
 	/**
-	 * @param coastal
-	 * @param input
+	 * Create a new instance of the tracing state.
+	 * 
+	 * @param coastal instance of COASTAL that started this run
+	 * @param input input values for the run
 	 */
 	public TraceState(COASTAL coastal, Input input) { // throws InterruptedException
 		super(coastal, input);
@@ -681,6 +689,7 @@ public final class TraceState extends State {
 				mayRecord = false;
 				setTrackingMode(true);
 				frameCount++;
+				triggeringIndex = triggerIndex;
 			}
 		}
 		broker.publishThread("enter-method", methodNumber);
@@ -1165,6 +1174,90 @@ public final class TraceState extends State {
 	//
 	// ======================================================================
 
+	/**
+	 * Return a string representation of the trigger and its inputs.
+	 * 
+	 * @return a string representation of the trigger and its inputs
+	 */
+	private String gatherInputs() {
+		if (triggeringIndex == -1) {
+			return null;
+		}
+		StringBuilder inputs = new StringBuilder();
+		Trigger trigger = coastal.getTrigger(triggeringIndex);
+		inputs.append(trigger.getMethodName()).append('(');
+		int argc = trigger.getParamCount();
+		for (int argi = 0; argi < argc; argi++) {
+			if (argi > 0) {
+				inputs.append(", ");
+			}
+			String argName = trigger.getParamName(argi);
+			if (argName == null) {
+				inputs.append('*');
+				continue;
+			}
+			inputs.append(argName).append("==");
+			inputs.append(gatherConcreteValue(trigger, argi));
+		}
+		inputs.append(')');
+		return inputs.toString();
+	}
+
+	/**
+	 * Return a string representation for the value of a particular parameter
+	 * (identified by {@code index}) of a given {@code trigger}.
+	 * 
+	 * @param trigger the specific trigger
+	 * @param index   the index of the parameter
+	 * @return a string representation of the value of the parameter
+	 */
+	private String gatherConcreteValue(Trigger trigger, int index) {
+		return gatherConcreteValue0(trigger.getParamType(index), input.get(index));
+	}
+
+	/**
+	 * Return a string representation of a {@code value} given its type.
+	 * 
+	 * @param argType the type of the value
+	 * @param value   the value itself
+	 * @return a string representation of the value
+	 */
+	private String gatherConcreteValue0(Class<?> argType, Object value) {
+		StringBuilder repr = new StringBuilder();
+		if (argType == boolean.class) {
+			repr.append((Boolean) value);
+		} else if (argType == byte.class) {
+			repr.append((Integer) value);
+		} else if (argType == short.class) {
+			repr.append((Integer) value);
+		} else if (argType == char.class) {
+			repr.append('\'').append(StringEscapeUtils.escapeJava("" + (Character) value)).append('\'');
+		} else if (argType == int.class) {
+			repr.append((Integer) value);
+		} else if (argType == long.class) {
+			repr.append((Long) value);
+		} else if (argType == float.class) {
+			repr.append((Float) value);
+		} else if (argType == double.class) {
+			repr.append((Double) value);
+		} else if (argType == String.class) {
+			repr.append('"').append(StringEscapeUtils.escapeJava((String) value)).append('"');
+		} else if (argType.isArray()) {
+			Class<?> elmentType = argType.getComponentType();
+			repr.append('[');
+			for (int i = 0, n = Array.getLength(value); i < n; i++) {
+				if (i > 0) {
+					repr.append(", ");
+				}
+				repr.append(gatherConcreteValue0(elmentType, Array.get(value, i)));
+			}
+			repr.append(']');
+		} else {
+			repr.append("???");
+		}
+		return repr.toString();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1175,7 +1268,9 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		broker.publish("stop", new Tuple(this, null));
+//		broker.publish("stop", new Tuple(this, null));
+		String triggerValues = gatherInputs();
+		broker.publish("stop", new Tuple(this, null, triggerValues));
 	}
 
 	/*
@@ -1188,7 +1283,9 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		broker.publish("stop", new Tuple(this, message));
+//		broker.publish("stop", new Tuple(this, message));
+		String triggerValues = gatherInputs();
+		broker.publish("stop", new Tuple(this, message, triggerValues));
 	}
 
 	/*

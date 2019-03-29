@@ -29,8 +29,8 @@ package za.ac.sun.cs.coastal.strategy;
  * copyright:
  * </p>
  * 
- * <table border="0" width="80%" cellpadding="10" align="center" bgcolor=
- * "#E0E0E0">
+ * <table border="0" width="80%" cellpadding="10">
+ * <caption>Copyright information</caption>
  * <tr>
  * <td>Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura, All
  * rights reserved.</td>
@@ -71,7 +71,7 @@ package za.ac.sun.cs.coastal.strategy;
  */
 public class MTRandom {
 
-	private static final double DOUBLE_UNIT = 0x1.0p-53; // 1.0  / (1L << 53)
+	private static final double DOUBLE_UNIT = 0x1.0p-53; // 1.0 / (1L << 53)
 
 	/**
 	 * Size of the bytes pool.
@@ -102,8 +102,8 @@ public class MTRandom {
 	 * Creates a new random number generator.
 	 * 
 	 * <p>
-	 * The instance is initialized using the current time plus the system
-	 * identity hash code of this instance as the seed.
+	 * The instance is initialized using the current time plus the system identity
+	 * hash code of this instance as the seed.
 	 * </p>
 	 */
 	public MTRandom() {
@@ -114,8 +114,7 @@ public class MTRandom {
 	/**
 	 * Creates a new random number generator using a single int seed.
 	 * 
-	 * @param seed
-	 *            the initial seed (32 bits integer)
+	 * @param seed the initial seed (32 bits integer)
 	 */
 	public MTRandom(int seed) {
 		mt = new int[N];
@@ -125,9 +124,8 @@ public class MTRandom {
 	/**
 	 * Creates a new random number generator using an int array seed.
 	 * 
-	 * @param seed
-	 *            the initial seed (32 bits integers array), if null the seed of
-	 *            the generator will be related to the current time
+	 * @param seed the initial seed (32 bits integers array), if null the seed of
+	 *             the generator will be related to the current time
 	 */
 	public MTRandom(int[] seed) {
 		mt = new int[N];
@@ -137,8 +135,7 @@ public class MTRandom {
 	/**
 	 * Creates a new random number generator using a single long seed.
 	 * 
-	 * @param seed
-	 *            the initial seed (64 bits integer)
+	 * @param seed the initial seed (64 bits integer)
 	 */
 	public MTRandom(long seed) {
 		mt = new int[N];
@@ -149,17 +146,17 @@ public class MTRandom {
 	 * Reinitialize the generator as if just built with the given int seed.
 	 * 
 	 * <p>
-	 * The state of the generator is exactly the same as a new generator built
-	 * with the same seed.
+	 * The state of the generator is exactly the same as a new generator built with
+	 * the same seed.
 	 * </p>
 	 * 
-	 * @param seed
-	 *            the initial seed (32 bits integer)
+	 * @param seed the initial seed (32 bits integer)
 	 */
 	public void setSeed(int seed) {
 		// we use a long masked by 0xffffffffL as a poor man unsigned int
 		long longMT = seed;
-		// NB: unlike original C code, we are working with java longs, the cast below makes masking unnecessary
+		// NB: unlike original C code, we are working with java longs, the cast below
+		// makes masking unnecessary
 		mt[0] = (int) longMT;
 		for (mti = 1; mti < N; ++mti) {
 			// See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier.
@@ -170,18 +167,16 @@ public class MTRandom {
 	}
 
 	/**
-	 * Reinitialize the generator as if just built with the given int array
-	 * seed.
+	 * Reinitialize the generator as if just built with the given int array seed.
 	 * 
 	 * <p>
-	 * The state of the generator is exactly the same as a new generator built
-	 * with the same seed.
+	 * The state of the generator is exactly the same as a new generator built with
+	 * the same seed.
 	 * </p>
 	 * 
-	 * @param seed
-	 *            the initial seed (32 bits integers array), if null the seed of
-	 *            the generator will be the current system time plus the system
-	 *            identity hash code of this instance
+	 * @param seed the initial seed (32 bits integers array), if null the seed of
+	 *             the generator will be the current system time plus the system
+	 *             identity hash code of this instance
 	 */
 	public void setSeed(int[] seed) {
 		if (seed == null) {
@@ -224,12 +219,11 @@ public class MTRandom {
 	 * Reinitialize the generator as if just built with the given long seed.
 	 * 
 	 * <p>
-	 * The state of the generator is exactly the same as a new generator built
-	 * with the same seed.
+	 * The state of the generator is exactly the same as a new generator built with
+	 * the same seed.
 	 * </p>
 	 * 
-	 * @param seed
-	 *            the initial seed (64 bits integer)
+	 * @param seed the initial seed (64 bits integer)
 	 */
 	public void setSeed(long seed) {
 		setSeed(new int[] { (int) (seed >>> 32), (int) (seed & 0xffffffffL) });
@@ -239,15 +233,12 @@ public class MTRandom {
 	 * Generate next pseudo-random number.
 	 * 
 	 * <p>
-	 * This method is the core generation algorithm. It is used by all the
-	 * public generation methods for the various primitive types
-	 * {@link #nextBoolean()}, {@link #nextBytes(byte[])},
-	 * {@link #nextDouble()}, {@link #nextFloat()}, {@link #nextGaussian()},
+	 * This method is the core generation algorithm. It is used by all the public
+	 * generation methods for the various primitive types {@link #nextBoolean()},
 	 * {@link #nextInt()}, {@link #next(int)} and {@link #nextLong()}.
 	 * </p>
 	 * 
-	 * @param bits
-	 *            number of random bits to produce
+	 * @param bits number of random bits to produce
 	 * @return random bits generated
 	 */
 	protected int next(int bits) {
@@ -279,14 +270,31 @@ public class MTRandom {
 		return y >>> (32 - bits);
 	}
 
+	/**
+	 * Return the next random {@code boolean} value.
+	 * 
+	 * @return next random {@code boolean}
+	 */
 	public boolean nextBoolean() {
 		return next(8) < 128;
 	}
 
+	/**
+	 * Return the next random {@code int} value.
+	 * 
+	 * @return next random {@code int}
+	 */
 	public int nextInt() {
 		return next(32);
 	}
 
+	/**
+	 * Return the next random {@code int} value that is greater than or equal to 0
+	 * and less than a given bound
+	 * 
+	 * @param bound upper bound on random values
+	 * @return next random {@code int} within bounds
+	 */
 	public int nextInt(int bound) {
 		return nextInt(0, bound);
 	}
@@ -312,6 +320,11 @@ public class MTRandom {
 		return r;
 	}
 
+	/**
+	 * Return the next random {@code long} value.
+	 * 
+	 * @return next random {@code long}
+	 */
 	public long nextLong() {
 		return next(32) << 32 + next(32);
 	}

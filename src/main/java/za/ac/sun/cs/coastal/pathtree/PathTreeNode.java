@@ -60,7 +60,7 @@ public abstract class PathTreeNode {
 	 * Create a leaf child node for this node.
 	 * 
 	 * @param index the index of the child node of its parent
-	 * @Param execution the execution that corresponds to this node
+	 * @param execution the execution that corresponds to this node
 	 * @return the node child node
 	 */
 	public final PathTreeNode createLeaf(long index, Execution execution) {
@@ -71,7 +71,7 @@ public abstract class PathTreeNode {
 	 * Create an infeasible child node for this node.
 	 * 
 	 * @param index the index of the child node of its parent
-	 * @Param execution the execution that corresponds to this node
+	 * @param execution the execution that corresponds to this node
 	 * @return the node child node
 	 */
 	public final PathTreeNode createInfeasible(long index, Execution execution) {
