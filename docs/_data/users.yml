@@ -1,0 +1,47 @@
+- username: jaco
+  name: Jaco Geldenhuys
+  url: https://github.com/jacogeld
+  slug: Main developer
+  image: jaco.jpg
+  description: >
+    Jaco Geldenhuys is Associate Professor of Computer Science at Stellenbosch
+    University.  His work over the last 25 years have focused mainly on
+    formal methods, model checking, software engineering, automata & language
+    theory, data structures and algorithms.
+
+- username: willem
+  name: Willem Visser
+  url: https://github.com/wvisser
+  slug: Main developer
+  image: willem.jpg
+  description: >
+    Willem Visser is Full Professor of Computer Science at Stellenbosch
+    University and an A-rated NRF researcher.
+
+- username: phillip
+  name: Phillip van Heerden
+  url: https://github.com/PhillipVH
+  slug: Masters student
+  image: phillip.jpg
+  description: >
+    Phillip van Heerden is an MSc student in Computer Science.  He is currently
+    working on the combination of supervised learning algorithms and concolic
+    execution.
+
+- username: justin
+  name: Justin Stigling
+  url: https://github.com/JustinStigling
+  slug: Honours student
+  image: justin.jpg
+  description: >
+    Justin Stigling is a HonsBSc student in Computer Science.  He is currently
+    working on ...
+    
+- username: mishka
+  name: Mishka Mohamed
+  url: https://github.com/
+  slug: Honours student
+  image: mishka.jpg
+  description: >
+    Mishka Mohamed is a HonsBSc student in Computer Science.  She is currently
+    working on the analysis of neural networks with concolic execution.

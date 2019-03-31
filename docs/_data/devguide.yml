@@ -1,0 +1,66 @@
+- title: Architecture
+
+  submenu:
+  - title: Overview
+    url: /devguide/overview/
+
+  - title: Design decisions
+    url: /devguide/design/
+
+  - title: Versions
+    url: /devguide/versions/
+
+  - title: Roadmap for the future
+    url: /devguide/roadmap/
+
+#----------------------------------------------------------------------
+- title: Internals
+
+  submenu:
+  - title: Components
+    url: /devguide/components/
+
+  - title: The PathTree
+    url: /devguide/pathtree/
+
+#----------------------------------------------------------------------
+- title: Conventions
+
+  submenu:
+  - title: Style guide
+    url: /devguide/styleguide/
+
+  - title: Good commit messages
+    url: /devguide/commitmsgs/
+
+  - title: Commit checklist
+    url: /devguide/commit-checklist/
+
+  - title: Release checklist
+    url: /devguide/release-checklist/
+
+  - title: Documentation checklist
+    url: /devguide/docs-checklist/
+
+#----------------------------------------------------------------------
+- title: Contributing
+
+  submenu:
+  - title: Support
+    url: /devguide/support/
+
+  - title: How to contribute
+    url: /devguide/contribute/
+
+  - title: Code of conduct
+    url: /devguide/codeofconduct/
+
+  - title: List of contributors
+    url: /devguide/contributors/
+
+#----------------------------------------------------------------------
+- title:
+
+  submenu:
+  - title: API
+    url: /api/

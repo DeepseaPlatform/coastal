@@ -49,7 +49,7 @@ public final class TraceState extends State {
 	 * Create a new instance of the tracing state.
 	 * 
 	 * @param coastal instance of COASTAL that started this run
-	 * @param input input values for the run
+	 * @param input   input values for the run
 	 */
 	public TraceState(COASTAL coastal, Input input) { // throws InterruptedException
 		super(coastal, input);
@@ -81,7 +81,7 @@ public final class TraceState extends State {
 
 	/**
 	 * Return the result of the execution.
-	 *  
+	 * 
 	 * @return result of the execution
 	 */
 	public Execution getExecution() {
@@ -269,11 +269,22 @@ public final class TraceState extends State {
 	// ======================================================================
 
 	/**
-	 * @param triggerIndex
-	 * @param index
-	 * @param address
-	 * @param currentValue
-	 * @return
+	 * Compute a value to use during the execution. This method caters for
+	 * {@code byte}, {@code short}, {@code char}, {@code int}, and {@code long}
+	 * values.
+	 * 
+	 * If the trigger description that the formal parameter must be symbolic, a new
+	 * symbolic variable is created with the appropriate bounds. If a new input
+	 * value is provided to use in the execution, the symbolic variable is set to
+	 * that values. If not, the default value (that the system-under-test would have
+	 * used naturally), is used.
+	 * 
+	 * @param triggerIndex index of the triggering method
+	 * @param index        index of the formal parameter
+	 * @param address      local variable address where parameter is stored
+	 * @param currentValue default values to use (if concolic execution does not
+	 *                     override the values)
+	 * @return value that will be used during the execution
 	 */
 	private long getConcreteIntegral(int triggerIndex, int index, int address, long currentValue) {
 		if (useCurrentValues) {
@@ -298,11 +309,21 @@ public final class TraceState extends State {
 	}
 
 	/**
-	 * @param triggerIndex
-	 * @param index
-	 * @param address
-	 * @param currentValue
-	 * @return
+	 * Compute a value to use during the execution. This method caters for
+	 * {@code float} and {@code double} values.
+	 * 
+	 * If the trigger description that the formal parameter must be symbolic, a new
+	 * symbolic variable is created with the appropriate bounds. If a new input
+	 * value is provided to use in the execution, the symbolic variable is set to
+	 * that values. If not, the default value (that the system-under-test would have
+	 * used naturally), is used.
+	 * 
+	 * @param triggerIndex index of the triggering method
+	 * @param index        index of the formal parameter
+	 * @param address      local variable address where parameter is stored
+	 * @param currentValue default values to use (if concolic execution does not
+	 *                     override the values)
+	 * @return value that will be used during the execution
 	 */
 	private double getConcreteReal(int triggerIndex, int index, int address, double currentValue) {
 		if (useCurrentValues) {
@@ -450,12 +471,24 @@ public final class TraceState extends State {
 	}
 
 	/**
-	 * @param triggerIndex
-	 * @param index
-	 * @param address
-	 * @param currentArray
-	 * @param convert
-	 * @return
+	 * Create an array of concrete values to use during the execution. This method
+	 * caters for {@code boolean}, {@code byte}, {@code short}, {@code char},
+	 * {@code int}, and {@code long} values.
+	 * 
+	 * If the trigger description that the formal parameter must be symbolic, new
+	 * symbolic variables are created with the appropriate bounds. If new input
+	 * values are provided to use in the execution, the symbolic variables are set
+	 * to these values. If not, the default values (that the system-under-test would
+	 * have used naturally), are used.
+	 * 
+	 * @param triggerIndex index of the triggering method
+	 * @param index        index of the formal parameter
+	 * @param address      local variable address where parameter is stored
+	 * @param currentArray default values to use (if concolic execution does not
+	 *                     override the values)
+	 * @param convert      {@link Function} to convert a {@link Long} value to the
+	 *                     desired type
+	 * @return array of concrete values that will be used during the execution
 	 */
 	private Object getConcreteIntegralArray(int triggerIndex, int index, int address, Object currentArray,
 			Function<Long, Object> convert) {
@@ -504,13 +537,26 @@ public final class TraceState extends State {
 	}
 
 	/**
-	 * @param triggerIndex
-	 * @param index
-	 * @param address
-	 * @param currentArray
-	 * @param type
-	 * @param convert
-	 * @return
+	 * Create an array of concrete values to use during the execution. This method
+	 * caters for {@code float} and {@code double} values.
+	 * 
+	 * If the trigger description that the formal parameter must be symbolic, new
+	 * symbolic variables are created with the appropriate bounds. (The
+	 * {@code sizeInBits} is needed to create symbolic variables because the solver
+	 * is bit-vector based.) If new input values are provided to use in the
+	 * execution, the symbolic variables are set to these values. If not, the
+	 * default values (that the system-under-test would have used naturally), are
+	 * used.
+	 * 
+	 * @param triggerIndex index of the triggering method
+	 * @param index        index of the formal parameter
+	 * @param address      local variable address where parameter is stored
+	 * @param currentArray default values to use (if concolic execution does not
+	 *                     override the values)
+	 * @param type         the type of the array
+	 * @param convert      {@link Function} to convert a {@link Double} value to the
+	 *                     desired type
+	 * @return array of concrete values that will be used during the execution
 	 */
 	@SuppressWarnings("unused")
 	private Object getConcreteRealArray(int triggerIndex, int index, int address, Object currentArray, Class<?> type,
@@ -1043,10 +1089,14 @@ public final class TraceState extends State {
 	}
 
 	/**
-	 * @param instr
-	 * @param opcode
-	 * @param result
-	 * @throws SymbolicException
+	 * Generic jump instruction that keeps track of the position of the execution in
+	 * the path tree. If a fully explored node is reached, execution is terminated.
+	 * 
+	 * @param instr  number of the instruction
+	 * @param opcode instruction opcode
+	 * @param result outcome of the binary branch
+	 * @throws SymbolicException if the execution is aborted because if has been
+	 *                           explored before
 	 */
 	private void jumpInsn(int instr, int opcode, boolean result) throws SymbolicException {
 		if (getRecordingMode()) {
@@ -1333,22 +1383,5 @@ public final class TraceState extends State {
 	public void printPC(String label) {
 		// do nothing
 	}
-
-//*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*
-//*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*
-//*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*0-0*
-
-//
-//
-//
-////	private String lastLabel = "NONE";
-//
-//	public Trace getTrace() {
-//		return path;
-//	}
-//
-//	public Input getConcreteValues() {
-//		return concreteValues;
-//	}
 
 }

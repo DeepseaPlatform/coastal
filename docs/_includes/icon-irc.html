@@ -1,9 +1,0 @@
-{% assign link = "http://webchat.freenode.net/?channels=" | append: include.channel %}
-{% assign size = {{ include.size }} | default: "16px" %}
-{% assign fill = include.fill | default: "#f0f0f0" %}
-<a href="{{ include.link | default: link }}">
-<span class="icon icon-irc">
-<svg viewBox="0 0 1800 1550" width="{{ size }}" height="{{ size }}">
-<path fill="{{ fill }}" d="M 1792,852 Q 1792,1026 1672,1174.5 T 1346,1407.5 T 896,1492 Q 826,1492 751,1484 Q 553,1659 291,1726 Q 242,1740 177,1748 Q 160,1750 146.5,1739 T 129,1710 V 1709 Q 126,1705 128.5,1697 T 130.5,1687 T 135,1677.5 L 141,1668.5 T 148,1660 T 156,1651 Q 163,1643 187,1616.5 T 221.5,1578.5 T 252.5,1539 T 285,1488 T 312,1429 T 338,1353 Q 181,1264 90.5,1133 T 0,852 Q 0,722 71,604.5 T 262,399 T 548,263.5 T 896,212 Q 1140,212 1346,298.5 T 1672,531.5 T 1792,852Z"/>
-</svg>
-</span><span class="channel">IRC #{{ include.channel }}</span></a>

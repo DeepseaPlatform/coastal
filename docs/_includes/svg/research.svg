@@ -1,0 +1,63 @@
+<svg viewBox="0 0 6000 2000">
+<!-- LIGHTBULB -->
+<g fill="#ffffff" stroke="#ffffff">
+	<!-- a3c4de -->
+	<rect fill="#b40064" x="0" y="0" width="3000" height="2000" rx="300" ry="300" />
+	<g fill="none" stroke-width="65" stroke-linecap="round" stroke-linejoin="round">
+		<g transform="translate(0,100)">
+			<path d="M 1008,408 C 1354,408 1351,696 1351,756 1351,815 1351,962 1174,1058 1174,1058 1174,1362 1174,1362 1174,1444 1075,1444 1075,1444 1075,1444 943,1444 943,1444 943,1444 842,1444 842,1362 842,1362 842,1133 842,1058 662,963 662,806 662,756 662,705 662,408 1008,408 Z" />
+			<path stroke-width="55" d="M 842,1248 C 842,1248 1174,1248 1174,1248" />
+			<path stroke-width="55" d="M 842,1345 C 842,1345 1174,1345 1174,1345" />
+			<path stroke-width="55" d="M 959,1248 C 959,1248 959,812 959,756 959,699 928,672 883,672 838,673 820,716 820,737 820,779 842,816 885,816 928,816 1082,816 1125,816 1174,816 1196,771 1196,734 1196,705 1168,673 1126,673 1083,673 1058,700 1058,756 1058,811 1058,1248 1058,1248 1058,1248 959,1248 959,1248 Z" />
+			<path stroke-width="55" d="M 943,1444 C 943,1444 931,1535 1008,1535 1084,1535 1075,1444 1075,1444" />
+			<polyline transform="translate(1000,751)rotate(-75)" points="0,-446 0,-538" />
+			<polyline transform="translate(1000,751)rotate(-50)" points="0,-446 0,-538" />
+			<polyline transform="translate(1000,751)rotate(-25)" points="0,-446 0,-538" />
+			<polyline transform="translate(1000,751)rotate(0)" points="0,-446 0,-538" />
+			<polyline transform="translate(1000,751)rotate(25)" points="0,-446 0,-538" />
+			<polyline transform="translate(1000,751)rotate(50)" points="0,-446 0,-538" />
+			<polyline transform="translate(1000,751)rotate(75)" points="0,-446 0,-538" />
+		</g>
+	</g>
+</g>
+<!-- PAPERS -->
+<g fill="#ffffff" stroke="#ffffff">
+	<!-- 1e6197 -->
+	<rect fill="#0064b4" x="3000" y="0" width="3000" height="2000" rx="300" ry="300" />
+	<g stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+		<path d="M 4547,1216 C 4547,1216 4884,1216 4884,1216 4884,1216 4884,1348 4884,1348 4884,1348 4547,1348 4547,1348 4547,1348 4547,1216 4547,1216 Z" />
+		<path d="M 5334,944 C 5334,944 5563,944 5563,944 5563,944 5563,1075 5563,1075 5563,1075 5334,1075 5334,1075 5334,1075 5334,944 5334,944 Z" />
+	</g>
+	<g fill="none" stroke-width="65" stroke-linecap="round" stroke-linejoin="round">
+		<polyline points="5423,368 5423,586 5664,587" />
+		<polyline points="4443,640 5014,640 5259,841 5259,1588 4443,1588 4443,640" />
+		<polyline points="5014,640 5014,841 5259,841" />
+		<polyline points="4578,841 4849,841" />
+		<polyline points="4578,977 4849,977" />
+		<polyline points="4578,1115 5124,1115" />
+		<polyline points="4988,1317 5124,1317" />
+		<polyline points="4578,1454 5124,1454" />
+		<polyline points="4849,640 4849,368 5423,368 5664,595 5664,1317 5259,1317" />
+		<polyline points=" 5366,841 5536,841" />
+		<polyline points="5366,1183 5536,1183" />
+	</g>
+</g>
+<!-- MICROSCOPE -->
+<g fill="#ffffff" stroke="#ffffff">
+	<!-- 4296d9 -->
+	<rect fill="#64b400" x="2000" y="0" width="2000" height="2000" rx="0" ry="0" />
+	<g fill="none" stroke-width="65" stroke-linecap="round" stroke-linejoin="round">
+		<path d="M 2466,1759 C 2466,1759 2466,1692 2466,1692 2466,1664 2484,1636 2511,1636 2511,1636 3485,1636 3485,1636 3516,1636 3534,1662 3534,1692 3534,1692 3534,1759 3534,1759 3534,1759 2466,1759 2466,1759 Z" />
+		<path d="M 3134,1473 C 3134,1473 3073,1546 3024,1530 3024,1530 2679,1408 2679,1408 2564,1377 2525,1530 2620,1568 2620,1568 2780,1636 2780,1636" />
+		<polyline points="2669,1108 3105,1282" />
+		<polyline points=" 3168,245 3416,344 3380,421 3134,317 3168,245" />
+		<polyline points="3199,356 3343,403 3277,529 3151,479 3199,356" />
+		<polyline points="3083,462 3331,566 3149,1022 3055,1063 2939,1022 2890,922 3083,462" />
+		<polyline points="2922,847 3177,949" />
+		<path d="M 3436,1214 C 3501,1066 3661,766 3303,639" />
+		<path d="M 3280,1157 C 3332,975 3436,889 3235,806" />
+		<circle cx="3284" cy="1346" r="190" />
+		<polyline points="3312,1539 3255,1625" />
+	</g>
+</g>
+</svg>

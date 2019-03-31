@@ -1,8 +1,8 @@
 ---
-layout: page
-title: An overview of how DEEPSEA works
+title: How COASTAL works
 permalink: /userguide/overview/
 ---
+
 
 <div class="quotation">
 	You only write code because you expect it to get executed. If you expect it
@@ -33,7 +33,7 @@ _V1_.
 3. Using this information, new input values _V2_ that exercise a new
 behaviour, is calculated.
 
-{% include figure.html name="figures/overview-dse.md" %}
+<!-- include figure.html name="figures/overview-dse.md" -->
 
 The "symbolic" in DSE refers to how the behaviour is recorded, and how this is
 used to calculate new input values.  Specifically, every concrete action of
@@ -44,7 +44,7 @@ value _A_.  If _a_ is incremented on the concrete side, it will contain the
 concrete value _6_.  This is just the normal behaviour of the SUT.  On the
 symbolic side, however, _a_ will be changed to contain the value _A+1_.
 
-{% include figure.html name="figures/overview-sym.md" %}
+<!-- include figure.html name="figures/overview-sym.md" -->
 
 The mirrored symbolic state plays an important role when the SUT performs a
 control flow action.  For example, every time a branch is taken on the
@@ -105,7 +105,7 @@ executed repeatedly.  The very first run is unconstrained; subsequent runs are
 directed (by modifying method arguments on-the-fly) so that unexplored
 behaviours of the SUT are exercised.
 
-{% include figure.html name="figures/overview-ds.md" %}
+<!-- include figure.html name="figures/overview-ds.md" -->
 <!-- include_relative figures/overview1.md width="25rem" -->
 
 From the SUT's and JVM2's perspective, everything proceeds as normal.  The

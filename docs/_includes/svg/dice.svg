@@ -1,0 +1,20 @@
+<svg viewBox="0 0 2000 2000">
+<rect fill="#2b98f0" x="0" y="0" width="2000" height="2000" rx="300" ry="300" />
+<g fill="#ffffff" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+	<ellipse transform="translate(586.16,976.24  )rotate(41 )" cx="0" cy="0" rx="80" ry="40" />
+	<ellipse transform="translate(917.52,1040.20 )rotate(41 )" cx="0" cy="0" rx="80" ry="40" />
+	<ellipse transform="translate(1000.35,1392.53)rotate(41 )" cx="0" cy="0" rx="80" ry="40" />
+	<ellipse transform="translate(666.90,1305.49 )rotate(41 )" cx="0" cy="0" rx="80" ry="40" />
+	<ellipse transform="translate(785.39,1177.57 )rotate(41 )" cx="0" cy="0" rx="80" ry="40" />
+	<ellipse transform="translate(656.42,719.33  )rotate(167)" cx="0" cy="0" rx="80" ry="40" />
+	<ellipse transform="translate(936.39,649.08  )rotate(167)" cx="0" cy="0" rx="80" ry="40" />
+	<ellipse transform="translate(1212.17,583.02 )rotate(167)" cx="0" cy="0" rx="80" ry="40" />
+	<ellipse transform="translate(1324,1045)rotate(90 )" cx="0" cy="0" rx="80" ry="40" />
+</g>
+<g fill="none" stroke="#ffffff" stroke-width="65" stroke-linecap="round" stroke-linejoin="round">
+	<polyline points="396,784 1062,898" />
+	<polyline points="1062,898 1178,1568" />
+	<polyline points="1062,898 1468,520" />
+	<path d="M 396,784 C 416,736 452,714 452,714 452,714 796,460 796,460 796,460 825.24,436.21 850.41,429.92 875.57,423.63 920,430 920,430 920,430 1388,492 1388,492 1388,492 1451.25,501.23 1468,520 1484.75,538.77 1494,602 1494,602 1494,602 1544,1092 1544,1092 1544,1092 1550.86,1132.48 1544,1150 1537.14,1167.52 1508,1218 1510,1216 1512,1214 1246,1536 1246,1536 1246,1536 1205.88,1563.45 1178,1568 1150.12,1572.55 1078,1568 1080,1568 1082,1568 610,1434 610,1434 610,1434 564.14,1417.69 548,1392 531.86,1366.31 520,1312 520,1312 520,1312 396,876 396,876 396,876 376,832 396,784 Z" />
+</g>
+</svg>

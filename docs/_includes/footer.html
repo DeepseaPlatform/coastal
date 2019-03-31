@@ -1,13 +1,31 @@
-<footer>
-	<div class="footerleft">
-		<p id="copyright">&copy; 2017 Computer Science</p>
-		<p>COASTAL is an open source library released under <a href="https://opensource.org/licenses/LGPL-3.0">LGPL</a>.</p>
+<footer><div class="wrapper">
+	<div class="footerbox narrow">
+		{% include svg/diver-gray.svg %}
 	</div>
-	<div class="footerright">
-		<p>{% include icon-github.html username="coastal" link="https://github.com/DeepseaPlatform/coastal" %}</p>
-		<p>{% include icon-rocket.html channel="coastal" offset="5px" %}</p>
-		<p>{% include icon-twitter.html username="coastal" %}</p>
-		<!-- <p>{% include icon-irc.html channel="coastal" %}</p> -->
+	<div class="footerbox wide">
+		<p>
+			&copy; 2017–2019 Computer Science
+			<br/>
+			COASTAL is an open source tool released under <a href="https://opensource.org/licenses/LGPL-3.0">LGPL</a>.
+		</p>
 	</div>
-	<div class="clear"></div>
-</footer>
+	<div class="footerbox">
+		<h2>Docs</h2>
+		<a href="{{ '/userguide/overview/' | relative_url }}">Overview</a>
+		<a href="{{ '/userguide/getting-started/' | relative_url }}">Get started</a>
+		<a href="{{ '/devguide/contribute/' | relative_url }}">Get involved</a>
+	</div>
+	<div class="footerbox">
+		<h2>Community</h2>
+		<!--
+		<a href="#">Facebook</a>
+		<a href="#">IRC channel</a> // IRC channel: #coastal on irc.freenode.ent
+		<a href="#">Showcase</a>
+		<a href="#">StackOverflow</a>
+		-->
+		<a href="https://github.com/DeepseaPlatform/coastal">GitHub</a>
+		<a href="#">Slack channel</a>
+		<a href="https://twitter.com/coastal">Twitter</a>
+		<a href="#">Videos</a>
+	</div>
+</div></footer>

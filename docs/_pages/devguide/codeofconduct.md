@@ -1,7 +1,6 @@
 ---
-layout: page
 title: Our code of conduct
-permalink: /devguide/codeofconduct
+permalink: /devguide/codeofconduct/
 ---
 
 In the interest of fostering an open and welcoming environment, we as

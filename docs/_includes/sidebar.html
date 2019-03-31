@@ -1,0 +1,10 @@
+{% for link in site.data[page.sidebar] %}
+	<h3>{{ link.title }}</h3>
+	<ul>
+	{% for sublink in link.submenu %}
+		{% assign urllen = sublink.url | size %}
+		{% assign urlprefix = page.url | slice: 0, urllen %}
+		<li><a {% if sublink.url == urlprefix %}class="active" {% endif %} href="{{ sublink.url | relative_url }}">{{ sublink.title | escape }}</a></li>
+	{% endfor %}
+	</ul>
+{% endfor %}

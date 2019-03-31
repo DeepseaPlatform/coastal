@@ -1,0 +1,70 @@
+code {
+	background-color: rgba(27,31,35,.05);
+	border-radius: 0.1875rem;
+	color: inherit;
+	font-family: $c-monofont-family;
+	font-size: 0.85rem;
+	margin: 0;
+	padding: 0.2rem 0.4rem;
+}
+
+pre {
+	margin-bottom: 1rem;
+
+	code {
+		background-color: transparent;
+		border: 0;
+		display: inline;
+		font-size: 0.85rem;
+		line-height: inherit;
+		margin: 0;
+		max-width: auto;
+		overflow: visible;
+		padding: 0;
+		white-space: pre;
+		word-break: normal;
+		word-wrap: normal;
+	}
+}
+
+.highlighter-rouge pre code {
+	margin-left: -$c-code-size;
+	margin-right: -$c-code-size;
+	border: 1px solid $c-code-border-color;
+	border-radius: 0.375rem;
+	padding: $c-code-size;
+	font-size: $c-code-size;
+	line-height: $c-code-line-height;
+	max-width: 50rem;
+	display: block;
+	overflow-x: auto;
+	color: $c-code-fg-color;
+	background: $c-code-bg-color;
+
+	.c1 { // line comment
+		color: $c-code-hl-comment;
+	}
+	.k { // keyword
+		color: $c-code-hl-keyword;
+		font-weight: bold;
+	}
+	.kd { // keyword
+		color: $c-code-hl-keyword;
+		font-weight: bold;
+	}
+	.kt { // keyword type
+		color: $c-code-hl-type;
+		font-weight: bold;
+	}
+	.o { // operator
+	}
+	.n { // name
+		color: $c-code-hl-name;
+	}
+	.mi { // constant
+		color: $c-code-hl-constant;
+	}
+	.s { // string
+		color: $c-code-hl-string;
+	}
+}

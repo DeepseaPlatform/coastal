@@ -222,7 +222,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 	 * @param paths        the prefixes of the path that corresponds to the
 	 *                     execution
 	 * @param isInfeasible whether or not the execution was infeasible
-	 * @return
+	 * @return deepest node on the newly inserted path 
 	 */
 	private PathTreeNode insert(Execution execution, Path[] paths, boolean isInfeasible) {
 		int depth = paths.length;

@@ -1,9 +1,0 @@
-{% assign link = "https://gitlab.com/" | append: include.username %}
-{% assign size = {{ include.size }} | default: "16px" %}
-{% assign fill = include.fill | default: "#f0f0f0" %}
-<a href="{{ include.link | default: link }}">
-<span class="icon icon-gitlab">
-<svg viewBox="0 0 1800 1650" width="{{ size }}" height="{{ size }}">
-<path fill="{{ fill }}" d="M104,635 L896,1650 L28,1020 Q10,1007,3,985.5 T3,943 L104,635 V635Z M566,635 H1226 L896,1650 V1650Z M368,23 L566,635 H104 L302,23 Q310,0,335,0 T368,23Z M1688,635 L1789,943 Q1796,964,1789,985.5 T1764,1020 L896,1650 L1688,635 V635Z M1688,635 H1226 L1424,23 Q1432,0,1457,0 T1490,23Z"/>
-</svg>
-</span><span class="username">{{ include.username }}</span></a>

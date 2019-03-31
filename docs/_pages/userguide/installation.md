@@ -1,6 +1,5 @@
 ---
-layout: page
-title: How to install DEEPSEA
+title: Installation
 permalink: /userguide/installation/
 ---
 
@@ -25,6 +24,26 @@ RUN make && \
 ~~~
 
 ## Installation for CLI
+
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+
+### Something else
+
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+
+### Something else entirely
+
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
+It was a dark and stormy night.  Suddenly, a shot rang out.  The next morning, a ship arrived in the bay.
 
   - git clone
   - settings

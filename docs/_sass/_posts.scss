@@ -1,0 +1,55 @@
+main {
+	.content {
+		.wrapper {
+			article {
+				border-bottom: 1px solid $c-post-border-color;
+				margin-bottom: 1.25rem;
+				padding-bottom: 1.25rem;
+
+				&:last-child {
+					border-bottom: none;
+				}
+			}
+
+			.post-title {
+				color: $c-post-title-fg-color;
+			}
+
+			.post-date {
+				display: block;
+				margin-bottom: 1.25rem;
+			}
+
+			.post-author {
+				display: flex;
+				margin-bottom: 1.5rem;
+
+				.post-author-block {
+					color: $c-post-author-fg-color;
+					display: flex;
+					flex-direction: column;
+					font-size: $c-post-author-font-size;
+					font-weight: 400;
+					justify-content: center;
+					margin-right: 1.25rem;
+					margin-top: 0;
+					margin-bottom: 0;
+					padding: 0;
+				}
+
+				.post-author-image {
+					height: 3.125rem;
+					width: 3.125rem;
+					border-radius: 50%;
+					overflow: hidden;
+
+					img {
+						border-style: none;
+						box-sizing: content-box;
+						max-width: 100%;
+					}
+				}
+			}
+		}
+	}
+}

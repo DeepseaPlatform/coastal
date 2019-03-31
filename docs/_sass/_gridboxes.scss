@@ -1,0 +1,42 @@
+.gridboxes {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+
+	> .gridbox2:first-child,
+	> .gridbox3:first-child,
+	> .gridbox4:first-child {
+		margin-left: 0;
+	}
+
+	> .gridbox2:last-child,
+	> .gridbox3:last-child,
+	> .gridbox4:last-child {
+		margin-right: 0;
+	}
+
+	/* TWO BOXES PER ROW */
+	
+	> .gridbox2 {
+		margin: 0 0.75rem;
+		flex: 1 0 40%;
+		box-sizing: border-box;
+	}
+
+	/* THREE BOXES PER ROW */
+	
+	> .gridbox3 {
+		margin: 0 0.75rem;
+		flex: 1 0 26%;
+		box-sizing: border-box;
+	}
+
+	/* FOUR BOXES PER ROW */
+	
+	> .gridbox4 {
+		margin: 0 0.75rem;
+		flex: 1 0 20%;
+		box-sizing: border-box;
+	}
+
+}

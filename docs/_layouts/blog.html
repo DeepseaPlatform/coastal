@@ -1,0 +1,16 @@
+---
+layout: default
+---
+
+<div class="content"><div class="wrapper">
+	<section class="sidebar">
+		{% include postsidebar.html %}
+	</section>
+	<section class="main">
+		{% for p in site.posts limit:5 %}
+			<article>
+				{% include post.html posting=p excerptonly=true %}
+			</article>
+		{% endfor %}
+	</section>
+</div></div>

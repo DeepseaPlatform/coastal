@@ -2,6 +2,8 @@
  * Main package for the COASTAL concolic execution framework. Includes some
  * helper classes, mainly for initialization and very high-level abstractions.
  * 
+ * {@after}
+ * 
  * <p>
  * COASTAL can be used directly from the command line.  (Insert example.)
  * </p>

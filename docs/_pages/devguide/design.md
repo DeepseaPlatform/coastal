@@ -1,5 +1,4 @@
 ---
-layout: page
 title: Design decisions
 permalink: /devguide/design/
 ---

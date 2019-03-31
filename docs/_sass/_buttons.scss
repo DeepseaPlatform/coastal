@@ -1,0 +1,36 @@
+.button {
+	border: 1px solid $c-button-fg-color;
+	border-radius: 3px;
+	color: $c-button-fg-color;
+	display: inline-block;
+	font-size: 0.9rem;
+	font-weight: 400;
+	line-height: 0.9rem;
+	padding: 1rem;
+	text-decoration: none !important;
+	text-transform: uppercase;
+	transition: background .3s, color .3s;
+}
+
+.button:hover {
+	background-color: $c-button-hover-bg-color;
+	color: $c-button-hover-fg-color;
+}
+
+main .navbuttons {
+	margin-bottom: 1.25rem;
+	padding: 1.25rem 0;
+	.button {
+		padding: 0.625rem;
+	}
+	.button.prev {
+		float: left;
+	}
+	.button.next {
+		float: right;
+	}
+	.button:last-child:after {
+		clear: both;
+		height: 0px;
+	}
+}

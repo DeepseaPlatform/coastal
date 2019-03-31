@@ -1,0 +1,23 @@
+- title: Applications
+
+  submenu:
+  - title: Test generation
+    url: /casestudy/test-generation/
+
+  - title: Bug detection
+    url: /casestudy/bug-detection/
+
+  - title: Reliability analysis
+    url: /casestudy/reliability/
+
+  - title: Performance analysis
+    url: /casestudy/performance/
+
+  - title: Differential program analysis
+    url: /casestudy/differential/
+
+  - title: Probabilistic programming
+    url: /casestudy/probabilistic/
+
+  - title: Program comprehension
+    url: /casestudy/comprehension/

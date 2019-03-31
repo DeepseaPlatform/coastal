@@ -1,0 +1,15 @@
+<svg viewBox="0 0 2000 2000">
+<rect fill="#2b98f0" x="0" y="0" width="2000" height="2000" rx="300" ry="300" />
+<g fill="none" stroke="#ffffff" stroke-width="65" stroke-linecap="round" stroke-linejoin="round">
+	<polyline points="573.52,512 491,512 491,1763 1507,1763 1507,512 1427.16,512" />
+	<path d="M 675,551 C 675,551 675,551 665,465 696.35,423.18 833.89,432.28 863,401 892.11,369.72 863,245.37 1003,241 1143,236.63 1108.50,367.58 1136,401 1163.50,434.42 1290.13,408.80 1338,465 1338,465 1328,551 1328,551 1328,551 675,551 675,551 Z" />
+	<g transform="translate(0,790)">
+	<polyline points="657,72 702,113 813,0" />
+	<polyline points="925,55 1346,55" />
+	<polyline points="657,397 702,438 813,325" />
+	<polyline points="925,380 1346,380" />
+	<polyline points="657,722 702,763 813,650" />
+	<polyline points="925,705 1346,705" />
+	</g>
+</g>
+</svg>

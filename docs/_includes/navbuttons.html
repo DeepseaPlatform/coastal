@@ -1,0 +1,32 @@
+{% assign prevurl = "" %}
+{% assign prevtitle = "" %}
+{% assign nexturl = "" %}
+{% assign nexttitle = "" %}
+{% assign foundflag = false %}
+{% assign foundbreak = false %}
+{% for link in site.data[page.sidebar] %}
+	{% for sublink in link.submenu %}
+		{% if foundflag %}
+			{% assign nexturl = sublink.url %}
+			{% assign nexttitle = sublink.title %}
+			{% assign foundbreak = true %}
+			{% break %}
+		{% else %}
+			{% assign urllen = sublink.url | size %}
+			{% assign urlprefix = page.url | slice: 0, urllen %}
+			{% if sublink.url == urlprefix %}
+				{% assign foundflag = true %}
+			{% else %}
+				{% assign prevurl = sublink.url %}
+				{% assign prevtitle = sublink.title %}
+			{% endif %}
+		{% endif %}
+	{% endfor %}
+	{% if foundbreak %}{% break %}{% endif %}
+{% endfor %}
+{% if foundbreak %}
+	<div class="navbuttons">
+		{% if prevurl != "" %}<a class="button prev" href="{{ prevurl | relative_url }}">←&nbsp;{{ prevtitle | escape }}</a>{% endif %}
+		{% if nexturl != "" %}<a class="button next" href="{{ nexturl | relative_url }}">{{ nexttitle | escape }}&nbsp;→</a>{% endif %}
+	</div>
+{% endif %}

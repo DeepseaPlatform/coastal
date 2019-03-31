@@ -1,0 +1,30 @@
+.contributors .gridbox3 {
+	margin-top: 3rem;
+	text-align: center;
+}
+
+.contributor-image {
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 1.25rem;
+	max-width: 5rem;
+
+	img {
+		max-width: 100%;
+		border-radius: 50%;
+		border-style: none;
+		box-sizing: content-box;
+	}
+}
+
+.contributor-name {
+	font-weight: 600;
+	line-height: 1.25;
+	margin-bottom: 1rem;
+	margin-top: 1.5rem;
+
+	> p {
+		color: $c-contributor-fg-color;
+		font-size: $c-contributor-slug-font-size;
+	}
+}

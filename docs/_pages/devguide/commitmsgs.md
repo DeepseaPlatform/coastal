@@ -1,7 +1,6 @@
 ---
-layout: page
 title: How to write commit messages
-permalink: /devguide/commitmsgs
+permalink: /devguide/commitmsgs/
 ---
 
 I want to take a moment to elaborate on what makes a well formed commit

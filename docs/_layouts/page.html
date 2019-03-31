@@ -1,7 +1,19 @@
 ---
 layout: default
 ---
-<section>
-	<h1 class="post-title">{{ page.title | escape }}</h1>
-	{{ content }}
-</section>
+
+<div class="content"><div class="wrapper">
+	<section class="sidebar">
+		{% include sidebar.html %}
+	</section>
+	<section class="main">
+		<h1>{{ page.title | escape }}</h1>
+		{{ content }}
+		{% include navbuttons.html %}
+	</section>
+	{% if page.toc %}
+	<section class="toc">
+		{{ content | toc_only }}
+	</section>
+	{% endif %}
+</div></div>

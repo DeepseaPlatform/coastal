@@ -1,0 +1,15 @@
+main {
+	.announcement {
+		background-color: $c-main-announcement-bg-color;
+		color: $c-main-announcement-fg-color;
+		padding: 3rem;
+		font-size: 1.5rem;
+		line-height: 2.125rem;
+		font-weight: 700;
+		text-align: center;
+
+		.wrapper {
+			width: 48rem;
+		}
+	}
+}

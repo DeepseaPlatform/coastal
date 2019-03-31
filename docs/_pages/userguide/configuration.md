@@ -1,8 +1,9 @@
 ---
-layout: page
-title: Configuring a COASTAL run
+title: Configuration settings
 permalink: /userguide/configuration/
 ---
+
+{% include svg/work-in-progress.svg %}
 
 To learn how to analyze programs with COASTAL, you should read the Usage page.
 As it explains, the convention is to create a file `XYZ.properties` that instructs COASTAL how to analyze program `XYZ.java`.

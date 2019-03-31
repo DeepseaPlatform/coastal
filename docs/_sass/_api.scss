@@ -1,71 +1,209 @@
-section.api {
-	h2.title {
-		font-size: 2rem;
-		line-height: 2.5rem;
-	}
-	h3 {
-		font-size: 1.5rem;
-		line-height: 2rem;
-		margin-top: 2rem;
-	}
-	ul.blockList {
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		li.blockList {
-			margin: 0;
-			padding: 0;
-		}
-	}
-	ul.inheritance {
-		font-family: $ds-monospace-font-family;
-		font-size: .9rem;
-		margin: 0;
-		padding: 0 0 2rem 0;
-		list-style: none;
-		ul.inheritance {
-			padding: 0 0 0 2rem;
-		}
-		li {
-			margin: 0;
-			padding: 0;
-		}
-	}
-	div.description {
-		dl {
-			font-size: .9rem;
-			dt {
-				font-weight: 600;
+main {
+	.content.api {
+		.wrapper {
+			table {
+				border-collapse: collapse;
 			}
-		}
-	}
-	table.overviewSummary,
-	table.typeSummary {
-		margin-top: 2rem;
-		margin-bottom: 3rem;
-		width: 100%;
-		font-size: 0.9rem;
-		color: $ds-packagelist-fg-color;
-		background-color: $ds-packagelist-bg-color;
-		border: 1px solid $ds-packagelist-border-color;
-		caption {
-			display: none;
-		}
-		th {
-			text-align: left;
-			font-weight: 600;
-			color: $ds-packagelist-caption-fg-color;
-			background-color: $ds-packagelist-caption-bg-color;
-			padding: .2rem 0 .2rem .2rem;
-		}
-		tr.rowColor {
-			background-color: $ds-packagelist-oddrow-bg-color;
-		}
-		td {
-			padding: .2rem 0 .2rem .2rem;
-			&.colFirst {
-				font-family: $ds-monospace-font-family;
-				width: 33%;
+
+			table.packages, table.classes, table.parameters {
+				border-collapse: collapse;
+				width: 100%;
+
+				thead {
+					background-color: #f0f0ff;
+					text-align: left;
+					font-weight: bold;		
+				}
+
+		/*
+				tbody tr:nth-child(even) {
+					background-color: #f8f8ff;
+				}
+		*/
+
+				td, th {
+					padding: 0.2rem 0.2rem;
+				}
+
+				th {
+					padding-bottom: 0.4rem;
+				}
+
+				td:first-child {
+					font-family: $c-monofont-family;
+					font-size: 0.9rem;
+					a {
+						color: $c-sidebar-link-fg-color;
+
+						&.active, &:hover {
+							color: $c-sidebar-link-active-fg-color;
+						}
+					}
+				}
+
+				td:last-child, th:last-child {
+					padding-left: 0.4rem;
+				}
+
+				td {
+					border: 1px solid #e0e0e0;
+				}
+
+				.paramtype {
+					color: $c-code-hl-name;
+					font-size: 0.8rem;
+				}
+			}
+
+			table.parameters {
+				tbody tr:nth-child(even) {
+					background-color: transparent;
+				}
+
+				tbody tr:nth-child(odd) {
+					background-color: transparent;
+				}
+
+				td:first-child {
+					width: 9rem;
+				}
+			}
+
+			section.main.package {
+				p:first-of-type {
+					margin-top: 1rem;
+				}
+
+				h2, h3 {
+					margin-top: 2rem;
+				}
+			}
+
+			section.main.class {
+				p:first-of-type {
+					margin-top: 1rem;
+				}
+
+				h2, h3 {
+					border-top: 1px solid $c-api-border-color;
+					padding-top: 0.7rem;
+					margin-top: 5rem;
+				}
+
+				h2 + h3 {
+					border-top: none !important;
+					padding-top: 0 !important;
+					margin-top: 0 !important;
+				}
+			}
+
+			section.sidetoc {
+				flex-basis: 15rem;
+				flex-grow: 0;
+				flex-shrink: 0;
+				font-size: $c-toc-font-size;
+				line-height: $c-toc-line-height;
+				padding-left: 1rem;
+				margin-top: 4rem;
+				align-self: flex-start;
+				color: $c-toc-fg-color;
+
+				li > a {
+					color: $c-sidebar-link-fg-color;
+					font-weight: normal;
+
+					&.active, &:hover {
+						color: $c-sidebar-link-active-fg-color;
+					}
+				}
+
+				ul {
+					list-style-type: none;
+					margin: 0;
+					padding: 0;
+				}
+
+				> ul {
+					padding: 0.625rem 0 0.125rem 0.9375rem;
+
+					> li {
+						color: $c-sidebar-heading-fg-color;
+						font-weight: bold;
+						padding-bottom: 0.5rem;
+
+						> ul {
+							padding: 0.5rem 0 0 1.25rem;
+
+							> li {
+								padding-bottom: 0.3rem;
+							}
+
+							> li + li {
+								margin-top: 0.1875rem;
+							}
+						}
+					}
+
+					> li + li {
+						margin-top: 0.1875rem;
+					}
+				}
+			}
+
+			section.apitoc {
+				flex-basis: 15rem;
+				flex-grow: 0;
+				flex-shrink: 0;
+				font-size: $c-toc-font-size;
+				line-height: $c-toc-line-height;
+				margin-left: 3rem;
+				padding-left: 1rem;
+				padding-left: 1rem;
+				margin-top: 4rem;
+				align-self: flex-start;
+				color: $c-toc-fg-color;
+
+				li > a {
+					color: $c-sidebar-link-fg-color;
+					font-weight: normal;
+
+					&.active, &:hover {
+						color: $c-sidebar-link-active-fg-color;
+					}
+				}
+
+				ul {
+					list-style-type: none;
+					margin: 0;
+					padding: 0;
+				}
+
+				> ul {
+					border-left: 1px solid $c-toc-border-color;
+					padding: 0.625rem 0 0.125rem 0.9375rem;
+
+					> li {
+						color: $c-sidebar-heading-fg-color;
+						font-weight: bold;
+						padding-bottom: 0.5rem;
+
+						> ul {
+							padding: 0.5rem 0 0 1.25rem;
+
+							> li {
+								padding-bottom: 0.3rem;
+							}
+
+							> li + li {
+								margin-top: 0.1875rem;
+							}
+						}
+					}
+
+					> li + li {
+						margin-top: 0.1875rem;
+					}
+				}
 			}
 		}
 	}

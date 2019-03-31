@@ -1,6 +1,5 @@
 ---
-layout: page
-title: Troubleshooting DEEPSEA
+title: Troubleshooting 
 permalink: /userguide/troubleshooting/
 ---
 

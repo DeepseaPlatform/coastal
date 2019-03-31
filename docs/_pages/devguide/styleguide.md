@@ -1,6 +1,5 @@
 ---
-layout: page
-title: Java style guide
+title: Style guide
 permalink: /devguide/styleguide/
 ---
 
@@ -16,9 +15,6 @@ perils or pitfalls, readability may be sacrificed.
 In general, much of our style and conventions mirror the
 [Code Conventions for the Java Programming Language](http://www.oracle.com/technetwork/java/codeconvtoc-136057.html)
 and [Google's Java Style Guide](https://google.github.io/styleguide/javaguide.html).
-
-* toc seed list
-{:toc}
 
 ## Recommended reading
 - [Effective Java](http://www.amazon.com/Effective-Java-Edition-Joshua-Bloch/dp/0321356683)
@@ -47,119 +43,124 @@ advantage to effectively tell the story to those reading the code.
 We use the "one true brace style" ([1TBS](http://en.wikipedia.org/wiki/Indent_style#Variant:_1TBS)).
 Indent size is 2 columns.
 
-    :::java
-    // Like this.
-    if (x < 0) {
-      negative(x);
-    } else {
-      nonnegative(x);
-    }
+~~~java
+// Like this.
+if (x < 0) {
+  negative(x);
+} else {
+  nonnegative(x);
+}
 
-    // Not like this.
-    if (x < 0)
-      negative(x);
+// Not like this.
+if (x < 0)
+  negative(x);
 
-    // Also not like this.
-    if (x < 0) negative(x);
+// Also not like this.
+if (x < 0) negative(x);
+~~~
 
 Continuation indent is 4 columns.  Nested continuations may add 4 columns or 2 at each level.
 
-    :::java
-    // Bad.
-    //   - Line breaks are arbitrary.
-    //   - Scanning the code makes it difficult to piece the message together.
-    throw new IllegalStateException("Failed to process request" + request.getId()
-        + " for user " + user.getId() + " query: '" + query.getText()
-        + "'");
+~~~java
+// Bad.
+//   - Line breaks are arbitrary.
+//   - Scanning the code makes it difficult to piece the message together.
+throw new IllegalStateException("Failed to process request" + request.getId()
+    + " for user " + user.getId() + " query: '" + query.getText()
+    + "'");
 
-    // Good.
-    //   - Each component of the message is separate and self-contained.
-    //   - Adding or removing a component of the message requires minimal reformatting.
-    throw new IllegalStateException("Failed to process"
-        + " request " + request.getId()
-        + " for user " + user.getId()
-        + " query: '" + query.getText() + "'");
+// Good.
+//   - Each component of the message is separate and self-contained.
+//   - Adding or removing a component of the message requires minimal reformatting.
+throw new IllegalStateException("Failed to process"
+    + " request " + request.getId()
+    + " for user " + user.getId()
+      + " query: '" + query.getText() + "'");
+~~~
 
 Don't break up a statement unnecessarily.
 
-    :::java
-    // Bad.
-    final String value =
-        otherValue;
+~~~java
+// Bad.
+final String value =
+    otherValue;
 
-    // Good.
-    final String value = otherValue;
+// Good.
+final String value = otherValue;
+~~~
 
 Method declaration continuations.
 
-    :::java
-    // Sub-optimal since line breaks are arbitrary and only filling lines.
-    String downloadAnInternet(Internet internet, Tubes tubes,
-        Blogosphere blogs, Amount<Long, Data> bandwidth) {
-      tubes.download(internet);
-      ...
-    }
+~~~java
+// Sub-optimal since line breaks are arbitrary and only filling lines.
+String downloadAnInternet(Internet internet, Tubes tubes,
+    Blogosphere blogs, Amount<Long, Data> bandwidth) {
+  tubes.download(internet);
+  ...
+}
 
-    // Acceptable.
-    String downloadAnInternet(Internet internet, Tubes tubes, Blogosphere blogs,
-        Amount<Long, Data> bandwidth) {
-      tubes.download(internet);
-      ...
-    }
+// Acceptable.
+String downloadAnInternet(Internet internet, Tubes tubes, Blogosphere blogs,
+    Amount<Long, Data> bandwidth) {
+  tubes.download(internet);
+  ...
+}
 
-    // Nicer, as the extra newline gives visual separation to the method body.
-    String downloadAnInternet(Internet internet, Tubes tubes, Blogosphere blogs,
-        Amount<Long, Data> bandwidth) {
+// Nicer, as the extra newline gives visual separation to the method body.
+String downloadAnInternet(Internet internet, Tubes tubes, Blogosphere blogs,
+    Amount<Long, Data> bandwidth) {
 
-      tubes.download(internet);
-      ...
-    }
+  tubes.download(internet);
+  ...
+}
 
-    // Also acceptable, but may be awkward depending on the column depth of the opening parenthesis.
-    public String downloadAnInternet(Internet internet,
-                                     Tubes tubes,
-                                     Blogosphere blogs,
-                                     Amount<Long, Data> bandwidth) {
-      tubes.download(internet);
-      ...
-    }
+// Also acceptable, but may be awkward depending on the column depth of the opening parenthesis.
+public String downloadAnInternet(Internet internet,
+                                 Tubes tubes,
+                                 Blogosphere blogs,
+                                 Amount<Long, Data> bandwidth) {
+  tubes.download(internet);
+  ...
+}
 
-    // Preferred for easy scanning and extra column space.
-    public String downloadAnInternet(
-        Internet internet,
-        Tubes tubes,
-        Blogosphere blogs,
-        Amount<Long, Data> bandwidth) {
+// Preferred for easy scanning and extra column space.
+public String downloadAnInternet(
+    Internet internet,
+    Tubes tubes,
+    Blogosphere blogs,
+    Amount<Long, Data> bandwidth) {
 
-      tubes.download(internet);
-      ...
-    }
+  tubes.download(internet);
+  ...
+}
+~~~
 
 ##### Chained method calls
 
-    :::java
-    // Bad.
-    //   - Line breaks are based on line length, not logic.
-    Iterable<Module> modules = ImmutableList.<Module>builder().add(new LifecycleModule())
-        .add(new AppLauncherModule()).addAll(application.getModules()).build();
+~~~java
+// Bad.
+//   - Line breaks are based on line length, not logic.
+Iterable<Module> modules = ImmutableList.<Module>builder().add(new LifecycleModule())
+    .add(new AppLauncherModule()).addAll(application.getModules()).build();
 
-    // Better.
-    //   - Calls are logically separated.
-    //   - However, the trailing period logically splits a statement across two lines.
-    Iterable<Module> modules = ImmutableList.<Module>builder().
-        add(new LifecycleModule()).
-        add(new AppLauncherModule()).
-        addAll(application.getModules()).
-        build();
+// Better.
+//   - Calls are logically separated.
+//   - However, the trailing period logically splits a statement across two lines.
+Iterable<Module> modules = ImmutableList.<Module>builder().
+    add(new LifecycleModule()).
+    add(new AppLauncherModule()).
+    addAll(application.getModules()).
+    build();
 
-    // Good.
-    //   - Method calls are isolated to a line.
-    //   - The proper location for a new method call is unambiguous.
-    Iterable<Module> modules = ImmutableList.<Module>builder()
-        .add(new LifecycleModule())
-        .add(new AppLauncherModule())
-        .addAll(application.getModules())
-        .build();
+// Good.
+//   - Method calls are isolated to a line.
+//   - The proper location for a new method call is unambiguous.
+Iterable<Module> modules = ImmutableList.<Module>builder()
+    .add(new LifecycleModule())
+    .add(new AppLauncherModule())
+    .addAll(application.getModules())
+    .build();
+~~~
 
 #### No tabs
 An oldie, but goodie.  We've found tab characters to cause more harm than good.
@@ -185,51 +186,54 @@ ordering (sections
 [8.3.1](http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.3.1) and
 [8.4.3](http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.4.3)).
 
-    :::java
-    // Bad.
-    final volatile private String value;
+~~~java
+// Bad.
+final volatile private String value;
 
-    // Good.
-    private final volatile String value;
+// Good.
+private final volatile String value;
+~~~
 
 ### Variable naming
 
 #### Extremely short variable names should be reserved for instances like loop indices.
 
-    :::java
-    // Bad.
-    //   - Field names give little insight into what fields are used for.
-    class User {
-      private final int a;
-      private final String m;
+~~~java
+// Bad.
+//   - Field names give little insight into what fields are used for.
+class User {
+  private final int a;
+  private final String m;
 
-      ...
-    }
+  ...
+}
 
-    // Good.
-    class User {
-      private final int ageInYears;
-      private final String maidenName;
+// Good.
+class User {
+  private final int ageInYears;
+  private final String maidenName;
 
-      ...
-    }
+  ...
+}
+~~~
 
 #### Include units in variable names
 
-    :::java
-    // Bad.
-    long pollInterval;
-    int fileSize;
+~~~java
+// Bad.
+long pollInterval;
+int fileSize;
 
-    // Good.
-    long pollIntervalMs;
-    int fileSizeGb.
+// Good.
+long pollIntervalMs;
+int fileSizeGb.
 
-    // Better.
-    //   - Unit is built in to the type.
-    //   - The field is easily adaptable between units, readability is high.
-    Amount<Long, Time> pollInterval;
-    Amount<Integer, Data> fileSize;
+// Better.
+//   - Unit is built in to the type.
+//   - The field is easily adaptable between units, readability is high.
+Amount<Long, Time> pollInterval;
+Amount<Integer, Data> fileSize;
+~~~
 
 #### Don't embed metadata in variable names
 A variable name should describe the variable's purpose.  Adding extra information like scope and

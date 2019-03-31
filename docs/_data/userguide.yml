@@ -1,0 +1,55 @@
+- title: Intro
+
+  submenu:
+  - title: Installation
+    url: /userguide/installation/
+
+  - title: "Getting started"
+    url: /userguide/getting-started/
+
+  - title: Troubleshooting
+    url: /userguide/troubleshooting/
+
+  - title: "Configuration settings"
+    url: /userguide/configuration/
+
+  - title: "Basic usage"
+    url: /userguide/basic-usage/
+
+  - title: Examples
+    url: /userguide/examples/
+
+#----------------------------------------------------------------------
+- title: Overview
+
+  submenu:
+  - title: How COASTAL works
+    url: /userguide/overview/
+
+  - title: Divers & surfers
+    url: /userguide/divers-surfers/
+
+  - title: Strategies
+    url: /userguide/strategies/
+
+  - title: Observers
+    url: /userguide/observers/
+
+  - title: Deletegates
+    url: /userguide/delegates/
+
+#----------------------------------------------------------------------
+- title: Tutorials
+  submenu:
+
+  - title: Something1
+    url: /userguide/xxx/
+
+  - title: Something2
+    url: /userguide/xxx/
+
+  - title: Something3
+    url: /userguide/xxx/
+
+  - title: Something3
+    url: /userguide/xxx/

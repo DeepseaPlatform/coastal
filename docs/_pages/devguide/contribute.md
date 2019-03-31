@@ -1,7 +1,6 @@
 ---
-layout: page
 title: How to contribute to COASTAL
-permalink: /devguide/contribute
+permalink: /devguide/contribute/
 ---
 
 We love pull requests from everyone. By participating in this project, you

@@ -1,53 +1,91 @@
-$ds-font-family: 'Roboto', sans-serif;
-$ds-font-size: 16px;
-$ds-line-height: 1.6;
-$ds-link-fg-color: #0066aa;
-// $ds-link-fg-color: #4a6782;
-$ds-link-hover-fg-color: #0099ff;
+// COLORS
+$c-coastal-blue: #339aed;
+$c-coastal-dark-blue: #346186;
 
-$ds-header-bg-color: #ffffff;
-$ds-header-border-color: rgba(0, 0, 0, 0.066);
-$ds-header-link-color: #000000;
-$ds-header-hover-color: #f3f3f3;
-$ds-header-active-color: #e1effa;
-// $ds-header-active-color: #a1d3fa;
-$ds-header-h1-color: #2196f3;
+// FONTS
+$c-font-family: '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Helvetica', 'Arial', sans-serif;
+$c-font-size: 16px;
+$c-line-height: 1.5;
+$c-monofont-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
 
-$ds-monospace-font-family: 'Fira Mono', monospace;
+// BASE
+$c-learnmore-link-fg-color: #008cf2;
 
-$ds-nav-font-family: 'Roboto', sans-serif;
+// CODE
+$c-code-border-color: #eeeeee;
+$c-code-bg-color: #fafafa;
+$c-code-fg-color: #383a42;
+$c-code-line-height: 1.4rem;
+$c-code-size: 0.9375rem;
+$c-code-hl-comment: #669966;
+$c-code-hl-keyword: #880000;
+$c-code-hl-type: #000088;
+$c-code-hl-name: #003366;
+$c-code-hl-constant: #cc00cc;
+$c-code-hl-string: #999900;
 
-$ds-heading-font-family: 'Overpass', sans-serif;
+// BUTTONS
+$c-button-fg-color: $c-coastal-blue;
+$c-button-hover-bg-color: $c-coastal-blue;
+$c-button-hover-fg-color: #ffffff;
 
-$ds-main-bg-color: #fcfcfc;
-$ds-main-fg-color: #393939;
-$ds-main-hx-fg-color: #000000;
+// HEADER
+$c-header-bg-color: $c-coastal-dark-blue;
+$c-header-fg-color: #fcfcfc;
+$c-header-border-color: rgba(0, 0, 0, 0.066);
+$c-header-nav-fg-color: hsla(0,0%,100%,.8);
+$c-header-nav-hover-fg-color: #ffffff;
 
-$ds-post-date-font-size: .85rem;
+// HERO
+$c-hero-bg-color: #303030;
+$c-hero-fg-color: #f0f0f0;
+$c-hero-padding-top: 1.5rem;
+$c-hero-padding-bottom: 3rem;
+$c-hero-diver-size: 10rem;
+$c-hero-diver-padding: 1.5rem;
+$c-hero-heading-font-size: 3.5rem;
+$c-hero-heading-line-height: 3.5rem;
+$c-hero-heading-padding-bottom: 2rem;
+$c-hero-subheading-font-size: 2.5rem;
+$c-hero-subheading-line-height: 3.5rem;
+$c-hero-subheading-padding-bottom: 2rem;
 
-$ds-quotation-font-size: .9rem;
+// ANNOUNCEMENT
+$c-main-announcement-bg-color: #20232a;
+$c-main-announcement-fg-color: #ffffff;
 
-$ds-section-vpadding: 2rem;
-$ds-section-lpadding: 12rem;
-$ds-section-rpadding: 10rem;
-$ds-section-gray-bg-color: #989fce;
-$ds-section-pre-bg-color: #ebf4fa;
-$ds-section-pre-font-family: $ds-monospace-font-family;
-$ds-section-code-font-family: $ds-monospace-font-family;
+// SIDEBAR
+$c-sidebar-heading-fg-color: #393939;
+$c-sidebar-heading-font-size: 1.125rem;
+$c-sidebar-heading-line-height: 1.35rem;
+$c-sidebar-heading-margin-top: 0;
+$c-sidebar-heading-margin-bottom: 0.5rem;
+$c-sidebar-link-fg-color: #717171;
+$c-sidebar-link-active-fg-color: $c-coastal-blue;
+$c-sidebar-link-font-size: 0.875rem;
+$c-sidebar-link-line-height: 1.3125rem;
+$c-sidebar-link-padding: 0.25rem 0;
 
-// $ds-section-pre-bg-color: #d4eafa;
-$ds-footer-fg-color: #ffffff;
-$ds-footer-bg-color: #2196f3;
-$ds-footer-link-color: #e0e0e0;
-$ds-footer-vpadding: 1.5rem;
-$ds-footer-lpadding: $ds-section-lpadding;
-$ds-footer-rpadding: $ds-section-rpadding;
+// TOC
+$c-toc-font-size: 0.75rem;
+$c-toc-line-height: 1rem;
+$c-toc-fg-color: #717171;
+$c-toc-border-color: #e0e0e0;
 
-$ds-packagelist-fg-color: $ds-main-fg-color;
-$ds-packagelist-bg-color: #ffffff;
-$ds-packagelist-border-color: rgba(0, 0, 0, 0.066);
-$ds-packagelist-caption-fg-color: #000000;
-$ds-packagelist-caption-bg-color: #89c4f3;
-// $ds-packagelist-caption-bg-color: #e18d15;
-$ds-packagelist-oddrow-bg-color: #eeeeef;
+// FOOTER
+$c-footer-bg-color: #20232a;
+$c-footer-fg-color: rgba(255, 255, 255, 0.6);
+$c-footer-font-size: 0.875rem;
 
+// POSTS
+$c-post-border-color: #cccccc;
+$c-post-title-fg-color: $c-coastal-dark-blue;
+$c-post-author-fg-color: rgba(57, 57, 57, 0.7);
+$c-post-author-font-size: 0.875rem;
+
+// CONTRIBUTORS
+$c-contributor-fg-color: #292929;
+$c-contributor-slug-font-size: 0.8125rem;
+
+// API
+$c-api-border-color: #e0e0e0;

@@ -1,0 +1,22 @@
+main {
+	.content {
+		.wrapper {
+			.error {
+				h1 {
+					text-align: center;
+					font-size: 4rem;
+				}
+				h2 {
+					text-align: center;
+					font-size: 2.5rem;
+					padding-bottom: 20rem;					
+				}
+				svg {
+					display: block;
+					margin: 3rem auto;
+					width: 20rem;
+				}
+			}
+		}
+	}
+}

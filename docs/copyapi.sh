@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#rm -rf _pages/api/
+#cp -r /Users/jaco/Public/Dropbox/WORKSPACE/coastal/build/docs/api/ _pages/api/
+
 exit
 
 #-------------------------------------------------------------------------------

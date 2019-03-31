@@ -1,0 +1,11 @@
+<svg viewBox="0 0 2000 2000">
+<rect fill="#2b98f0" x="0" y="0" width="2000" height="2000" rx="300" ry="300" />
+<g transform="translate(1000,1100)scale(0.8)translate(-1000,-1000)" fill="none" stroke="#ffffff" stroke-width="80" stroke-linecap="round" stroke-linejoin="round">
+	<!--}<polyline transform="translate(400,0)" points="653,1194 697,1230 814,1118" /> -->
+	<path d="M 1700,677 L 1007,977 1173,247 A 755,755 0 1,0 1700,677" />
+	<g transform="translate(200,-200)">
+		<path d="M 1700,677 L 1007,977 1173,247 A 755,755 0 0,1 1700,677" />
+		<path transform="translate(600,-600)" d="M 662,1101 L 785,1233 M 662,1233 L 785,1101"/>
+	</g>
+</g>
+</svg>

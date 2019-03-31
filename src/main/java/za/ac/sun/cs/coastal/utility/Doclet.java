@@ -15,6 +15,7 @@ import java.util.TreeSet;
 
 import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.ConstructorDoc;
+import com.sun.javadoc.Doc;
 import com.sun.javadoc.DocErrorReporter;
 import com.sun.javadoc.ExecutableMemberDoc;
 import com.sun.javadoc.FieldDoc;
@@ -201,28 +202,70 @@ public class Doclet {
 	private void generatePackage(PackageDoc packageDoc) throws IOException {
 		MdWriter writer = new MdWriter(destination, packageDoc.name(), packageDoc.name());
 		generatePackageSidebar(writer);
-		writer.section("main").h1("{{ page.title | escape }}");
-		writer.tags(packageDoc.inlineTags());
-		writer.table("classes").thead().tr();
-		writer.th().cdata("Class").thEnd();
-		writer.th().cdata("Description").thEnd();
-		writer.trEnd().theadEnd().tbody();
-		ClassDoc[] classes = sortList(packageDoc.allClasses(), new ClassDoc[] {});
-		for (ClassDoc classDoc : classes) {
-			writer.tr();
-			writer.td().a(classDoc.name(), classDoc.name()).tdEnd();
-			writer.td().tags(classDoc.firstSentenceTags()).tdEnd();
-			writer.trEnd();
-			generateClass(classDoc);
+		writer.section("main package").h1("{{ page.title | escape }}");
+		writer.tags(packageDoc.inlineTags(), -1);
+		int interfaceCount = 0;
+		ClassDoc[] interfaces = sortList(packageDoc.interfaces(), new ClassDoc[] {});
+		if (interfaces.length > 0) {
+			writer.h2("Interfaces").table("classes").tbody();
+			for (ClassDoc interfac : interfaces) {
+				writer.tr();
+				writer.td().a(interfac.name(), interfac.name()).tdEnd();
+				writer.td().tags(interfac.firstSentenceTags()).tdEnd();
+				writer.trEnd();
+				generateClass(interfac);
+				interfaceCount++;
+			}
+			writer.tbodyEnd().tableEnd();
 		}
-		writer.tbodyEnd().tableEnd();
+		if (interfaceCount > 0) {
+			ClassDoc[] classes = sortList(packageDoc.allClasses(), new ClassDoc[] {});
+			writer.h2("Classes").table("classes").tbody();
+			for (ClassDoc classDoc : classes) {
+				if (classDoc.isInterface()) {
+					continue;
+				}
+				writer.tr();
+				writer.td().a(classDoc.name(), classDoc.name()).tdEnd();
+				writer.td().tags(classDoc.firstSentenceTags()).tdEnd();
+				writer.trEnd();
+				generateClass(classDoc);
+			}
+			writer.tbodyEnd().tableEnd();
+		}
+//		if (packageDoc.tags("@after").length > 0) {
+		if (hasAfterTag(packageDoc.inlineTags())) {
+			writer.h2("Description").tags(packageDoc.inlineTags(), 1);
+		}
+//		writer.table("classes").thead().tr();
+//		writer.th().cdata("Class").thEnd();
+//		writer.th().cdata("Description").thEnd();
+//		writer.trEnd().theadEnd().tbody();
+//		ClassDoc[] classes = sortList(packageDoc.allClasses(), new ClassDoc[] {});
+//		for (ClassDoc classDoc : classes) {
+//			writer.tr();
+//			writer.td().a(classDoc.name(), classDoc.name()).tdEnd();
+//			writer.td().tags(classDoc.firstSentenceTags()).tdEnd();
+//			writer.trEnd();
+//			generateClass(classDoc);
+//		}
+//		writer.tbodyEnd().tableEnd();
 		writer.sectionEnd().close();
+	}
+
+	private boolean hasAfterTag(Tag[] inlineTags) {
+		for (Tag tag : inlineTags) {
+			if (tag.name().equals("@after")) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void generateClass(ClassDoc classDoc) throws IOException {
 		MdWriter writer = new MdWriter(destination, classDoc.name(), classDoc.name(), true);
 		generatePackageSidebar(writer);
-		writer.section("main").h1("{{ page.title | escape }}");
+		writer.section("main class").h1("{{ page.title | escape }}");
 		writer.tags(classDoc.inlineTags());
 		// FIELDS
 		FieldDoc[] fields = classDoc.fields();
@@ -241,8 +284,12 @@ public class Doclet {
 						writer.prejava();
 						writer.cdata(field.modifiers() + " ");
 						writer.cdata(excludeQualifier(field.type().qualifiedTypeName()) + " ");
-						writer.cdata(field.name() + "\n");
-						writer.prejavaEnd();
+						writer.cdata(field.name());
+						String value = field.constantValueExpression();
+						if (value != null) {
+							writer.cdata(" = " + value);
+						}
+						writer.cdata("\n").prejavaEnd();
 						writer.p().tags(field.inlineTags()).pEnd();
 					}
 				}
@@ -255,8 +302,8 @@ public class Doclet {
 						writer.prejava();
 						writer.cdata(field.modifiers() + " ");
 						writer.cdata(excludeQualifier(field.type().qualifiedTypeName()) + " ");
-						writer.cdata(field.name() + "\n");
-						writer.prejavaEnd();
+						writer.cdata(field.name());
+						writer.cdata("\n").prejavaEnd();
 						writer.p().tags(field.inlineTags()).pEnd();
 					}
 				}
@@ -267,7 +314,7 @@ public class Doclet {
 		if (constructors.length > 0) {
 			// writer.h2("Constructors");
 			for (ConstructorDoc constructor : constructors) {
-				writer.h2(null, constructor.name(), constructor.name());
+				writer.h2(null, constructor.name(), constructor.name() + constructor.flatSignature());
 				writer.prejava();
 				writer.cdata(constructor.modifiers() + " ");
 				generateMethodHead(writer, constructor);
@@ -280,7 +327,7 @@ public class Doclet {
 		if (methods.length > 0) {
 			// writer.h2("Methods");
 			for (MethodDoc method : methods) {
-				writer.h2(null, method.name(), method.name());
+				writer.h2(null, method.name(), method.name() + method.flatSignature());
 				writer.prejava();
 				writer.cdata(method.modifiers() + " ");
 				writer.cdata(excludeQualifier(method.returnType().qualifiedTypeName()) + " ");
@@ -375,8 +422,10 @@ public class Doclet {
 			constructors = sortList(constructors, new ConstructorDoc[] {});
 			writer.li("toc-entry toc-h2").cdata("Constructors").ul();
 			for (ConstructorDoc constructor : constructors) {
+				String text = constructor.name() + constructor.flatSignature();
+				String anchor = classDoc.name() + "#" + text;
 				writer.li("toc-entry toc-h3");
-				writer.a(classDoc.name() + "#" + constructor.name(), constructor.name() + constructor.flatSignature());
+				writer.a(anchor, text);
 				writer.liEnd();
 			}
 			writer.ulEnd().liEnd();
@@ -386,8 +435,10 @@ public class Doclet {
 			methods = sortList(methods, new MethodDoc[] {});
 			writer.li("toc-entry toc-h2").cdata("Methods").ul();
 			for (MethodDoc method : methods) {
+				String text = method.name() + method.flatSignature();
+				String anchor = classDoc.name() + "#" + text;
 				writer.li("toc-entry toc-h3");
-				writer.a(classDoc.name() + "#" + method.name(), method.name() + method.flatSignature());
+				writer.a(anchor, text);
 				writer.liEnd();
 			}
 			writer.ulEnd().liEnd();
@@ -428,9 +479,14 @@ public class Doclet {
 	//
 	// ======================================================================
 
-	public static class MdWriter extends PrintWriter {
+	private static final String fileseparator = System.getProperty("file.separator");
+	
+	private static Writer genWriter(String fullFilename) throws IOException {
+		FileOutputStream fos = new FileOutputStream(fullFilename);
+		return new OutputStreamWriter(fos, "UTF-8");
+	}
 
-		private static final String fileseparator = System.getProperty("file.separator");
+	public class MdWriter extends PrintWriter {
 
 		public MdWriter(String path, String title) throws IOException {
 			super(genWriter(path + fileseparator + "index.md"));
@@ -462,34 +518,45 @@ public class Doclet {
 			println("---\n");
 		}
 
-		private static Writer genWriter(String fullFilename) throws IOException {
-			FileOutputStream fos = new FileOutputStream(fullFilename);
-			return new OutputStreamWriter(fos, "UTF-8");
-		}
-
-		private MdWriter tags(Tag[] tags) {
-			for (Tag tag : tags) {
-				switch (tag.name()) {
+		private MdWriter tags(Tag[] tags, int before) {
+			int i = 0;
+			if (before > 0) {
+				while ((i < tags.length) && !tags[i].name().equals("@after")) {
+					i++;
+				}
+			}
+			while (i < tags.length) {
+				switch (tags[i].name()) {
+				case "@after":
+					if (before < 0) {
+						return this;
+					}
+					break;
 				case "Text":
-					cdata(tag.text());
+					cdata(tags[i].text());
 					break;
 				case "@prejava":
-					prejava().cdata(tag.text()).prejavaEnd();
+					prejava().cdata(tags[i].text()).prejavaEnd();
 					break;
 				case "@link":
-					a(tag.text(), tag.text());
+					code().az(tags[i].holder(), null, tags[i].text(), tags[i].text()).codeEnd();
 					break;
 				case "@code":
-					code().cdata(tag.text()).codeEnd();
+					code().cdata(tags[i].text()).codeEnd();
 					break;
 				default:
-					cdata("TAG(" + tag.name() + ", " + tag.text() + ")");
+					cdata("TAG(" + tags[i].name() + ", " + tags[i].text() + ")");
 					break;
 				}
+				i++;
 			}
 			return this;
 		}
 
+		private MdWriter tags(Tag[] tags) {
+			return tags(tags, 0);
+		}
+		
 		public MdWriter a(String href, String text) {
 			printf("<a href=\"%s\">%s</a>", href(href), text);
 			return this;
@@ -505,6 +572,20 @@ public class Doclet {
 			return this;
 		}
 
+		public MdWriter az(Doc doc, String clas, String href, String text) {
+			String classSpec = "";
+			if (clas != null) {
+				classSpec = String.format(" class=\"%s\"", clas);
+			}
+			if (href.startsWith("#")) {
+				printf("<a%s href=\"%s\">%s</a>\n", classSpec, href(doc.name() + href), text.substring(1));
+				return this;
+			} else {
+				printf("<a%s href=\"%s\">%s</a>\n", classSpec, href(href), text);
+				return this;
+			}
+		}
+		
 		private String href(String href) {
 			int index = href.indexOf('#');
 			if (index == -1) {

@@ -1,15 +1,11 @@
-entries:
-- title: News
-  url: /news/
-- title: Articles
-  url: /articles/
-#- title: Videos
-#  url: /videos/
-- title: User guide
-  url: /userguide/
-- title: Developer guide
-  url: /devguide/
-- title: API
-  url: /api/
-#- title: Research
-#  url: /research/
+- title: Docs
+  url: /userguide/installation/
+
+- title: Blog
+  url: /blog/
+
+- title: Developers
+  url: /devguide/overview/
+
+- title: GitHub
+  url: https://github.com/DeepseaPlatform/coastal

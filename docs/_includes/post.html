@@ -1,0 +1,36 @@
+<a href="{{ include.posting.url | relative_url }}"><h1 class="post-meta post-title">{{ include.posting.title | escape }}</h1></a>
+<div class="post-meta post-date">{{ include.posting.date | date:"%d %B %Y" }}</div>
+{% if include.posting.author %}
+	{% assign authors = site.data.users | where_exp: 'x', 'x.username == include.posting.author' %}
+	{% if authors.size == 1 %}
+		<div class="post-meta post-author">
+			<div class="post-author-block">
+				<a class="post-author-name" href="{{ authors[0].url | relative_url }}">{{ authors[0].name }}</a>
+				<span class="post-author-slug">{{ authors[0].slug }}</span>
+			</div>
+			<div class="post-author-image">
+				<img src="{{ authors[0].image | prepend: '/assets/images/' | relative_url }}" />
+			</div>
+		</div>
+	{% else %}
+		<div class="post-meta post-author">
+			<div class="post-author-block">
+				<span class="post-author-name">{{ include.posting.author }}</span>
+			</div>
+		</div>
+	{% endif %}
+{% endif %}
+{% if include.excerptonly %}
+	{% if include.posting.content contains site.excerpt_separator %}
+		{% assign content_array = include.posting.content | split: site.excerpt_separator %}
+		{% assign excerpt_only = content_array | first %}
+		<div class="post-content">{{ excerpt_only }}</div>
+		<div class="navbuttons">
+			<a class="button next" href="{{ include.posting.url | relative_url }}">Read more&nbsp;→</a>
+		</div>
+	{% else %}
+		<div class="post-content">{{ include.posting.content }}</div>
+	{% endif %}
+{% else %}
+	<div class="post-content">{{ include.posting.content }}</div>
+{% endif %}

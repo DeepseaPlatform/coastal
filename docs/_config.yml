@@ -11,10 +11,55 @@ description: > # this means to ignore newlines until "baseurl:"
 baseurl: "/coastal"
 #url: "https://www.cs.sun.ac.za"
 url: ""
+excerpt_separator: "<!-- more -->"
 twitter_username: coastal
 github_username:  coastal
 markdown: kramdown
 include: ["_pages", "coastal.dtd"]
-exclude: ["copyapi.sh", "Gemfile", "Gemfile.lock", "_pages/userguide/figures"]
+exclude: ["copyapi.sh", "runlocal.sh", "Gemfile", "Gemfile.lock", "coastal-docs.sublime-project", "coastal-docs.sublime-workspace", "README.md"]
 plugins:
-  - jekyll-feed
+  - jekyll-toc
+  - jekyll-tidy
+toc:
+  max_level: 3
+defaults:
+  -
+    scope:
+      path: "_posts"
+      type: "posts"
+    values:
+      permalink: /blog/:year/:month/:day/:slug/
+      layout: "post"
+      excerpt_separator: "<!--more-->"
+  -
+    scope:
+      path: "_pages/devguide"
+      type: "pages"
+    values:
+      layout: page
+      sidebar: devguide
+      toc: true
+  -
+    scope:
+      path: "_pages/api"
+      type: "pages"
+    values:
+      layout: api
+      toc: true
+  -
+    scope:
+      path: "_pages/userguide"
+      type: "pages"
+    values:
+      layout: page
+      sidebar: userguide
+      toc: true
+  -
+    scope:
+      path: "_pages/casestudy"
+      type: "pages"
+    values:
+      layout: page
+      sidebar: casestudy
+      toc: true
+

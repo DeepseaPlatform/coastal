@@ -1,0 +1,26 @@
+{
+	"folders":
+	[
+		{
+			"path": "_includes"
+		},
+		{
+			"path": "_data"
+		},
+		{
+			"path": "_layouts"
+		},
+		{
+			"path": "_pages"
+		},
+		{
+			"path": "_posts"
+		},
+		{
+			"path": "_sass"
+		},
+		{
+			"path": "assets"
+		}
+	]
+}

@@ -1,0 +1,17 @@
+<svg viewBox="0 0 2000 2000">
+<rect fill="#2b98f0" x="0" y="0" width="2000" height="2000" rx="300" ry="300" />
+<g fill="#ffffff" stroke="none" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+	<circle cx="1000" cy="382" r="184" />
+</g>
+<g fill="#ffffff" stroke="#ffffff" stroke-width="65" stroke-linecap="round" stroke-linejoin="round">
+	<polyline points="1358,1620 1358,1760 640,1760  640,1620 1358,1620" />
+	<path transform="translate(458,518)" d="M -210,560 C -210,560 -210,728 0,728 210,728 212,560 212,560 212,560 -210,560 -210,560 Z" />
+	<path transform="translate(1538,278)" d="M -210,560 C -210,560 -210,728 0,728 210,728 212,560 212,560 212,560 -210,560 -210,560 Z" />
+</g>
+<g fill="none" stroke="#ffffff" stroke-width="65" stroke-linecap="round" stroke-linejoin="round">
+	<polyline points="1000,382 1000,1620" />
+	<polyline points="458,518 1538,278" />
+	<polyline transform="translate(458,518)" points="-210,560 -210,508 0,0 212,508 212,560" />
+	<polyline transform="translate(1538,278)" points="-210,560 -210,508 0,0 212,508 212,560" />
+</g>
+</svg>

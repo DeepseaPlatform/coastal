@@ -1,16 +1,98 @@
 header {
-	height: 3.75rem;
-	min-height: 3.75rem;
+	width: 100%;
+	height: 2rem;
+	padding: 0.5rem 0;
+	position: fixed;
+	z-index: 999;
+	background-color: $c-header-bg-color;
+
+	.wrapper {
+		display: flex;
+		flex-direction: row;
+		position: relative;
+
+		a {
+			display: inline-flex;
+			align-items: center;
+			color: $c-header-fg-color;
+			height: 2rem;
+			position: relative;
+
+			svg {
+				position: absolute;
+				left: 0;
+				top: 0;
+				height: 2rem;
+				max-height: 2rem;
+				margin-right: 0.6rem;
+			}
+
+			h1, h2 {
+				display: inline;
+				line-height: 2rem;
+				margin: 0;
+			}
+
+			h1 {
+				font-size: 1.24rem;
+				margin-left: 2.7rem;
+			}
+
+			h2 {
+				font-size: 1rem;
+				margin-left: 0.5rem;
+				text-decoration: underline;
+			}		
+		}
+
+		nav {
+			display: inline-flex;
+			margin-left: auto;
+
+			a {
+				padding: 0 0.5rem;
+				color: $c-header-nav-fg-color;
+			}
+
+			a:hover {
+				color: $c-header-nav-hover-fg-color;
+			}
+		}
+	}
+}
+
+/*----------------------------------------------------------------------
+
+	padding: 0.5rem;
+	// display: flex;
+	// flex-grow: 1;
+
+	a {
+		border: 0;
+		color: #ffffff;
+		display: inline;
+		// flex-flow: row nowrap;
+		height: 2.125rem;
+		z-index: 10000;
+
+		h1 {
+			display: inline;
+			font-size: 1.25rem;
+			line-height: 1.25rem;
+			margin: 0;
+			position: relative;
+		}
+
+		h2 {
+			display: inline;
+			font-size: 1rem;
+			line-height: 1.25rem;
+			text-decoration: underline;
+		}
+	}
+
 	box-sizing: border-box;
 	box-shadow: 0 1px 0 0 $ds-header-border-color;
-	position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	background-color: $ds-header-bg-color;
-	z-index: 2;
-	display: flex;
-	flex-grow: 1;
 	a {
 		color: $ds-link-fg-color;
 		text-decoration: none;
@@ -55,3 +137,4 @@ header {
 		}
 	}
 }
+*/

@@ -1,0 +1,4 @@
+<div class="navbuttons">
+	{% if page.next.url %}<a class="button prev" href="{{ page.next.url | relative_url }}">←&nbsp;{{ page.next.title | escape }}</a>{% endif %}
+	{% if page.previous.url %}<a class="button next" href="{{ page.previous.url | relative_url }}">{{ page.previous.title | escape }}&nbsp;→</a>{% endif %}
+</div>
