@@ -25,7 +25,6 @@ import com.sun.javadoc.ParamTag;
 import com.sun.javadoc.Parameter;
 import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.Tag;
-import com.sun.javadoc.Type;
 
 public class Doclet {
 
@@ -80,9 +79,9 @@ public class Doclet {
 			setOptions(root.options());
 			initArrays(root);
 			generatePackageSummary();
-		} catch (Fault f) {
-			root.printError(f.getMessage());
-			return false;
+//		} catch (Fault f) {
+//			root.printError(f.getMessage());
+//			return false;
 		} catch (IOException e) {
 			root.printError(e.getMessage());
 			return false;
@@ -125,7 +124,7 @@ public class Doclet {
 		return LanguageVersion.JAVA_1_5;
 	}
 
-	private void setOptions(String[][] options) throws Fault {
+	private void setOptions(String[][] options) {
 		for (int i = 0, n = options.length; i < n; i++) {
 			String option = options[i][0];
 			if (option.equals("-d")) {
@@ -344,10 +343,6 @@ public class Doclet {
 		// writer.h4("Throws");
 	}
 
-	/*
-	 * <li class="toc-entry toc-h3"><a href="#brances">Brances</a></li>
-	 */
-
 	private void generateClassSidebar(MdWriter writer, ClassDoc classDoc) throws IOException {
 		writer.section("apitoc").ul("section-nav");
 		FieldDoc[] fields = classDoc.fields();
@@ -400,7 +395,7 @@ public class Doclet {
 			}
 			writer.ulEnd().liEnd();
 		}
-		writer.ulEnd().sectionEnd();
+		writer.cdata("\n").ulEnd().sectionEnd();
 	}
 
 	private void generatePackageSidebar(MdWriter writer) throws IOException {
@@ -436,18 +431,18 @@ public class Doclet {
 	//
 	// ======================================================================
 
-	private static class Fault extends Exception {
-
-		private static final long serialVersionUID = 0;
-
-		Fault(String msg) {
-			super(msg);
-		}
-
-		Fault(String msg, Exception cause) {
-			super(msg, cause);
-		}
-	}
+//	private static class Fault extends Exception {
+//
+//		private static final long serialVersionUID = 0;
+//
+//		Fault(String msg) {
+//			super(msg);
+//		}
+//
+//		Fault(String msg, Exception cause) {
+//			super(msg, cause);
+//		}
+//	}
 
 	// ======================================================================
 	//
@@ -503,8 +498,14 @@ public class Doclet {
 				case "@prejava":
 					prejava().cdata(tag.text()).prejavaEnd();
 					break;
+				case "@link":
+					a(tag.text(), tag.text());
+					break;
+				case "@code":
+					code().cdata(tag.text()).codeEnd();
+					break;
 				default:
-					cdata("TAG(" + tag.kind() + ", " + tag.text() + ")");
+					cdata("TAG(" + tag.name() + ", " + tag.text() + ")");
 					break;
 				}
 			}
@@ -576,6 +577,18 @@ public class Doclet {
 		
 		public MdWriter spanEnd() {
 			return genericEnd("span", false);
+		}
+		
+		public MdWriter code() {
+			return generic("code", false);
+		}
+		
+		public MdWriter code(String clas) {
+			return generic(clas, "code", false);
+		}
+		
+		public MdWriter codeEnd() {
+			return genericEnd("code", false);
 		}
 		
 		private MdWriter generic(String element) {
