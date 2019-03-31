@@ -79,9 +79,6 @@ public class Doclet {
 			setOptions(root.options());
 			initArrays(root);
 			generatePackageSummary();
-//		} catch (Fault f) {
-//			root.printError(f.getMessage());
-//			return false;
 		} catch (IOException e) {
 			root.printError(e.getMessage());
 			return false;
@@ -424,25 +421,6 @@ public class Doclet {
 		}
 		return sortedSet.toArray(prototype);
 	}
-
-	// ======================================================================
-	//
-	// FAULT CLASS
-	//
-	// ======================================================================
-
-//	private static class Fault extends Exception {
-//
-//		private static final long serialVersionUID = 0;
-//
-//		Fault(String msg) {
-//			super(msg);
-//		}
-//
-//		Fault(String msg, Exception cause) {
-//			super(msg, cause);
-//		}
-//	}
 
 	// ======================================================================
 	//
