@@ -9,7 +9,7 @@ public class Mystery {
 		// runExample();
 	}
 
-	private static void runExample() {		
+	public static void runExample() {		
 		char[] s = new char[18];
 		s[0] = 0; s[1] = 0; s[2] = 0; s[3] = 60; s[4] = 97; s[5] = 32; s[6] = 104; s[7] = 114; s[8] = 101;
 		s[9] = 102; s[10] = 61; s[11] = 34; s[12] = 50; s[13] = 51; s[14] = 52; s[15] = 53; s[16] = 54; s[17] = 55;
@@ -19,7 +19,7 @@ public class Mystery {
 		System.out.println("output: " + result);
 	}
 	
-	private static void printInput(String s) {
+	public static void printInput(String s) {
 		char[] str = s.toCharArray();
 		String output = "";
 		for (int i = 0; i < str.length; i++) {

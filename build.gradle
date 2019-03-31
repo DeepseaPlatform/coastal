@@ -26,6 +26,7 @@ dependencies {
 	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.1.3.201810200350-r'
 	testCompile group: 'junit', name: 'junit', version: '4.12'
 	testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.25'
+	implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
 }
 
 // So that XML files in src/test/java/tests/* are copied
@@ -42,8 +43,12 @@ checkstyle {
 }
 
 javadoc {
-	// options.memberLevel = JavadocMemberLevel.PRIVATE
-	options.noQualifiers = [ 'java.lang.*', 'java.io.*', 'java.util.*', 'org.apache.*' ]
+	destinationDir = file('build/docs/api')
+	options.docletpath = [ file('build/classes/java/main') ]
+	options.doclet = 'za.ac.sun.cs.coastal.utility.Doclet'
+	options.noQualifiers = [ 'java.lang.*', 'java.io.*', 'java.util.*', 'org.apache.*' , 'za.ac.sun.cs.coastal.' ]
+	// 'org.apache.logging.log4j.*', 'org.apache.commons.configuration2.*'
+	options.memberLevel = JavadocMemberLevel.PRIVATE
 }
 
 version = gitVersion()
