@@ -46,8 +46,9 @@ javadoc {
 	destinationDir = file('build/docs/api')
 	options.docletpath = [ file('build/classes/java/main') ]
 	options.doclet = 'za.ac.sun.cs.coastal.utility.Doclet'
-	options.noQualifiers = [ 'java.lang.*', 'java.io.*', 'java.util.*', 'org.apache.*' ]
-	// options.memberLevel = JavadocMemberLevel.PRIVATE
+	options.noQualifiers = [ 'java.lang.*', 'java.io.*', 'java.util.*', 'org.apache.*' , 'za.ac.sun.cs.coastal.' ]
+	// 'org.apache.logging.log4j.*', 'org.apache.commons.configuration2.*'
+	options.memberLevel = JavadocMemberLevel.PRIVATE
 }
 
 version = gitVersion()

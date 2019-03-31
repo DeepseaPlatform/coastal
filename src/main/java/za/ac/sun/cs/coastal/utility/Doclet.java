@@ -10,14 +10,22 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.ConstructorDoc;
 import com.sun.javadoc.DocErrorReporter;
+import com.sun.javadoc.ExecutableMemberDoc;
+import com.sun.javadoc.FieldDoc;
 import com.sun.javadoc.LanguageVersion;
+import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.PackageDoc;
+import com.sun.javadoc.ParamTag;
+import com.sun.javadoc.Parameter;
 import com.sun.javadoc.RootDoc;
 import com.sun.javadoc.Tag;
+import com.sun.javadoc.Type;
 
 public class Doclet {
 
@@ -54,14 +62,16 @@ public class Doclet {
 
 	private String destination = ".";
 
+	private final Set<String> excludedQualifiers = new HashSet<>();
+
 	private PackageDoc[] coastalPackages;
-	
-	private Set<ClassDoc> coastalClasses = new HashSet<>();
-	
+
+	private final Set<ClassDoc> coastalClasses = new HashSet<>();
+
 	private PackageDoc[] examplePackages;
 
-	private Set<ClassDoc> exampleClasses = new HashSet<>();
-	
+	private final Set<ClassDoc> exampleClasses = new HashSet<>();
+
 	public Doclet() {
 	}
 
@@ -121,8 +131,38 @@ public class Doclet {
 			if (option.equals("-d")) {
 				destination = options[i][1];
 				new File(destination).mkdirs();
+			} else if (option.equals("-noqualifier")) {
+				addToSet(excludedQualifiers, options[i][1]);
 			}
 		}
+	}
+
+	private void addToSet(Set<String> s, String str) {
+		StringTokenizer st = new StringTokenizer(str, ":");
+		String current;
+		while (st.hasMoreTokens()) {
+			current = st.nextToken();
+			s.add(current);
+		}
+	}
+
+	private String excludeQualifier(String qualifier) {
+		for (String excludedQualifier : excludedQualifiers) {
+			if (excludedQualifier.endsWith("*")) {
+				if (qualifier.startsWith(excludedQualifier.substring(0, excludedQualifier.length() - 1))) {
+					int index = qualifier.lastIndexOf(".", qualifier.length() + 1 - 1);
+					return qualifier.substring(index + 1);
+				}
+			}
+		}
+		int index = qualifier.length() + 1;
+		while ((index = qualifier.lastIndexOf(".", index - 1)) != -1) {
+			String prefix = qualifier.substring(0, index + 1);
+			if (excludedQualifiers.contains(prefix)) {
+				return qualifier.substring(index + 1);
+			}
+		}
+		return qualifier;
 	}
 
 	private void initArrays(RootDoc root) {
@@ -141,7 +181,7 @@ public class Doclet {
 		coastalPackages = sortList(coastalSet, new PackageDoc[] {});
 		examplePackages = sortList(exampleSet, new PackageDoc[] {});
 	}
-	
+
 	private void generatePackageSummary() throws IOException {
 		MdWriter writer = new MdWriter(destination, "COASTAL", false);
 		writer.section("sidebar").sectionEnd();
@@ -188,53 +228,195 @@ public class Doclet {
 		generatePackageSidebar(writer);
 		writer.section("main").h1("{{ page.title | escape }}");
 		writer.tags(classDoc.inlineTags());
+		// FIELDS
+		FieldDoc[] fields = classDoc.fields();
+		if (fields.length > 0) {
+			int numberOfConstants = 0;
+			for (FieldDoc field : fields) {
+				if (field.isStatic() && field.isFinal()) {
+					numberOfConstants++;
+				}
+			}
+			if (numberOfConstants > 0) {
+				// writer.h2("Constants");
+				for (FieldDoc field : fields) {
+					if (field.isStatic() && field.isFinal()) {
+						writer.h2(null, field.name(), field.name());
+						writer.prejava();
+						writer.cdata(field.modifiers() + " ");
+						writer.cdata(excludeQualifier(field.type().qualifiedTypeName()) + " ");
+						writer.cdata(field.name() + "\n");
+						writer.prejavaEnd();
+						writer.p().tags(field.inlineTags()).pEnd();
+					}
+				}
+			}
+			if (numberOfConstants < fields.length) {
+				// writer.h2("Fields");
+				for (FieldDoc field : fields) {
+					if (!field.isStatic() || !field.isFinal()) {
+						writer.h2(null, field.name(), field.name());
+						writer.prejava();
+						writer.cdata(field.modifiers() + " ");
+						writer.cdata(excludeQualifier(field.type().qualifiedTypeName()) + " ");
+						writer.cdata(field.name() + "\n");
+						writer.prejavaEnd();
+						writer.p().tags(field.inlineTags()).pEnd();
+					}
+				}
+			}
+		}
+		// CONSTRUCTORS
+		ConstructorDoc[] constructors = classDoc.constructors();
+		if (constructors.length > 0) {
+			// writer.h2("Constructors");
+			for (ConstructorDoc constructor : constructors) {
+				writer.h2(null, constructor.name(), constructor.name());
+				writer.prejava();
+				writer.cdata(constructor.modifiers() + " ");
+				generateMethodHead(writer, constructor);
+				writer.prejavaEnd();
+				generateMethod(writer, constructor);
+			}
+		}
+		// METHODS
+		MethodDoc[] methods = classDoc.methods();
+		if (methods.length > 0) {
+			// writer.h2("Methods");
+			for (MethodDoc method : methods) {
+				writer.h2(null, method.name(), method.name());
+				writer.prejava();
+				writer.cdata(method.modifiers() + " ");
+				writer.cdata(excludeQualifier(method.returnType().qualifiedTypeName()) + " ");
+				generateMethodHead(writer, method);
+				writer.prejavaEnd();
+				generateMethod(writer, method);
+			}
+		}
 		writer.sectionEnd();
 		generateClassSidebar(writer, classDoc);
 		writer.close();
 	}
 
-/*
-	
-          <section class="toc">
-            <ul class="section-nav">
-              <li class="toc-entry toc-h2"><a href="#branches-choices-and-paths">Branches, choices, and paths</a>
-                <ul>
-                  <li class="toc-entry toc-h3"><a href="#brances">Brances</a></li>
-                  <li class="toc-entry toc-h3"><a href="#choices">Choices</a></li>
-                  <li class="toc-entry toc-h3"><a href="#paths">Paths</a></li>
-                  <li class="toc-entry toc-h3"><a href="#example">Example</a></li>
-                </ul>
-              </li>
-              <li class="toc-entry toc-h2"><a href="#executions-and-inputs">Executions and inputs</a>
-                <ul>
-                  <li class="toc-entry toc-h3"><a href="#executions">Executions</a></li>
-                </ul>
-              </li>
-              <li class="toc-entry toc-h2"><a href="#the-pathtree-and-pathtreenode">The PathTree and PathTreeNode</a></li>
-            </ul>
-          </section>
-	
-	
-*/
+	private void generateMethodHead(MdWriter writer, ExecutableMemberDoc executable) {
+		writer.cdata(executable.name() + "(");
+		Parameter[] params = executable.parameters();
+		if (params.length > 0) {
+			boolean isFirst = true;
+			for (Parameter param : params) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					writer.cdata(", ");
+				}
+				writer.cdata(excludeQualifier(param.type().qualifiedTypeName()) + " ");
+				writer.cdata(param.name());
+			}
+		}
+		writer.cdata(")\n");
+	}
+
+	private void generateMethod(MdWriter writer, ExecutableMemberDoc executable) {
+		writer.tags(executable.inlineTags());
+		Parameter[] params = executable.parameters();
+		ParamTag[] paramTags = executable.paramTags();
+		if (params.length > 0) {
+			writer.h4("Parameters").table("parameters").tbody();
+			for (int i = 0, n = params.length; i < n; i++) {
+				writer.tr();
+				writer.td().cdata(params[i].name()).cdata("<br/>");
+				writer.span("paramtype").cdata(excludeQualifier(params[i].type().qualifiedTypeName())).spanEnd();
+				writer.tdEnd();
+				if (i < paramTags.length) {
+					writer.td().tags(paramTags[i].inlineTags()).tdEnd();
+				} else {
+					writer.td().tdEnd();
+				}
+				writer.trEnd();
+			}
+			writer.tbodyEnd().tableEnd();
+		}
+		Tag[] returnTags = executable.tags("@return");
+		if (returnTags.length > 0) {
+			writer.h4("Returns");
+			writer.p().tags(returnTags[0].inlineTags()).pEnd();
+		}
+		// writer.h4("Throws");
+	}
+
+	/*
+	 * <li class="toc-entry toc-h3"><a href="#brances">Brances</a></li>
+	 */
+
 	private void generateClassSidebar(MdWriter writer, ClassDoc classDoc) throws IOException {
-		writer.section("toc").ul("section-nav");
+		writer.section("apitoc").ul("section-nav");
+		FieldDoc[] fields = classDoc.fields();
+		if (fields.length > 0) {
+			fields = sortList(fields, new FieldDoc[] {});
+			int numberOfConstants = 0;
+			for (FieldDoc field : fields) {
+				if (field.isStatic() && field.isFinal()) {
+					numberOfConstants++;
+				}
+			}
+			if (numberOfConstants > 0) {
+				writer.li("toc-entry toc-h2").cdata("Constants").ul();
+				for (FieldDoc field : fields) {
+					if (field.isStatic() && field.isFinal()) {
+						writer.li("toc-entry toc-h3").a(classDoc.name() + "#" + field.name(), field.name()).liEnd();
+					}
+				}
+				writer.ulEnd().liEnd();
+			}
+			if (numberOfConstants < fields.length) {
+				writer.li("toc-entry toc-h2").cdata("Fields").ul();
+				for (FieldDoc field : fields) {
+					if (!field.isStatic() || !field.isFinal()) {
+						writer.li("toc-entry toc-h3").a(classDoc.name() + "#" + field.name(), field.name()).liEnd();
+					}
+				}
+				writer.ulEnd().liEnd();
+			}
+		}
+		ConstructorDoc[] constructors = classDoc.constructors();
+		if (constructors.length > 0) {
+			constructors = sortList(constructors, new ConstructorDoc[] {});
+			writer.li("toc-entry toc-h2").cdata("Constructors").ul();
+			for (ConstructorDoc constructor : constructors) {
+				writer.li("toc-entry toc-h3");
+				writer.a(classDoc.name() + "#" + constructor.name(), constructor.name() + constructor.flatSignature());
+				writer.liEnd();
+			}
+			writer.ulEnd().liEnd();
+		}
+		MethodDoc[] methods = classDoc.methods();
+		if (methods.length > 0) {
+			methods = sortList(methods, new MethodDoc[] {});
+			writer.li("toc-entry toc-h2").cdata("Methods").ul();
+			for (MethodDoc method : methods) {
+				writer.li("toc-entry toc-h3");
+				writer.a(classDoc.name() + "#" + method.name(), method.name() + method.flatSignature());
+				writer.liEnd();
+			}
+			writer.ulEnd().liEnd();
+		}
 		writer.ulEnd().sectionEnd();
 	}
 
 	private void generatePackageSidebar(MdWriter writer) throws IOException {
-		writer.section("sidebar");
-		writer.ax("top", "/api/", "API home");
-		writer.h3("COASTAL").ul();
+		writer.section("sidetoc").ul("section-nav");
+		writer.li("toc-entry toc-h2").ax("top", "/api/", "API home").liEnd();
+		writer.li("toc-entry toc-h2").cdata("COASTAL").ul();
 		for (PackageDoc packageDoc : coastalPackages) {
-			writer.li().a(packageDoc.name(), packageDoc.name()).liEnd();
+			writer.li("toc-entry toc-h3").a(packageDoc.name(), packageDoc.name()).liEnd();
 		}
-		writer.ulEnd().h3("Examples").ul();
+		writer.ulEnd().liEnd().li("toc-entry toc-h2").cdata("Examples").ul();
 		for (PackageDoc packageDoc : examplePackages) {
-			writer.li().a(packageDoc.name(), packageDoc.name()).liEnd();
+			writer.li("toc-entry toc-h3").a(packageDoc.name(), packageDoc.name()).liEnd();
 		}
-		writer.ulEnd().sectionEnd();
+		writer.ulEnd().liEnd().ulEnd().sectionEnd();
 	}
-	
+
 	private <T> T[] sortList(Collection<T> collection, T[] prototype) {
 		SortedSet<T> sortedSet = new TreeSet<>(collection);
 		return sortedSet.toArray(prototype);
@@ -247,7 +429,7 @@ public class Doclet {
 		}
 		return sortedSet.toArray(prototype);
 	}
-	
+
 	// ======================================================================
 	//
 	// FAULT CLASS
@@ -273,7 +455,7 @@ public class Doclet {
 	//
 	// ======================================================================
 
-	private static class MdWriter extends PrintWriter {
+	public static class MdWriter extends PrintWriter {
 
 		private static final String fileseparator = System.getProperty("file.separator");
 
@@ -281,12 +463,12 @@ public class Doclet {
 			super(genWriter(path + fileseparator + "index.md"));
 			writeFrontMatter(title, "/api/");
 		}
-		
+
 		public MdWriter(String path, String title, boolean toc) throws IOException {
 			super(genWriter(path + fileseparator + "index.md"));
 			writeFrontMatter(title, "/api/", new Object[][] { { "toc", toc } });
 		}
-		
+
 		public MdWriter(String path, String filename, String title) throws IOException {
 			super(genWriter(path + fileseparator + filename + ".md"));
 			writeFrontMatter(title, String.format("/api/%s/", filename));
@@ -296,7 +478,7 @@ public class Doclet {
 			super(genWriter(path + fileseparator + filename + ".md"));
 			writeFrontMatter(title, String.format("/api/%s/", filename), new Object[][] { { "toc", toc } });
 		}
-		
+
 		private void writeFrontMatter(String title, String permalink, Object[]... extras) {
 			println("---");
 			printf("title: %s\n", title);
@@ -319,7 +501,7 @@ public class Doclet {
 					cdata(tag.text());
 					break;
 				case "@prejava":
-					cdata("<div markdown=\"1\">\n~~~java\n" + tag.text() + "~~~\n</div>\n");
+					prejava().cdata(tag.text()).prejavaEnd();
 					break;
 				default:
 					cdata("TAG(" + tag.kind() + ", " + tag.text() + ")");
@@ -330,188 +512,299 @@ public class Doclet {
 		}
 
 		public MdWriter a(String href, String text) {
-			printf("<a href=\"{{ '/api/%s/' | relative_url }}\">%s</a>", href, text);
+			printf("<a href=\"%s\">%s</a>", href(href), text);
 			return this;
 		}
-		
+
 		public MdWriter a(String clas, String href, String text) {
-			printf("<a class=\"%s\" href=\"{{ '/api/%s/' | relative_url }}\">%s</a>", clas, href, text);
+			printf("<a class=\"%s\" href=\"%s\">%s</a>\n", clas, href(href), text);
 			return this;
 		}
-		
+
 		public MdWriter ax(String clas, String href, String text) {
-			printf("<a class=\"%s\" href=\"{{ '%s' | relative_url }}\">%s</a>", clas, href, text);
+			printf("<a class=\"%s\" href=\"{{ '%s' | relative_url }}\">%s</a>\n", clas, href, text);
 			return this;
 		}
-		
+
+		private String href(String href) {
+			int index = href.indexOf('#');
+			if (index == -1) {
+				return String.format("{{ '/api/%s/' | relative_url }}", href);
+			} else {
+				String anchor = href.substring(index);
+				String base = href.substring(0, index);
+				return String.format("{{ '/api/%s/' | relative_url }}%s", base, anchor);
+			}
+		}
+
 		public MdWriter cdata(String data) {
 			print(data);
 			return this;
 		}
+
+		public MdWriter prejava() {
+			println("<div markdown=\"1\">");
+			println("~~~java");
+			return this;
+		}
+
+		public MdWriter prejavaEnd() {
+			println("~~~");
+			println("</div>");
+			return this;
+		}
+
+		public MdWriter p() {
+			return generic("p");
+		}
+
+		public MdWriter p(String clas) {
+			return generic(clas, "p");
+		}
+
+		public MdWriter pEnd() {
+			return genericEnd("p");
+		}
+
+		public MdWriter span() {
+			return generic("span", false);
+		}
+		
+		public MdWriter span(String clas) {
+			return generic(clas, "span", false);
+		}
+		
+		public MdWriter spanEnd() {
+			return genericEnd("span", false);
+		}
+		
+		private MdWriter generic(String element) {
+			return generic(element, true);
+		}
+
+		private MdWriter generic(String clas, String element) {
+			return generic(clas, element, true);
+		}
+
+		private MdWriter genericEnd(String element) {
+			return genericEnd(element, true);
+		}
+
+		private MdWriter generic(String element, boolean newline) {
+			printf("<%s>", element);
+			if (newline) {
+				printf("\n");
+			}
+			return this;
+		}
+		
+		private MdWriter generic(String clas, String element, boolean newline) {
+			if (clas == null) {
+				printf("<%s>", element);
+			} else {
+				printf("<%s class=\"%s\">", element, clas);
+			}
+			if (newline) {
+				printf("\n");
+			}
+			return this;
+		}
+		
+		private MdWriter genericEnd(String element, boolean newline) {
+			printf("</%s>", element);
+			if (newline) {
+				printf("\n");
+			}
+			return this;
+		}
 		
 		// ---------- HEADINGS ----------------------------------------
-				
+
 		public MdWriter h1(String heading) {
-			printf("<h1>%s</h1>\n", heading);
-			return this;
+			return hn("h1", heading);
 		}
-		
-		public MdWriter h1(String heading, String clas) {
-			printf("<h1 class=\"%s\">%s</h1>\n", clas, heading);
-			return this;
+
+		public MdWriter h1(String clas, String heading) {
+			return hn("h1", clas, heading);
 		}
-		
+
+		public MdWriter h1(String clas, String heading, String name) {
+			return hn("h1", clas, heading, name);
+		}
+
+		public MdWriter h2(String heading) {
+			return hn("h2", heading);
+		}
+
+		public MdWriter h2(String clas, String heading) {
+			return hn("h2", clas, heading);
+		}
+
+		public MdWriter h2(String clas, String heading, String name) {
+			return hn("h2", clas, heading, name);
+		}
+
 		public MdWriter h3(String heading) {
-			printf("<h3>%s</h3>\n", heading);
+			return hn("h3", heading);
+		}
+
+		public MdWriter h3(String clas, String heading) {
+			return hn("h3", clas, heading);
+		}
+
+		public MdWriter h3(String clas, String heading, String name) {
+			return hn("h3", clas, heading, name);
+		}
+
+		public MdWriter h4(String heading) {
+			return hn("h4", heading);
+		}
+
+		public MdWriter h4(String clas, String heading) {
+			return hn("h4", clas, heading);
+		}
+
+		public MdWriter h4(String clas, String heading, String name) {
+			return hn("h4", clas, heading, name);
+		}
+
+		private MdWriter hn(String hn, String heading) {
+			printf("<%s>%s</%s>\n", hn, heading, hn);
 			return this;
 		}
-		
-		public MdWriter h3(String heading, String clas) {
-			printf("<h3 class=\"%s\">%s</h3>\n", clas, heading);
+
+		private MdWriter hn(String hn, String clas, String heading) {
+			if (clas == null) {
+				printf("<%s>%s</%s>\n", hn, heading, hn);
+			} else {
+				printf("<%s class=\"%s\">%s</%s>\n", hn, clas, heading, hn);
+			}
 			return this;
 		}
-		
+
+		private MdWriter hn(String hn, String clas, String heading, String name) {
+			if (clas == null) {
+				printf("<%s><a class=\"anchor\" name=\"%s\"></a>%s</%s>\n", hn, name, heading, hn);
+			} else {
+				printf("<%s class=\"%s\"><a class=\"anchor\" name=\"%s\"></a>%s</%s>\n", hn, clas, name, heading, hn);
+			}
+			return this;
+		}
+
 		// ---------- LISTS ----------------------------------------
-		
+
 		public MdWriter ul() {
-			println("<ul>");
-			return this;
+			return generic("ul");
 		}
 
 		public MdWriter ul(String clas) {
-			printf("<ul class=\"%s\">\n", clas);
-			return this;
+			return generic(clas, "ul");
 		}
-		
+
 		public MdWriter ulEnd() {
-			println("</ul>");
-			return this;
+			return genericEnd("ul");
 		}
 
 		public MdWriter li() {
-			println("<li>");
-			return this;
+			return generic("li");
 		}
-
+		
 		public MdWriter li(String clas) {
-			printf("<li class=\"%s\">\n", clas);
-			return this;
+			return generic(clas, "li");
 		}
 		
 		public MdWriter liEnd() {
-			println("</li>");
-			return this;
+			return genericEnd("li");
 		}
 		
 		// ---------- SECTION ----------------------------------------
-		
-		public MdWriter section() {
-			println("<section>");
-			return this;
-		}
 
+		public MdWriter section() {
+			return generic("section");
+		}
+		
 		public MdWriter section(String clas) {
-			printf("<section class=\"%s\">\n", clas);
-			return this;
+			return generic(clas, "section");
 		}
 		
 		public MdWriter sectionEnd() {
-			println("</section>");
-			return this;
+			return genericEnd("section");
 		}
-
-		// ---------- TABLES ----------------------------------------
 		
-		public MdWriter table() {
-			println("<table>");
-			return this;
-		}
+		// ---------- TABLES ----------------------------------------
 
+		public MdWriter table() {
+			return generic("table");
+		}
+		
 		public MdWriter table(String clas) {
-			printf("<table class=\"%s\">\n", clas);
-			return this;
+			return generic(clas, "table");
 		}
 		
 		public MdWriter tableEnd() {
-			println("</table>");
-			return this;
+			return genericEnd("table");
 		}
-
+		
 		public MdWriter thead() {
-			println("<thead>");
-			return this;
+			return generic("thead");
 		}
 		
 		public MdWriter thead(String clas) {
-			printf("<thead class=\"%s\">\n", clas);
-			return this;
+			return generic(clas, "thead");
 		}
 		
 		public MdWriter theadEnd() {
-			println("</thead>");
-			return this;
+			return genericEnd("thead");
 		}
 		
 		public MdWriter tbody() {
-			println("<tbody>");
-			return this;
+			return generic("tbody");
 		}
 		
 		public MdWriter tbody(String clas) {
-			printf("<tbody class=\"%s\">\n", clas);
-			return this;
+			return generic(clas, "tbody");
 		}
 		
 		public MdWriter tbodyEnd() {
-			println("</tbody>");
-			return this;
+			return genericEnd("tbody");
 		}
 		
 		public MdWriter tr() {
-			println("<tr>");
-			return this;
+			return generic("tr");
 		}
-
+		
 		public MdWriter tr(String clas) {
-			printf("<tr class=\"%s\">\n", clas);
-			return this;
+			return generic(clas, "tr");
 		}
 		
 		public MdWriter trEnd() {
-			println("</tr>");
-			return this;
+			return genericEnd("tr");
 		}
-
+		
 		public MdWriter th() {
-			println("<th>");
-			return this;
+			return generic("th");
 		}
 		
 		public MdWriter th(String clas) {
-			printf("<th class=\"%s\">\n", clas);
-			return this;
+			return generic(clas, "th");
 		}
 		
 		public MdWriter thEnd() {
-			println("</th>");
-			return this;
+			return genericEnd("th");
 		}
 		
 		public MdWriter td() {
-			println("<td>");
-			return this;
+			return generic("td");
 		}
-
+		
 		public MdWriter td(String clas) {
-			printf("<td class=\"%s\">\n", clas);
-			return this;
+			return generic(clas, "td");
 		}
 		
 		public MdWriter tdEnd() {
-			println("</td>");
-			return this;
+			return genericEnd("td");
 		}
-
+		
 	}
 
 }

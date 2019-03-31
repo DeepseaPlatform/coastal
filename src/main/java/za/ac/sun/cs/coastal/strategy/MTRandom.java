@@ -241,8 +241,7 @@ public class MTRandom {
 	 * <p>
 	 * This method is the core generation algorithm. It is used by all the
 	 * public generation methods for the various primitive types
-	 * {@link #nextBoolean()}, {@link #nextBytes(byte[])},
-	 * {@link #nextDouble()}, {@link #nextFloat()}, {@link #nextGaussian()},
+	 * {@link #nextBoolean()},
 	 * {@link #nextInt()}, {@link #next(int)} and {@link #nextLong()}.
 	 * </p>
 	 * 
