@@ -479,8 +479,8 @@ public class Doclet {
 	//
 	// ======================================================================
 
-	private static final String fileseparator = System.getProperty("file.separator");
-	
+	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
+
 	private static Writer genWriter(String fullFilename) throws IOException {
 		FileOutputStream fos = new FileOutputStream(fullFilename);
 		return new OutputStreamWriter(fos, "UTF-8");
@@ -489,22 +489,22 @@ public class Doclet {
 	public class MdWriter extends PrintWriter {
 
 		public MdWriter(String path, String title) throws IOException {
-			super(genWriter(path + fileseparator + "index.md"));
+			super(genWriter(path + FILE_SEPARATOR + "index.md"));
 			writeFrontMatter(title, "/api/");
 		}
 
 		public MdWriter(String path, String title, boolean toc) throws IOException {
-			super(genWriter(path + fileseparator + "index.md"));
+			super(genWriter(path + FILE_SEPARATOR + "index.md"));
 			writeFrontMatter(title, "/api/", new Object[][] { { "toc", toc } });
 		}
 
 		public MdWriter(String path, String filename, String title) throws IOException {
-			super(genWriter(path + fileseparator + filename + ".md"));
+			super(genWriter(path + FILE_SEPARATOR + filename + ".md"));
 			writeFrontMatter(title, String.format("/api/%s/", filename));
 		}
 
 		public MdWriter(String path, String filename, String title, boolean toc) throws IOException {
-			super(genWriter(path + fileseparator + filename + ".md"));
+			super(genWriter(path + FILE_SEPARATOR + filename + ".md"));
 			writeFrontMatter(title, String.format("/api/%s/", filename), new Object[][] { { "toc", toc } });
 		}
 
@@ -556,7 +556,7 @@ public class Doclet {
 		private MdWriter tags(Tag[] tags) {
 			return tags(tags, 0);
 		}
-		
+
 		public MdWriter a(String href, String text) {
 			printf("<a href=\"%s\">%s</a>", href(href), text);
 			return this;
@@ -585,7 +585,7 @@ public class Doclet {
 				return this;
 			}
 		}
-		
+
 		private String href(String href) {
 			int index = href.indexOf('#');
 			if (index == -1) {
@@ -629,27 +629,27 @@ public class Doclet {
 		public MdWriter span() {
 			return generic("span", false);
 		}
-		
+
 		public MdWriter span(String clas) {
 			return generic(clas, "span", false);
 		}
-		
+
 		public MdWriter spanEnd() {
 			return genericEnd("span", false);
 		}
-		
+
 		public MdWriter code() {
 			return generic("code", false);
 		}
-		
+
 		public MdWriter code(String clas) {
 			return generic(clas, "code", false);
 		}
-		
+
 		public MdWriter codeEnd() {
 			return genericEnd("code", false);
 		}
-		
+
 		private MdWriter generic(String element) {
 			return generic(element, true);
 		}
@@ -669,7 +669,7 @@ public class Doclet {
 			}
 			return this;
 		}
-		
+
 		private MdWriter generic(String clas, String element, boolean newline) {
 			if (clas == null) {
 				printf("<%s>", element);
@@ -681,7 +681,7 @@ public class Doclet {
 			}
 			return this;
 		}
-		
+
 		private MdWriter genericEnd(String element, boolean newline) {
 			printf("</%s>", element);
 			if (newline) {
@@ -689,7 +689,7 @@ public class Doclet {
 			}
 			return this;
 		}
-		
+
 		// ---------- HEADINGS ----------------------------------------
 
 		public MdWriter h1(String heading) {
@@ -780,103 +780,103 @@ public class Doclet {
 		public MdWriter li() {
 			return generic("li");
 		}
-		
+
 		public MdWriter li(String clas) {
 			return generic(clas, "li");
 		}
-		
+
 		public MdWriter liEnd() {
 			return genericEnd("li");
 		}
-		
+
 		// ---------- SECTION ----------------------------------------
 
 		public MdWriter section() {
 			return generic("section");
 		}
-		
+
 		public MdWriter section(String clas) {
 			return generic(clas, "section");
 		}
-		
+
 		public MdWriter sectionEnd() {
 			return genericEnd("section");
 		}
-		
+
 		// ---------- TABLES ----------------------------------------
 
 		public MdWriter table() {
 			return generic("table");
 		}
-		
+
 		public MdWriter table(String clas) {
 			return generic(clas, "table");
 		}
-		
+
 		public MdWriter tableEnd() {
 			return genericEnd("table");
 		}
-		
+
 		public MdWriter thead() {
 			return generic("thead");
 		}
-		
+
 		public MdWriter thead(String clas) {
 			return generic(clas, "thead");
 		}
-		
+
 		public MdWriter theadEnd() {
 			return genericEnd("thead");
 		}
-		
+
 		public MdWriter tbody() {
 			return generic("tbody");
 		}
-		
+
 		public MdWriter tbody(String clas) {
 			return generic(clas, "tbody");
 		}
-		
+
 		public MdWriter tbodyEnd() {
 			return genericEnd("tbody");
 		}
-		
+
 		public MdWriter tr() {
 			return generic("tr");
 		}
-		
+
 		public MdWriter tr(String clas) {
 			return generic(clas, "tr");
 		}
-		
+
 		public MdWriter trEnd() {
 			return genericEnd("tr");
 		}
-		
+
 		public MdWriter th() {
 			return generic("th");
 		}
-		
+
 		public MdWriter th(String clas) {
 			return generic(clas, "th");
 		}
-		
+
 		public MdWriter thEnd() {
 			return genericEnd("th");
 		}
-		
+
 		public MdWriter td() {
 			return generic("td");
 		}
-		
+
 		public MdWriter td(String clas) {
 			return generic(clas, "td");
 		}
-		
+
 		public MdWriter tdEnd() {
 			return genericEnd("td");
 		}
-		
+
 	}
 
 }

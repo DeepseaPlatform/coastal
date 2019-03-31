@@ -1,3 +1,4 @@
+// CHECKSTYLE:OFF
 package za.ac.sun.cs.coastal.utility;
 
 public class DocRun {

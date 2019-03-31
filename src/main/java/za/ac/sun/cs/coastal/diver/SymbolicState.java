@@ -149,7 +149,7 @@ public final class SymbolicState extends State {
 	 * Create a new instance of the symbolic state.
 	 * 
 	 * @param coastal instance of COASTAL that started this run
-	 * @param input input values for the run
+	 * @param input   input values for the run
 	 */
 	public SymbolicState(COASTAL coastal, Input input) { // throws InterruptedException
 		super(coastal, input);
@@ -159,7 +159,9 @@ public final class SymbolicState extends State {
 	}
 
 	/**
-	 * Return the value of the {@link #mayContinue} flag that indicates whether clients (such as diver, surfers, and strategies) should continue work on the problem.
+	 * Return the value of the {@link #mayContinue} flag that indicates whether
+	 * clients (such as diver, surfers, and strategies) should continue work on the
+	 * problem.
 	 * 
 	 * @return value of the {@link #mayContinue} flag
 	 */
@@ -975,8 +977,7 @@ public final class SymbolicState extends State {
 	 *                     override the values)
 	 * @return value that will be used during the execution
 	 */
-	private long getConcreteIntegral(int triggerIndex, int index, int address, int sizeInBits,
-			long currentValue) {
+	private long getConcreteIntegral(int triggerIndex, int index, int address, int sizeInBits, long currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
@@ -1024,8 +1025,7 @@ public final class SymbolicState extends State {
 	 *                     override the values)
 	 * @return value that will be used during the execution
 	 */
-	private double getConcreteReal(int triggerIndex, int index, int address, int sizeInBits,
-			double currentValue) {
+	private double getConcreteReal(int triggerIndex, int index, int address, int sizeInBits, double currentValue) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
@@ -1289,8 +1289,8 @@ public final class SymbolicState extends State {
 	 *                     desired type
 	 * @return array of concrete values that will be used during the execution
 	 */
-	private Object getConcreteRealArray(int triggerIndex, int index, int address, int sizeInBits,
-			Object currentArray, Function<Object, Double> unconvert, Function<Double, Object> convert) {
+	private Object getConcreteRealArray(int triggerIndex, int index, int address, int sizeInBits, Object currentArray,
+			Function<Object, Double> unconvert, Function<Double, Object> convert) {
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		int length = Array.getLength(currentArray);

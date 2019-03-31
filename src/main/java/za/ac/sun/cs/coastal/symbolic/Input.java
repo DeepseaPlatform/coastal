@@ -42,7 +42,9 @@ public final class Input extends PayloadCarrierImpl {
 		inputVector = new InputVector(input.inputVector);
 	}
 
-	public int getSize() { return inputMap.getSize(); }
+	public int getSize() {
+		return inputMap.getSize();
+	}
 
 	/**
 	 * Return the priority of this input. First the method checks is there is a

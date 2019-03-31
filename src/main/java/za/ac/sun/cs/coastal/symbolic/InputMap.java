@@ -6,7 +6,8 @@ import java.util.Set;
 
 /**
  * The inputs to a run of the system-under-test in the form of a mapping from
- * variable indices (as {@link Integer}s) to variable values (as {@link Object}s).
+ * variable indices (as {@link Integer}s) to variable values (as
+ * {@link Object}s).
  */
 public class InputMap {
 
@@ -22,7 +23,9 @@ public class InputMap {
 		inputMap = new HashMap<>();
 	}
 
-	public int getSize() { return inputMap.size(); }
+	public int getSize() {
+		return inputMap.size();
+	}
 
 	/**
 	 * Construct a new set of inputs based on an existing set.
