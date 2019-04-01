@@ -13,7 +13,7 @@ layout: default
 	</section>
 	{% if page.toc %}
 	<section class="toc">
-		{{ content | toc_only }}
+		{% include toc.html html=content h_max=3 %}
 	</section>
 	{% endif %}
 </div></div>
