@@ -13,20 +13,20 @@ import java.io.StringWriter;
  * Typical usage for a one-line banner:
  * </p>
  * 
- * {@prejava
- *log.info((Banner.getBannerLine("some error occurred", '*'));
- * }
+ * <pre>
+ *   log.info((Banner.getBannerLine("some error occurred", '*'));
+ * </pre>
  * 
  * <p>
  * Typical usage for a larger banner:
  * </p>
  * 
- * {@prejava
- *Banner bn = new Banner('@');
- *bn.println("SOME SERIOUS ERROR:");
- *bn.println(exception.getMessage());
- *bn.display(log);
- * }
+ * <pre>
+ *   Banner bn = new Banner('@');
+ *   bn.println("SOME SERIOUS ERROR:");
+ *   bn.println(exception.getMessage());
+ *   bn.display(log);
+ * </pre>
  * 
  * <p>
  * Two additional methods ({@link #getElapsed(COASTAL)} and

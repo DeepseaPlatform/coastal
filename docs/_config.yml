@@ -17,11 +17,6 @@ github_username:  coastal
 markdown: kramdown
 include: ["_pages", "coastal.dtd"]
 exclude: ["copyapi.sh", "runlocal.sh", "Gemfile", "Gemfile.lock", "coastal-docs.sublime-project", "coastal-docs.sublime-workspace", "README.md"]
-plugins:
-  - jekyll-toc
-  - jekyll-tidy
-toc:
-  max_level: 3
 defaults:
   -
     scope:
