@@ -94,7 +94,7 @@ public abstract class Expression implements Comparable<Expression> {
 	// ISREAL
 	//
 	// ======================================================================
-	
+
 	public final boolean isReal() {
 		RealVisitor rv = new RealVisitor();
 		try {
@@ -104,15 +104,15 @@ public abstract class Expression implements Comparable<Expression> {
 		}
 		return rv.isReal();
 	}
-	
+
 	private static class RealVisitor extends Visitor {
-		
+
 		private final Stack<Boolean> stack = new Stack<>();
-		
+
 		public boolean isReal() {
 			return stack.isEmpty() ? false : stack.peek();
 		}
-		
+
 		@Override
 		public void postVisit(Operation operation) throws VisitorException {
 			int n = operation.getOperatandCount();
@@ -122,27 +122,27 @@ public abstract class Expression implements Comparable<Expression> {
 			}
 			stack.push(result);
 		}
-		
+
 		@Override
 		public void postVisit(RealVariable realVariable) throws VisitorException {
 			stack.push(true);
 		}
-		
+
 		@Override
 		public void postVisit(IntegerVariable integerVariable) throws VisitorException {
 			stack.push(false);
 		}
-		
+
 		@Override
 		public void postVisit(RealConstant realConstant) throws VisitorException {
 			stack.push(true);
 		}
-		
+
 		@Override
 		public void postVisit(IntegerConstant integerConstant) throws VisitorException {
 			stack.push(false);
 		}
-		
+
 	}
-	
+
 }

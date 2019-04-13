@@ -30,8 +30,9 @@ public class Solver {
 
 	protected static final String DEFAULT_Z3_ARGS = "-smt2 -in";
 
-	protected static final String Z3_FILE = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + "z3.smt";
-    
+	protected static final String Z3_FILE = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator")
+			+ "z3.smt";
+
 	protected static int problemCounter = 0;
 
 	protected final Logger log;
@@ -167,10 +168,17 @@ public class Solver {
 			if (!variables.containsKey(n)) {
 				StringBuilder b = new StringBuilder();
 				b.append("(declare-const ").append(n).append(" (_ BitVec ").append(v.getSize()).append("))\n");
-				b.append("(assert (bvsge ").append(n).append(' ').append(literal(v.getLowerBound(), v.getSize()))
-						.append("))\n");
-				b.append("(assert (bvsle ").append(n).append(' ').append(literal(v.getUpperBound(), v.getSize()))
-						.append("))");
+				if (v.getLowerBound() >= 0) {
+					b.append("(assert (bvuge ").append(n).append(' ').append(literal(v.getLowerBound(), v.getSize()))
+							.append("))\n");
+					b.append("(assert (bvule ").append(n).append(' ').append(literal(v.getUpperBound(), v.getSize()))
+							.append("))");
+				} else {
+					b.append("(assert (bvsge ").append(n).append(' ').append(literal(v.getLowerBound(), v.getSize()))
+							.append("))\n");
+					b.append("(assert (bvsle ").append(n).append(' ').append(literal(v.getUpperBound(), v.getSize()))
+							.append("))");
+				}
 				variableDefs.add(b.toString());
 				variables.put(n, v);
 			}
@@ -219,12 +227,14 @@ public class Solver {
 					maxSize = (lSize > rSize) ? lSize : rSize;
 					b.append('(').append(setOperator(Operator.EQ, lType)).append(' ');
 					if (lSize < maxSize) {
-						b.append("((_ sign_extend ").append(maxSize - lSize).append(") ").append(l.getEntry()).append(") ");
+						b.append("((_ sign_extend ").append(maxSize - lSize).append(") ").append(l.getEntry())
+								.append(") ");
 					} else {
 						b.append(l.getEntry()).append(' ');
 					}
 					if (rSize < maxSize) {
-						b.append("((_ sign_extend ").append(maxSize - rSize).append(") ").append(r.getEntry()).append("))");
+						b.append("((_ sign_extend ").append(maxSize - rSize).append(") ").append(r.getEntry())
+								.append("))");
 					} else {
 						b.append(r.getEntry()).append(')');
 					}
@@ -234,12 +244,14 @@ public class Solver {
 					maxSize = (lSize > rSize) ? lSize : rSize;
 					b.append("(not (").append(setOperator(Operator.EQ, lType)).append(' ');
 					if (lSize < maxSize) {
-						b.append("((_ sign_extend ").append(maxSize - lSize).append(") ").append(l.getEntry()).append(") ");
+						b.append("((_ sign_extend ").append(maxSize - lSize).append(") ").append(l.getEntry())
+								.append(") ");
 					} else {
 						b.append(l.getEntry()).append(' ');
 					}
 					if (rSize < maxSize) {
-						b.append("((_ sign_extend ").append(maxSize - rSize).append(") ").append(r.getEntry()).append(")))");
+						b.append("((_ sign_extend ").append(maxSize - rSize).append(") ").append(r.getEntry())
+								.append(")))");
 					} else {
 						b.append(r.getEntry()).append("))");
 					}
@@ -286,7 +298,7 @@ public class Solver {
 					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 32));
 					break;
 				case AND:
-					String lStr = l.getEntry(); 
+					String lStr = l.getEntry();
 					if (lStr.equals("(= #x00000000 #x00000000)")) {
 						b.append(r.getEntry());
 						stack.push(new StackEntry(b.toString(), lType, lSize));
