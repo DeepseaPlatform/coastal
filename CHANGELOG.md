@@ -33,7 +33,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Removed dependency on GREEN [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
 
 ### Fixed
-- ...
+- Fixed bug with stack sizes
+- Fixed bug with character description in in-house solver output
+- Removed tricky COASTAL version code [#37](https://github.com/DeepseaPlatform/coastal/issues/37)
 
 ## [0.0.2] - 2018.12.14
 
