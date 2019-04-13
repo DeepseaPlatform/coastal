@@ -43,7 +43,7 @@ public class String {
 		if (index instanceof IntegerConstant) {
 			state.push(state.getStringChar(thisAddress, (int) ((IntegerConstant) index).getValue()));
 		} else {
-			Expression var = new IntegerVariable(state.getNewVariableName(), 32, minChar, maxChar);
+			Expression var = new IntegerVariable(state.getNewVariableName(), 16, minChar, maxChar);
 			Expression subguard = null;
 			for (int i = 0; i < thisLength; i++) {
 				Expression eq = Operation.and(Operation.eq(index, new IntegerConstant(i, 32)),

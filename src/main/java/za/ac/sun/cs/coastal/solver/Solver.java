@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,7 +29,11 @@ public class Solver {
 	protected static final String DEFAULT_Z3_PATH = "/usr/local/bin/z3";
 
 	protected static final String DEFAULT_Z3_ARGS = "-smt2 -in";
-	
+
+	protected static final String Z3_FILE = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + "z3.smt";
+    
+	protected static int problemCounter = 0;
+
 	protected final Logger log;
 
 	protected final String z3Command;
@@ -69,6 +74,11 @@ public class Solver {
 				stdin.close();
 				stdout.close();
 				process.destroy();
+				String filename = Z3_FILE + problemCounter++;
+				PrintWriter writer = new PrintWriter(filename, "UTF-8");
+				writer.println(smt);
+				writer.close();
+				log.trace("Z3 input written to \"{}\"", filename);
 				return null;
 			}
 
@@ -190,27 +200,56 @@ public class Solver {
 			Operator op = operation.getOperator();
 			int arity = op.getArity();
 			if (arity == 2) {
-				Class<? extends Expression> lt = null; // rt = null;
-				int ls = 0; // rs = 0;
+				Class<? extends Expression> lType = null; // rt = null;
+				int lSize = 0, rSize = 0, maxSize = 0;
 				if (!stack.isEmpty()) {
 					r = stack.pop();
 					// rt = r.getType();
-					// rs = r.getSize();
+					rSize = r.getSize();
 				}
 				if (!stack.isEmpty()) {
 					l = stack.pop();
-					lt = l.getType();
-					ls = l.getSize();
+					lType = l.getType();
+					lSize = l.getSize();
 				}
-				//checkCompatible(lt, ls, rt, rs);
+				// checkCompatible(lt, ls, rt, rs);
 				StringBuilder b = new StringBuilder();
 				switch (op) {
-				case NE:
-					b.append("(not (").append(setOperator(Operator.EQ, lt)).append(' ');
-					b.append(l.getEntry()).append(' ');
-					b.append(r.getEntry()).append("))");
-					stack.push(new StackEntry(b.toString(), lt, ls));
+				case EQ:
+					maxSize = (lSize > rSize) ? lSize : rSize;
+					b.append('(').append(setOperator(Operator.EQ, lType)).append(' ');
+					if (lSize < maxSize) {
+						b.append("((_ sign_extend ").append(maxSize - lSize).append(") ").append(l.getEntry()).append(") ");
+					} else {
+						b.append(l.getEntry()).append(' ');
+					}
+					if (rSize < maxSize) {
+						b.append("((_ sign_extend ").append(maxSize - rSize).append(") ").append(r.getEntry()).append("))");
+					} else {
+						b.append(r.getEntry()).append(')');
+					}
+					stack.push(new StackEntry(b.toString(), lType, maxSize));
 					break;
+				case NE:
+					maxSize = (lSize > rSize) ? lSize : rSize;
+					b.append("(not (").append(setOperator(Operator.EQ, lType)).append(' ');
+					if (lSize < maxSize) {
+						b.append("((_ sign_extend ").append(maxSize - lSize).append(") ").append(l.getEntry()).append(") ");
+					} else {
+						b.append(l.getEntry()).append(' ');
+					}
+					if (rSize < maxSize) {
+						b.append("((_ sign_extend ").append(maxSize - rSize).append(") ").append(r.getEntry()).append(")))");
+					} else {
+						b.append(r.getEntry()).append("))");
+					}
+					stack.push(new StackEntry(b.toString(), lType, maxSize));
+					break;
+//					b.append("(not (").append(setOperator(Operator.EQ, lType)).append(' ');
+//					b.append(l.getEntry()).append(' ');
+//					b.append(r.getEntry()).append("))");
+//					stack.push(new StackEntry(b.toString(), lType, lSize));
+//					break;
 				case LCMP:
 					addLcmp();
 					b.append("(lcmp! ");
@@ -246,11 +285,23 @@ public class Solver {
 					b.append(r.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 32));
 					break;
+				case AND:
+					String lStr = l.getEntry(); 
+					if (lStr.equals("(= #x00000000 #x00000000)")) {
+						b.append(r.getEntry());
+						stack.push(new StackEntry(b.toString(), lType, lSize));
+					} else {
+						b.append('(').append(setOperator(op, lType)).append(' ');
+						b.append(lStr).append('\n');
+						b.append(r.getEntry()).append(')');
+						stack.push(new StackEntry(b.toString(), lType, lSize));
+					}
+					break;
 				default:
-					b.append('(').append(setOperator(op, lt)).append(' ');
+					b.append('(').append(setOperator(op, lType)).append(' ');
 					b.append(l.getEntry()).append(' ');
 					b.append(r.getEntry()).append(')');
-					stack.push(new StackEntry(b.toString(), lt, ls));
+					stack.push(new StackEntry(b.toString(), lType, lSize));
 					break;
 				}
 			} else if (arity == 1) {
@@ -263,10 +314,31 @@ public class Solver {
 				}
 				StringBuilder b = new StringBuilder();
 				switch (op) {
+				case B2I:
+					b.append("((_ sign_extend 24) ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 64));
+					break;
+				case S2I:
+					b.append("((_ sign_extend 16) ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 64));
+					break;
 				case I2L:
 					b.append("((_ sign_extend 32) ");
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 64));
+					break;
+				case I2C:
+				case I2S:
+					b.append("((_ extract 15 0) ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 16));
+					break;
+				case I2B:
+					b.append("((_ extract 7 0) ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 8));
 					break;
 				case F2D:
 					b.append("((_ to_fp 11 53) RNE ");
@@ -364,6 +436,8 @@ public class Solver {
 		private String literal(long v, int size) {
 			if (size == 32) {
 				return String.format("#x%08x", (int) v);
+			} else if (size == 16) {
+				return String.format("#x%04x", v);
 			} else if (size == 64) {
 				return String.format("#x%016x", v);
 			} else {
@@ -485,8 +559,8 @@ public class Solver {
 	private Input retrieveModel(String output, Map<String, Variable> variables) {
 		output = output.replaceAll("^\\s*\\(model\\s+(.*)\\s*\\)\\s*$", "$1@");
 		output = output.replaceAll("\\)\\s*\\(define-fun", ")@(define-fun");
-		output = output.replaceAll("\\(define-fun\\s+([$!\\w-]+)\\s*\\(\\)\\s*((\\w+)|(\\([^)]+\\)))\\s+([^@]+)\\s*\\)@",
-				"$1 == $5 ;; ");
+		output = output.replaceAll(
+				"\\(define-fun\\s+([$!\\w-]+)\\s*\\(\\)\\s*((\\w+)|(\\([^)]+\\)))\\s+([^@]+)\\s*\\)@", "$1 == $5 ;; ");
 
 		final Map<String, String> assignment = new HashMap<>();
 		for (String asgn : output.split(";;")) {

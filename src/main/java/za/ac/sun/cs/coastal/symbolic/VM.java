@@ -40,35 +40,35 @@ public class VM {
 	public static void pushExtraConjunct(Expression extraConjunct) {
 		state.pushExtraCondition(extraConjunct);
 	}
-	
+
 	public static int createSymbolicInt(int oldValue, int uniqueId) {
 		return state.createSymbolicInt(oldValue, uniqueId);
 	}
-	
+
 	public static short createSymbolicShort(short oldValue, int uniqueId) {
 		return state.createSymbolicShort(oldValue, uniqueId);
 	}
-	
+
 	public static boolean createSymbolicBoolean(boolean oldValue, int uniqueId) {
 		return state.createSymbolicBoolean(oldValue, uniqueId);
 	}
-	
+
 	public static byte createSymbolicByte(byte oldValue, int uniqueId) {
 		return state.createSymbolicByte(oldValue, uniqueId);
 	}
-	
+
 	public static char createSymbolicChar(char oldValue, int uniqueId) {
 		return state.createSymbolicChar(oldValue, uniqueId);
 	}
-	
+
 	public static long createSymbolicLong(long oldValue, int uniqueId) {
 		return state.createSymbolicLong(oldValue, uniqueId);
 	}
-	
+
 	public static float createSymbolicFloat(float oldValue, int uniqueId) {
 		return state.createSymbolicFloat(oldValue, uniqueId);
 	}
-	
+
 	public static double createSymbolicDouble(double oldValue, int uniqueId) {
 		return state.createSymbolicDouble(oldValue, uniqueId);
 	}
@@ -86,35 +86,35 @@ public class VM {
 	public static boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) {
 		return state.getConcreteBoolean(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
 		return state.getConcreteByte(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static short getConcreteShort(int triggerIndex, int index, int address, short currentValue) {
 		return state.getConcreteShort(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
 		return state.getConcreteChar(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
 		return state.getConcreteInt(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static long getConcreteLong(int triggerIndex, int index, int address, long currentValue) {
 		return state.getConcreteLong(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static float getConcreteFloat(int triggerIndex, int index, int address, float currentValue) {
 		return state.getConcreteFloat(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static double getConcreteDouble(int triggerIndex, int index, int address, double currentValue) {
 		return state.getConcreteDouble(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static String getConcreteString(int triggerIndex, int index, int address, String currentValue) {
 		return state.getConcreteString(triggerIndex, index, address, currentValue);
 	}
@@ -122,35 +122,35 @@ public class VM {
 	public static boolean[] getConcreteBooleanArray(int triggerIndex, int index, int address, boolean[] currentValue) {
 		return state.getConcreteBooleanArray(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) {
 		return state.getConcreteByteArray(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static short[] getConcreteShortArray(int triggerIndex, int index, int address, short[] currentValue) {
 		return state.getConcreteShortArray(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) {
 		return state.getConcreteCharArray(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) {
 		return state.getConcreteIntArray(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static long[] getConcreteLongArray(int triggerIndex, int index, int address, long[] currentValue) {
 		return state.getConcreteLongArray(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static float[] getConcreteFloatArray(int triggerIndex, int index, int address, float[] currentValue) {
 		return state.getConcreteFloatArray(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue) {
 		return state.getConcreteDoubleArray(triggerIndex, index, address, currentValue);
 	}
-	
+
 	public static String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue) {
 		return state.getConcreteStringArray(triggerIndex, index, address, currentValue);
 	}
@@ -166,31 +166,31 @@ public class VM {
 	public static void returnValue(boolean returnValue) {
 		state.returnValue(returnValue);
 	}
-	
+
 	public static void returnValue(char returnValue) {
 		state.returnValue(returnValue);
 	}
-	
+
 	public static void returnValue(double returnValue) {
 		state.returnValue(returnValue);
 	}
-	
+
 	public static void returnValue(float returnValue) {
 		state.returnValue(returnValue);
 	}
-	
+
 	public static void returnValue(int returnValue) {
 		state.returnValue(returnValue);
 	}
-	
+
 	public static void returnValue(long returnValue) {
 		state.returnValue(returnValue);
 	}
-	
+
 	public static void returnValue(short returnValue) {
 		state.returnValue(returnValue);
 	}
-	
+
 	// ======================================================================
 	//
 	// INSTRUCTIONS
@@ -204,7 +204,7 @@ public class VM {
 	public static void label(int instr, String label) {
 		state.label(instr, label);
 	}
-	
+
 	public static void insn(int instr, int opcode) throws SymbolicException {
 		state.insn(instr, opcode);
 	}
@@ -242,15 +242,15 @@ public class VM {
 	public static void jumpInsn(int value, int instr, int opcode) throws SymbolicException {
 		state.jumpInsn(value, instr, opcode);
 	}
-	
+
 	public static void jumpInsn(Object value, int instr, int opcode) throws SymbolicException {
 		state.jumpInsn(value, instr, opcode);
 	}
-	
+
 	public static void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException {
 		state.jumpInsn(value1, value2, instr, opcode);
 	}
-	
+
 	public static void postJumpInsn(int instr, int opcode) throws SymbolicException {
 		state.postJumpInsn(instr, opcode);
 	}
@@ -258,19 +258,19 @@ public class VM {
 	public static void ldcInsn(int instr, int opcode, int value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
-	
+
 	public static void ldcInsn(int instr, int opcode, long value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
-	
+
 	public static void ldcInsn(int instr, int opcode, float value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
-	
+
 	public static void ldcInsn(int instr, int opcode, double value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
-	
+
 	public static void ldcInsn(int instr, int opcode, Object value) throws SymbolicException {
 		state.ldcInsn(instr, opcode, value);
 	}
@@ -304,7 +304,7 @@ public class VM {
 	public static void noException() throws SymbolicException {
 		state.noException();
 	}
-	
+
 	public static void startCatch(int instr) throws SymbolicException {
 		state.startCatch(instr);
 	}
@@ -334,9 +334,19 @@ public class VM {
 	public static void printPC(String label) {
 		state.printPC(label);
 	}
-	
+
 	public static void printPC() {
 		state.printPC();
 	}
-	
+
+	// ======================================================================
+	//
+	// CLASS LOADING
+	//
+	// ======================================================================
+
+	public static void loadClasses(String descriptor) {
+		state.loadClasses(descriptor);
+	}
+
 }

@@ -101,7 +101,7 @@ public abstract class State {
 	 * Construct a new state to record an execution.
 	 * 
 	 * @param coastal the COASTAL instance that initiated the execution
-	 * @param input input values for the run
+	 * @param input   input values for the run
 	 */
 	public State(COASTAL coastal, Input input) { // throws InterruptedException
 		this.coastal = coastal;
@@ -943,5 +943,13 @@ public abstract class State {
 	 * @param label a message passed from the call
 	 */
 	public abstract void printPC(String label);
+
+	// ======================================================================
+	//
+	// CLASS LOADING
+	//
+	// ======================================================================
+
+	public abstract void loadClasses(String descriptor);
 
 }

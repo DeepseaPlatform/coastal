@@ -91,7 +91,9 @@ public class InstrumentationClassManager {
 	}
 
 	public ClassLoader createHeavyClassLoader(SymbolicState symbolicState) {
-		return new HeavyClassLoader(coastal, this, symbolicState);
+		ClassLoader classLoader = new HeavyClassLoader(coastal, this, symbolicState);
+		symbolicState.setClassLoader(classLoader);
+		return classLoader;
 	}
 
 	public ClassLoader createLightClassLoader(TraceState traceState) {
@@ -360,6 +362,25 @@ public class InstrumentationClassManager {
 
 	public void registerLinenumbers(BitSet linenumbers) {
 		this.linenumbers.put(methodCounter, linenumbers);
+	}
+
+	public static void loadClasses(ClassLoader classLoader, String descriptor) {
+		int i = 0, n = descriptor.length();
+		while (i < n) {
+			if (descriptor.charAt(i) == 'L') {
+				int j = descriptor.indexOf(';', i + 1);
+				if (j > 0) {
+					String className = descriptor.substring(i + 1, j).replace('/', '.');
+					try {
+						classLoader.loadClass(className);
+					} catch (ClassNotFoundException e) {
+						// ignore
+					}
+					i = j;
+				}
+			}
+			i++;
+		}
 	}
 
 }

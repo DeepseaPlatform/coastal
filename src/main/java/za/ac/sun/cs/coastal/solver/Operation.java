@@ -205,8 +205,28 @@ public class Operation extends Expression {
 		return new Operation(Operator.DCMPG, a, b);
 	}
 	
+	public static Expression b2i(Expression a) {
+		return new Operation(Operator.B2I, a);
+	}
+	
+	public static Expression s2i(Expression a) {
+		return new Operation(Operator.S2I, a);
+	}
+	
 	public static Expression i2l(Expression a) {
 		return new Operation(Operator.I2L, a);
+	}
+	
+	public static Expression i2s(Expression a) {
+		return new Operation(Operator.I2S, a);
+	}
+	
+	public static Expression i2c(Expression a) {
+		return new Operation(Operator.I2C, a);
+	}
+	
+	public static Expression i2b(Expression a) {
+		return new Operation(Operator.I2B, a);
 	}
 	
 	public static Expression f2d(Expression a) {
@@ -477,7 +497,12 @@ public class Operation extends Expression {
 		DCMPL("DCMPL", 2, Fix.PREFIX, null, null),
 		DCMPG("DCMPG", 2, Fix.PREFIX, null, null),
 		// ---- Conversion operators ----
+		B2I("B2I", 1, Fix.PREFIX, null, null),
+		S2I("S2I", 1, Fix.PREFIX, null, null),
 		I2L("I2L", 1, Fix.PREFIX, null, null),
+		I2S("I2C", 1, Fix.PREFIX, null, null),
+		I2C("I2S", 1, Fix.PREFIX, null, null),
+		I2B("I2B", 1, Fix.PREFIX, null, null),
 		F2D("F2D", 1, Fix.PREFIX, null, null),
 		// ---- Arithmetic operators ----
 		ADD("+", 2, Fix.INFIX, "bvadd", "fp.add RNE"),

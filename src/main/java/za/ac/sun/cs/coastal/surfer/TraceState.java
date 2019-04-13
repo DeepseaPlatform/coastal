@@ -1384,4 +1384,20 @@ public final class TraceState extends State {
 		// do nothing
 	}
 
+	// ======================================================================
+	//
+	// CLASS LOADING
+	//
+	// ======================================================================
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#loadClasses(java.lang.String)
+	 */
+	@Override
+	public void loadClasses(String descriptor) {
+		// do nothing
+	}
+
 }

@@ -18,6 +18,7 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
+import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.solver.Constant;
 import za.ac.sun.cs.coastal.solver.Expression;
@@ -146,6 +147,11 @@ public final class SymbolicState extends State {
 	private final Stack<Expression> pendingSwitch = new Stack<>();
 
 	/**
+	 * The class loader that is used for the system under test.
+	 */
+	private ClassLoader classLoader = null;
+
+	/**
 	 * Create a new instance of the symbolic state.
 	 * 
 	 * @param coastal instance of COASTAL that started this run
@@ -156,6 +162,15 @@ public final class SymbolicState extends State {
 		limitConjuncts = ConfigHelper.limitLong(coastal.getConfig(), "coastal.settings.conjunct-limit");
 		trackAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		setTrackingMode(trackAll);
+	}
+
+	/**
+	 * Set the class loader to the given value.
+	 * 
+	 * @param classLoader the actual class loader used for the system-under-test
+	 */
+	public void setClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
 	}
 
 	/**
@@ -450,38 +465,42 @@ public final class SymbolicState extends State {
 	 * @param type the method's return type as a Java type descriptor
 	 */
 	private void pushReturnValue(char type) {
-		if (type == 'Z') {
-			push(new IntegerVariable(getNewVariableName(), 32, 0, 1));
-		} else if (type == 'B') {
+		if (type == 'Z') { // boolean
+			push(new IntegerVariable(getNewVariableName(), 32, 0, 1), 32);
+		} else if (type == 'B') { // byte
 			byte min = (byte) coastal.getDefaultMinValue(byte.class);
 			byte max = (byte) coastal.getDefaultMaxValue(byte.class);
-			push(new IntegerVariable(getNewVariableName(), 8, min, max));
-		} else if (type == 'C') {
+			push(new IntegerVariable(getNewVariableName(), 8, min, max), 8);
+		} else if (type == 'C') { // char
 			char min = (char) coastal.getDefaultMinValue(char.class);
 			char max = (char) coastal.getDefaultMaxValue(char.class);
-			push(new IntegerVariable(getNewVariableName(), 16, min, max));
-		} else if (type == 'S') {
+			push(new IntegerVariable(getNewVariableName(), 16, min, max), 16);
+		} else if (type == 'S') { // short
 			short min = (short) coastal.getDefaultMinValue(short.class);
 			short max = (short) coastal.getDefaultMaxValue(short.class);
-			push(new IntegerVariable(getNewVariableName(), 16, min, max));
-		} else if (type == 'I') {
+			push(new IntegerVariable(getNewVariableName(), 16, min, max), 16);
+		} else if (type == 'I') { // integer
 			int min = (int) coastal.getDefaultMinValue(int.class);
 			int max = (int) coastal.getDefaultMaxValue(int.class);
-			push(new IntegerVariable(getNewVariableName(), 32, min, max));
-		} else if (type == 'L') {
+			push(new IntegerVariable(getNewVariableName(), 32, min, max), 32);
+		} else if (type == 'J') { // long
 			long min = (long) coastal.getDefaultMinValue(long.class);
 			long max = (long) coastal.getDefaultMaxValue(long.class);
-			push(new IntegerVariable(getNewVariableName(), 64, min, max));
-		} else if (type == 'F') {
+			push(new IntegerVariable(getNewVariableName(), 64, min, max), 64);
+		} else if (type == 'F') { // float
 			float min = (float) coastal.getDefaultMinValue(float.class);
 			float max = (float) coastal.getDefaultMaxValue(float.class);
-			push(new RealVariable(getNewVariableName(), 32, min, max));
-		} else if (type == 'D') {
+			push(new RealVariable(getNewVariableName(), 32, min, max), 32);
+		} else if (type == 'D') { // double
 			double min = (double) coastal.getDefaultMinValue(double.class);
 			double max = (double) coastal.getDefaultMaxValue(double.class);
-			push(new RealVariable(getNewVariableName(), 64, min, max));
+			push(new RealVariable(getNewVariableName(), 64, min, max), 64);
+		} else if (type == 'L') { // object
+			int min = 0;
+			int max = Integer.MAX_VALUE;
+			push(new IntegerVariable(getNewVariableName(), 32, min, max), 32);
 		} else if ((type != 'V') && (type != '?')) {
-			push(IntegerConstant.ZERO32);
+			push(IntegerConstant.ZERO32, 32);
 		}
 	}
 
@@ -644,8 +663,26 @@ public final class SymbolicState extends State {
 	@Override
 	public void push(Expression expr) {
 		frames.peek().push(expr);
+//		if (expr == null) {
+//			push(IntegerConstant.ZERO32);
+//		} else {
+//			push(expr, expr.getBitSize());
+//		}
 	}
 
+	public void push(Expression expr, int bitSize) {
+		frames.peek().push(expr);
+//		if (expr.isReal()) {
+//			frames.peek().push(expr);
+//		} else if (bitSize == 8) {
+//			frames.peek().push(Operation.b2i(expr));
+//		} else if (bitSize == 16) {
+//			frames.peek().push(Operation.s2i(expr));
+//		} else {
+//			frames.peek().push(expr);
+//		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -755,7 +792,7 @@ public final class SymbolicState extends State {
 		}
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntegerVariable(name, 32, 0, 1));
+		push(new IntegerVariable(name, 32, 0, 1), 32);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
 		if (concrete == null) {
@@ -781,7 +818,7 @@ public final class SymbolicState extends State {
 		}
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntegerVariable(name, 8, Byte.MIN_VALUE, Byte.MAX_VALUE));
+		push(new IntegerVariable(name, 8, Byte.MIN_VALUE, Byte.MAX_VALUE), 8);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 8);
 		if (concrete == null) {
@@ -807,7 +844,7 @@ public final class SymbolicState extends State {
 		}
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntegerVariable(name, 16, Short.MIN_VALUE, Short.MAX_VALUE));
+		push(new IntegerVariable(name, 16, Short.MIN_VALUE, Short.MAX_VALUE), 16);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
 		if (concrete == null) {
@@ -833,7 +870,7 @@ public final class SymbolicState extends State {
 		}
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntegerVariable(name, 16, Character.MIN_VALUE, Character.MAX_VALUE));
+		push(new IntegerVariable(name, 16, Character.MIN_VALUE, Character.MAX_VALUE), 16);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
 		if (concrete == null) {
@@ -859,7 +896,7 @@ public final class SymbolicState extends State {
 		}
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntegerVariable(name, 32, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		push(new IntegerVariable(name, 32, Integer.MIN_VALUE, Integer.MAX_VALUE), 32);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
 		if (concrete == null) {
@@ -885,7 +922,7 @@ public final class SymbolicState extends State {
 		}
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new IntegerVariable(name, 64, Long.MIN_VALUE, Long.MAX_VALUE));
+		push(new IntegerVariable(name, 64, Long.MIN_VALUE, Long.MAX_VALUE), 64);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 64);
 		if (concrete == null) {
@@ -911,7 +948,7 @@ public final class SymbolicState extends State {
 		}
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new RealVariable(name, 32, Float.MIN_VALUE, Float.MAX_VALUE));
+		push(new RealVariable(name, 32, Float.MIN_VALUE, Float.MAX_VALUE), 32);
 		Double concreteVal = (input == null) ? null : (Double) input.get(name);
 		RealConstant concrete = concreteVal == null ? null : new RealConstant(concreteVal, 32);
 		if (concrete == null) {
@@ -937,7 +974,7 @@ public final class SymbolicState extends State {
 		}
 		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
-		push(new RealVariable(name, 64, Double.MIN_VALUE, Double.MAX_VALUE));
+		push(new RealVariable(name, 64, Double.MIN_VALUE, Double.MAX_VALUE), 64);
 		Double concreteVal = (input == null) ? null : (Double) input.get(name);
 		RealConstant concrete = concreteVal == null ? null : new RealConstant(concreteVal, 64);
 		if (concrete == null) {
@@ -1513,7 +1550,7 @@ public final class SymbolicState extends State {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
 		} else {
-			Expression value = new IntegerConstant(returnValue, 32);
+			Expression value = new IntegerConstant(returnValue, 16);
 			pushExtraCondition(Operation.eq(peek(), value));
 		}
 	}
@@ -1644,49 +1681,49 @@ public final class SymbolicState extends State {
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.ACONST_NULL:
-			push(IntegerConstant.ZERO32);
+			push(IntegerConstant.ZERO32, 32);
 			break;
 		case Opcodes.ICONST_M1:
-			push(new IntegerConstant(-1, 32));
+			push(new IntegerConstant(-1, 32), 32);
 			break;
 		case Opcodes.ICONST_0:
-			push(IntegerConstant.ZERO32);
+			push(IntegerConstant.ZERO32, 32);
 			break;
 		case Opcodes.ICONST_1:
-			push(IntegerConstant.ONE32);
+			push(IntegerConstant.ONE32, 32);
 			break;
 		case Opcodes.ICONST_2:
-			push(new IntegerConstant(2, 32));
+			push(new IntegerConstant(2, 32), 32);
 			break;
 		case Opcodes.ICONST_3:
-			push(new IntegerConstant(3, 32));
+			push(new IntegerConstant(3, 32), 32);
 			break;
 		case Opcodes.ICONST_4:
-			push(new IntegerConstant(4, 32));
+			push(new IntegerConstant(4, 32), 32);
 			break;
 		case Opcodes.ICONST_5:
-			push(new IntegerConstant(5, 32));
+			push(new IntegerConstant(5, 32), 32);
 			break;
 		case Opcodes.LCONST_0:
-			push(IntegerConstant.ZERO64);
+			push(IntegerConstant.ZERO64, 64);
 			break;
 		case Opcodes.LCONST_1:
-			push(IntegerConstant.ONE64);
+			push(IntegerConstant.ONE64, 64);
 			break;
 		case Opcodes.FCONST_0:
-			push(RealConstant.ZERO32);
+			push(RealConstant.ZERO32, 32);
 			break;
 		case Opcodes.FCONST_1:
-			push(new RealConstant(1, 32));
+			push(new RealConstant(1, 32), 32);
 			break;
 		case Opcodes.FCONST_2:
-			push(new RealConstant(2, 32));
+			push(new RealConstant(2, 32), 32);
 			break;
 		case Opcodes.DCONST_0:
-			push(RealConstant.ZERO64);
+			push(RealConstant.ZERO64, 64);
 			break;
 		case Opcodes.DCONST_1:
-			push(new RealConstant(1, 64));
+			push(new RealConstant(1, 64), 64);
 			break;
 		case Opcodes.IALOAD:
 			// check if i is a variable, if a variable add noExceptionExpression 0 <= i <
@@ -1874,15 +1911,15 @@ public final class SymbolicState extends State {
 		case Opcodes.I2L:
 			push(Operation.i2l(pop()));
 			break;
-//		case Opcodes.I2S:
-//			push(Operation.i2s(pop()));
-//			break;
-//		case Opcodes.I2B:
-//			push(Operation.i2b(pop()));
-//			break;
-//		case Opcodes.I2C:
-//			push(Operation.i2c(pop()));
-//			break;
+		case Opcodes.I2S:
+			push(Operation.i2s(pop()));
+			break;
+		case Opcodes.I2B:
+			push(Operation.i2b(pop()));
+			break;
+		case Opcodes.I2C:
+			push(Operation.i2c(pop()));
+			break;
 //		case Opcodes.L2I:
 //			push(Operation.l2i(pop()));
 //			break;
@@ -1965,10 +2002,10 @@ public final class SymbolicState extends State {
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.BIPUSH:
-			push(new IntegerConstant(operand, 32));
+			push(new IntegerConstant(operand, 32), 32);
 			break;
 		case Opcodes.SIPUSH:
-			push(new IntegerConstant(operand, 32));
+			push(new IntegerConstant(operand, 32), 32);
 			break;
 		case Opcodes.NEWARRAY:
 			Constant init = null;
@@ -2007,7 +2044,7 @@ public final class SymbolicState extends State {
 			for (int i = 0; i < n; i++) {
 				setArrayValue(id, i, init);
 			}
-			push(new IntegerConstant(id, 32));
+			push(new IntegerConstant(id, 32), 32);
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", instr, Bytecodes.toString(opcode), operand,
@@ -2031,8 +2068,8 @@ public final class SymbolicState extends State {
 		broker.publishThread("var-insn", new Tuple(instr, opcode, var));
 		checkLimitConjuncts();
 		switch (opcode) {
-		case Opcodes.ALOAD:
 		case Opcodes.ILOAD:
+		case Opcodes.ALOAD:
 		case Opcodes.LLOAD:
 		case Opcodes.FLOAD:
 		case Opcodes.DLOAD:
@@ -2068,7 +2105,7 @@ public final class SymbolicState extends State {
 		switch (opcode) {
 		case Opcodes.NEW:
 			int id = incrAndGetNewObjectId();
-			push(new IntegerConstant(id, 32));
+			push(new IntegerConstant(id, 32), 32);
 			break;
 		case Opcodes.CHECKCAST:
 			break;
@@ -2076,7 +2113,7 @@ public final class SymbolicState extends State {
 			int size = (int) ((IntegerConstant) pop()).getValue();
 			id = incrAndGetNewObjectId();
 			setArrayLength(id, size);
-			push(new IntegerConstant(id, 32));
+			push(new IntegerConstant(id, 32), 32);
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
@@ -2142,8 +2179,9 @@ public final class SymbolicState extends State {
 		checkLimitConjuncts();
 		lastInvokingInstruction = instr;
 		switch (opcode) {
-		case Opcodes.INVOKESPECIAL:
 		case Opcodes.INVOKEVIRTUAL:
+		case Opcodes.INVOKESPECIAL:
+		case Opcodes.INVOKEINTERFACE:
 			String className = owner.replace('/', '.');
 			if (!coastal.isTarget(className)) {
 				if (!executeDelegate(className, name, descriptor)) {
@@ -2399,13 +2437,13 @@ public final class SymbolicState extends State {
 		switch (opcode) {
 		case Opcodes.LDC:
 			if (value instanceof Integer) {
-				push(new IntegerConstant((int) value, 32));
+				push(new IntegerConstant((int) value, 32), 32);
 			} else if (value instanceof Long) {
-				push(new IntegerConstant((long) value, 64));
+				push(new IntegerConstant((long) value, 64), 64);
 			} else if (value instanceof Float) {
-				push(new RealConstant((float) value, 32));
+				push(new RealConstant((float) value, 32), 32);
 			} else if (value instanceof Double) {
-				push(new RealConstant((double) value, 64));
+				push(new RealConstant((double) value, 64), 64);
 			} else if (value instanceof String) {
 				String s = (String) value;
 				int id = createArray();
@@ -2413,9 +2451,9 @@ public final class SymbolicState extends State {
 				for (int i = 0; i < s.length(); i++) {
 					setArrayValue(id, i, new IntegerConstant(s.charAt(i), 32));
 				}
-				push(new IntegerConstant(id, 32));
+				push(new IntegerConstant(id, 32), 32);
 			} else {
-				push(IntegerConstant.ZERO32);
+				push(IntegerConstant.ZERO32, 32);
 			}
 			break;
 		default:
@@ -2761,6 +2799,22 @@ public final class SymbolicState extends State {
 		final String pc = path.getPathCondition().toString();
 		broker.publish("print-pc", new Tuple(this, null, pc));
 		log.trace("{}: {}", null, pc);
+	}
+
+	// ======================================================================
+	//
+	// CLASS LOADING
+	//
+	// ======================================================================
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#loadClasses(java.lang.String)
+	 */
+	@Override
+	public void loadClasses(String descriptor) {
+		InstrumentationClassManager.loadClasses(classLoader, descriptor);
 	}
 
 }
