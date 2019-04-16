@@ -50,5 +50,6 @@ javadoc {
 }
 
 run {
-    args findProperty('args')
+    if (project.hasProperty('args'))
+       args findProperty('args')
 }
