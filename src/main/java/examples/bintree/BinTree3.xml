@@ -27,7 +27,7 @@
 		<observers>
 			<observer>za.ac.sun.cs.coastal.observers.GUIFactory</observer>
 		</observers>
-		<!-- 
+		<!--
 		-->
 	</coastal>
 </configuration>

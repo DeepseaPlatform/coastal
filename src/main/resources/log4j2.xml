@@ -10,6 +10,7 @@
 		</File>
 	</Appenders>
 	<Loggers>
+		<Logger name="GREEN" level="ALL" additivity="false"/>
 		<Logger name="COASTAL-TEST" level="ALL" additivity="false"/>
 		<Logger name="COASTAL-QUIET" level="ALL" additivity="false">
 			<AppenderRef ref="CONSOLE"/>
