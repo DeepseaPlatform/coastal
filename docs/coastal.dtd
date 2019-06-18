@@ -22,7 +22,7 @@
 <!ATTLIST bound max CDATA #REQUIRED>
 
 <!-- general settings -->
-<!ELEMENT settings (trace-all?,echo-output?,draw-paths?,concrete-values?,show-instrumentation?,write-classfile?,max-threads?,run-limit?,time-limit?,path-limit?,conjunct-limit?,z3-path?)>
+<!ELEMENT settings (trace-all?,echo-output?,draw-paths?,concrete-values?,show-instrumentation?,write-classfile?,max-threads?,run-limit?,time-limit?,path-limit?,conjunct-limit?,solver?)>
 <!ELEMENT trace-all (#PCDATA)>
 <!ELEMENT echo-output (#PCDATA)>
 <!ELEMENT draw-paths (#PCDATA)>
@@ -35,8 +35,8 @@
 <!ELEMENT time-limit (#PCDATA)>
 <!ELEMENT path-limit (#PCDATA)>
 <!ELEMENT conjunct-limit (#PCDATA)>
-<!ELEMENT z3-path (#PCDATA)>
-<!ATTLIST z3-path args CDATA #IMPLIED>
+<!ELEMENT solver (#PCDATA|options)*>
+<!-- <!ELEMENT z3-path (#PCDATA)> <!ATTLIST z3-path args CDATA #IMPLIED> -->
 
 <!ELEMENT divers EMPTY>
 <!ATTLIST divers threads NMTOKEN #IMPLIED>
