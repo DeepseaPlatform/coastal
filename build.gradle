@@ -48,3 +48,8 @@ javadoc {
 	// 'org.apache.logging.log4j.*', 'org.apache.commons.configuration2.*'
 	options.memberLevel = JavadocMemberLevel.PRIVATE
 }
+
+run {
+    if (project.hasProperty('args'))
+       args findProperty('args')
+}
