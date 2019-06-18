@@ -16,6 +16,9 @@
 		<settings>
 			<echo-output>true</echo-output>
 			<draw-paths>true</draw-paths>
+			<solver>
+				za.ac.sun.cs.coastal.solver.SolverGreen
+			</solver>
 		</settings>
 		<!--
 		<divers threads="0"/><surfers threads="1"/>

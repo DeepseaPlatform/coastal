@@ -139,8 +139,10 @@ The configuration consists of 8 sections, all of them optional:
 			-->
 			<solver>
 				za.ac.sun.cs.coastal.solver.SolverZ3
-				<z3-args>-smt2 -in</z3-args>
-				<z3-path>/usr/local/bin/z3</z3-path>
+				<options>
+					<z3-args>-smt2 -in</z3-args>
+					<z3-path>/usr/local/bin/z3</z3-path>
+				</options>
 			</solver>
 		</settings>
 
