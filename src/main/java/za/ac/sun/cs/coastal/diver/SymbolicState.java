@@ -744,15 +744,16 @@ public final class SymbolicState extends State {
 	 */
 	private void pushConjunct(Expression expression, long min, long max, long cur) {
 		Expression conjunct;
-		if (cur < min) {
+		if ((cur < min) || (cur > max)) {
 			Expression lo = Operation.lt(expression, new IntegerConstant(min, 32));
 			Expression hi = Operation.gt(expression, new IntegerConstant(max, 32));
 			conjunct = Operation.or(lo, hi);
+			cur = max + 1; 
 		} else {
 			conjunct = Operation.eq(expression, new IntegerConstant(cur, 32));
 		}
 		Branch branch = new SegmentedPC.Nary(expression, min, max, pendingExtraCondition);
-		path = new Path(path, new Choice(branch, cur));
+		path = new Path(path, new Choice(branch, cur - min));
 		pendingExtraCondition = null;
 		log.trace(">>> adding (switch) conjunct: {}", conjunct.toString());
 		log.trace(">>> path is now: {}", path.getPathCondition().toString());
@@ -1465,8 +1466,39 @@ public final class SymbolicState extends State {
 	 * int, java.lang.String[])
 	 */
 	@Override
-	public String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue) {
-		throw new RuntimeException("UNIMPLEMENTED METHOD");
+	public String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentArray) {
+		Trigger trigger = coastal.getTrigger(triggerIndex);
+		String name = trigger.getParamName(index);
+		int length = (currentArray == null) ? 0 : currentArray.length;
+		int arrayId = createArray();
+		setArrayLength(arrayId, length);
+		if (name == null) { // not symbolic
+			for (int i = 0; i < length; i++) {
+				int stringLength = currentArray[i].length();
+				int stringId = createString();
+				for (int j = 0; j < stringLength; j++) {
+					IntegerConstant chValue = new IntegerConstant(currentArray[i].charAt(j), 16);
+					setStringChar(stringId, i, chValue);
+				}
+				setArrayValue(arrayId, i, new IntegerConstant(stringId, 32));
+			}
+			setLocal(index, new IntegerConstant(arrayId, 32));
+			input.put(index, currentArray);
+			return currentArray;
+		} else {
+			throw new RuntimeException("UNIMPLEMENTED METHOD");
+//			char minChar = (Character) coastal.getDefaultMinValue(char.class);
+//			char maxChar = (Character) coastal.getDefaultMaxValue(char.class);
+//			String[] newArray = new String[length];
+//			for (int i = 0; i < length; i++) {
+//				String entryName = name + INDEX_SEPARATOR + i;
+//				/*???*/ Object concrete = ((name == null) || (input == null)) ? null : input.get(entryName);
+//				char[] chars = new char[length];
+//			}
+//			setLocal(index, new IntegerConstant(arrayId, 32));
+//			input.put(index, newArray);
+//			return newArray;
+		}
 	}
 
 	/*
@@ -2511,7 +2543,7 @@ public final class SymbolicState extends State {
 			return;
 		}
 		if (getRecordingMode()) {
-			log.trace("CASE FOR {}", Bytecodes.toString(Opcodes.TABLESWITCH));
+			log.trace("CASE {} FOR TABLESWITCH ({} .. {})", value, min, max);
 			checkLimitConjuncts();
 			if (!pendingSwitch.isEmpty()) {
 				pushConjunct(pendingSwitch.pop(), min, max, value);

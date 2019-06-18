@@ -26,7 +26,9 @@ public final class Choice extends PayloadCarrierImpl {
 	 */
 	public Choice(Branch branch, long alternative) {
 		this.branch = branch;
-		assert (alternative >= 0) && (alternative < branch.getNumberOfAlternatives());
+		assert (branch != null);
+		assert (alternative >= 0) && (alternative < branch.getNumberOfAlternatives()) : ("alternative:" + alternative
+				+ " branch.getNumberOfAlternatives():" + branch.getNumberOfAlternatives());
 		this.alternative = alternative;
 	}
 
@@ -57,7 +59,7 @@ public final class Choice extends PayloadCarrierImpl {
 	public Choice getAlternative(long alternative) {
 		return new Choice(branch, alternative);
 	}
-	
+
 	/**
 	 * The active conjunct associated with this choice.
 	 * 
@@ -66,7 +68,7 @@ public final class Choice extends PayloadCarrierImpl {
 	public Expression getActiveConjunct() {
 		return getBranch().getAlternative(alternative);
 	}
-	
+
 	/**
 	 * Return the contribution of this choice to a path condition of which it forms
 	 * part.
@@ -78,8 +80,8 @@ public final class Choice extends PayloadCarrierImpl {
 	}
 
 	/**
-	 * Return the contribution of this choice to the signature of a path of which it forms
-	 * part.
+	 * Return the contribution of this choice to the signature of a path of which it
+	 * forms part.
 	 * 
 	 * @return the choice's contribution to the signature
 	 */

@@ -25,9 +25,9 @@ public class SVComp {
 				/************************
 				 * JPF-REGRESSION TESTS *
 				 ************************/
-				{ "jpf-regression", "ExLazy_true", true }, { "jpf-regression", "ExLazy_false", false },
-				{ "jpf-regression", "ExGenSymExe_true", true }, { "jpf-regression", "ExGenSymExe_false", false },
-				{ "jpf-regression", "ExSymExe1_true", true }, { "jpf-regression", "ExSymExe1_false", false },
+//				{ "jpf-regression", "ExLazy_true", true }, { "jpf-regression", "ExLazy_false", false },
+//				{ "jpf-regression", "ExGenSymExe_true", true }, { "jpf-regression", "ExGenSymExe_false", false },
+//				{ "jpf-regression", "ExSymExe1_true", true }, { "jpf-regression", "ExSymExe1_false", false },
 //				{ "jpf-regression", "ExSymExe2_true", true }, { "jpf-regression", "ExSymExe2_false", false },
 //				{ "jpf-regression", "ExSymExe3_true", true }, { "jpf-regression", "ExSymExe3_false", false },
 //				{ "jpf-regression", "ExSymExe4_true", true }, { "jpf-regression", "ExSymExe4_false", false },
@@ -140,7 +140,7 @@ public class SVComp {
 //				{ "jbmc-regression", "virtual1", true }, { "jbmc-regression", "Validate01", true },
 
 //			{ "jbmc-regression", "ClassCastException3", false }, // unknown issue... not calling visitEnd();
-//			{ "jbmc-regression", "exceptions10", false }, // unknown issue
+			{ "jbmc-regression", "exceptions10", false }, // unknown issue
 //			{ "jbmc-regression", "exceptions12", false }, // unknown issue
 //			{ "jbmc-regression", "exceptions13", false }, // unknown issue
 //			{ "jbmc-regression", "exceptions1", false }, // unknown issue

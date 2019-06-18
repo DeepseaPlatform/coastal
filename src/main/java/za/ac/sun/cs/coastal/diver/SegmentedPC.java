@@ -238,7 +238,8 @@ public abstract class SegmentedPC extends Branch {
 	// ======================================================================
 
 	/**
-	 * Representation of an n-ary branch.
+	 * Representation of an n-ary branch with potential choices from min to max and
+	 * one additional choice to represent values less than min or greater than max.
 	 */
 	public static final class Nary extends SegmentedPC {
 
@@ -283,11 +284,11 @@ public abstract class SegmentedPC extends Branch {
 		@Override
 		public Expression getAlternative(long alternative) {
 			if ((alternative < 0) || (alternative >= max - min + 1)) {
-				Expression lo = Operation.lt(expression, new IntegerConstant(this.min, 32));
-				Expression hi = Operation.gt(expression, new IntegerConstant(this.max, 32));
+				Expression lo = Operation.lt(expression, new IntegerConstant(min, 32));
+				Expression hi = Operation.gt(expression, new IntegerConstant(max, 32));
 				return Operation.or(lo, hi);
 			} else {
-				return Operation.eq(expression, new IntegerConstant(alternative, 32));
+				return Operation.eq(expression, new IntegerConstant(alternative + min, 32));
 			}
 		}
 
