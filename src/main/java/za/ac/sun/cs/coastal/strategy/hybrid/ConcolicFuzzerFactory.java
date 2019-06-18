@@ -687,7 +687,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 		protected ConcolicFuzzerHarvester(COASTAL coastal, StrategyManager manager) {
 			super(coastal, manager);
 			this.manager = (ConcolicFuzzerManager) manager;
-			solver = new Solver(coastal);
+			solver = Solver.getSolver(coastal);
 		}
 
 		@Override

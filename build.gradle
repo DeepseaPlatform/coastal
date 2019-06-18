@@ -14,6 +14,7 @@ repositories {
 }
 
 dependencies {
+	compile group: 'za.ac.sun.cs', name: 'green', version: '0.1.5-SNAPSHOT'
 	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
 	compile group: 'commons-io', name: 'commons-io', version: '2.6'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'

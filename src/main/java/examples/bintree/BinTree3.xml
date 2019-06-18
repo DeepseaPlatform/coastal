@@ -17,7 +17,6 @@
 		</bounds>
 		<settings>
 			<draw-paths>true</draw-paths>
-			<z3-path>/usr/local/bin/z3</z3-path>
 		</settings>
 		<strategies>
 			<strategy>za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory</strategy>

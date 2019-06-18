@@ -179,7 +179,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			super(coastal, manager);
 			this.manager = (PathBasedManager) manager;
 			broker = coastal.getBroker();
-			solver = new Solver(coastal);
+			solver = Solver.getSolver(coastal);
 		}
 
 		@Override
