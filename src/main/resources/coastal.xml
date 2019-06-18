@@ -129,9 +129,19 @@ The configuration consists of 8 sections, all of them optional:
 			<conjunct-limit>0</conjunct-limit>
 			
 			<!--
-			Default location and command-line arguments for Z3.
+			Default solver.
+				<solver>
+					FULLY QUALIFIED SOLVER
+					<settings>
+						ANY SETTING WE WANT
+					</settings>
+				</solver>
 			-->
-			<z3-path args="-smt2 -in">/usr/local/bin/z3</z3-path>
+			<solver>
+				za.ac.sun.cs.coastal.solver.SolverZ3
+				<z3-args>-smt2 -in</z3-args>
+				<z3-path>/usr/local/bin/z3</z3-path>
+			</solver>
 		</settings>
 
 		<!--
@@ -157,9 +167,9 @@ The configuration consists of 8 sections, all of them optional:
 			<!--
 			<observer>
 				FULLY QUALIFIED OBSERVER
-				<settings>
+				<options>
 					ANY SETTING WE WANT
-				</settings>
+				</options>
 			</observer>
 			-->
 			<!--
