@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE configuration PUBLIC "-//DEEPSEA//COASTAL configuration//EN" "https://deepseaplatform.github.io/coastal/coastal.dtd">
+<configuration>
+	<coastal>
+		<target>
+			<main>tests.simple.TriggerGlobals</main>
+			<instrument>tests.simple</instrument>
+			<trigger>tests.simple.TriggerGlobals.test()</trigger>
+			<trigger>tests.simple.TriggerGlobals.runit())</trigger>
+		</target>
+		<settings>
+		
+		  <trace-all>true</trace-all>
+		  
+		  <echo-output>true</echo-output>
+		  
+		  <show-instrumentation>true</show-instrumentation>
+		  
+		</settings>
+	</coastal>
+</configuration>
