@@ -281,6 +281,22 @@ public abstract class State {
 	 */
 	public abstract double createSymbolicDouble(double currentValue, int uniqueId);
 
+	public abstract int makeSymbolicInt(String newName);
+	
+	public abstract short makeSymbolicShort(String newName);
+	
+	public abstract boolean makeSymbolicBoolean(String newName);
+	
+	public abstract byte makeSymbolicByte(String newName);
+	
+	public abstract char makeSymbolicChar(String newName);
+	
+	public abstract long makeSymbolicLong(String newName);
+	
+	public abstract float makeSymbolicFloat(String newName);
+	
+	public abstract double makeSymbolicDouble(String newName);
+	
 	// ======================================================================
 	//
 	// METHOD ROUTINES
