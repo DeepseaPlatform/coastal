@@ -131,6 +131,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			broker.publish("report", new Tuple(name + ".extraction-time", extractionTime.get()));
 			broker.publish("report", new Tuple(name + ".wait-time", swt));
 			broker.publish("report", new Tuple(name + ".total-time", strategyTime.get()));
+			Solver.report();
 		}
 
 		protected abstract int getTaskCount();
