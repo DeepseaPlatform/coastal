@@ -682,7 +682,7 @@ public final class SymbolicState extends State {
 //			frames.peek().push(expr);
 //		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -748,7 +748,7 @@ public final class SymbolicState extends State {
 			Expression lo = Operation.lt(expression, new IntegerConstant(min, 32));
 			Expression hi = Operation.gt(expression, new IntegerConstant(max, 32));
 			conjunct = Operation.or(lo, hi);
-			cur = max + 1; 
+			cur = max + 1;
 		} else {
 			conjunct = Operation.eq(expression, new IntegerConstant(cur, 32));
 		}
@@ -781,17 +781,10 @@ public final class SymbolicState extends State {
 	// ROUTINES TO CREATE NEW SYMBOLIC VARIABLES DURING EXECUTION
 	// ----------------------------------------------------------------------
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicBoolean(boolean, int)
-	 */
-	@Override
-	public boolean createSymbolicBoolean(boolean currentValue, int uniqueId) {
+	public boolean createSymbolicBoolean(boolean currentValue, String name) {
 		if (!getTrackingMode()) {
 			return false;
 		}
-		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new IntegerVariable(name, 32, 0, 1), 32);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
@@ -807,17 +800,10 @@ public final class SymbolicState extends State {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicByte(byte, int)
-	 */
-	@Override
-	public byte createSymbolicByte(byte currentValue, int uniqueId) {
+	public byte createSymbolicByte(byte currentValue, String name) {
 		if (!getTrackingMode()) {
 			return 0;
 		}
-		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new IntegerVariable(name, 8, Byte.MIN_VALUE, Byte.MAX_VALUE), 8);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
@@ -833,17 +819,10 @@ public final class SymbolicState extends State {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicShort(short, int)
-	 */
-	@Override
-	public short createSymbolicShort(short currentValue, int uniqueId) {
+	public short createSymbolicShort(short currentValue, String name) {
 		if (!getTrackingMode()) {
 			return 0;
 		}
-		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new IntegerVariable(name, 16, Short.MIN_VALUE, Short.MAX_VALUE), 16);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
@@ -859,17 +838,10 @@ public final class SymbolicState extends State {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicChar(char, int)
-	 */
-	@Override
-	public char createSymbolicChar(char currentValue, int uniqueId) {
+	public char createSymbolicChar(char currentValue, String name) {
 		if (!getTrackingMode()) {
 			return 0x00;
 		}
-		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new IntegerVariable(name, 16, Character.MIN_VALUE, Character.MAX_VALUE), 16);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
@@ -885,17 +857,10 @@ public final class SymbolicState extends State {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicInt(int, int)
-	 */
-	@Override
-	public int createSymbolicInt(int currentValue, int uniqueId) {
+	public int createSymbolicInt(int currentValue, String name) {
 		if (!getTrackingMode()) {
 			return 0;
 		}
-		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new IntegerVariable(name, 32, Integer.MIN_VALUE, Integer.MAX_VALUE), 32);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
@@ -911,17 +876,10 @@ public final class SymbolicState extends State {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicLong(long, int)
-	 */
-	@Override
-	public long createSymbolicLong(long currentValue, int uniqueId) {
+	public long createSymbolicLong(long currentValue, String name) {
 		if (!getTrackingMode()) {
 			return 0;
 		}
-		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new IntegerVariable(name, 64, Long.MIN_VALUE, Long.MAX_VALUE), 64);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
@@ -937,17 +895,10 @@ public final class SymbolicState extends State {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicFloat(float, int)
-	 */
-	@Override
-	public float createSymbolicFloat(float currentValue, int uniqueId) {
+	public float createSymbolicFloat(float currentValue, String name) {
 		if (!getTrackingMode()) {
 			return 0;
 		}
-		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new RealVariable(name, 32, Float.MIN_VALUE, Float.MAX_VALUE), 32);
 		Double concreteVal = (input == null) ? null : (Double) input.get(name);
@@ -963,17 +914,10 @@ public final class SymbolicState extends State {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicDouble(double, int)
-	 */
-	@Override
-	public double createSymbolicDouble(double currentValue, int uniqueId) {
+	public double createSymbolicDouble(double currentValue, String name) {
 		if (!getTrackingMode()) {
 			return 0;
 		}
-		String name = CREATE_VAR_PREFIX + uniqueId;
 		pop();
 		push(new RealVariable(name, 64, Double.MIN_VALUE, Double.MAX_VALUE), 64);
 		Double concreteVal = (input == null) ? null : (Double) input.get(name);
@@ -987,6 +931,126 @@ public final class SymbolicState extends State {
 			log.trace(">>> create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicBoolean(boolean, int)
+	 */
+	@Override
+	public boolean createSymbolicBoolean(boolean currentValue, int uniqueId) {
+		return createSymbolicBoolean(currentValue, CREATE_VAR_PREFIX + uniqueId);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicByte(byte, int)
+	 */
+	@Override
+	public byte createSymbolicByte(byte currentValue, int uniqueId) {
+		return createSymbolicByte(currentValue, CREATE_VAR_PREFIX + uniqueId);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicShort(short, int)
+	 */
+	@Override
+	public short createSymbolicShort(short currentValue, int uniqueId) {
+		return createSymbolicShort(currentValue, CREATE_VAR_PREFIX + uniqueId);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicChar(char, int)
+	 */
+	@Override
+	public char createSymbolicChar(char currentValue, int uniqueId) {
+		return createSymbolicChar(currentValue, CREATE_VAR_PREFIX + uniqueId);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicInt(int, int)
+	 */
+	@Override
+	public int createSymbolicInt(int currentValue, int uniqueId) {
+		return createSymbolicInt(currentValue, CREATE_VAR_PREFIX + uniqueId);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicLong(long, int)
+	 */
+	@Override
+	public long createSymbolicLong(long currentValue, int uniqueId) {
+		return createSymbolicLong(currentValue, CREATE_VAR_PREFIX + uniqueId);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicFloat(float, int)
+	 */
+	@Override
+	public float createSymbolicFloat(float currentValue, int uniqueId) {
+		return createSymbolicFloat(currentValue, CREATE_VAR_PREFIX + uniqueId);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicDouble(double, int)
+	 */
+	@Override
+	public double createSymbolicDouble(double currentValue, int uniqueId) {
+		return createSymbolicDouble(currentValue, CREATE_VAR_PREFIX + uniqueId);
+	}
+
+	@Override
+	public boolean makeSymbolicBoolean(String newName) {
+		return createSymbolicBoolean(false, newName);
+	}
+
+	@Override
+	public int makeSymbolicInt(String newName) {
+		return createSymbolicInt(0, newName);
+	}
+
+	@Override
+	public short makeSymbolicShort(String newName) {
+		return createSymbolicShort((short) 0, newName);
+	}
+
+	@Override
+	public byte makeSymbolicByte(String newName) {
+		return createSymbolicByte((byte) 0, newName);
+	}
+
+	@Override
+	public char makeSymbolicChar(String newName) {
+		return createSymbolicChar('\0', newName);
+	}
+
+	@Override
+	public long makeSymbolicLong(String newName) {
+		return createSymbolicLong(0L, newName);
+	}
+
+	@Override
+	public float makeSymbolicFloat(String newName) {
+		return createSymbolicFloat(0F, newName);
+	}
+
+	@Override
+	public double makeSymbolicDouble(String newName) {
+		return createSymbolicDouble(0.0, newName);
 	}
 
 	// ======================================================================

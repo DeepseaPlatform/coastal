@@ -25,8 +25,7 @@ public final class TriggerGlobals {
 	public void test() { // TRIGGER METHOD
 		if (field < 10) {
 			System.out.println("<10");
-		}
-		else {
+		} else {
 			System.out.println(">=10");
 		}
 	}
@@ -34,8 +33,7 @@ public final class TriggerGlobals {
 	public static void test2(TriggerGlobals o) { // TRIGGER METHOD
 		if (o.field < 10) {
 			System.out.println("<10");
-		}
-		else {
+		} else {
 			System.out.println(">=10");
 		}
 	}

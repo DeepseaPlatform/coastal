@@ -9,12 +9,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.solver.Operation.Operator;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.green.Green;
 import za.ac.sun.cs.green.Instance;
 import za.ac.sun.cs.green.expr.IntConstant;
 import za.ac.sun.cs.green.expr.IntVariable;
+import za.ac.sun.cs.green.util.Reporter;
 
 public class SolverGreen extends Solver {
 
@@ -55,6 +57,16 @@ public class SolverGreen extends Solver {
 			log.trace("VISITOR EXCEPTION", x);
 		}
 		return null;
+	}
+
+	@Override
+	public void issueReport() {
+		green.report(new Reporter() {
+			@Override
+			public void report(String context, String message) {
+				coastal.getBroker().publish("report", new Tuple("green." + context, message));
+			}
+		});
 	}
 
 	// ======================================================================
@@ -112,70 +124,91 @@ public class SolverGreen extends Solver {
 				}
 				switch (op) {
 				case OR:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.OR, l, r));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.OR, l, r));
 					break;
 				case AND:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.AND, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.AND, l,
+							r));
 					break;
 				case EQ:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.EQ, l, r));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.EQ, l, r));
 					break;
 				case NE:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.NE, l, r));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.NE, l, r));
 					break;
 				case LT:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.LT, l, r));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.LT, l, r));
 					break;
 				case LE:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.LE, l, r));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.LE, l, r));
 					break;
 				case GT:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.GT, l, r));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.GT, l, r));
 					break;
 				case GE:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.GE, l, r));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.GE, l, r));
 					break;
 				case ADD:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.ADD, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.ADD, l,
+							r));
 					break;
 				case SUB:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.SUB, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.SUB, l,
+							r));
 					break;
 				case MUL:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.MUL, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.MUL, l,
+							r));
 					break;
 				case DIV:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.DIV, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.DIV, l,
+							r));
 					break;
 				case REM:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.MOD, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.MOD, l,
+							r));
 					break;
 				case BITOR:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.BIT_OR, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.BIT_OR,
+							l, r));
 					break;
 				case BITAND:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.BIT_AND, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.BIT_AND,
+							l, r));
 					break;
 				case BITXOR:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.BIT_XOR, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.BIT_XOR,
+							l, r));
 					break;
 				case SHL:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.SHIFTL, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.SHIFTL,
+							l, r));
 					break;
 				case ASHR:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.SHIFTR, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.SHIFTR,
+							l, r));
 					break;
 				case LSHR:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.SHIFTUR, l, r));
+					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.SHIFTUR,
+							l, r));
 					break;
 				case LCMP:
 				case FCMPL:
 				case DCMPL:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.LT, l, r));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.LT, l, r));
 					break;
 				case FCMPG:
 				case DCMPG:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.GT, l, r));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.GT, l, r));
 					break;
 				default:
 					assert false;
@@ -187,7 +220,8 @@ public class SolverGreen extends Solver {
 				}
 				switch (op) {
 				case NOT:
-					stack.push(new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.NOT, l));
+					stack.push(
+							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.NOT, l));
 					break;
 				case B2I:
 				case S2I:
@@ -231,7 +265,7 @@ public class SolverGreen extends Solver {
 		}
 		return model;
 	}
-	
+
 //	private Input retrieveModel(Map<IntVariable, Integer> greenModel) {
 //		Input model = new Input();
 //		for (IntVariable variable : greenModel.keySet()) {

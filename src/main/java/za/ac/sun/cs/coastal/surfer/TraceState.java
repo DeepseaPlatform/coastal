@@ -262,6 +262,38 @@ public final class TraceState extends State {
 		return 0; // TODO
 	}
 
+	public int makeSymbolicInt(String newName) {
+		return 0;
+	}
+	
+	public short makeSymbolicShort(String newName) {
+		return (short) 0;
+	}
+	
+	public boolean makeSymbolicBoolean(String newName) {
+		return false;
+	}
+	
+	public byte makeSymbolicByte(String newName) {
+		return (byte) 0;
+	}
+	
+	public char makeSymbolicChar(String newName) {
+		return '\0';
+	}
+	
+	public long makeSymbolicLong(String newName) {
+		return 0L;
+	}
+	
+	public float makeSymbolicFloat(String newName) {
+		return 0F;
+	}
+	
+	public double makeSymbolicDouble(String newName) {
+		return 0.0;
+	}
+	
 	// ======================================================================
 	//
 	// METHOD ROUTINES
