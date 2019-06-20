@@ -83,6 +83,10 @@ public class VM {
 		return state.getRecordingMode();
 	}
 
+	public static void transferThis() {
+		state.transferThis();
+	}
+	
 	public static boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) {
 		return state.getConcreteBoolean(triggerIndex, index, address, currentValue);
 	}

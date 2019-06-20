@@ -268,6 +268,11 @@ public final class TraceState extends State {
 	//
 	// ======================================================================
 
+	@Override
+	public void transferThis() {
+		// do nothing
+	}
+
 	/**
 	 * Compute a value to use during the execution. This method caters for
 	 * {@code byte}, {@code short}, {@code char}, {@code int}, and {@code long}

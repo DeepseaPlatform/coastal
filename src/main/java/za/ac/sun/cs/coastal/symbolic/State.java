@@ -298,6 +298,8 @@ public abstract class State {
 	 * - handling of return values
 	 */
 
+	public abstract void transferThis();
+
 	/**
 	 * Return the value to use for a {@code boolean} variable.
 	 * 

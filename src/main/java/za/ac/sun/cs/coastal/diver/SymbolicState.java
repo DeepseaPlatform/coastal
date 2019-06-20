@@ -995,6 +995,11 @@ public final class SymbolicState extends State {
 	//
 	// ======================================================================
 
+	@Override
+	public void transferThis() {
+		
+	}
+
 	/**
 	 * Compute a value to use during the execution. This method caters for
 	 * {@code byte}, {@code short}, {@code char}, {@code int}, and {@code long}
