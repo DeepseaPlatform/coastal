@@ -300,11 +300,6 @@ public final class TraceState extends State {
 	//
 	// ======================================================================
 
-	@Override
-	public void transferThis() {
-		// do nothing
-	}
-
 	/**
 	 * Compute a value to use during the execution. This method caters for
 	 * {@code byte}, {@code short}, {@code char}, {@code int}, and {@code long}
@@ -764,7 +759,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#triggerMethod(int, int)
 	 */
 	@Override
-	public void triggerMethod(int methodNumber, int triggerIndex) {
+	public void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic) {
 		if (!getRecordingMode()) {
 			setRecordingMode(mayRecord);
 			if (getRecordingMode()) {

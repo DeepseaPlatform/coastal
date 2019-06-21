@@ -10,14 +10,14 @@ public final class TriggerGlobals0 {
 
 	public static void main(String[] args) {
 		TriggerGlobals0 o = new TriggerGlobals0(5);
-		o.test();
+		o.test(10);
 	}
 
-	public void test() { // TRIGGER METHOD
-		if (field < 10) {
-			System.out.println("<10");
+	public void test(int limit) { // TRIGGER METHOD
+		if (field < limit) {
+			System.out.println("<limit");
 		} else {
-			System.out.println(">=10");
+			System.out.println(">=limit");
 		}
 	}
 	

@@ -243,14 +243,12 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			//---   triggerMethod()
 			mv.visitLdcInsn(classManager.getNextMethodCounter());
 			mv.visitLdcInsn(triggerIndex);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(II)V", false);
+			mv.visitLdcInsn(isStatic);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(IIZ)V", false);
 			//---   GENERATE PARAMETER OVERRIDES
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			int n = trigger.getParamCount();
 			int offset = (isStatic ? 0 : 1);
-			if (!isStatic) {
-				mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "transferThis", "()V", false);
-			}
 			int address = offset;
 			for (int i = 0; i < n; i++) {
 				address += visitParameter(trigger, triggerIndex, i, address);

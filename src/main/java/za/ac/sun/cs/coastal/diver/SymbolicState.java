@@ -1059,11 +1059,6 @@ public final class SymbolicState extends State {
 	//
 	// ======================================================================
 
-	@Override
-	public void transferThis() {
-		
-	}
-
 	/**
 	 * Compute a value to use during the execution. This method caters for
 	 * {@code byte}, {@code short}, {@code char}, {@code int}, and {@code long}
@@ -1573,17 +1568,21 @@ public final class SymbolicState extends State {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see za.ac.sun.cs.coastal.symbolic.State#triggerMethod(int, int)
+	 * @see za.ac.sun.cs.coastal.symbolic.State#triggerMethod(int, int, boolean)
 	 */
 	@Override
-	public void triggerMethod(int methodNumber, int triggerIndex) {
+	public void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic) {
 		if (!getRecordingMode()) {
 			setRecordingMode(mayRecord);
 			if (getRecordingMode()) {
 				log.trace(">>> symbolic record mode switched on");
 				mayRecord = false;
 				setTrackingMode(true);
+				Expression thisValue = isStatic ? null : peek();
 				frames.push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
+				if (!isStatic) {
+					setLocal(0, thisValue);
+				}
 				dumpFrames();
 				triggeringIndex = triggerIndex;
 			}

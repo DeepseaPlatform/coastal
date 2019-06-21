@@ -5,7 +5,7 @@
 		<target>
 			<main>tests.simple.TriggerGlobals0</main>
 			<instrument>tests.simple</instrument>
-			<trigger>tests.simple.TriggerGlobals0.test()</trigger>
+			<trigger>tests.simple.TriggerGlobals0.test(int)</trigger>
 		</target>
 		<settings>
 			<trace-all>true</trace-all>

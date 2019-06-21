@@ -115,10 +115,6 @@ public class VM {
 		return state.getRecordingMode();
 	}
 
-	public static void transferThis() {
-		state.transferThis();
-	}
-	
 	public static boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) {
 		return state.getConcreteBoolean(triggerIndex, index, address, currentValue);
 	}
@@ -191,8 +187,8 @@ public class VM {
 		return state.getConcreteStringArray(triggerIndex, index, address, currentValue);
 	}
 
-	public static void triggerMethod(int methodNumber, int triggerIndex) {
-		state.triggerMethod(methodNumber, triggerIndex);
+	public static void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic) {
+		state.triggerMethod(methodNumber, triggerIndex, isStatic);
 	}
 
 	public static void startMethod(int methodNumber, int argCount) {

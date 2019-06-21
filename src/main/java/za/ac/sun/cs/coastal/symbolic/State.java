@@ -314,8 +314,6 @@ public abstract class State {
 	 * - handling of return values
 	 */
 
-	public abstract void transferThis();
-
 	/**
 	 * Return the value to use for a {@code boolean} variable.
 	 * 
@@ -538,8 +536,9 @@ public abstract class State {
 	 * 
 	 * @param methodNumber unique number of the method
 	 * @param triggerIndex index of the matching trigger
+	 * @param isStatic whether or not the triggered method is static
 	 */
-	public abstract void triggerMethod(int methodNumber, int triggerIndex);
+	public abstract void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic);
 
 	/**
 	 * Handle the invocation of a non-triggering method. Tracking may or may not be
