@@ -9,16 +9,15 @@
 		</target>
 		<bounds>
 			<bound name="int" min="-9" max="9"/>
-			<bound name="o1" min="0" max="1"/>
-			<bound name="o2" min="0" max="1"/>
-			<bound name="o3" min="0" max="1"/>
-			<bound name="o4" min="0" max="1"/>
-			<bound name="o5" min="0" max="1"/>
+			<bound name="c0" min="0" max="1"/>
+			<bound name="c1" min="0" max="1"/>
+			<bound name="c2" min="0" max="1"/>
+			<bound name="c3" min="0" max="1"/>
+			<bound name="c4" min="0" max="1"/>
 		</bounds>
 		<settings>
 			<echo-output>true</echo-output>
 			<draw-paths>true</draw-paths>
-			<!--
 			<solver>
 				za.ac.sun.cs.coastal.solver.SolverGreen
 				<options>
@@ -29,6 +28,7 @@
 					</green>
 				</options>
 			</solver>
+			<!--
 			-->
 		</settings>
 		<!--
