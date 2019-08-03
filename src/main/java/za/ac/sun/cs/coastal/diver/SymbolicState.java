@@ -17,6 +17,7 @@ import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.ConfigHelper;
 import za.ac.sun.cs.coastal.Trigger;
+import za.ac.sun.cs.coastal.diver.SymbolicValueFactory.SymbolicValue;
 import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Tuple;
@@ -33,6 +34,7 @@ import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Path;
 import za.ac.sun.cs.coastal.symbolic.State;
+import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 
@@ -93,7 +95,7 @@ public final class SymbolicState extends State {
 	 * 
 	 * TO DO: Add a description of of the mapping. Give examples.
 	 */
-	private final Map<String, Expression> instanceData = new HashMap<>();
+	private final Map<String, SymbolicValue> instanceData = new HashMap<>();
 
 	/**
 	 * Extra constraints that are added to the next branching point as the "passive
@@ -144,13 +146,18 @@ public final class SymbolicState extends State {
 	/**
 	 * 
 	 */
-	private final Stack<Expression> pendingSwitch = new Stack<>();
+	private final Stack<SymbolicValue> pendingSwitch = new Stack<>();
 
 	/**
 	 * The class loader that is used for the system under test.
 	 */
 	private ClassLoader classLoader = null;
 
+	/**
+	 * The factory that produces symbolic values.
+	 */
+	private final SymbolicValueFactory symbolicValueFactory;
+	
 	/**
 	 * Create a new instance of the symbolic state.
 	 * 
@@ -161,6 +168,12 @@ public final class SymbolicState extends State {
 		super(coastal, input);
 		limitConjuncts = ConfigHelper.limitLong(coastal.getConfig(), "coastal.settings.conjunct-limit");
 		trackAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
+		String factoryName = coastal.getConfig().getString("coastal.settings.value-factory");
+		if (factoryName != null) {
+			symbolicValueFactory = (SymbolicValueFactory) ConfigHelper.createInstance(coastal, factoryName);
+		} else {
+			symbolicValueFactory = new DiverValueFactory();
+		}
 		setTrackingMode(trackAll);
 	}
 
@@ -171,6 +184,10 @@ public final class SymbolicState extends State {
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
+	}
+
+	public SymbolicValueFactory getSymbolicValueFactory() {
+		return symbolicValueFactory;
 	}
 
 	/**
@@ -207,7 +224,7 @@ public final class SymbolicState extends State {
 	 * @param index the index of the variable
 	 * @return the symbolic value of the local variable
 	 */
-	private Expression getLocal(int index) {
+	private SymbolicValue getLocal(int index) {
 		return frames.peek().getLocal(index);
 	}
 
@@ -218,10 +235,21 @@ public final class SymbolicState extends State {
 	 * @param index the index of the variable
 	 * @param value the new symbolic value of the local variable
 	 */
-	private void setLocal(int index, Expression value) {
+	private void setLocal(int index, SymbolicValue value) {
 		frames.peek().setLocal(index, value);
 	}
 
+	/**
+	 * Return the symbolic value of a local variable in the topmost invocation
+	 * frame.
+	 * 
+	 * @param index the index of the variable
+	 * @param value the new symbolic value of the local variable
+	 */
+	private void setLocal(int index, Expression value) {
+		setLocal(index, symbolicValueFactory.createSymbolicValue(value));
+	}
+	
 	/**
 	 * Update the symbolic value of a field in a particular object instance.
 	 * 
@@ -229,7 +257,7 @@ public final class SymbolicState extends State {
 	 * @param fieldName the name of the field
 	 * @param value     the new symbolic expression for the field
 	 */
-	private void putField(int objectId, String fieldName, Expression value) {
+	private void putField(int objectId, String fieldName, SymbolicValue value) {
 		putField(Integer.toString(objectId), fieldName, value);
 	}
 
@@ -240,7 +268,7 @@ public final class SymbolicState extends State {
 	 * @param fieldName  the name of the field
 	 * @param value      the new symbolic expression for the field
 	 */
-	private void putField(String objectName, String fieldName, Expression value) {
+	private void putField(String objectName, String fieldName, SymbolicValue value) {
 		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
 		instanceData.put(fullFieldName, value);
 	}
@@ -252,7 +280,7 @@ public final class SymbolicState extends State {
 	 * @param fieldName the name of the field
 	 * @return the symbolic expression for the value of the field
 	 */
-	private Expression getField(int objectId, String fieldName) {
+	private SymbolicValue getField(int objectId, String fieldName) {
 		return getField(Integer.toString(objectId), fieldName);
 	}
 
@@ -265,16 +293,17 @@ public final class SymbolicState extends State {
 	 * @param fieldName  the name of the field
 	 * @return the symbolic expression for the value of the field
 	 */
-	private Expression getField(String objectName, String fieldName) {
+	private SymbolicValue getField(String objectName, String fieldName) {
 		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
-		Expression value = instanceData.get(fullFieldName);
+		SymbolicValue value = instanceData.get(fullFieldName);
 		if (value == null) {
 			// THIS int.class ASSUMPTION IS SOMETIMES WRONG
 			// WE MUST INSTEAD ALSO STORE THE TYPE OF THE ARRAY ELEMS
 			// THIS PROBABLY REQUIRES A SECOND MAP LIKE instanceData
 			int min = (Integer) coastal.getDefaultMinValue(int.class);
 			int max = (Integer) coastal.getDefaultMaxValue(int.class);
-			value = new IntegerVariable(getNewVariableName(), 32, min, max);
+			Expression expr = new IntegerVariable(getNewVariableName(), 32, min, max);
+			value = symbolicValueFactory.createSymbolicValue(expr);
 			instanceData.put(fullFieldName, value);
 		}
 		return value;
@@ -545,7 +574,8 @@ public final class SymbolicState extends State {
 	 * @param type    the type of the array elements
 	 */
 	private void setArrayType(int arrayId, int type) {
-		putField(arrayId, "type", new IntegerConstant(type, 32));
+		SymbolicValue value = symbolicValueFactory.createSymbolicValue(new IntegerConstant(type, 32));
+		putField(arrayId, "type", value);
 	}
 
 	/**
@@ -555,7 +585,8 @@ public final class SymbolicState extends State {
 	 * @param length  the length of the array
 	 */
 	private void setArrayLength(int arrayId, int length) {
-		putField(arrayId, "length", new IntegerConstant(length, 32));
+		SymbolicValue value = symbolicValueFactory.createSymbolicValue(new IntegerConstant(length, 32));
+		putField(arrayId, "length", value);
 	}
 
 	/**
@@ -565,10 +596,10 @@ public final class SymbolicState extends State {
 	 * @param index   the index of the element
 	 * @return the symbolic element value in the array
 	 */
-	private Expression getArrayValue(int arrayId, int index) {
+	private SymbolicValue getArrayValue(int arrayId, int index) {
 		return getField(arrayId, "" + index);
 	}
-
+	
 	/**
 	 * Set the symbolic value stored in an array at a particular index.
 	 * 
@@ -576,11 +607,11 @@ public final class SymbolicState extends State {
 	 * @param index   the index of the element
 	 * @param value   the new symbolic value of the array element
 	 */
-	private void setArrayValue(int arrayId, int index, Expression value) {
+	private void setArrayValue(int arrayId, int index, SymbolicValue value) {
 		if (index < 0) {
 			return;
 		}
-		Expression length = getField(arrayId, "length");
+		Expression length = getField(arrayId, "length").toExpression();
 		if (length instanceof IntegerVariable) {
 			String name = ((IntegerVariable) length).getName();
 			int i = (int) new IntegerConstant((Long) input.get(name), 32).getValue();
@@ -593,6 +624,17 @@ public final class SymbolicState extends State {
 			}
 		}
 		putField(arrayId, "" + index, value);
+	}
+
+	/**
+	 * Set the symbolic value stored in an array at a particular index.
+	 * 
+	 * @param arrayId the array identifier
+	 * @param index   the index of the element
+	 * @param value   the new symbolic value of the array element
+	 */
+	private void setArrayValue(int arrayId, int index, Expression value) {
+		setArrayValue(arrayId, index, symbolicValueFactory.createSymbolicValue(value));
 	}
 
 	// ----------------------------------------------------------------------
@@ -615,8 +657,18 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#getStringLength(int)
 	 */
 	@Override
-	public Expression getStringLength(int stringId) {
+	public SymbolicValue getStringLength(int stringId) {
 		return getField(stringId, "length");
+	}
+	
+	/**
+	 * Set the length for a string instance.
+	 * 
+	 * @param stringId unique string identifier
+	 * @param length   new length
+	 */
+	private void setStringLength(int stringId, SymbolicValue length) {
+		putField(stringId, "length", length);
 	}
 
 	/**
@@ -626,16 +678,16 @@ public final class SymbolicState extends State {
 	 * @param length   new length
 	 */
 	private void setStringLength(int stringId, Expression length) {
-		putField(stringId, "length", length);
+		setStringLength(stringId, symbolicValueFactory.createSymbolicValue(length));
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see za.ac.sun.cs.coastal.symbolic.State#getStringChar(int, int)
 	 */
 	@Override
-	public Expression getStringChar(int stringId, int index) {
+	public SymbolicValue getStringChar(int stringId, int index) {
 		return getField(stringId, "" + index);
 	}
 
@@ -646,10 +698,21 @@ public final class SymbolicState extends State {
 	 * @param index    character index to set
 	 * @param value    value for the character
 	 */
-	private void setStringChar(int stringId, int index, Expression value) {
+	private void setStringChar(int stringId, int index, SymbolicValue value) {
 		putField(stringId, "" + index, value);
 	}
 
+	/**
+	 * Set a character inside a string.
+	 * 
+	 * @param stringId unique string identifier
+	 * @param index    character index to set
+	 * @param value    value for the character
+	 */
+	private void setStringChar(int stringId, int index, Expression value) {
+		setStringChar(stringId, index, symbolicValueFactory.createSymbolicValue(value));
+	}
+	
 	// ----------------------------------------------------------------------
 	// ROUTINES TO MANIPULATE THE EXPRESSION STACK
 	// ----------------------------------------------------------------------
@@ -661,8 +724,8 @@ public final class SymbolicState extends State {
 	 * Expression)
 	 */
 	@Override
-	public void push(Expression expr) {
-		frames.peek().push(expr);
+	public void push(Value expr) {
+		frames.peek().push((SymbolicValue) expr);
 //		if (expr == null) {
 //			push(IntegerConstant.ZERO32);
 //		} else {
@@ -670,7 +733,7 @@ public final class SymbolicState extends State {
 //		}
 	}
 
-	public void push(Expression expr, int bitSize) {
+	public void push(SymbolicValue expr, int bitSize) {
 		frames.peek().push(expr);
 //		if (expr.isReal()) {
 //			frames.peek().push(expr);
@@ -683,13 +746,32 @@ public final class SymbolicState extends State {
 //		}
 	}
 
+	/**
+	 * IWrap an expression inside a symbolic value and push it onto the expression stack.
+	 *
+	 * @param expr expression to wrap
+	 */
+	public void push(Expression expr) {
+		push(symbolicValueFactory.createSymbolicValue(expr));
+	}
+
+	/**
+	 * Internal routine to wrap an expression inside a symbolic value and push it onto the expression stack.
+	 *
+	 * @param expr expression to wrap
+	 * @param bitSize bit size
+	 */
+	private void push(Expression expr, int bitSize) {
+		push(symbolicValueFactory.createSymbolicValue(expr), bitSize);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see za.ac.sun.cs.coastal.symbolic.State#pop()
 	 */
 	@Override
-	public Expression pop() {
+	public SymbolicValue pop() {
 		return frames.peek().pop();
 	}
 
@@ -699,7 +781,7 @@ public final class SymbolicState extends State {
 	 * 
 	 * @return the expression on top of the expression stack
 	 */
-	private Expression peek() {
+	private SymbolicValue peek() {
 		return frames.peek().peek();
 	}
 
@@ -766,7 +848,6 @@ public final class SymbolicState extends State {
 	 * za.ac.sun.cs.coastal.symbolic.State#pushExtraCondition(za.ac.sun.cs.coastal.
 	 * solver.Expression)
 	 */
-	@Override
 	public void pushExtraCondition(Expression extraCondition) {
 		if (!SegmentedPC.isConstant(extraCondition)) {
 			if (pendingExtraCondition == null) {
@@ -1578,7 +1659,7 @@ public final class SymbolicState extends State {
 				log.trace(">>> symbolic record mode switched on");
 				mayRecord = false;
 				setTrackingMode(true);
-				Expression thisValue = isStatic ? null : peek();
+				SymbolicValue thisValue = isStatic ? null : peek();
 				frames.push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
 				if (!isStatic) {
 					setLocal(0, thisValue);
@@ -1593,7 +1674,7 @@ public final class SymbolicState extends State {
 	/**
 	 * A small stack where method parameters are stored temporarily.
 	 */
-	private final Stack<Expression> params = new Stack<>();
+	private final Stack<SymbolicValue> params = new Stack<>();
 
 	/*
 	 * (non-Javadoc)
@@ -1636,7 +1717,7 @@ public final class SymbolicState extends State {
 			justExecutedDelegate = false;
 		} else {
 			Expression value = returnValue ? IntegerConstant.ONE32 : IntegerConstant.ZERO32;
-			pushExtraCondition(Operation.eq(peek(), value));
+			pushExtraCondition(Operation.eq(peek().toExpression(), value));
 		}
 	}
 
@@ -1651,7 +1732,7 @@ public final class SymbolicState extends State {
 			justExecutedDelegate = false;
 		} else {
 			Expression value = new IntegerConstant(returnValue, 16);
-			pushExtraCondition(Operation.eq(peek(), value));
+			pushExtraCondition(Operation.eq(peek().toExpression(), value));
 		}
 	}
 
@@ -1691,7 +1772,7 @@ public final class SymbolicState extends State {
 			justExecutedDelegate = false;
 		} else {
 			Expression value = new IntegerConstant(returnValue, 32);
-			pushExtraCondition(Operation.eq(peek(), value));
+			pushExtraCondition(Operation.eq(peek().toExpression(), value));
 		}
 	}
 
@@ -1717,7 +1798,7 @@ public final class SymbolicState extends State {
 			justExecutedDelegate = false;
 		} else {
 			Expression value = new IntegerConstant(returnValue, 32);
-			pushExtraCondition(Operation.eq(peek(), value));
+			pushExtraCondition(Operation.eq(peek().toExpression(), value));
 		}
 	}
 
@@ -1829,70 +1910,60 @@ public final class SymbolicState extends State {
 			// check if i is a variable, if a variable add noExceptionExpression 0 <= i <
 			// size
 			int i = 0;
-			Expression idx = pop();
+			Expression idx = pop().toExpression();
 			if (idx instanceof IntegerVariable) {
 				String name = ((IntegerVariable) idx).getName();
 				i = (int) new IntegerConstant((Long) input.get(name), 32).getValue();
 			} else {
 				i = (int) ((IntegerConstant) idx).getValue();
 			}
-			int a = (int) ((IntegerConstant) pop()).getValue();
+			int a = (int) (pop().toValue());
 			push(getArrayValue(a, i));
-			noExceptionExpression.add(
-					Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, getField(a, "length"))));
+			Expression len = getField(a, "length").toExpression();
+			noExceptionExpression.add(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, len)));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = new IntegerConstant(i, 32);
 			noException();
 			break;
 		case Opcodes.AALOAD:
-			i = (int) ((IntegerConstant) pop()).getValue();
-			a = (int) ((IntegerConstant) pop()).getValue();
+			i = (int) (pop().toValue());
+			a = (int) (pop().toValue());
 			push(getArrayValue(a, i));
 			break;
 		case Opcodes.BALOAD:
-			i = (int) ((IntegerConstant) pop()).getValue();
-			a = (int) ((IntegerConstant) pop()).getValue();
+			i = (int) (pop().toValue());
+			a = (int) (pop().toValue());
 			push(getArrayValue(a, i));
 			break;
 		case Opcodes.CALOAD:
-			i = (int) ((IntegerConstant) pop()).getValue();
-			a = (int) ((IntegerConstant) pop()).getValue();
+			i = (int) (pop().toValue());
+			a = (int) (pop().toValue());
 			push(getArrayValue(a, i));
 			break;
 		case Opcodes.IASTORE:
-			Expression e = pop();
-			idx = pop();
+			SymbolicValue v = pop();
+			idx = pop().toExpression();
 			if (idx instanceof IntegerVariable) {
 				String name = ((IntegerVariable) idx).getName();
 				i = (int) new IntegerConstant((Long) input.get(name), 32).getValue();
 			} else {
 				i = (int) ((IntegerConstant) idx).getValue();
 			}
-			a = (int) ((IntegerConstant) pop()).getValue();
-			setArrayValue(a, i, e);
-			noExceptionExpression.add(
-					Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, getField(a, "length"))));
+			a = (int) (pop().toValue());
+			setArrayValue(a, i, v);
+			len = getField(a, "length").toExpression();
+			noExceptionExpression.add(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, len)));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = new IntegerConstant(i, 32);
 			noException();
 			break;
 		case Opcodes.AASTORE:
-			e = pop();
-			i = (int) ((IntegerConstant) pop()).getValue();
-			a = (int) ((IntegerConstant) pop()).getValue();
-			setArrayValue(a, i, e);
-			break;
 		case Opcodes.BASTORE:
-			e = pop();
-			i = (int) ((IntegerConstant) pop()).getValue();
-			a = (int) ((IntegerConstant) pop()).getValue();
-			setArrayValue(a, i, e);
-			break;
 		case Opcodes.CASTORE:
-			e = pop();
-			i = (int) ((IntegerConstant) pop()).getValue();
-			a = (int) ((IntegerConstant) pop()).getValue();
-			setArrayValue(a, i, e);
+			v = pop();
+			i = (int) (pop().toValue());
+			a = (int) (pop().toValue());
+			setArrayValue(a, i, v);
 			break;
 		case Opcodes.POP:
 			pop();
@@ -1901,124 +1972,118 @@ public final class SymbolicState extends State {
 			push(peek());
 			break;
 		case Opcodes.LNEG:
-			push(Operation.mul(pop(), new IntegerConstant(-1, 64)));
+			push(pop().mul(symbolicValueFactory.createSymbolicValue(new IntegerConstant(-1, 64))));
 			break;
 		case Opcodes.INEG:
-			push(Operation.mul(pop(), new IntegerConstant(-1, 32)));
+			push(pop().mul(symbolicValueFactory.createSymbolicValue(new IntegerConstant(-1, 32))));
 			break;
 		case Opcodes.IADD:
 		case Opcodes.LADD:
 		case Opcodes.FADD:
 		case Opcodes.DADD:
-			e = pop();
-			push(Operation.add(pop(), e));
+			v = pop();
+			push(pop().add(v));
 			break;
 		case Opcodes.IMUL:
 		case Opcodes.LMUL:
 		case Opcodes.FMUL:
 		case Opcodes.DMUL:
-			e = pop();
-			push(Operation.mul(pop(), e));
+			v = pop();
+			push(pop().mul(v));
 			break;
 		case Opcodes.LUSHR:
 		case Opcodes.IUSHR:
-			e = pop();
-			push(Operation.lshr(pop(), e));
+			v = pop();
+			push(pop().lshr(v));
 			break;
 		case Opcodes.LSHR:
 		case Opcodes.ISHR:
-			e = pop();
-			push(Operation.ashr(pop(), e));
+			v = pop();
+			push(pop().ashr(v));
 			break;
 		case Opcodes.LSHL:
 		case Opcodes.ISHL:
-			e = pop();
-			push(Operation.shl(pop(), e));
+			v = pop();
+			push(pop().shl(v));
 			break;
 		case Opcodes.LOR:
 		case Opcodes.IOR:
-			e = pop();
-			push(Operation.bitor(pop(), e));
+			v = pop();
+			push(pop().bitor(v));
 			break;
 		case Opcodes.LAND:
 		case Opcodes.IAND:
-			e = pop();
-			push(Operation.bitand(pop(), e));
+			v = pop();
+			push(pop().bitand(v));
 			break;
 		case Opcodes.LXOR:
 		case Opcodes.IXOR:
-			e = pop();
-			push(Operation.bitxor(pop(), e));
+			v = pop();
+			push(pop().bitxor(v));
 			break;
 		case Opcodes.IDIV:
-			e = pop();
-			Expression idiv = Operation.div(pop(), e);
-			push(idiv);
-			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO32));
+			v = pop();
+			push(pop().div(v));
+			noExceptionExpression.add(Operation.ne(v.toExpression(), IntegerConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.LDIV:
-			e = pop();
-			Expression ldiv = Operation.div(pop(), e);
-			push(ldiv);
-			noExceptionExpression.add(Operation.ne(e, IntegerConstant.ZERO64));
+			v = pop();
+			push(pop().div(v));
+			noExceptionExpression.add(Operation.ne(v.toExpression(), IntegerConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO64;
 			break;
 		case Opcodes.FDIV:
-			e = pop();
-			Expression fdiv = Operation.div(pop(), e);
-			push(fdiv);
-			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO32));
+			v = pop();
+			push(pop().div(v));
+			noExceptionExpression.add(Operation.ne(v.toExpression(), RealConstant.ZERO32));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.DDIV:
-			e = pop();
-			Expression ddiv = Operation.div(pop(), e);
-			push(ddiv);
-			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
+			v = pop();
+			push(pop().div(v));
+			noExceptionExpression.add(Operation.ne(v.toExpression(), RealConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO64;
 			break;
 		case Opcodes.LREM:
-			e = pop();
-			Expression rem = Operation.rem(pop(), e);
-			push(rem);
-			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO64));
+			v = pop();
+			push(pop().rem(v));
+			noExceptionExpression.add(Operation.ne(v.toExpression(), RealConstant.ZERO64));
 			// Add ExceptionExpression to noExceptionExpressionList
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO64;
 			break;
 		case Opcodes.IREM:
-			e = pop();
-			rem = Operation.rem(pop(), e);
-			push(rem);
-			noExceptionExpression.add(Operation.ne(e, RealConstant.ZERO32));
+			v = pop();
+			push(pop().rem(v));
+			noExceptionExpression.add(Operation.ne(v.toExpression(), RealConstant.ZERO32));
 			// Add ExceptionExpression to noExceptionExpressionList
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.LSUB:
 		case Opcodes.ISUB:
-			e = pop();
-			push(Operation.sub(pop(), e));
+			v = pop();
+			push(pop().sub(v));
 			break;
 		case Opcodes.F2D:
-			push(Operation.f2d(pop()));
+			push(pop().f2d());
 			break;
 		case Opcodes.I2L:
-			push(Operation.i2l(pop()));
+			push(pop().i2l());
 			break;
 		case Opcodes.I2S:
-			push(Operation.i2s(pop()));
+			push(pop().i2s());
 			break;
 		case Opcodes.I2B:
-			push(Operation.i2b(pop()));
+			push(pop().i2b());
 			break;
 		case Opcodes.I2C:
-			push(Operation.i2c(pop()));
+			push(pop().i2c());
 			break;
 //		case Opcodes.L2I:
 //			push(Operation.l2i(pop()));
@@ -2027,54 +2092,54 @@ public final class SymbolicState extends State {
 		// case Opcodes.D2F:
 		// break;
 		case Opcodes.LCMP:
-			e = pop();
-			push(Operation.lcmp(pop(), e));
+			v = pop();
+			push(pop().lcmp(v));
 			break;
 		case Opcodes.FCMPL:
-			e = pop();
-			push(Operation.fcmpl(pop(), e));
+			v = pop();
+			push(pop().fcmpl(v));
 			break;
 		case Opcodes.FCMPG:
-			e = pop();
-			push(Operation.fcmpg(pop(), e));
+			v = pop();
+			push(pop().fcmpg(v));
 			break;
 		case Opcodes.DCMPL:
-			e = pop();
-			push(Operation.dcmpl(pop(), e));
+			v = pop();
+			push(pop().dcmpl(v));
 			break;
 		case Opcodes.DCMPG:
-			e = pop();
-			push(Operation.dcmpg(pop(), e));
+			v = pop();
+			push(pop().dcmpg(v));
 			break;
 		case Opcodes.IRETURN:
-			e = pop();
+			v = pop();
 			if (methodReturn()) {
-				push(e);
+				push(v);
 			}
 			break;
 		case Opcodes.LRETURN:
-			e = pop();
+			v = pop();
 			if (methodReturn()) {
-				push(e);
+				push(v);
 			}
 			break;
 		case Opcodes.ARETURN:
-			e = pop();
+			v = pop();
 			if (methodReturn()) {
-				push(e);
+				push(v);
 			}
 			break;
 		case Opcodes.RETURN:
 			methodReturn();
 			break;
 		case Opcodes.ARRAYLENGTH:
-			int id = (int) ((IntegerConstant) pop()).getValue();
+			int id = (int) (pop().toValue());
 			push(getField(id, "length"));
 			break;
 		case Opcodes.ATHROW:
 			noExceptionExpression.add(Operation.FALSE);
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = pop();
+			throwable = pop().toExpression();
 			// broker.publish("assert-failed", new Tuple(this, null));
 			break;
 		case Opcodes.MONITORENTER:
@@ -2130,7 +2195,8 @@ public final class SymbolicState extends State {
 				assert false;
 				break;
 			}
-			Expression e = pop();
+			SymbolicValue initValue = symbolicValueFactory.createSymbolicValue(init);
+			Expression e = pop().toExpression();
 			int n = 0;
 			if (e instanceof IntegerVariable) {
 				String name = ((IntegerVariable) e).getName();
@@ -2142,7 +2208,7 @@ public final class SymbolicState extends State {
 			setArrayType(id, operand);
 			setArrayLength(id, n);
 			for (int i = 0; i < n; i++) {
-				setArrayValue(id, i, init);
+				setArrayValue(id, i, initValue);
 			}
 			push(new IntegerConstant(id, 32), 32);
 			break;
@@ -2210,7 +2276,7 @@ public final class SymbolicState extends State {
 		case Opcodes.CHECKCAST:
 			break;
 		case Opcodes.ANEWARRAY:
-			int size = (int) ((IntegerConstant) pop()).getValue();
+			int size = (int) (pop().toValue());
 			id = incrAndGetNewObjectId();
 			setArrayLength(id, size);
 			push(new IntegerConstant(id, 32), 32);
@@ -2242,17 +2308,16 @@ public final class SymbolicState extends State {
 			push(getField(owner, name));
 			break;
 		case Opcodes.PUTSTATIC:
-			Expression e = pop();
-			putField(owner, name, e);
+			putField(owner, name, pop());
 			break;
 		case Opcodes.GETFIELD:
-			int id = (int) ((IntegerConstant) pop()).getValue();
+			int id = (int) (pop().toValue());
 			push(getField(id, name));
 			break;
 		case Opcodes.PUTFIELD:
-			e = pop();
-			id = (int) ((IntegerConstant) pop()).getValue();
-			putField(id, name, e);
+			SymbolicValue v = pop();
+			id = (int) (pop().toValue());
+			putField(id, name, v);
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr, Bytecodes.toString(opcode),
@@ -2389,68 +2454,68 @@ public final class SymbolicState extends State {
 				// do nothing
 				break;
 			case Opcodes.IFEQ:
-				Expression e = pop();
-				pushConjunct(Operation.eq(e, IntegerConstant.ZERO32));
+				SymbolicValue v = pop();
+				pushConjunct(v.eq(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			case Opcodes.IFNE:
-				e = pop();
-				pushConjunct(Operation.ne(e, IntegerConstant.ZERO32));
+				v = pop();
+				pushConjunct(v.ne(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			case Opcodes.IFLT:
-				e = pop();
-				pushConjunct(Operation.lt(e, IntegerConstant.ZERO32));
+				v = pop();
+				pushConjunct(v.lt(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			case Opcodes.IFGE:
-				e = pop();
-				pushConjunct(Operation.ge(e, IntegerConstant.ZERO32));
+				v = pop();
+				pushConjunct(v.ge(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			case Opcodes.IFGT:
-				e = pop();
-				pushConjunct(Operation.gt(e, IntegerConstant.ZERO32));
+				v = pop();
+				pushConjunct(v.gt(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			case Opcodes.IFLE:
-				e = pop();
-				pushConjunct(Operation.le(e, IntegerConstant.ZERO32));
+				v = pop();
+				pushConjunct(v.le(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			case Opcodes.IF_ICMPEQ:
-				e = pop();
-				pushConjunct(Operation.eq(pop(), e));
+				v = pop();
+				pushConjunct(pop().eq(v).toExpression());
 				break;
 			case Opcodes.IF_ICMPNE:
-				e = pop();
-				pushConjunct(Operation.ne(pop(), e));
+				v = pop();
+				pushConjunct(pop().ne(v).toExpression());
 				break;
 			case Opcodes.IF_ICMPLT:
-				e = pop();
-				pushConjunct(Operation.lt(pop(), e));
+				v = pop();
+				pushConjunct(pop().lt(v).toExpression());
 				break;
 			case Opcodes.IF_ICMPGE:
-				e = pop();
-				pushConjunct(Operation.ge(pop(), e));
+				v = pop();
+				pushConjunct(pop().ge(v).toExpression());
 				break;
 			case Opcodes.IF_ICMPGT:
-				e = pop();
-				pushConjunct(Operation.gt(pop(), e));
+				v = pop();
+				pushConjunct(pop().gt(v).toExpression());
 				break;
 			case Opcodes.IF_ICMPLE:
-				e = pop();
-				pushConjunct(Operation.le(pop(), e));
+				v = pop();
+				pushConjunct(pop().le(v).toExpression());
 				break;
 			case Opcodes.IF_ACMPEQ:
-				e = pop();
-				pushConjunct(Operation.eq(pop(), e));
+				v = pop();
+				pushConjunct(pop().eq(v).toExpression());
 				break;
 			case Opcodes.IF_ACMPNE:
-				e = pop();
-				pushConjunct(Operation.ne(pop(), e));
+				v = pop();
+				pushConjunct(pop().ne(v).toExpression());
 				break;
 			case Opcodes.IFNULL:
-				e = pop();
-				pushConjunct(Operation.eq(e, IntegerConstant.ZERO32));
+				v = pop();
+				pushConjunct(v.eq(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			case Opcodes.IFNONNULL:
-				e = pop();
-				pushConjunct(Operation.ne(e, IntegerConstant.ZERO32));
+				v = pop();
+				pushConjunct(v.ne(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			default:
 				log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
@@ -2547,9 +2612,9 @@ public final class SymbolicState extends State {
 			} else if (value instanceof String) {
 				String s = (String) value;
 				int id = createArray();
-				putField(id, "length", new IntegerConstant(s.length(), 32));
+				putField(id, "length", symbolicValueFactory.createSymbolicValue(new IntegerConstant(s.length(), 32)));
 				for (int i = 0; i < s.length(); i++) {
-					setArrayValue(id, i, new IntegerConstant(s.charAt(i), 32));
+					setArrayValue(id, i, symbolicValueFactory.createSymbolicValue(new IntegerConstant(s.charAt(i), 32)));
 				}
 				push(new IntegerConstant(id, 32), 32);
 			} else {
@@ -2577,9 +2642,9 @@ public final class SymbolicState extends State {
 		log.trace("<{}> {} {}", instr, Bytecodes.toString(opcode), increment);
 		broker.publishThread("iinc-insn", new Tuple(instr, var, increment));
 		checkLimitConjuncts();
-		Expression e0 = getLocal(var);
-		Expression e1 = new IntegerConstant(increment, 32);
-		setLocal(var, Operation.add(e0, e1));
+		SymbolicValue v0 = getLocal(var);
+		SymbolicValue v1 = symbolicValueFactory.createSymbolicValue(new IntegerConstant(increment, 32));
+		setLocal(var, v0.add(v1));
 		dumpFrames();
 	}
 
@@ -2614,7 +2679,7 @@ public final class SymbolicState extends State {
 			log.trace("CASE {} FOR TABLESWITCH ({} .. {})", value, min, max);
 			checkLimitConjuncts();
 			if (!pendingSwitch.isEmpty()) {
-				pushConjunct(pendingSwitch.pop(), min, max, value);
+				pushConjunct(pendingSwitch.pop().toExpression(), min, max, value);
 			}
 			dumpFrames();
 		}

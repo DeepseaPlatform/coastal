@@ -1,10 +1,18 @@
+/*
+ * This file is part of the COASTAL tool, https://deepseaplatform.github.io/coastal/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.coastal.diver;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-import za.ac.sun.cs.coastal.solver.Expression;
+import za.ac.sun.cs.coastal.diver.SymbolicValueFactory.SymbolicValue;
 
 public class SymbolicFrame {
 
@@ -12,9 +20,9 @@ public class SymbolicFrame {
 	
 	protected final int invokingInstruction;
 	
-	protected final Stack<Expression> stack = new Stack<>();
+	protected final Stack<SymbolicValue> stack = new Stack<>();
 
-	protected final Map<Integer, Expression> locals = new HashMap<>();
+	protected final Map<Integer, SymbolicValue> locals = new HashMap<>();
 
 	public SymbolicFrame(int methodNumber, int invokingInstruction) {
 		this.methodNumber = methodNumber;
@@ -37,19 +45,19 @@ public class SymbolicFrame {
 		stack.clear();
 	}
 	
-	public Expression pop() {
+	public SymbolicValue pop() {
 		return stack.pop();
 	}
 
-	public Expression peek() {
+	public SymbolicValue peek() {
 		return stack.peek();
 	}
 
-	public Expression peek(int index) {
+	public SymbolicValue peek(int index) {
 		return stack.get(index);
 	}
 
-	public void push(Expression value) {
+	public void push(SymbolicValue value) {
 		stack.push(value);
 	}
 
@@ -57,11 +65,11 @@ public class SymbolicFrame {
 		return stack.size();
 	}
 
-	public Expression getLocal(int index) {
+	public SymbolicValue getLocal(int index) {
 		return locals.get(index);
 	}
 
-	public void setLocal(int index, Expression value) {
+	public void setLocal(int index, SymbolicValue value) {
 		locals.put(index, value);
 	}
 

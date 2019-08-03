@@ -1,3 +1,4 @@
+// CHECKSTYLE:OFF
 package examples.bintree;
 
 //
@@ -299,7 +300,7 @@ public class BinTree {
 		boolean branch = true; //true =left, false =right
 
 		int depth1 = depth;
-		
+
 		while (current != null && depth1 > 0) {
 			depth1--;
 			System.out.println("depth1 = " +depth1);
@@ -322,7 +323,7 @@ public class BinTree {
 		    		if (depth == 2)
 		    		   break;
 				}
-				
+
 				if (bigson == root) { // && bigson.left == null && bigson.right == null) {
 					root = null;
 					intendedSize--;
@@ -349,7 +350,7 @@ public class BinTree {
 				intendedSize--;
 				return true;
 			}
-			
+
 			parent = current;
 			//	    if (current.value <x ) { // THERE WAS ERROR
 			if (current.value > x) {
@@ -671,7 +672,7 @@ public class BinTree {
         //runExplicit4(1,1,1,1,1,1,1,1);
 		/*
 		BinTree b = new BinTree();
-		
+
 		b.add(0);
 		System.out.println(b.checkTree() + " " + b);
 		b.add(-10);
@@ -682,11 +683,11 @@ public class BinTree {
 		System.out.println(b.checkTree() + " " + b);
 		b.add(-13);
 		System.out.println(b.checkTree() + " " + b);
-		
+
 		System.out.println(b.delete(-11));
 		System.out.println(b.checkTree() + " " + b);
-		
-		System.out.println(b.remove(-12));		
+
+		System.out.println(b.remove(-12));
 		assert b.checkSize() : " size = " + b.getSize() + " but should have been " + b.intendedSize;
 		System.out.println("check = " + b.checkSize()  + " " + b);
 		*/

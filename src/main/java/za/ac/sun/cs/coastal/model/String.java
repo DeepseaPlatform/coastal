@@ -4,6 +4,7 @@ import org.apache.commons.configuration2.ImmutableConfiguration;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
+import za.ac.sun.cs.coastal.diver.SymbolicValueFactory.SymbolicValue;
 import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.solver.IntegerConstant;
 import za.ac.sun.cs.coastal.solver.IntegerVariable;
@@ -29,13 +30,13 @@ public class String {
 	}
 
 	public boolean length____I(SymbolicState state) {
-		int thisAddress = (int) intConstantValue(state.pop());
+		int thisAddress = (int) intConstantValue(state.pop().toExpression());
 		state.push(state.getStringLength(thisAddress));
 		return true;
 	}
 
 	public boolean charAt__I__C(SymbolicState state) {
-		Expression index = state.pop();
+		Expression index = state.pop().toExpression();
 		int thisAddress = (int) intConstantValue(state.pop());
 		int thisLength = (int) intConstantValue(state.getStringLength(thisAddress));
 		Expression guard = Operation.and(Operation.ge(index, IntegerConstant.ZERO32),
@@ -47,7 +48,7 @@ public class String {
 			Expression subguard = null;
 			for (int i = 0; i < thisLength; i++) {
 				Expression eq = Operation.and(Operation.eq(index, new IntegerConstant(i, 32)),
-						Operation.eq(var, state.getStringChar(thisAddress, i)));
+						Operation.eq(var, state.getStringChar(thisAddress, i).toExpression()));
 				if (subguard == null) {
 					subguard = eq;
 				} else {
@@ -62,7 +63,7 @@ public class String {
 	}
 
 	public boolean indexOf__C__I(SymbolicState state) {
-		Expression chr = state.pop();
+		Expression chr = state.pop().toExpression();
 		int thisAddress = (int) intConstantValue(state.pop());
 		int thisLength = (int) intConstantValue(state.getStringLength(thisAddress));
 		if (thisLength == 0) {
@@ -76,8 +77,8 @@ public class String {
 	}
 
 	public boolean indexOf__CI__I(SymbolicState state) {
-		Expression expr = state.pop();
-		Expression chr = state.pop();
+		Expression expr = state.pop().toExpression();
+		Expression chr = state.pop().toExpression();
 		int thisAddress = (int) intConstantValue(state.pop());
 		int thisLength = (int) intConstantValue(state.getStringLength(thisAddress));
 		if (thisLength == 0) {
@@ -115,7 +116,7 @@ public class String {
 	private Expression firstOccurrenceGuard(SymbolicState state, int strAddress, Expression chr, Expression rval,
 			int ofs, int len) {
 		assert ofs < len;
-		Expression thisChar = state.getStringChar(strAddress, ofs);
+		Expression thisChar = state.getStringChar(strAddress, ofs).toExpression();
 		Expression foundAtOfs = Operation.eq(thisChar, chr);
 		Expression returnValue = Operation.eq(rval, new IntegerConstant(ofs, 32));
 		Expression guard = Operation.and(foundAtOfs, returnValue);
@@ -126,7 +127,7 @@ public class String {
 			} else {
 				mismatch = Operation.and(mismatch, Operation.not(foundAtOfs));
 			}
-			thisChar = state.getStringChar(strAddress, o);
+			thisChar = state.getStringChar(strAddress, o).toExpression();
 			foundAtOfs = Operation.and(mismatch, Operation.eq(thisChar, chr));
 			returnValue = Operation.eq(rval, new IntegerConstant(o, 32));
 			guard = Operation.or(guard, Operation.and(foundAtOfs, returnValue));
@@ -148,8 +149,8 @@ public class String {
 		if (thisLength >= prefixLength) {
 			Expression guard = null;
 			for (int i = 0; i < prefixLength; i++) {
-				Expression prefixChar = state.getStringChar(prefixAddress, i);
-				Expression thisChar = state.getStringChar(thisAddress, i);
+				Expression prefixChar = state.getStringChar(prefixAddress, i).toExpression();
+				Expression thisChar = state.getStringChar(thisAddress, i).toExpression();
 				Expression eq = Operation.eq(prefixChar, thisChar);
 				if (i == 0) {
 					guard = eq;
@@ -173,7 +174,7 @@ public class String {
 	}
 
 	public boolean startsWith__Ljava_1lang_1String_2I__Z(SymbolicState state) {
-		Expression offset = state.pop();
+		Expression offset = state.pop().toExpression();
 		int prefixAddress = (int) intConstantValue(state.pop());
 		int thisAddress = (int) intConstantValue(state.pop());
 		int prefixLength = (int) intConstantValue(state.getStringLength(prefixAddress));
@@ -187,8 +188,8 @@ public class String {
 		if (thisLength >= first + prefixLength) {
 			Expression guard = null;
 			for (int i = 0; i < prefixLength; i++) {
-				Expression prefixChar = state.getStringChar(prefixAddress, i);
-				Expression thisChar = state.getStringChar(thisAddress, i + first);
+				Expression prefixChar = state.getStringChar(prefixAddress, i).toExpression();
+				Expression thisChar = state.getStringChar(thisAddress, i + first).toExpression();
 				Expression eq = Operation.eq(prefixChar, thisChar);
 				if (i == 0) {
 					guard = eq;
@@ -220,8 +221,8 @@ public class String {
 		if (thisLength >= prefixLength) {
 			Expression guard = null;
 			for (int i = 0; i < prefixLength; i++) {
-				Expression prefixChar = state.getStringChar(prefixAddress, i);
-				Expression thisChar = state.getStringChar(thisAddress, i + thisLength - prefixLength);
+				Expression prefixChar = state.getStringChar(prefixAddress, i).toExpression();
+				Expression thisChar = state.getStringChar(thisAddress, i + thisLength - prefixLength).toExpression();
 				Expression eq = Operation.eq(prefixChar, thisChar);
 				if (i == 0) {
 					guard = eq;
@@ -249,4 +250,8 @@ public class String {
 		return ((IntegerConstant) expr).getValue();
 	}
 
+	private long intConstantValue(SymbolicValue expr) {
+		return intConstantValue(expr.toExpression());
+	}
+	
 }
