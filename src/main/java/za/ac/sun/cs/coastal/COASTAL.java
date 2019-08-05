@@ -2021,8 +2021,8 @@ public class COASTAL {
 		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, args);
 		if (config != null) {
 			new COASTAL(log, config).start(false);
+			new Banner('~').println("COASTAL DONE (" + config.getString("run-name", "?") + ")").display(log);
 		}
-		new Banner('~').println("COASTAL DONE (" + config.getString("run-name", "?") + ")").display(log);
 		LogManager.shutdown(true);
 	}
 
