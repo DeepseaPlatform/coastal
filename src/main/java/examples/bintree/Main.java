@@ -8,8 +8,14 @@ package examples.bintree;
  *     directory: regression/cbmc-java/tableswitch1
  * The benchmark was taken from the repo: 24 January 2018
  */
+
+@SuppressWarnings("serial")
 class A extends RuntimeException { }
+
+@SuppressWarnings("serial")
 class B extends A { }
+
+@SuppressWarnings("serial")
 class C extends B { }
 
 public class Main {
@@ -22,6 +28,7 @@ public class Main {
     }
   }
 
+  @SuppressWarnings("unused")
   public static void main(String[] args) {
     try {
       A a = new A();
