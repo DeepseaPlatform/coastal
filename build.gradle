@@ -9,12 +9,11 @@ mainClassName = 'za.ac.sun.cs.coastal.COASTAL'
 
 repositories {
 	jcenter()
-	maven { url 'http://repo.jacogeld.org:8081/artifactory/gradle-dev-local/' }
 	maven { url 'https://plugins.gradle.org/m2/' }
 }
 
 dependencies {
-	compile group: 'za.ac.sun.cs', name: 'green', version: '0.1.5-SNAPSHOT'
+	compile group: 'com.github.green-solver', name: 'green', version: '0.2.0'
 	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
 	compile group: 'commons-io', name: 'commons-io', version: '2.6'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
@@ -26,6 +25,16 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.12'
 	testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.25'
 	implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
+}
+
+// Includes sources for examples
+sourceSets {
+	examples {
+		java.srcDir file('src/examples/java')
+		resources.srcDir file('src/examples/resources')
+		compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+		runtimeClasspath += output + compileClasspath
+	}
 }
 
 // So that XML files in src/test/java/tests/* are copied
