@@ -63,8 +63,13 @@ public class SolverGreen extends Solver {
 	public void issueReport() {
 		green.report(new Reporter() {
 			@Override
-			public void report(String context, String message) {
+			public void reportMessage(String context, String message) {
 				coastal.getBroker().publish("report", new Tuple("green." + context, message));
+			}
+
+			@Override
+			public void report(String context, String key, String value) {
+				reportMessage(context, key + ":" + value);
 			}
 		});
 	}
@@ -106,7 +111,7 @@ public class SolverGreen extends Solver {
 
 		@Override
 		public void postVisit(RealVariable v) {
-			stack.push(new za.ac.sun.cs.green.expr.RealVariable(v.getName(), v.getLowerBound(), v.getUpperBound()));
+			stack.push(new za.ac.sun.cs.green.expr.RealVariable(v.getName(), v.getLowerBound(), v.getUpperBound(), 64));
 		}
 
 		@Override
