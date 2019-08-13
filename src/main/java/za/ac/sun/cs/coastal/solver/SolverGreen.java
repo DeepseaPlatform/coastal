@@ -4,11 +4,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Stack;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.solver.Operation.Operator;
 import za.ac.sun.cs.coastal.symbolic.Input;
@@ -26,12 +26,11 @@ public class SolverGreen extends Solver {
 
 	protected final Green green;
 
-	public SolverGreen(COASTAL coastal, ImmutableConfiguration config) {
-		super(coastal, config);
+	public SolverGreen(COASTAL coastal, Configuration configuration) {
+		super(coastal, configuration);
 		log = coastal.getLog();
 		green = new Green("COASTAL", LogManager.getLogger("GREEN"));
-		Properties greenProperties = new Properties();
-		config.getKeys("green").forEachRemaining(k -> greenProperties.setProperty(k, config.getString(k)));
+		Properties greenProperties = configuration.extract("green");
 		greenProperties.setProperty("green.log.level", "ALL");
 		greenProperties.setProperty("green.services", "model");
 		greenProperties.setProperty("green.service.model", "(modeller)");

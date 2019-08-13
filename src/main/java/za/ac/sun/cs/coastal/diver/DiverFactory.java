@@ -4,11 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.TaskFactory;
 import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.messages.Broker;
@@ -160,7 +160,7 @@ public class DiverFactory implements TaskFactory {
 
 		protected final Logger log;
 
-		protected final ImmutableConfiguration config;
+		protected final Configuration configuration;
 
 		protected final Broker broker;
 
@@ -169,7 +169,7 @@ public class DiverFactory implements TaskFactory {
 		public Diver(COASTAL coastal, DiverManager manager) {
 			this.coastal = coastal;
 			log = coastal.getLog();
-			config = coastal.getConfig();
+			configuration = coastal.getConfig();
 			broker = coastal.getBroker();
 			this.manager = manager;
 		}

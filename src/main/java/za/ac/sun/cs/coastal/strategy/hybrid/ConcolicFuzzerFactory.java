@@ -8,10 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
-
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.ConfigHelper;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
@@ -27,15 +25,15 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class ConcolicFuzzerFactory implements StrategyFactory {
 
-	protected final ImmutableConfiguration options;
+	protected final Configuration configuration;
 
-	public ConcolicFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
-		this.options = options;
+	public ConcolicFuzzerFactory(COASTAL coastal, Configuration configuration) {
+		this.configuration = configuration;
 	}
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new ConcolicFuzzerManager(coastal, options);
+		return new ConcolicFuzzerManager(coastal, configuration);
 	}
 
 	@Override
@@ -108,20 +106,20 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 
 		protected final Map<String, Integer> edgesSeen = new HashMap<>();
 
-		public ConcolicFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
+		public ConcolicFuzzerManager(COASTAL coastal, Configuration configuration) {
 			this.coastal = coastal;
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
 			pathTree = coastal.getPathTree();
 			pathTree.setRecordDeepest(true);
-			queueLimit = ConfigHelper.zero(options.getInt("queue-limit", 0), DEFAULT_QUEUE_LIMIT);
-			randomSeed = ConfigHelper.zero(options.getInt("random-seed", 0), System.currentTimeMillis());
-			attenuation = ConfigHelper.minmax(options.getDouble("attenuation", 0.5), 0.0, 1.0);
-			mutationCount = ConfigHelper.zero(options.getInt("mutation-count", 0), 100);
-			eliminationCount = options.getInt("elimination-count", 0);
-			eliminationRatio = ConfigHelper.minmax(options.getDouble("elimination-ratio", 0), 0.0, 1.0);
-			keepTop = ConfigHelper.minmax(options.getInt("keep-top", 1), 1, Integer.MAX_VALUE);
-			drawTree = options.getBoolean("draw-final-tree", false);
+			queueLimit = configuration.getInt("queue-limit", DEFAULT_QUEUE_LIMIT);
+			randomSeed = configuration.getLong("random-seed", System.currentTimeMillis());
+			attenuation = configuration.getDouble("attenuation", 0.5, 0.0, 1.0);
+			mutationCount = configuration.getInt("mutation-count", 100);
+			eliminationCount = configuration.getInt("elimination-count", 0);
+			eliminationRatio = configuration.getDouble("elimination-ratio", 0, 0.0, 1.0);
+			keepTop = configuration.getInt("keep-top", 1, 1, Integer.MAX_VALUE);
+			drawTree = configuration.getBoolean("draw-final-tree", false);
 		}
 
 		public PathTree getPathTree() {

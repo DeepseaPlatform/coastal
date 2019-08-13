@@ -18,7 +18,6 @@ dependencies {
 	compile group: 'commons-io', name: 'commons-io', version: '2.6'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
-	compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.4'
 	compile group: 'org.ow2.asm', name: 'asm', version: '7.0'
 	compile group: 'org.ow2.asm', name: 'asm-commons', version: '7.0'
 	compile group: 'org.ow2.asm', name: 'asm-util', version: '7.0'

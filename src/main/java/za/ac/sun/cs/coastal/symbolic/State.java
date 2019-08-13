@@ -1,3 +1,11 @@
+/*
+ * This file is part of the COASTAL tool, https://deepseaplatform.github.io/coastal/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.coastal.symbolic;
 
 import org.apache.logging.log4j.Logger;
@@ -6,6 +14,7 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.Symbolic;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.solver.Expression;
+import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 
 /**
@@ -165,7 +174,7 @@ public abstract class State {
 	 * @param stringId identifier for the string
 	 * @return symbolic expression for the length of the string
 	 */
-	public abstract Expression getStringLength(int stringId);
+	public abstract Value getStringLength(int stringId);
 
 	/**
 	 * Return the symbolic value of the character at a given index in a given
@@ -175,7 +184,7 @@ public abstract class State {
 	 * @param index    index of the character
 	 * @return symbolic value for the character
 	 */
-	public abstract Expression getStringChar(int stringId, int index);
+	public abstract Value getStringChar(int stringId, int index);
 
 	/**
 	 * Push an expression onto the top of the expression stack of the topmost
@@ -183,7 +192,7 @@ public abstract class State {
 	 * 
 	 * @param expr the expression to push onto the current expression stack
 	 */
-	public abstract void push(Expression expr);
+	public abstract void push(Value expr);
 
 	/**
 	 * Pop and return the expression on the top of the expression stack of the
@@ -191,7 +200,7 @@ public abstract class State {
 	 * 
 	 * @return the expression removed from the current expression stack
 	 */
-	public abstract Expression pop();
+	public abstract Value pop();
 
 	/**
 	 * Register an additional constraint that will be added to the passive conjunct

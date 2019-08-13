@@ -6,10 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
-
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.ConfigHelper;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
@@ -23,15 +21,15 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class FeedbackXFuzzerFactory implements StrategyFactory {
 
-	protected final ImmutableConfiguration options;
+	protected final Configuration configuration;
 
-	public FeedbackXFuzzerFactory(COASTAL coastal, ImmutableConfiguration options) {
-		this.options = options;
+	public FeedbackXFuzzerFactory(COASTAL coastal, Configuration configuration) {
+		this.configuration = configuration;
 	}
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new FeedbackXFuzzerManager(coastal, options);
+		return new FeedbackXFuzzerManager(coastal, configuration);
 	}
 
 	@Override
@@ -94,16 +92,16 @@ public class FeedbackXFuzzerFactory implements StrategyFactory {
 
 		protected final Map<String, Integer> edgesSeen = new HashMap<>();
 
-		public FeedbackXFuzzerManager(COASTAL coastal, ImmutableConfiguration options) {
+		public FeedbackXFuzzerManager(COASTAL coastal, Configuration configuration) {
 			this.coastal = coastal;
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
 			pathTree = coastal.getPathTree();
-			queueLimit = ConfigHelper.zero(options.getInt("queue-limit", 0), DEFAULT_QUEUE_LIMIT);
-			randomSeed = ConfigHelper.zero(options.getInt("seed", 0), System.currentTimeMillis());
-			attenuation = ConfigHelper.minmax(options.getDouble("attenuation", 0.5), 0.0, 1.0);
-			firstRepeat = ConfigHelper.zero(options.getInt("first-repeat", 0), 100);
-			pairRepeat = ConfigHelper.zero(options.getInt("pair-repeat", 0), 50);
+			queueLimit = configuration.getInt("queue-limit", 0, DEFAULT_QUEUE_LIMIT);
+			randomSeed = configuration.getLong("seed", 0, System.currentTimeMillis());
+			attenuation = configuration.getDouble("attenuation", 0.5, 0.0, 1.0);
+			firstRepeat = configuration.getInt("first-repeat", 0, 100);
+			pairRepeat = configuration.getInt("pair-repeat", 0, 50);
 		}
 
 		public PathTree getPathTree() {

@@ -17,11 +17,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.solver.Operation.Operator;
 import za.ac.sun.cs.coastal.symbolic.Input;
 
@@ -40,11 +40,11 @@ public class SolverZ3 extends Solver {
 
 	protected final String z3Command;
 
-	public SolverZ3(COASTAL coastal, ImmutableConfiguration config) {
-		super(coastal, config);
+	public SolverZ3(COASTAL coastal, Configuration configuration) {
+		super(coastal, configuration);
 		log = coastal.getLog();
-		String z3Path = config.getString("z3-path", DEFAULT_Z3_PATH);
-		String z3Args = config.getString("z3-args", DEFAULT_Z3_ARGS);
+		String z3Path = configuration.getString("z3-path", DEFAULT_Z3_PATH);
+		String z3Args = configuration.getString("z3-args", DEFAULT_Z3_ARGS);
 		z3Command = z3Path + ' ' + z3Args;
 	}
 

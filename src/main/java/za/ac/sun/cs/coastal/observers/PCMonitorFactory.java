@@ -1,16 +1,16 @@
 package za.ac.sun.cs.coastal.observers;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class PCMonitorFactory implements ObserverFactory {
 
-	public PCMonitorFactory(COASTAL coastal, ImmutableConfiguration options) {
+	public PCMonitorFactory(COASTAL coastal, Configuration config) {
 	}
 
 	@Override

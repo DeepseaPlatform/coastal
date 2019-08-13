@@ -2,18 +2,17 @@ package za.ac.sun.cs.coastal.observers;
 
 import java.util.BitSet;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.ConfigHelper;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class LineCoverageFactory implements ObserverFactory {
 
-	public LineCoverageFactory(COASTAL coastal, ImmutableConfiguration options) {
+	public LineCoverageFactory(COASTAL coastal, Configuration options) {
 	}
 
 	@Override
@@ -69,9 +68,9 @@ public class LineCoverageFactory implements ObserverFactory {
 				BitSet uncovered = new BitSet();
 				uncovered.or(potentials);
 				uncovered.andNot(covered);
-				broker.publish("report", new Tuple("LineCoverage.uncovered", ConfigHelper.toString(uncovered)));
-				//broker.publish("report", new Tuple("LineCoverage.covered", Conversion.toString(covered)));
-				//broker.publish("report", new Tuple("LineCoverage.potentials", Conversion.toString(potentials)));
+				broker.publish("report", new Tuple("LineCoverage.uncovered", Configuration.toString(uncovered)));
+				//broker.publish("report", new Tuple("LineCoverage.covered", Configuration.toString(covered)));
+				//broker.publish("report", new Tuple("LineCoverage.potentials", Configuration.toString(potentials)));
 			}
 		}
 

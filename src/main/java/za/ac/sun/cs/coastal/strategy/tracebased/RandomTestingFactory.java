@@ -4,10 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
-
 import za.ac.sun.cs.coastal.COASTAL;
-import za.ac.sun.cs.coastal.ConfigHelper;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.strategy.MTRandom;
 import za.ac.sun.cs.coastal.surfer.TraceState;
@@ -16,15 +14,15 @@ import za.ac.sun.cs.coastal.symbolic.Input;
 
 public class RandomTestingFactory extends TraceBasedFactory {
 
-	protected final ImmutableConfiguration options;
+	protected final Configuration configuration;
 
-	public RandomTestingFactory(COASTAL coastal, ImmutableConfiguration options) {
-		this.options = options;
+	public RandomTestingFactory(COASTAL coastal, Configuration configuration) {
+		this.configuration = configuration;
 	}
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new RandomTestingManager(coastal, options);
+		return new RandomTestingManager(coastal, configuration);
 	}
 
 	@Override
@@ -47,10 +45,10 @@ public class RandomTestingFactory extends TraceBasedFactory {
 
 		protected final long randomSeed;
 
-		public RandomTestingManager(COASTAL coastal, ImmutableConfiguration options) {
+		public RandomTestingManager(COASTAL coastal, Configuration configuration) {
 			super(coastal);
-			maxNumberOfModels = ConfigHelper.zero(options.getInt("max-models", 1000), Integer.MAX_VALUE - 1);
-			randomSeed = ConfigHelper.zero(options.getInt("seed", 0), System.currentTimeMillis());
+			maxNumberOfModels = configuration.getInt("max-models", 1000, Integer.MAX_VALUE - 1);
+			randomSeed = configuration.getLong("seed", 0, System.currentTimeMillis());
 		}
 
 		protected void incrementTaskCount() {

@@ -20,16 +20,15 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
-
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.Reporter.Reportable;
 import za.ac.sun.cs.coastal.TaskFactory.TaskManager;
 import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class GUIFactory implements ObserverFactory {
 
-	public GUIFactory(COASTAL coastal, ImmutableConfiguration options) {
+	public GUIFactory(COASTAL coastal, Configuration config) {
 	}
 
 	@Override

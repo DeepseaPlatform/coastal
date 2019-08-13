@@ -1,6 +1,15 @@
+/*
+ * This file is part of the COASTAL tool, https://deepseaplatform.github.io/coastal/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.coastal.symbolic;
 
 import za.ac.sun.cs.coastal.solver.Expression;
+import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 
 public class VM {
@@ -21,19 +30,19 @@ public class VM {
 		return state.getNewVariableName();
 	}
 
-	public static Expression getStringLength(int stringId) {
+	public static Value getStringLength(int stringId) {
 		return state.getStringLength(stringId);
 	}
 
-	public static Expression getStringChar(int stringId, int index) {
+	public static Value getStringChar(int stringId, int index) {
 		return state.getStringChar(stringId, index);
 	}
 
-	public static void push(Expression expr) {
+	public static void push(Value expr) {
 		state.push(expr);
 	}
 
-	public static Expression pop() {
+	public static Value pop() {
 		return state.pop();
 	}
 

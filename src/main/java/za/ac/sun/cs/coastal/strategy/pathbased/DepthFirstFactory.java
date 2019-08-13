@@ -1,15 +1,14 @@
 package za.ac.sun.cs.coastal.strategy.pathbased;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
-
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class DepthFirstFactory extends PathBasedFactory {
 
-	public DepthFirstFactory(COASTAL coastal, ImmutableConfiguration options) {
+	public DepthFirstFactory(COASTAL coastal, Configuration config) {
 	}
 
 	@Override

@@ -29,7 +29,7 @@
 <!ELEMENT concrete-values (#PCDATA)>
 <!ELEMENT show-instrumentation (#PCDATA)>
 <!ELEMENT write-classfile (#PCDATA)>
-<!--<! E LEMENT load-balance (#PCDATA)>-->
+<!--<! ELEMENT load-balance (#PCDATA)>-->
 <!ELEMENT max-threads (#PCDATA)>
 <!ELEMENT run-limit (#PCDATA)>
 <!ELEMENT time-limit (#PCDATA)>

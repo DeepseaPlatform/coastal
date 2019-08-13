@@ -3,9 +3,8 @@ package za.ac.sun.cs.coastal.strategy.pathbased;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
-
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.solver.Expression;
@@ -16,12 +15,15 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class GenerationalFactory extends PathBasedFactory {
 
-	public GenerationalFactory(COASTAL coastal, ImmutableConfiguration options) {
+	private final Configuration config;
+
+	public GenerationalFactory(COASTAL coastal, Configuration config) {
+		this.config = config;
 	}
 
 	@Override
 	public StrategyManager createManager(COASTAL coastal) {
-		return new GenerationalManager(coastal);
+		return new GenerationalManager(coastal, config);
 	}
 
 	@Override
@@ -52,16 +54,16 @@ public class GenerationalFactory extends PathBasedFactory {
 
 		private final boolean full;
 
-		GenerationalManager(COASTAL coastal) {
+		GenerationalManager(COASTAL coastal, Configuration config) {
 			super(coastal);
-			if (coastal.getConfig().getBoolean("coastal.strategy[@topdown]", false)) {
+			if (config.getBoolean("topdown", false)) {
 				priorityStart = 0;
 				priorityDelta = 1;
 			} else {
 				priorityStart = 10000;
 				priorityDelta = -1;
 			}
-			full = coastal.getConfig().getBoolean("coastal.strategy[@full]", true);
+			full = config.getBoolean("full", true);
 		}
 
 		protected void incrementTaskCount() {

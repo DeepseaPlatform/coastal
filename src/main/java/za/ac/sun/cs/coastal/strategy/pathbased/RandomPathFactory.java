@@ -2,16 +2,18 @@ package za.ac.sun.cs.coastal.strategy.pathbased;
 
 import java.util.Random;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
-
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class RandomPathFactory extends PathBasedFactory {
 
-	public RandomPathFactory(COASTAL coastal, ImmutableConfiguration options) {
+	private final Configuration config;
+
+	public RandomPathFactory(COASTAL coastal, Configuration config) {
+		this.config = config;
 	}
 
 	@Override
@@ -22,7 +24,7 @@ public class RandomPathFactory extends PathBasedFactory {
 	@Override
 	public Strategy[] createTask(COASTAL coastal, TaskManager manager) {
 		((RandomStrategyManager) manager).incrementTaskCount();
-		return new Strategy[] { new RandomPathStrategy(coastal, (StrategyManager) manager) };
+		return new Strategy[] { new RandomPathStrategy(coastal, config, (StrategyManager) manager) };
 	}
 
 	// ======================================================================
@@ -65,12 +67,9 @@ public class RandomPathFactory extends PathBasedFactory {
 
 		private final Random rng = new Random();
 
-		RandomPathStrategy(COASTAL coastal, StrategyManager manager) {
+		RandomPathStrategy(COASTAL coastal, Configuration config, StrategyManager manager) {
 			super(coastal, manager);
-			Long seed = coastal.getConfig().getLong("coastal.strategy[@seed]");
-			if (seed != null) {
-				rng.setSeed(seed);
-			}
+			rng.setSeed(config.getLong("seed", 0, System.currentTimeMillis()));
 		}
 
 		@Override

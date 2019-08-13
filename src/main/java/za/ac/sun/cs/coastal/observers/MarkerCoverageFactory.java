@@ -3,16 +3,16 @@ package za.ac.sun.cs.coastal.observers;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class MarkerCoverageFactory implements ObserverFactory {
 
-	public MarkerCoverageFactory(COASTAL coastal, ImmutableConfiguration options) {
+	public MarkerCoverageFactory(COASTAL coastal, Configuration config) {
 	}
 
 	@Override

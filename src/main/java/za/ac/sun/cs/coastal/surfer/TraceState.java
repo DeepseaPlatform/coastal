@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.objectweb.asm.Opcodes;
 
 import za.ac.sun.cs.coastal.COASTAL;
@@ -14,15 +13,18 @@ import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
 import za.ac.sun.cs.coastal.solver.Expression;
+import za.ac.sun.cs.coastal.surfer.TraceValueFactory.TraceValue;
 import za.ac.sun.cs.coastal.symbolic.Branch;
 import za.ac.sun.cs.coastal.symbolic.Choice;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.Path;
 import za.ac.sun.cs.coastal.symbolic.State;
+import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
 import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.CompletedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
+import za.ac.sun.cs.coastal.utility.Translator;
 
 public final class TraceState extends State {
 
@@ -135,7 +137,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#getStringLength(int)
 	 */
 	@Override
-	public Expression getStringLength(int stringId) {
+	public TraceValue getStringLength(int stringId) {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -145,7 +147,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#getStringChar(int, int)
 	 */
 	@Override
-	public Expression getStringChar(int stringId, int index) {
+	public TraceValue getStringChar(int stringId, int index) {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -156,7 +158,7 @@ public final class TraceState extends State {
 	 * Expression)
 	 */
 	@Override
-	public void push(Expression expr) {
+	public void push(Value expr) {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -166,7 +168,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#pop()
 	 */
 	@Override
-	public Expression pop() {
+	public TraceValue pop() {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1313,7 +1315,7 @@ public final class TraceState extends State {
 		} else if (argType == short.class) {
 			repr.append((Integer) value);
 		} else if (argType == char.class) {
-			repr.append('\'').append(StringEscapeUtils.escapeJava("" + (Character) value)).append('\'');
+			repr.append('\'').append(Translator.translate("" + (Character) value)).append('\'');
 		} else if (argType == int.class) {
 			repr.append((Integer) value);
 		} else if (argType == long.class) {
@@ -1323,7 +1325,7 @@ public final class TraceState extends State {
 		} else if (argType == double.class) {
 			repr.append((Double) value);
 		} else if (argType == String.class) {
-			repr.append('"').append(StringEscapeUtils.escapeJava((String) value)).append('"');
+			repr.append('"').append(Translator.translate((String) value)).append('"');
 		} else if (argType.isArray()) {
 			Class<?> elmentType = argType.getComponentType();
 			repr.append('[');
