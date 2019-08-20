@@ -1,4 +1,4 @@
-package bintree;
+package simple;
 
 /*
  * Origin of the benchmark:
