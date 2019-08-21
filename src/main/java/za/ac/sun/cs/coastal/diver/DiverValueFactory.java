@@ -224,6 +224,11 @@ public class DiverValueFactory implements SymbolicValueFactory {
 			return createSymbolicValue(Operation.i2c(expression));
 		}
 
+		@Override
+		public String toString() {
+			return expression.toString();
+		}
+
 	}
 
 }

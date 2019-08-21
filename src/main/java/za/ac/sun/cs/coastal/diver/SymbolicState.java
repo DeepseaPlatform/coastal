@@ -59,6 +59,11 @@ public final class SymbolicState extends State {
 	private final boolean trackAll;
 
 	/**
+	 * Whether or not constant conjuncts are eliminated from path conditions.
+	 */
+	private boolean constantElimination;
+
+	/**
 	 * Whether or not the current path is in danger of exceeding the path length
 	 * limit.
 	 */
@@ -141,6 +146,11 @@ public final class SymbolicState extends State {
 	/**
 	 * 
 	 */
+	private boolean lastConjunctWasConstant = false;
+
+	/**
+	 * 
+	 */
 	private int lastInvokingInstruction = 0;
 
 	/**
@@ -157,17 +167,26 @@ public final class SymbolicState extends State {
 	 * The factory that produces symbolic values.
 	 */
 	private final SymbolicValueFactory symbolicValueFactory;
-	
+
 	/**
 	 * Create a new instance of the symbolic state.
 	 * 
-	 * @param coastal instance of COASTAL that started this run
-	 * @param input   input values for the run
+	 * @param coastal
+	 *                instance of COASTAL that started this run
+	 * @param input
+	 *                input values for the run
 	 */
 	public SymbolicState(COASTAL coastal, Input input) { // throws InterruptedException
 		super(coastal, input);
 		limitConjuncts = coastal.getConfig().getLongMaxed("coastal.settings.conjunct-limit");
 		trackAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
+		constantElimination = coastal.getConfig().getBoolean("coastal.settings.constant-elimination", true);
+		if (constantElimination) {
+			if (coastal.getConfig().getInt("coastal.divers.threads", 0) > 0) {
+				log.warn("Cannot eliminate constants when surfer threads > 0 -- switched off elimination");
+				constantElimination = false;
+			}
+		}
 		String factoryName = coastal.getConfig().getString("coastal.settings.value-factory");
 		if (factoryName != null) {
 			symbolicValueFactory = (SymbolicValueFactory) Configuration.createInstance(coastal, factoryName);
@@ -180,7 +199,8 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the class loader to the given value.
 	 * 
-	 * @param classLoader the actual class loader used for the system-under-test
+	 * @param classLoader
+	 *                    the actual class loader used for the system-under-test
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
@@ -221,7 +241,8 @@ public final class SymbolicState extends State {
 	 * Return the symbolic value of a local variable in the topmost invocation
 	 * frame.
 	 * 
-	 * @param index the index of the variable
+	 * @param index
+	 *              the index of the variable
 	 * @return the symbolic value of the local variable
 	 */
 	private SymbolicValue getLocal(int index) {
@@ -232,8 +253,10 @@ public final class SymbolicState extends State {
 	 * Return the symbolic value of a local variable in the topmost invocation
 	 * frame.
 	 * 
-	 * @param index the index of the variable
-	 * @param value the new symbolic value of the local variable
+	 * @param index
+	 *              the index of the variable
+	 * @param value
+	 *              the new symbolic value of the local variable
 	 */
 	private void setLocal(int index, SymbolicValue value) {
 		frames.peek().setLocal(index, value);
@@ -243,19 +266,24 @@ public final class SymbolicState extends State {
 	 * Return the symbolic value of a local variable in the topmost invocation
 	 * frame.
 	 * 
-	 * @param index the index of the variable
-	 * @param value the new symbolic value of the local variable
+	 * @param index
+	 *              the index of the variable
+	 * @param value
+	 *              the new symbolic value of the local variable
 	 */
 	private void setLocal(int index, Expression value) {
 		setLocal(index, symbolicValueFactory.createSymbolicValue(value));
 	}
-	
+
 	/**
 	 * Update the symbolic value of a field in a particular object instance.
 	 * 
-	 * @param objectId  the identifier of the object
-	 * @param fieldName the name of the field
-	 * @param value     the new symbolic expression for the field
+	 * @param objectId
+	 *                  the identifier of the object
+	 * @param fieldName
+	 *                  the name of the field
+	 * @param value
+	 *                  the new symbolic expression for the field
 	 */
 	private void putField(int objectId, String fieldName, SymbolicValue value) {
 		putField(Integer.toString(objectId), fieldName, value);
@@ -264,9 +292,12 @@ public final class SymbolicState extends State {
 	/**
 	 * Update the symbolic value of a field in a particular object instance.
 	 * 
-	 * @param objectName the name of the object
-	 * @param fieldName  the name of the field
-	 * @param value      the new symbolic expression for the field
+	 * @param objectName
+	 *                   the name of the object
+	 * @param fieldName
+	 *                   the name of the field
+	 * @param value
+	 *                   the new symbolic expression for the field
 	 */
 	private void putField(String objectName, String fieldName, SymbolicValue value) {
 		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
@@ -276,8 +307,10 @@ public final class SymbolicState extends State {
 	/**
 	 * Return the symbolic value of a field in a particular object instance.
 	 * 
-	 * @param objectId  the identifier of the object
-	 * @param fieldName the name of the field
+	 * @param objectId
+	 *                  the identifier of the object
+	 * @param fieldName
+	 *                  the name of the field
 	 * @return the symbolic expression for the value of the field
 	 */
 	private SymbolicValue getField(int objectId, String fieldName) {
@@ -289,8 +322,10 @@ public final class SymbolicState extends State {
 	 * object is identifier by its "name", which could simply be a string version of
 	 * the object number, or a more complex name.
 	 * 
-	 * @param objectName the name of the object
-	 * @param fieldName  the name of the field
+	 * @param objectName
+	 *                   the name of the object
+	 * @param fieldName
+	 *                   the name of the field
 	 * @return the symbolic expression for the value of the field
 	 */
 	private SymbolicValue getField(String objectName, String fieldName) {
@@ -396,7 +431,8 @@ public final class SymbolicState extends State {
 	 * exceeds the path length limit. If so, an exception is raised. If the danger
 	 * flag is set, it is reset to {@code false}.
 	 * 
-	 * @throws SymbolicException if the path length limit has been reached or
+	 * @throws SymbolicException
+	 *                           if the path length limit has been reached or
 	 *                           exceeded
 	 */
 	private void checkLimitConjuncts() throws SymbolicException {
@@ -412,7 +448,8 @@ public final class SymbolicState extends State {
 	 * Parse a Java type descriptor of a method and count and return the number of
 	 * formal parameters.
 	 * 
-	 * @param descriptor the type descriptor of a method
+	 * @param descriptor
+	 *                   the type descriptor of a method
 	 * @return the number of formal arguments
 	 */
 	private static int getArgumentCount(String descriptor) {
@@ -446,7 +483,8 @@ public final class SymbolicState extends State {
 	 * The return type is returned in the Java type descriptor format and is not
 	 * converted to an integer code or even an instance of {@link Class}.
 	 * 
-	 * @param descriptor the type descriptor of a method
+	 * @param descriptor
+	 *                   the type descriptor of a method
 	 * @return a type descriptor for the return type of the method as specified in
 	 *         the given type descriptor
 	 */
@@ -477,7 +515,8 @@ public final class SymbolicState extends State {
 	 * </li>
 	 * </ul>
 	 * 
-	 * @param descriptor the original Java type descriptor
+	 * @param descriptor
+	 *                   the original Java type descriptor
 	 * @return the sanitized type descriptor
 	 */
 	public static String getAsciiSignature(String descriptor) {
@@ -491,7 +530,8 @@ public final class SymbolicState extends State {
 	 * method. The nature of the symbolic variable is based on the Java type
 	 * descriptor of the method's return type.
 	 * 
-	 * @param type the method's return type as a Java type descriptor
+	 * @param type
+	 *             the method's return type as a Java type descriptor
 	 */
 	private void pushReturnValue(char type) {
 		if (type == 'Z') { // boolean
@@ -570,8 +610,10 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the type of the elements of an array.
 	 * 
-	 * @param arrayId the array identifier
-	 * @param type    the type of the array elements
+	 * @param arrayId
+	 *                the array identifier
+	 * @param type
+	 *                the type of the array elements
 	 */
 	private void setArrayType(int arrayId, int type) {
 		SymbolicValue value = symbolicValueFactory.createSymbolicValue(new IntegerConstant(type, 32));
@@ -581,8 +623,10 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the length of an array.
 	 * 
-	 * @param arrayId the array identifier
-	 * @param length  the length of the array
+	 * @param arrayId
+	 *                the array identifier
+	 * @param length
+	 *                the length of the array
 	 */
 	private void setArrayLength(int arrayId, int length) {
 		SymbolicValue value = symbolicValueFactory.createSymbolicValue(new IntegerConstant(length, 32));
@@ -592,8 +636,10 @@ public final class SymbolicState extends State {
 	/**
 	 * Return the symbolic value stored in an array at a particular index.
 	 * 
-	 * @param arrayId the array identifier
-	 * @param index   the index of the element
+	 * @param arrayId
+	 *                the array identifier
+	 * @param index
+	 *                the index of the element
 	 * @return the symbolic element value in the array
 	 */
 	private SymbolicValue getArrayValue(int arrayId, int index) {
@@ -603,9 +649,12 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the symbolic value stored in an array at a particular index.
 	 * 
-	 * @param arrayId the array identifier
-	 * @param index   the index of the element
-	 * @param value   the new symbolic value of the array element
+	 * @param arrayId
+	 *                the array identifier
+	 * @param index
+	 *                the index of the element
+	 * @param value
+	 *                the new symbolic value of the array element
 	 */
 	private void setArrayValue(int arrayId, int index, SymbolicValue value) {
 		if (index < 0) {
@@ -629,9 +678,12 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the symbolic value stored in an array at a particular index.
 	 * 
-	 * @param arrayId the array identifier
-	 * @param index   the index of the element
-	 * @param value   the new symbolic value of the array element
+	 * @param arrayId
+	 *                the array identifier
+	 * @param index
+	 *                the index of the element
+	 * @param value
+	 *                the new symbolic value of the array element
 	 */
 	private void setArrayValue(int arrayId, int index, Expression value) {
 		setArrayValue(arrayId, index, symbolicValueFactory.createSymbolicValue(value));
@@ -660,12 +712,14 @@ public final class SymbolicState extends State {
 	public SymbolicValue getStringLength(int stringId) {
 		return getField(stringId, "length");
 	}
-	
+
 	/**
 	 * Set the length for a string instance.
 	 * 
-	 * @param stringId unique string identifier
-	 * @param length   new length
+	 * @param stringId
+	 *                 unique string identifier
+	 * @param length
+	 *                 new length
 	 */
 	private void setStringLength(int stringId, SymbolicValue length) {
 		putField(stringId, "length", length);
@@ -674,13 +728,15 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the length for a string instance.
 	 * 
-	 * @param stringId unique string identifier
-	 * @param length   new length
+	 * @param stringId
+	 *                 unique string identifier
+	 * @param length
+	 *                 new length
 	 */
 	private void setStringLength(int stringId, Expression length) {
 		setStringLength(stringId, symbolicValueFactory.createSymbolicValue(length));
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -694,9 +750,12 @@ public final class SymbolicState extends State {
 	/**
 	 * Set a character inside a string.
 	 * 
-	 * @param stringId unique string identifier
-	 * @param index    character index to set
-	 * @param value    value for the character
+	 * @param stringId
+	 *                 unique string identifier
+	 * @param index
+	 *                 character index to set
+	 * @param value
+	 *                 value for the character
 	 */
 	private void setStringChar(int stringId, int index, SymbolicValue value) {
 		putField(stringId, "" + index, value);
@@ -705,14 +764,17 @@ public final class SymbolicState extends State {
 	/**
 	 * Set a character inside a string.
 	 * 
-	 * @param stringId unique string identifier
-	 * @param index    character index to set
-	 * @param value    value for the character
+	 * @param stringId
+	 *                 unique string identifier
+	 * @param index
+	 *                 character index to set
+	 * @param value
+	 *                 value for the character
 	 */
 	private void setStringChar(int stringId, int index, Expression value) {
 		setStringChar(stringId, index, symbolicValueFactory.createSymbolicValue(value));
 	}
-	
+
 	// ----------------------------------------------------------------------
 	// ROUTINES TO MANIPULATE THE EXPRESSION STACK
 	// ----------------------------------------------------------------------
@@ -747,24 +809,29 @@ public final class SymbolicState extends State {
 	}
 
 	/**
-	 * IWrap an expression inside a symbolic value and push it onto the expression stack.
+	 * IWrap an expression inside a symbolic value and push it onto the expression
+	 * stack.
 	 *
-	 * @param expr expression to wrap
+	 * @param expr
+	 *             expression to wrap
 	 */
 	public void push(Expression expr) {
 		push(symbolicValueFactory.createSymbolicValue(expr));
 	}
 
 	/**
-	 * Internal routine to wrap an expression inside a symbolic value and push it onto the expression stack.
+	 * Internal routine to wrap an expression inside a symbolic value and push it
+	 * onto the expression stack.
 	 *
-	 * @param expr expression to wrap
-	 * @param bitSize bit size
+	 * @param expr
+	 *                expression to wrap
+	 * @param bitSize
+	 *                bit size
 	 */
 	private void push(Expression expr, int bitSize) {
 		push(symbolicValueFactory.createSymbolicValue(expr), bitSize);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -793,22 +860,30 @@ public final class SymbolicState extends State {
 	 * Add a binary conjunct to the current path. This also adds the accumulated
 	 * passive conjuncts to the current path.
 	 * 
-	 * @param conjunct   the conjunct to add
-	 * @param truthValue the value of the conjunct
+	 * @param conjunct
+	 *                   the conjunct to add
+	 * @param truthValue
+	 *                   the value of the conjunct
 	 */
 	private void pushConjunct(Expression conjunct, boolean truthValue) {
-		Branch branch = new SegmentedPC.Binary(conjunct, pendingExtraCondition);
-		path = new Path(path, new Choice(branch, truthValue ? 1 : 0));
-		pendingExtraCondition = null;
-		log.trace(">>> adding conjunct: {}", conjunct.toString());
-		log.trace(">>> path is now: {}", path.getPathCondition().toString());
+		if (!SegmentedPC.isConstant(conjunct) || !constantElimination) {
+			Branch branch = new SegmentedPC.Binary(conjunct, pendingExtraCondition);
+			path = new Path(path, new Choice(branch, truthValue ? 1 : 0));
+			pendingExtraCondition = null;
+			log.trace(">>> adding conjunct: {}", conjunct.toString());
+			log.trace(">>> path is now: {}", path.getPathCondition().toString());
+			lastConjunctWasConstant = false;
+		} else {
+			lastConjunctWasConstant = true;
+		}
 	}
 
 	/**
 	 * Add a binary conjunct to the current path. The conjunct is assumed to be
 	 * true.
 	 * 
-	 * @param conjunct the conjunct to add
+	 * @param conjunct
+	 *                 the conjunct to add
 	 */
 	private void pushConjunct(Expression conjunct) {
 		pushConjunct(conjunct, true);
@@ -818,27 +893,33 @@ public final class SymbolicState extends State {
 	 * Add an n-ary conjunct to the current path. This also adds the accumulated
 	 * passive conjuncts to the current path.
 	 * 
-	 * @param expression the expression that determines the choice at this branching
+	 * @param expression
+	 *                   the expression that determines the choice at this branching
 	 *                   point
-	 * @param min        the smallest value handled by the n-ary branching point
-	 * @param max        the largest value handled by the n-ary branching point
-	 * @param cur        the current value taken at the n-ary branching point
+	 * @param min
+	 *                   the smallest value handled by the n-ary branching point
+	 * @param max
+	 *                   the largest value handled by the n-ary branching point
+	 * @param cur
+	 *                   the current value taken at the n-ary branching point
 	 */
 	private void pushConjunct(Expression expression, long min, long max, long cur) {
-		Expression conjunct;
-		if ((cur < min) || (cur > max)) {
-			Expression lo = Operation.lt(expression, new IntegerConstant(min, 32));
-			Expression hi = Operation.gt(expression, new IntegerConstant(max, 32));
-			conjunct = Operation.or(lo, hi);
-			cur = max + 1;
-		} else {
-			conjunct = Operation.eq(expression, new IntegerConstant(cur, 32));
+		if (!SegmentedPC.isConstant(expression)) {
+			Expression conjunct;
+			if ((cur < min) || (cur > max)) {
+				Expression lo = Operation.lt(expression, new IntegerConstant(min, 32));
+				Expression hi = Operation.gt(expression, new IntegerConstant(max, 32));
+				conjunct = Operation.or(lo, hi);
+				cur = max + 1;
+			} else {
+				conjunct = Operation.eq(expression, new IntegerConstant(cur, 32));
+			}
+			Branch branch = new SegmentedPC.Nary(expression, min, max, pendingExtraCondition);
+			path = new Path(path, new Choice(branch, cur - min));
+			pendingExtraCondition = null;
+			log.trace(">>> adding (switch) conjunct: {}", conjunct.toString());
+			log.trace(">>> path is now: {}", path.getPathCondition().toString());
 		}
-		Branch branch = new SegmentedPC.Nary(expression, min, max, pendingExtraCondition);
-		path = new Path(path, new Choice(branch, cur - min));
-		pendingExtraCondition = null;
-		log.trace(">>> adding (switch) conjunct: {}", conjunct.toString());
-		log.trace(">>> path is now: {}", path.getPathCondition().toString());
 	}
 
 	/*
@@ -1152,11 +1233,16 @@ public final class SymbolicState extends State {
 	 * execution, the symbolic variable is set to that values. If not, the default
 	 * value (that the system-under-test would have used naturally), is used.
 	 * 
-	 * @param triggerIndex index of the triggering method
-	 * @param index        index of the formal parameter
-	 * @param address      local variable address where parameter is stored
-	 * @param sizeInBits   size of the desired type
-	 * @param currentValue default values to use (if concolic execution does not
+	 * @param triggerIndex
+	 *                     index of the triggering method
+	 * @param index
+	 *                     index of the formal parameter
+	 * @param address
+	 *                     local variable address where parameter is stored
+	 * @param sizeInBits
+	 *                     size of the desired type
+	 * @param currentValue
+	 *                     default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return value that will be used during the execution
 	 */
@@ -1200,11 +1286,16 @@ public final class SymbolicState extends State {
 	 * execution, the symbolic variable is set to that values. If not, the default
 	 * value (that the system-under-test would have used naturally), is used.
 	 * 
-	 * @param triggerIndex index of the triggering method
-	 * @param index        index of the formal parameter
-	 * @param address      local variable address where parameter is stored
-	 * @param sizeInBits   size of the desired type
-	 * @param currentValue default values to use (if concolic execution does not
+	 * @param triggerIndex
+	 *                     index of the triggering method
+	 * @param index
+	 *                     index of the formal parameter
+	 * @param address
+	 *                     local variable address where parameter is stored
+	 * @param sizeInBits
+	 *                     size of the desired type
+	 * @param currentValue
+	 *                     default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return value that will be used during the execution
 	 */
@@ -1388,15 +1479,22 @@ public final class SymbolicState extends State {
 	 * default values (that the system-under-test would have used naturally), are
 	 * used.
 	 * 
-	 * @param triggerIndex index of the triggering method
-	 * @param index        index of the formal parameter
-	 * @param address      local variable address where parameter is stored
-	 * @param sizeInBits   size of the desired type
-	 * @param currentArray default values to use (if concolic execution does not
+	 * @param triggerIndex
+	 *                     index of the triggering method
+	 * @param index
+	 *                     index of the formal parameter
+	 * @param address
+	 *                     local variable address where parameter is stored
+	 * @param sizeInBits
+	 *                     size of the desired type
+	 * @param currentArray
+	 *                     default values to use (if concolic execution does not
 	 *                     override the values)
-	 * @param unconvert    {@link Function} to convert an object to a {@link Long}
+	 * @param unconvert
+	 *                     {@link Function} to convert an object to a {@link Long}
 	 *                     value
-	 * @param convert      {@link Function} to convert a {@link Long} value to the
+	 * @param convert
+	 *                     {@link Function} to convert a {@link Long} value to the
 	 *                     desired type
 	 * @return array of concrete values that will be used during the execution
 	 */
@@ -1461,14 +1559,21 @@ public final class SymbolicState extends State {
 	 * default values (that the system-under-test would have used naturally), are
 	 * used.
 	 * 
-	 * @param triggerIndex index of the triggering method
-	 * @param index        index of the formal parameter
-	 * @param address      local variable address where parameter is stored
-	 * @param sizeInBits   size of the desired type
-	 * @param currentArray default values to use (if concolic execution does not
+	 * @param triggerIndex
+	 *                     index of the triggering method
+	 * @param index
+	 *                     index of the formal parameter
+	 * @param address
+	 *                     local variable address where parameter is stored
+	 * @param sizeInBits
+	 *                     size of the desired type
+	 * @param currentArray
+	 *                     default values to use (if concolic execution does not
 	 *                     override the values)
-	 * @param unconvert    {@link Function} to convert an object to a {@link Double}
-	 * @param convert      {@link Function} to convert a {@link Double} value to the
+	 * @param unconvert
+	 *                     {@link Function} to convert an object to a {@link Double}
+	 * @param convert
+	 *                     {@link Function} to convert a {@link Double} value to the
 	 *                     desired type
 	 * @return array of concrete values that will be used during the execution
 	 */
@@ -2565,16 +2670,21 @@ public final class SymbolicState extends State {
 			return;
 		}
 		if (getRecordingMode()) {
-			log.trace("(POST) {}", Bytecodes.toString(opcode));
-			log.trace(">>> previous conjunct is false");
-			broker.publishThread("post-jump-insn", new Tuple(instr, opcode));
-			Choice lastChoice = path.getChoice();
-			Branch lastBranch = lastChoice.getBranch();
-			assert lastBranch instanceof SegmentedPC.Binary;
-			long otherAlternative = 1 - lastChoice.getAlternative();
-			path = new Path(path.getParent(), new Choice(lastBranch, otherAlternative));
-			checkLimitConjuncts();
-			log.trace(">>> path is now: {}", path.getPathCondition().toString());
+			if (lastConjunctWasConstant) {
+				lastConjunctWasConstant = false;
+				log.trace(">>> previous conjunct was constant");
+			} else {
+				log.trace("(POST) {}", Bytecodes.toString(opcode));
+				log.trace(">>> previous conjunct is false");
+				broker.publishThread("post-jump-insn", new Tuple(instr, opcode));
+				Choice lastChoice = path.getChoice();
+				Branch lastBranch = lastChoice.getBranch();
+				assert lastBranch instanceof SegmentedPC.Binary;
+				long otherAlternative = 1 - lastChoice.getAlternative();
+				path = new Path(path.getParent(), new Choice(lastBranch, otherAlternative));
+				checkLimitConjuncts();
+				log.trace(">>> path is now: {}", path.getPathCondition().toString());
+			}
 		}
 	}
 
@@ -2614,7 +2724,8 @@ public final class SymbolicState extends State {
 				int id = createArray();
 				putField(id, "length", symbolicValueFactory.createSymbolicValue(new IntegerConstant(s.length(), 32)));
 				for (int i = 0; i < s.length(); i++) {
-					setArrayValue(id, i, symbolicValueFactory.createSymbolicValue(new IntegerConstant(s.charAt(i), 32)));
+					setArrayValue(id, i,
+							symbolicValueFactory.createSymbolicValue(new IntegerConstant(s.charAt(i), 32)));
 				}
 				push(new IntegerConstant(id, 32), 32);
 			} else {
@@ -2828,8 +2939,10 @@ public final class SymbolicState extends State {
 	 * Return a string representation for the value of a particular parameter
 	 * (identified by {@code index}) of a given {@code trigger}.
 	 * 
-	 * @param trigger the specific trigger
-	 * @param index   the index of the parameter
+	 * @param trigger
+	 *                the specific trigger
+	 * @param index
+	 *                the index of the parameter
 	 * @return a string representation of the value of the parameter
 	 */
 	private String gatherConcreteValue(Trigger trigger, int index) {
@@ -2839,8 +2952,10 @@ public final class SymbolicState extends State {
 	/**
 	 * Return a string representation of a {@code value} given its type.
 	 * 
-	 * @param argType the type of the value
-	 * @param value   the value itself
+	 * @param argType
+	 *                the type of the value
+	 * @param value
+	 *                the value itself
 	 * @return a string representation of the value
 	 */
 	private String gatherConcreteValue0(Class<?> argType, Object value) {
