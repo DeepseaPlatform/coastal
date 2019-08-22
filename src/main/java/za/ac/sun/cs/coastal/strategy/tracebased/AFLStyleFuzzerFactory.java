@@ -24,6 +24,11 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class AFLStyleFuzzerFactory implements StrategyFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "@A@";
+
 	protected final Configuration configuration;
 
 	public AFLStyleFuzzerFactory(COASTAL coastal, Configuration configuration) {
@@ -268,7 +273,7 @@ public class AFLStyleFuzzerFactory implements StrategyFactory {
 
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ strategy task starting");
+			log.trace("{} strategy task starting", LOG_PREFIX);
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
@@ -276,11 +281,11 @@ public class AFLStyleFuzzerFactory implements StrategyFactory {
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					manager.incrementRefinements();
-					log.trace("+++ starting refinement");
+					log.trace("{} starting refinement", LOG_PREFIX);
 					refine(execution);
 				}
 			} catch (InterruptedException e) {
-				log.trace("^^^ strategy task canceled");
+				log.trace("{} strategy task canceled", LOG_PREFIX);
 				throw e;
 			}
 		}
@@ -289,7 +294,7 @@ public class AFLStyleFuzzerFactory implements StrategyFactory {
 			long t0 = System.currentTimeMillis();
 			modelsAdded = -1;
 			refine0(execution);
-			log.trace("+++ added {} surfer models", modelsAdded);
+			log.trace("{} added {} surfer models", LOG_PREFIX, modelsAdded);
 			coastal.updateWork(modelsAdded);
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}

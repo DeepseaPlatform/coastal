@@ -20,8 +20,14 @@ import za.ac.sun.cs.coastal.symbolic.VM;
 import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 
 public class SurferFactory implements TaskFactory {
+
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "...";
 
 	/**
 	 * The number of surfer tasks started (ever).
@@ -193,7 +199,7 @@ public class SurferFactory implements TaskFactory {
 
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ surfer task starting");
+			log.trace("{} surfer task starting", LOG_PREFIX);
 			for (Tuple observer : coastal.getObserversPerTask()) {
 				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 				ObserverManager observerManager = (ObserverManager) observer.get(1);
@@ -231,6 +237,7 @@ public class SurferFactory implements TaskFactory {
 							x.printStackTrace(coastal.getSystemErr());
 						} catch (InvocationTargetException x) {
 							Throwable t = x.getCause();
+							log.trace("{} InvocationTargetException, t.class={}", LOG_PREFIX, t.getClass().getName());
 							if ((t == null) || !(t instanceof SymbolicException)) {
 								// x.printStackTrace();
 								try {
@@ -241,9 +248,8 @@ public class SurferFactory implements TaskFactory {
 							} else if (t instanceof AbortedRunException) {
 								aborted = true;
 							} else if (!(t instanceof SymbolicException)) {
-								log.info("!@#$%$#@! PROGRAM EXCEPTION:", t);
+								log.info("P R O G R A M   E X C E P T I O N:", t);
 								if (t instanceof AssertionError) {
-									log.trace("test");
 									broker.publish("assert-failed", new Tuple(this, null));
 								}
 								try {
@@ -266,6 +272,7 @@ public class SurferFactory implements TaskFactory {
 							x.printStackTrace(coastal.getSystemErr());
 						} catch (InvocationTargetException x) {
 							Throwable t = x.getCause();
+							log.trace("{} InvocationTargetException, t.class={}", LOG_PREFIX, t.getClass().getName());
 							if ((t == null) || !(t instanceof SymbolicException)) {
 								// x.printStackTrace();
 								try {
@@ -273,12 +280,13 @@ public class SurferFactory implements TaskFactory {
 								} catch (LimitConjunctException e) {
 									// ignore, since run is over in any case
 								}
+							} else if (t instanceof SystemExitException) {
+								broker.publish("system-exit", new Tuple(this, null));
 							} else if (t instanceof AbortedRunException) {
 								aborted = true;
 							} else if (!(t instanceof SymbolicException)) {
-								log.info("!@#$%$#@! PROGRAM EXCEPTION:", t);
+								log.info("P R O G R A M   E X C E P T I O N:", t);
 								if (t instanceof AssertionError) {
-									log.trace("test");
 									broker.publish("assert-failed", new Tuple(this, null));
 								}
 								try {
@@ -292,7 +300,7 @@ public class SurferFactory implements TaskFactory {
 					// ------- END MANUAL INLINE
 					manager.recordSurferTime(System.currentTimeMillis() - t1);
 					if (aborted) {
-						log.trace("!!! execution aborted, fully explored");
+						log.trace("{} execution aborted, fully explored", LOG_PREFIX);
 						manager.incrementAbortCount();
 					} else {
 						Execution execution = traceState.getExecution();
@@ -306,11 +314,11 @@ public class SurferFactory implements TaskFactory {
 				}
 			} catch (InterruptedException e) {
 				broker.publishThread("surfer-task-end", this);
-				log.trace("^^^ surfer task canceled");
+				log.trace("{} surfer task canceled", LOG_PREFIX);
 				throw e;
 			}
 			broker.publishThread("surfer-task-end", this);
-			log.trace("^^^ surfer task canceled");
+			log.trace("{} surfer task canceled", LOG_PREFIX);
 			return null;
 		}
 

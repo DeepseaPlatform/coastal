@@ -12,6 +12,11 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class MarkerCoverageFactory implements ObserverFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "#M#";
+
 	public MarkerCoverageFactory(COASTAL coastal, Configuration config) {
 	}
 
@@ -116,7 +121,7 @@ public class MarkerCoverageFactory implements ObserverFactory {
 			} else {
 				marker = (String) object;
 			}
-			log.trace("%%% mark hit {}", marker);
+			log.trace("{} mark hit {}", LOG_PREFIX, marker);
 			Integer n = markers.get(marker);
 			if (n == null) {
 				markers.put(marker, 1);

@@ -978,4 +978,12 @@ public abstract class State {
 
 	public abstract void loadClasses(String descriptor);
 
+	// ======================================================================
+	//
+	// SPECIAL ROUTINES
+	//
+	// ======================================================================
+
+	public abstract void systemExit(int status) throws SymbolicException;
+
 }

@@ -21,6 +21,11 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class FeedbackXFuzzerFactory implements StrategyFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "@X@";
+
 	protected final Configuration configuration;
 
 	public FeedbackXFuzzerFactory(COASTAL coastal, Configuration configuration) {
@@ -297,7 +302,7 @@ public class FeedbackXFuzzerFactory implements StrategyFactory {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ strategy task starting");
+			log.trace("{} strategy task starting", LOG_PREFIX);
 			try {
 				long t0 = System.currentTimeMillis();
 				Execution execution = coastal.getNextTrace();
@@ -305,7 +310,7 @@ public class FeedbackXFuzzerFactory implements StrategyFactory {
 				long t1 = System.currentTimeMillis();
 				manager.recordWaitTime(t1 - t0);
 				manager.incrementRefinements();
-				log.trace("+++ starting refinement");
+				log.trace("{} starting refinement", LOG_PREFIX);
 				setValues = new HashSet<Integer>((Set<Integer>) execution.getPayload("setValues"));
 				incValues = new HashSet<Integer>((Set<Integer>) execution.getPayload("incValues"));
 //				Set<Integer> sv = trace.getSetValues();
@@ -338,11 +343,11 @@ public class FeedbackXFuzzerFactory implements StrategyFactory {
 					t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					manager.incrementRefinements();
-					log.trace("+++ starting refinement");
+					log.trace("{} starting refinement", LOG_PREFIX);
 					refinePair(execution1, score1, execution2, score2);
 				}
 			} catch (InterruptedException e) {
-				log.trace("^^^ strategy task canceled");
+				log.trace("{} strategy task canceled", LOG_PREFIX);
 				throw e;
 			}
 		}
@@ -360,7 +365,7 @@ public class FeedbackXFuzzerFactory implements StrategyFactory {
 			for (int i = 0; i < firstRepeat; i++) {
 				mutatem(score, input);
 			}
-			log.trace("+++ added {} surfer models", inputsAdded);
+			log.trace("{} added {} surfer models", LOG_PREFIX, inputsAdded + 1);
 			coastal.updateWork(inputsAdded);
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}
@@ -407,7 +412,7 @@ public class FeedbackXFuzzerFactory implements StrategyFactory {
 				mutatem(score, newModel1);
 				mutatem(score, newModel2);
 			}
-			log.trace("+++ added {} surfer models", inputsAdded);
+			log.trace("{} added {} surfer models", LOG_PREFIX, inputsAdded + 1);
 			coastal.updateWork(inputsAdded);
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}

@@ -14,6 +14,11 @@ import za.ac.sun.cs.coastal.symbolic.Input;
 
 public class RandomTestingFactory extends TraceBasedFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "@R@";
+
 	protected final Configuration configuration;
 
 	public RandomTestingFactory(COASTAL coastal, Configuration configuration) {
@@ -108,7 +113,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 			if (execution == null) {
 				return null;
 			}
-			log.trace("... explored <{}>", execution.getPath().getSignature());
+			log.trace("{} explored <{}>", LOG_PREFIX, execution.getPath().getSignature());
 			manager.insertPath(execution, false);
 			if (pathTree.getRoot().isFullyExplored()) {
 				return null;
@@ -234,7 +239,7 @@ public class RandomTestingFactory extends TraceBasedFactory {
 				}
 			}
 			String modelString = concreteValues.toString();
-			log.trace("... new model: {}", modelString);
+			log.trace("{} new model: {}", LOG_PREFIX, modelString);
 			numberOfModels++;
 			return Collections.singletonList(concreteValues);
 		}

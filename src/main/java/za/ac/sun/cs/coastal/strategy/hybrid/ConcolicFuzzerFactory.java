@@ -25,6 +25,11 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class ConcolicFuzzerFactory implements StrategyFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "%%%";
+	
 	protected final Configuration configuration;
 
 	public ConcolicFuzzerFactory(COASTAL coastal, Configuration configuration) {
@@ -331,7 +336,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ strategy task (ConcolicFuzzerStrategy) starting");
+			log.trace("{} strategy task (ConcolicFuzzerStrategy) starting", LOG_PREFIX);
 			try {
 				ExecutionCollection keepers = new ExecutionCollection(keepTop);
 				ExecutionCollection allTime = new ExecutionCollection(keepTop);
@@ -340,7 +345,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 				long t1 = System.currentTimeMillis();
 				manager.recordWaitTime(t1 - t0);
 				manager.incrementRefinements();
-				log.trace("+++ starting refinement");
+				log.trace("{} starting refinement", LOG_PREFIX);
 				int score0 = calculateScore(execution0);
 				keepers.add(score0, execution0);
 				allTime.add(score0, execution0);
@@ -360,7 +365,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 						t1 = System.currentTimeMillis();
 						manager.recordWaitTime(t1 - t0);
 						if (executionx == null) {
-							log.trace("+++ out of traces");
+							log.trace("{} out of traces", LOG_PREFIX);
 							break;
 						}
 						int scorex = calculateScore(executionx);
@@ -368,7 +373,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 						allTime.add(scorex, executionx);
 					}
 					manager.incrementRefinements();
-					log.trace("+++ starting refinement");
+					log.trace("{} starting refinement", LOG_PREFIX);
 					ExecutionCollection candidates = (keepers.size() > 0) ? keepers : allTime;
 					setValues.clear();
 					incValues.clear();
@@ -386,10 +391,10 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 					}
 				}
 			} catch (InterruptedException e) {
-				log.trace("^^^ strategy task (ConcolicFuzzerStrategy) canceled");
+				log.trace("{} strategy task (ConcolicFuzzerStrategy) canceled", LOG_PREFIX);
 				throw e;
 			}
-			log.trace("^^^ strategy task (ConcolicFuzzerStrategy) finished");
+			log.trace("{} strategy task (ConcolicFuzzerStrategy) finished", LOG_PREFIX);
 			return null;
 		}
 
@@ -400,7 +405,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 			parameters = coastal.getParameters();
 			Input input = execution.getInput();
 			mutate(score, input);
-			log.trace("+++ added {} surfer models", inputsAdded);
+			log.trace("{} added {} surfer models", LOG_PREFIX, inputsAdded + 1);
 			coastal.updateWork(inputsAdded);
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}
@@ -598,7 +603,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ strategy task (ConcolicFuzzerPlanter) starting");
+			log.trace("{} strategy task (ConcolicFuzzerPlanter) starting", LOG_PREFIX);
 			try {
 				while (true) {
 					if (!plant()) {
@@ -613,10 +618,10 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 				log.info("CLASSCASTEXCEPTION", e);
 				throw e;
 			} catch (InterruptedException e) {
-				log.trace("^^^ strategy task (ConcolicFuzzerPlanter) canceled");
+				log.trace("{} strategy task (ConcolicFuzzerPlanter) canceled", LOG_PREFIX);
 				throw e;
 			}
-			log.trace("^^^ strategy task (ConcolicFuzzerPlanter) finished");
+			log.trace("{} strategy task (ConcolicFuzzerPlanter) finished", LOG_PREFIX);
 			return null;
 		}
 
@@ -630,9 +635,6 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 //			if (parent == null) {
 //				return false;
 //			}
-			if (node.getId() == 7) {
-				log.trace("At node 7");
-			}
 			Execution execution = node.getExecution();
 			if (execution == null) {
 				return false;
@@ -690,7 +692,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ strategy task (ConcolicFuzzerHarvester) starting");
+			log.trace("{} strategy task (ConcolicFuzzerHarvester) starting", LOG_PREFIX);
 			try {
 				while (true) {
 					Execution execution = coastal.getNextPc();
@@ -713,10 +715,10 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 					}
 				}
 			} catch (InterruptedException e) {
-				log.trace("^^^ strategy task (ConcolicFuzzerHarvester) canceled");
+				log.trace("{} strategy task (ConcolicFuzzerHarvester) canceled", LOG_PREFIX);
 				throw e;
 			}
-			log.trace("^^^ strategy task (ConcolicFuzzerHarvester) finished");
+			log.trace("{} strategy task (ConcolicFuzzerHarvester) finished", LOG_PREFIX);
 			return null;
 		}
 

@@ -15,6 +15,11 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class GenerationalFactory extends PathBasedFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "+++";
+
 	private final Configuration config;
 
 	public GenerationalFactory(COASTAL coastal, Configuration config) {
@@ -122,7 +127,7 @@ public class GenerationalFactory extends PathBasedFactory {
 			}
 			List<Input> inputs = new ArrayList<>();
 			Path path = execution.getPath();
-			log.trace("explored <{}> {}", path.getSignature(), path.getPathCondition().toString());
+			log.trace("{} explored <{}> {}", LOG_PREFIX, path.getSignature(), path.getPathCondition().toString());
 			PathTreeNode bottom = manager.insertPath0(execution, false);
 			if (bottom != null) {
 				List<Path> altPaths = new ArrayList<>();
@@ -137,26 +142,26 @@ public class GenerationalFactory extends PathBasedFactory {
 				for (Path altPath : altPaths) {
 					Expression pc = altPath.getPathCondition();
 					String sig = altPath.getSignature();
-					log.trace("trying   <{}> {}", sig, pc.toString());
+					log.trace("{} trying   <{}> {}", LOG_PREFIX, sig, pc.toString());
 					Input input = solver.solve(pc);
 					if (input == null) {
-						log.trace("no model");
-						log.trace("(The path is {})", altPath.getPathCondition().toString());
+						log.trace("{} no model", LOG_PREFIX);
+						log.trace("{} (The path is {})", LOG_PREFIX, altPath.getPathCondition().toString());
 						manager.insertPath(altPath, true);
 					} else {
 						String modelString = input.toString();
-						log.trace("new model: {}", modelString);
+						log.trace("{} new model: {}", LOG_PREFIX, modelString);
 						if (visitedInputs.add(modelString)) {
 							input.setPayload("priority", priority);
 							inputs.add(input);
 							priority += priorityDelta;
 						} else {
-							log.trace("model {} has been visited before", modelString);
+							log.trace("{} model {} has been visited before", LOG_PREFIX, modelString);
 						}
 					}
 				}
 			} else {
-				log.trace("revisited path -- no new models generated");
+				log.trace("{} revisited path -- no new models generated", LOG_PREFIX);
 			}
 			return inputs;
 		}

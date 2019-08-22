@@ -2,6 +2,11 @@ package za.ac.sun.cs.coastal.observers;
 
 public class ConditionCoverage {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	// private static final String LOG_PREFIX = "#C#";
+
 	//********************************************************************************
 	//********************************************************************************
 	//

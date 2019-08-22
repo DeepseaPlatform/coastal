@@ -390,4 +390,14 @@ public class VM {
 		state.loadClasses(descriptor);
 	}
 
+	// ======================================================================
+	//
+	// SPECIAL ROUTINES
+	//
+	// ======================================================================
+
+	public static void systemExit(int status) throws SymbolicException {
+		state.systemExit(status);
+	}
+
 }

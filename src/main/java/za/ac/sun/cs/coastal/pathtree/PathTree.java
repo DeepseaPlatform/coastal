@@ -21,6 +21,11 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 public class PathTree implements Comparator<PathTreeNode> {
 
 	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = ":::";
+
+	/**
 	 * The one-and-only logger.
 	 */
 	protected final Logger log;
@@ -184,7 +189,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 			paths[--idx] = p;
 		}
 		assert idx == 0;
-		log.trace("::: depth:{}", depth);
+		log.trace("{} depth:{}", LOG_PREFIX, depth);
 		/*
 		 * Step 2: Add the new path to the path tree
 		 */
@@ -192,7 +197,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 			lock.writeLock().lock();
 			try {
 				if (root == null) {
-					log.trace("::: creating root");
+					log.trace("{} creating root", LOG_PREFIX);
 					root = PathTreeNode.createRoot(paths[0]);
 				}
 			} finally {
@@ -204,9 +209,9 @@ public class PathTree implements Comparator<PathTreeNode> {
 		 * Step 3: Dump the tree if required
 		 */
 		if (drawPaths && (root != null)) {
-			log.trace(":::");
+			log.trace("{}", LOG_PREFIX);
 			for (String ll : stringRepr()) {
-				log.trace("::: {}", ll);
+				log.trace("{} {}", LOG_PREFIX, ll);
 			}
 		}
 		insertTime.addAndGet(System.currentTimeMillis() - t);
@@ -232,10 +237,10 @@ public class PathTree implements Comparator<PathTreeNode> {
 		long alt = paths[0].getChoice().getAlternative();
 		for (int j = 1; j < depth; j++) {
 			if (paths[j].getChoice().getBranch() instanceof Trace) {
-				log.trace("::: insert(parent:{}, cur/depth:{}/{})", getId(parent), j, depth);
+				log.trace("{} insert(parent:{}, cur/depth:{}/{})", LOG_PREFIX, getId(parent), j, depth);
 			} else {
 				Expression conjunct = paths[j].getChoice().getActiveConjunct();
-				log.trace("::: insert(parent:{}, conjunct:{}, cur/depth:{}/{})", getId(parent), conjunct, j, depth);
+				log.trace("{} insert(parent:{}, conjunct:{}, cur/depth:{}/{})", LOG_PREFIX, getId(parent), conjunct, j, depth);
 			}
 			PathTreeNode n = parent.getChild(alt);
 			if (n == null) {
@@ -288,7 +293,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 				if (full) {
 					node.lock();
 					if (!node.isFullyExplored()) {
-						log.trace("::: setting {} as fully explored", getId(node));
+						log.trace("{} setting {} as fully explored", LOG_PREFIX, getId(node));
 						node.setFullyExplored();
 					}
 					node.unlock();
@@ -296,7 +301,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 			}
 		}
 		if (recordDeepest && (n != null) && !n.isFullyExplored()) {
-			log.trace("%%%%%%% DEEPEST NODE ADDED: {}", n);
+			log.trace("{} %%%%%%% DEEPEST NODE ADDED: {}", LOG_PREFIX, n);
 			deepest.add(n);
 		}
 		return n;

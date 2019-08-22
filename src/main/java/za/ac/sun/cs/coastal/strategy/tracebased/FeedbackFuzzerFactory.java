@@ -23,6 +23,11 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 
 public class FeedbackFuzzerFactory implements StrategyFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "@F@";
+
 	protected final Configuration configuration;
 
 	public FeedbackFuzzerFactory(COASTAL coastal, Configuration configuration) {
@@ -324,7 +329,7 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 		@SuppressWarnings("unchecked")
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ strategy task starting");
+			log.trace("{} strategy task starting", LOG_PREFIX);
 			try {
 				ExecutionCollection keepers = new ExecutionCollection(keepTop);
 				ExecutionCollection allTime = new ExecutionCollection(keepTop);
@@ -333,7 +338,7 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 				long t1 = System.currentTimeMillis();
 				manager.recordWaitTime(t1 - t0);
 				manager.incrementRefinements();
-				log.trace("+++ starting refinement");
+				log.trace("{} starting refinement", LOG_PREFIX);
 				int score0 = calculateScore(execution0);
 				keepers.add(score0, execution0);
 				allTime.add(score0, execution0);
@@ -353,7 +358,7 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 						t1 = System.currentTimeMillis();
 						manager.recordWaitTime(t1 - t0);
 						if (executionx == null) {
-							log.trace("+++ out of traces");
+							log.trace("{} out of traces", LOG_PREFIX);
 							break;
 						}
 						int scorex = calculateScore(executionx);
@@ -361,7 +366,7 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 						allTime.add(scorex, executionx);
 					}
 					manager.incrementRefinements();
-					log.trace("+++ starting refinement");
+					log.trace("{} starting refinement", LOG_PREFIX);
 					ExecutionCollection candidates = (keepers.size() > 0) ? keepers : allTime;
 					setValues.clear();
 					incValues.clear();
@@ -379,10 +384,10 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 					}
 				}
 			} catch (InterruptedException e) {
-				log.trace("^^^ strategy task canceled");
+				log.trace("{} strategy task canceled", LOG_PREFIX);
 				throw e;
 			}
-			log.trace("^^^ strategy task finished");
+			log.trace("{} strategy task finished", LOG_PREFIX);
 			return null;
 		}
 
@@ -393,7 +398,7 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 			parameters = coastal.getParameters();
 			Input input = execution.getInput();
 			mutate(score, input);
-			log.trace("+++ added {} surfer models", inputsAdded);
+			log.trace("{} added {} surfer models", LOG_PREFIX, inputsAdded);
 			coastal.updateWork(inputsAdded);
 			manager.recordTime(System.currentTimeMillis() - t0);
 		}

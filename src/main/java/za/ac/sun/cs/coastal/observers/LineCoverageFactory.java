@@ -12,6 +12,11 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class LineCoverageFactory implements ObserverFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "#L#";
+
 	public LineCoverageFactory(COASTAL coastal, Configuration options) {
 	}
 
@@ -139,7 +144,7 @@ public class LineCoverageFactory implements ObserverFactory {
 
 		public void line(Object object) {
 			int lineno = (Integer) ((Tuple) object).get(1);
-			log.trace("+++ L{}", lineno);
+			log.trace("{} L{}", LOG_PREFIX, lineno);
 			covered.set(lineno);
 			if (--updateCounter < 0) {
 				update(null);

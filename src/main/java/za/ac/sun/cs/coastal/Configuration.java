@@ -31,6 +31,11 @@ import org.apache.logging.log4j.Logger;
  */
 public class Configuration {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "!!!";
+
 	// ======================================================================
 	//
 	// CONFIGURATION PARAMETERS
@@ -757,11 +762,11 @@ public class Configuration {
 			InputStream inputStream = new FileInputStream(filename);
 			Configuration configuration = loadFromStream(log, inputStream);
 			if (configuration == null) {
-				log.trace("failed to load configuration from {}", filename);
+				log.trace("{} failed to load configuration from {}", LOG_PREFIX, filename);
 			}
 			return configuration;
 		} catch (FileNotFoundException e) {
-			log.trace("failed to load configuration from {}", filename);
+			log.trace("{} failed to load configuration from {}", LOG_PREFIX, filename);
 		}
 		return null;
 	}
@@ -781,7 +786,7 @@ public class Configuration {
 		InputStream resourceStream = loader.getResourceAsStream(resourceName);
 		Configuration configuration = loadFromStream(log, resourceStream);
 		if (configuration == null) {
-			log.trace("failed to load configuration from {}", resourceName);
+			log.trace("{} failed to load configuration from {}", LOG_PREFIX, resourceName);
 		}
 		return configuration;
 	}
@@ -801,7 +806,7 @@ public class Configuration {
 			properties.load(inputStream);
 			return new Configuration(properties);
 		} catch (IOException x) {
-			log.trace("IO error", x);
+			log.trace(LOG_PREFIX + " IO error", x);
 		}
 		return null;
 	}
@@ -817,7 +822,7 @@ public class Configuration {
 	 */
 	private static Configuration loadFromString(Logger log, String configString) {
 		if (configString == null) {
-			log.trace("configString is null");
+			log.trace("{} configString is null", LOG_PREFIX);
 			return null;
 		}
 		InputStream in = new ByteArrayInputStream(configString.getBytes());
@@ -872,15 +877,15 @@ public class Configuration {
 				log.info("CONSTRUCTOR NOT FOUND: " + className, x);
 			}
 		} catch (SecurityException x) {
-			log.warn("CONSTRUCTOR SECURITY ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR SECURITY ERROR: " + className, x);
 		} catch (IllegalArgumentException x) {
-			log.warn("CONSTRUCTOR ARGUMENT ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR ARGUMENT ERROR: " + className, x);
 		} catch (InstantiationException x) {
-			log.warn("CONSTRUCTOR INSTANTIATION ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR INSTANTIATION ERROR: " + className, x);
 		} catch (IllegalAccessException x) {
-			log.warn("CONSTRUCTOR ACCESS ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR ACCESS ERROR: " + className, x);
 		} catch (InvocationTargetException x) {
-			log.warn("CONSTRUCTOR INVOCATION ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR INVOCATION ERROR: " + className, x);
 		}
 		return null;
 	}
@@ -919,15 +924,15 @@ public class Configuration {
 				log.info("CONSTRUCTOR NOT FOUND: " + className, x);
 			}
 		} catch (SecurityException x) {
-			log.warn("CONSTRUCTOR SECURITY ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR SECURITY ERROR: " + className, x);
 		} catch (IllegalArgumentException x) {
-			log.warn("CONSTRUCTOR ARGUMENT ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR ARGUMENT ERROR: " + className, x);
 		} catch (InstantiationException x) {
-			log.warn("CONSTRUCTOR INSTANTIATION ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR INSTANTIATION ERROR: " + className, x);
 		} catch (IllegalAccessException x) {
-			log.warn("CONSTRUCTOR ACCESS ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR ACCESS ERROR: " + className, x);
 		} catch (InvocationTargetException x) {
-			log.warn("CONSTRUCTOR INVOCATION ERROR: " + className, x);
+			log.trace(LOG_PREFIX + " CONSTRUCTOR INVOCATION ERROR: " + className, x);
 		}
 		return null;
 	}
@@ -949,9 +954,9 @@ public class Configuration {
 				ClassLoader cl = COASTAL.class.getClassLoader();
 				clas = cl.loadClass(className);
 			} catch (ClassNotFoundException x) {
-				log.warn("CLASS NOT FOUND: " + className, x);
+				log.trace(LOG_PREFIX + " CLASS NOT FOUND: " + className, x);
 			} catch (ExceptionInInitializerError x) {
-				log.warn("CLASS NOT FOUND: " + className, x);
+				log.trace(LOG_PREFIX + " CLASS NOT FOUND: " + className, x);
 			}
 		}
 		return clas;

@@ -31,6 +31,11 @@ import za.ac.sun.cs.coastal.surfer.TraceState;
 
 public class InstrumentationClassManager {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "~~~";
+
 	private final COASTAL coastal;
 
 	private final Logger log;
@@ -157,7 +162,7 @@ public class InstrumentationClassManager {
 			instrumentedCount.incrementAndGet();
 			preInstrumentedSize.addAndGet(in.length);
 			postInstrumentedSize.addAndGet(instrumented.length);
-			log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, instrumented.length);
+			log.trace("{} instrumented {}: {} -> {} bytes", LOG_PREFIX, name, in.length, instrumented.length);
 			if (writeClassfile != null) {
 				writeFile(writeClassfile, instrumented);
 			}
@@ -196,7 +201,7 @@ public class InstrumentationClassManager {
 			instrumentedCount.incrementAndGet();
 			preInstrumentedSize.addAndGet(in.length);
 			postInstrumentedSize.addAndGet(instrumented.length);
-			log.trace("*** instrumented {}: {} -> {} bytes", name, in.length, instrumented.length);
+			log.trace("{} instrumented {}: {} -> {} bytes", LOG_PREFIX, name, in.length, instrumented.length);
 			if (writeClassfile != null) {
 				writeFile(writeClassfile, instrumented);
 			}
@@ -253,7 +258,7 @@ public class InstrumentationClassManager {
 							}
 							zin.closeEntry();
 							out.close();
-							log.trace("]]] file {} found: {}::{}", filename, entry.getKey(), fullFilename);
+							log.trace("{} file {} found: {}::{}", LOG_PREFIX, filename, entry.getKey(), fullFilename);
 							return out.toByteArray();
 						}
 						ze = zin.getNextEntry();
@@ -271,7 +276,7 @@ public class InstrumentationClassManager {
 			File file = new File(classPath, filename);
 			if (file.exists() && !file.isDirectory()) {
 				try {
-					log.trace("]]] file {} found: {}", filename, file.getAbsolutePath());
+					log.trace("{} file {} found: {}", LOG_PREFIX, filename, file.getAbsolutePath());
 					FileInputStream in = new FileInputStream(file);
 					if (in != null) {
 						return new BufferedInputStream(in);
@@ -285,7 +290,7 @@ public class InstrumentationClassManager {
 			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 			InputStream in = loader.getResourceAsStream(filename);
 			if (in != null) {
-				log.trace("]]] resource {} found", filename);
+				log.trace("{} resource {} found", LOG_PREFIX, filename);
 			}
 			return in;
 		} else {

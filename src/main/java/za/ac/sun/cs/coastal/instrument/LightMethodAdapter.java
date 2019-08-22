@@ -12,9 +12,16 @@ import za.ac.sun.cs.coastal.Trigger;
 
 public class LightMethodAdapter extends MethodVisitor {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "{{{";
+
 	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
 
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/VM";
+
+	private static final String SYSTEM = "java/lang/System";
 
 	private final COASTAL coastal;
 
@@ -172,7 +179,7 @@ public class LightMethodAdapter extends MethodVisitor {
 					"(III[Ljava/lang/String;)[Ljava/lang/String;", false);
 			mv.visitIntInsn(Opcodes.ASTORE, address);
 		} else {
-			log.fatal("UNHANDLED PARAMETER TYPE");
+			log.fatal("{} UNHANDLED PARAMETER TYPE", LOG_PREFIX);
 			System.exit(1);
 		}
 		return size;
@@ -180,7 +187,7 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitLineNumber(int line, Label start) {
-		log.trace("visitLineNumber(line:{}, label:{})", line, start);
+		log.trace("{} visitLineNumber(line:{}, label:{})", LOG_PREFIX, line, start);
 		mv.visitLdcInsn(classManager.getInstructionCounter());
 		mv.visitLdcInsn(line);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(II)V", false);
@@ -199,7 +206,7 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitEnd() {
-		log.trace("visitEnd()");
+		log.trace("{} visitEnd()", LOG_PREFIX);
 		classManager.registerLastInstruction();
 		classManager.registerLinenumbers(currentLinenumbers);
 		mv.visitEnd();
@@ -207,7 +214,7 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitCode() {
-		log.trace("visitCode()");
+		log.trace("{} visitCode()", LOG_PREFIX);
 		if (triggerIndex >= 0) {
 			//--- IF (symbolicMode) {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getRecordingMode", "()Z", false);
@@ -216,7 +223,8 @@ public class LightMethodAdapter extends MethodVisitor {
 			//---   triggerMethod()
 			mv.visitLdcInsn(classManager.getNextMethodCounter());
 			mv.visitLdcInsn(triggerIndex);
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(II)V", false);
+			mv.visitLdcInsn(isStatic);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(IIZ)V", false);
 			//---   GENERATE PARAMETER OVERRIDES
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			int n = trigger.getParamCount();
@@ -249,7 +257,7 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitInsn(int opcode) {
-		log.trace("visitInsn(opcode:{})", opcode);
+		log.trace("{} visitInsn(opcode:{})", LOG_PREFIX, opcode);
 		switch (opcode) {
 		case Opcodes.IRETURN:
 		case Opcodes.ARETURN:
@@ -269,10 +277,12 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-		log.trace("visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
+		log.trace("{} visitMethodInsn(opcode:{}, owner:{}, name:{})", LOG_PREFIX, opcode, owner, name);
 		if (owner.equals(SYMBOLIC)) {
 			mv.visitMethodInsn(opcode, LIBRARY, name, descriptor, isInterface);
 			// pop params !!!!!!!!!!!
+		} else if (owner.equals(SYSTEM) && name.equals("exit")) {
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "systemExit", "(I)V", false);
 		} else {
 			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 		}
@@ -280,7 +290,7 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
-		log.trace("visitJumpInsn(opcode:{}, label:{})", opcode, label);
+		log.trace("{} visitJumpInsn(opcode:{}, label:{})", LOG_PREFIX, opcode, label);
 		switch (opcode) {
 		case Opcodes.IFEQ:
 		case Opcodes.IFNE:

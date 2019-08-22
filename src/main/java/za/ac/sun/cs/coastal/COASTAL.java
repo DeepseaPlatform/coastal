@@ -62,6 +62,11 @@ import za.ac.sun.cs.coastal.symbolic.Input;
 public class COASTAL {
 
 	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = ">>>";
+
+	/**
 	 * The logger for this analysis run. This is not created but set by the outside
 	 * world.
 	 */
@@ -1063,16 +1068,24 @@ public class COASTAL {
 		String[] delegates = getConfig().getString("coastal.delegates", "").split(",");
 		for (String delegate : delegates) {
 			if (delegate.trim().length() == 0) {
-				break;
+				// log.info("Empty delegate ignored");
+				continue;
 			}
-			String key = "coastal.observers." + delegate.trim();
+			String key = "coastal.delegates." + delegate.trim();
 			String target = getConfig().getString(key + ".for");
 			if (target == null) {
-				break;
+				log.info("No target for delegate {} -- ignored", delegate.trim());
+				continue;
 			}
 			String model = getConfig().getString(key + ".model");
+			if (model == null) {
+				log.info("No model for delegate {} -- ignored", delegate.trim());
+				continue;
+			}
 			Object modelObject = Configuration.createInstance(this, getConfig().subset(key), model.trim());
-			if (modelObject != null) {
+			if (modelObject == null) {
+				log.info("Failed to create model for delegate {}", delegate.trim());
+			} else {
 				this.delegates.put(target.trim(), modelObject);
 			}
 		}
@@ -1875,7 +1888,7 @@ public class COASTAL {
 				traceQueue.clear();
 				if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
 					executor.shutdownNow();
-					log.trace("(still awaiting termination)");
+					log.trace("{} (still awaiting termination)", LOG_PREFIX);
 				}
 			}
 		} catch (InterruptedException x) {

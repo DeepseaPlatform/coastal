@@ -18,8 +18,14 @@ import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.VM;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 
 public class DiverFactory implements TaskFactory {
+
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "***";
 
 	/**
 	 * The number of diver tasks started (ever).
@@ -176,7 +182,7 @@ public class DiverFactory implements TaskFactory {
 
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ diver task starting");
+			log.trace("{} diver task starting", LOG_PREFIX);
 			for (Tuple observer : coastal.getObserversPerTask()) {
 				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 				ObserverManager observerManager = (ObserverManager) observer.get(1);
@@ -207,7 +213,7 @@ public class DiverFactory implements TaskFactory {
 				}
 			} catch (InterruptedException e) {
 				broker.publishThread("diver-task-end", this);
-				log.trace("^^^ diver task canceled");
+				log.trace("{} diver task canceled", LOG_PREFIX);
 				throw e;
 			}
 		}
@@ -235,10 +241,11 @@ public class DiverFactory implements TaskFactory {
 					} catch (SymbolicException e) {
 						// ignore, since run is over in any case
 					}
+				} else if (t instanceof SystemExitException) {
+					broker.publish("system-exit", new Tuple(this, null));
 				} else if (!(t instanceof SymbolicException)) {
-					log.info("!@#$%$#@! PROGRAM EXCEPTION:", t);
+					log.info("P R O G R A M   E X C E P T I O N:", LOG_PREFIX, t);
 					if (t instanceof AssertionError) {
-						log.trace("test");
 						broker.publish("assert-failed", new Tuple(this, null));
 					}
 					try {

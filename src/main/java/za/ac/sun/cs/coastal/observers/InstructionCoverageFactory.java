@@ -12,6 +12,11 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 
 public class InstructionCoverageFactory implements ObserverFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "#I#";
+	
 	public InstructionCoverageFactory(COASTAL coastal, Configuration config) {
 	}
 
@@ -152,7 +157,7 @@ public class InstructionCoverageFactory implements ObserverFactory {
 
 		public void insn(Object object) {
 			int instr = (Integer) ((Tuple) object).get(0);
-			log.trace("+++ {}", instr);
+			log.trace("{} {}", LOG_PREFIX, instr);
 			covered.set(instr);
 			if (--updateCounter < 0) {
 				update(null);

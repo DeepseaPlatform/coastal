@@ -24,9 +24,15 @@ import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
 import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.CompletedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 import za.ac.sun.cs.coastal.utility.Translator;
 
 public final class TraceState extends State {
+
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "&&&";
 
 	private boolean useCurrentValues;
 
@@ -106,7 +112,7 @@ public final class TraceState extends State {
 		assert frameCount > 0;
 		frameCount--;
 		if ((frameCount == 0) && getRecordingMode()) {
-			log.trace(">>> symbolic record mode switched off");
+			log.trace("{} symbolic record mode switched off", LOG_PREFIX);
 			setRecordingMode(false);
 			mayRecord = false;
 			setTrackingMode(false);
@@ -765,7 +771,7 @@ public final class TraceState extends State {
 		if (!getRecordingMode()) {
 			setRecordingMode(mayRecord);
 			if (getRecordingMode()) {
-				log.trace(">>> symbolic record mode switched on");
+				log.trace("{} symbolic record mode switched on", LOG_PREFIX);
 				mayRecord = false;
 				setTrackingMode(true);
 				frameCount++;
@@ -785,7 +791,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace(">>> transferring arguments");
+		log.trace("{} transferring arguments", LOG_PREFIX);
 		frameCount++;
 		broker.publishThread("enter-method", methodNumber);
 	}
@@ -876,7 +882,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("### LINENUMBER {}", line);
+		log.trace("{} ### LINENUMBER {}", LOG_PREFIX, line);
 		broker.publishThread("linenumber", new Tuple(instr, line));
 	}
 
@@ -900,7 +906,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
 		broker.publishThread("insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		// case Opcodes.IDIV:
@@ -1000,16 +1006,16 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
 		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.GOTO:
 			break;
 		case Opcodes.JSR:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		default:
-			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 	}
@@ -1024,7 +1030,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
 		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.IFEQ:
@@ -1046,7 +1052,7 @@ public final class TraceState extends State {
 			jumpInsn(instr, opcode, value >= 0);
 			break;
 		default:
-			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 	}
@@ -1061,7 +1067,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
 		switch (opcode) {
 		case Opcodes.IFNULL:
 			jumpInsn(instr, opcode, value == null);
@@ -1070,7 +1076,7 @@ public final class TraceState extends State {
 			jumpInsn(instr, opcode, value != null);
 			break;
 		default:
-			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 	}
@@ -1085,7 +1091,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("<{}> {}", instr, Bytecodes.toString(opcode));
+		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
 		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.IF_ACMPEQ:
@@ -1117,7 +1123,7 @@ public final class TraceState extends State {
 			jumpInsn(instr, opcode, value1 <= value2);
 			break;
 		default:
-			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 	}
@@ -1143,7 +1149,7 @@ public final class TraceState extends State {
 					pathTreeNode = pathTreeNode.getChild(0);
 				}
 				if (pathTreeNode != null) {
-					log.trace("PTN: #{} -> #{}", ptn, pathTreeNode.getId());
+					log.trace("{} PTN: #{} -> #{}", LOG_PREFIX, ptn, pathTreeNode.getId());
 				}
 				if ((pathTreeNode != null) && pathTreeNode.isFullyExplored()) {
 					throw new AbortedRunException();
@@ -1432,6 +1438,16 @@ public final class TraceState extends State {
 	@Override
 	public void loadClasses(String descriptor) {
 		// do nothing
+	}
+
+	// ======================================================================
+	//
+	// SPECIAL ROUTINES
+	//
+	// ======================================================================
+
+	public void systemExit(int status) throws SymbolicException {
+		throw new SystemExitException();
 	}
 
 }

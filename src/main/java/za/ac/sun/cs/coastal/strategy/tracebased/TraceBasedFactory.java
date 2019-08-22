@@ -16,6 +16,11 @@ import za.ac.sun.cs.coastal.symbolic.Input;
 
 public abstract class TraceBasedFactory implements StrategyFactory {
 
+	/**
+	 * Prefix added to log messages.
+	 */
+	private static final String LOG_PREFIX = "@T@";
+
 	// ======================================================================
 	//
 	// TRACE-BASED SEARCH STRATEGY MANAGER
@@ -155,7 +160,7 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 
 		@Override
 		public Void call() throws Exception {
-			log.trace("^^^ strategy task starting");
+			log.trace("{} strategy task starting", LOG_PREFIX);
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
@@ -163,7 +168,7 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					manager.incrementRefinements();
-					log.trace("+++ starting refinement");
+					log.trace("{} starting refinement", LOG_PREFIX);
 					List<Input> inputs = refine(execution);
 					int d = -1;
 					while (inputs != null) {
@@ -174,11 +179,11 @@ public abstract class TraceBasedFactory implements StrategyFactory {
 						}
 						inputs = refine1();
 					}
-					log.trace("+++ added {} surfer models", d);
+					log.trace("{} added {} surfer models", LOG_PREFIX, d);
 					coastal.updateWork(d);
 				}
 			} catch (InterruptedException e) {
-				log.trace("^^^ strategy task canceled");
+				log.trace("{} strategy task canceled", LOG_PREFIX);
 				throw e;
 			}
 		}
