@@ -167,8 +167,8 @@ public class RandomTestingFactory extends TraceBasedFactory {
 					concreteValues.put(name, value);
 				} else if (type == String.class) {
 					int size = coastal.getParameterSize(name);
-					int min = (Character) coastal.getMinBound(name, char.class);
-					int max = (Character) coastal.getMaxBound(name, char.class);
+					int min = (Character) coastal.getMinBound(name, String.class);
+					int max = (Character) coastal.getMaxBound(name, String.class);
 					for (int i = 0; i < size; i++) {
 						int value = rng.nextInt(min, max + 1);
 						concreteValues.put(name + TraceState.CHAR_SEPARATOR + i, Long.valueOf(value));

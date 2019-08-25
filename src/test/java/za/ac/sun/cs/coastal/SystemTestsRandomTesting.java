@@ -2,7 +2,6 @@ package za.ac.sun.cs.coastal;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;
@@ -14,9 +13,9 @@ public class SystemTestsRandomTesting extends SystemTests {
 	@Test
 	public void testRandomTesting01A() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/randomtesting/RandomTesting01.xml" },
-				"<coastal><strategies><strategy><options><seed>1</seed></options></strategy></strategies></coastal>");
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "randomtesting/RandomTesting01.properties" },
+				"coastal.strategies.S.seed = 1");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -35,9 +34,9 @@ public class SystemTestsRandomTesting extends SystemTests {
 	@Test
 	public void testRandomTesting01B() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/randomtesting/RandomTesting01.xml" },
-				"<coastal><strategies><strategy><options><seed>12</seed></options></strategy></strategies></coastal>");
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "randomtesting/RandomTesting01.properties" },
+				"coastal.strategies.S.seed = 12");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -56,9 +55,9 @@ public class SystemTestsRandomTesting extends SystemTests {
 	@Test
 	public void testRandomTesting01C() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/randomtesting/RandomTesting01.xml" },
-				"<coastal><strategies><strategy><options><seed>123</seed></options></strategy></strategies></coastal>");
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "randomtesting/RandomTesting01.properties" },
+				"coastal.strategies.S.seed = 123");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -77,9 +76,9 @@ public class SystemTestsRandomTesting extends SystemTests {
 	@Test
 	public void testRandomTesting01D() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/randomtesting/RandomTesting01.xml" },
-				"<coastal><strategies><strategy><options><seed>1234</seed></options></strategy></strategies></coastal>");
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "randomtesting/RandomTesting01.properties" },
+				"coastal.strategies.S.seed = 1234");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -98,9 +97,9 @@ public class SystemTestsRandomTesting extends SystemTests {
 	@Test
 	public void testRandomTesting01E() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/randomtesting/RandomTesting01.xml" },
-				"<coastal><strategies><strategy><options><seed>12345</seed></options></strategy></strategies></coastal>");
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "randomtesting/RandomTesting01.properties" },
+				"coastal.strategies.S.seed = 12345");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -119,9 +118,9 @@ public class SystemTestsRandomTesting extends SystemTests {
 	@Test
 	public void testRandomTesting01F() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/randomtesting/RandomTesting01.xml" },
-				"<coastal><bounds><bound name=\"a\" min=\"10\"/></bounds></coastal>");
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "randomtesting/RandomTesting01.properties" },
+				"coastal.bounds.a.min = 10");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);

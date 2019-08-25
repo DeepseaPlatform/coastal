@@ -14,16 +14,16 @@ import java.util.Map;
  */
 public class Translator {
 
-	private static final Map<Character, String> map = new HashMap<>();
+	private static final Map<Character, String> TRANSLATE_MAP = new HashMap<>();
 
 	static {
-		map.put('"', "\\\"");
-		map.put('\\', "\\\\");
-		map.put('\b', "\\b");
-		map.put('\f', "\\f");
-		map.put('\n', "\\n");
-		map.put('\r', "\\r");
-		map.put('\t', "\\t");
+		TRANSLATE_MAP.put('"', "\\\"");
+		TRANSLATE_MAP.put('\\', "\\\\");
+		TRANSLATE_MAP.put('\b', "\\b");
+		TRANSLATE_MAP.put('\f', "\\f");
+		TRANSLATE_MAP.put('\n', "\\n");
+		TRANSLATE_MAP.put('\r', "\\r");
+		TRANSLATE_MAP.put('\t', "\\t");
 	}
 
 	private static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
@@ -93,8 +93,8 @@ public class Translator {
 
 	private static int translate(final CharSequence input, final int index, final Writer out) throws IOException {
 		char ch = input.charAt(index);
-		if (map.containsKey(ch)) {
-			out.write(map.get(ch));
+		if (TRANSLATE_MAP.containsKey(ch)) {
+			out.write(TRANSLATE_MAP.get(ch));
 			return 1;
 		}
 		if ((ch < 32) || (ch > 0x7f)) {

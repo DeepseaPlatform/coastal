@@ -3,7 +3,6 @@ package za.ac.sun.cs.coastal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,7 +10,7 @@ public class SystemTests {
 
 	protected Reporter setup(String basic, String special) {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { basic, special });
+		Configuration config = Configuration.load(log, new String[] { basic, special });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);

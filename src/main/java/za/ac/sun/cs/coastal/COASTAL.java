@@ -606,7 +606,7 @@ public class COASTAL {
 				prefixes.add(instrument);
 			}
 		}
-		String mainClass = configuration.getString("coastal.target.main", null);
+		String mainClass = getConfig().getString("coastal.target.main", null);
 		String[] triggerNames = getConfig().getString("coastal.target.trigger", "").split(";");
 		for (String trig : triggerNames) {
 			String trigger = trig.trim();
@@ -614,14 +614,25 @@ public class COASTAL {
 				triggers.add(Trigger.createTrigger(trigger, mainClass, parameters));
 			}
 		}
-		String entrypoint = configuration.getString("coastal.target.entrypoint", null);
+		String entrypoint = getConfig().getString("coastal.target.entrypoint", null);
+		if (entrypoint != null) {
+			int dot = entrypoint.lastIndexOf('.');
+			if ((mainClass == null) && (dot != -1)) {
+				mainClass = entrypoint.substring(0, dot);
+			}
+		}
+		if (mainClass == null) {
+			log.fatal("NO MAIN CLASS SPECIFIED -- TERMINATING");
+			System.exit(1);
+		}
 		if (entrypoint != null) {
 			mainEntrypoint = Trigger.createTrigger(entrypoint, mainClass);
 		} else {
 			mainEntrypoint = Trigger.createTrigger("main(String[])", mainClass);
 		}
 		mainArguments = new Object[mainEntrypoint.getParamCount()];
-		String[] args = getConfig().getString("coastal.target.arg", "").split(",");
+		String argString = getConfig().getString("coastal.target.args", null);
+		String[] args = (argString == null) ? new String[0] : argString.split(",");
 		for (int i = 0; i < mainEntrypoint.getParamCount(); i++) {
 			Class<?> type = mainEntrypoint.getParamType(i);
 			if (type == boolean.class) {
@@ -810,7 +821,7 @@ public class COASTAL {
 		defaultMinBounds.put(long.class, Long.MIN_VALUE + 1L);
 		defaultMinBounds.put(float.class, -Float.MAX_VALUE);
 		defaultMinBounds.put(double.class, -Double.MAX_VALUE);
-		// defaultMinBounds.put(String.class, Character.MIN_VALUE);
+		defaultMinBounds.put(String.class, Character.MIN_VALUE);
 		defaultMinBounds.put(boolean[].class, 0);
 		defaultMinBounds.put(byte[].class, Byte.MIN_VALUE);
 		defaultMinBounds.put(short[].class, Short.MIN_VALUE);
@@ -828,7 +839,7 @@ public class COASTAL {
 		defaultMaxBounds.put(long.class, Long.MAX_VALUE);
 		defaultMaxBounds.put(float.class, Float.MAX_VALUE);
 		defaultMaxBounds.put(double.class, Double.MAX_VALUE);
-		// defaultMaxBounds.put(String.class, Character.MAX_VALUE);
+		defaultMaxBounds.put(String.class, Character.MAX_VALUE);
 		defaultMaxBounds.put(boolean[].class, 1);
 		defaultMaxBounds.put(byte[].class, Byte.MAX_VALUE);
 		defaultMaxBounds.put(short[].class, Short.MAX_VALUE);
@@ -839,7 +850,7 @@ public class COASTAL {
 		defaultMaxBounds.put(double[].class, Double.MAX_VALUE);
 		// defaultMaxBounds.put(String[].class, Character.MAX_VALUE);
 		Configuration bounds = getConfig().subset("coastal.bounds");
-		List<String> keys = new ArrayList<>();
+		Set<String> keys = new HashSet<>();
 		for (String key : bounds.getKeys()) {
 			if (key.endsWith(".min") || key.endsWith(".max")) {
 				keys.add(key.substring(0, key.length() - 4));
@@ -849,93 +860,93 @@ public class COASTAL {
 			if (key.equals("boolean")) {
 				int l = (Integer) defaultMinBounds.get(boolean.class);
 				int u = (Integer) defaultMaxBounds.get(boolean.class);
-				defaultMinBounds.put(boolean.class, new Integer(getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(boolean.class, new Integer(getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(boolean.class, new Integer(bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(boolean.class, new Integer(bounds.getInt(key + ".max", u)));
 			} else if (key.equals("boolean[]")) {
 				int l = (Integer) defaultMinBounds.get(boolean[].class);
 				int u = (Integer) defaultMaxBounds.get(boolean[].class);
-				defaultMinBounds.put(boolean[].class, new Integer(getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(boolean[].class, new Integer(getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(boolean[].class, new Integer(bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(boolean[].class, new Integer(bounds.getInt(key + ".max", u)));
 			} else if (key.equals("byte")) {
 				byte l = (Byte) defaultMinBounds.get(byte.class);
 				byte u = (Byte) defaultMaxBounds.get(byte.class);
-				defaultMinBounds.put(byte.class, new Byte((byte) getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(byte.class, new Byte((byte) getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(byte.class, new Byte((byte) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(byte.class, new Byte((byte) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("byte[]")) {
 				byte l = (Byte) defaultMinBounds.get(byte[].class);
 				byte u = (Byte) defaultMaxBounds.get(byte[].class);
-				defaultMinBounds.put(byte[].class, new Byte((byte) getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(byte[].class, new Byte((byte) getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(byte[].class, new Byte((byte) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(byte[].class, new Byte((byte) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("short")) {
 				short l = (Short) defaultMinBounds.get(short.class);
 				short u = (Short) defaultMaxBounds.get(short.class);
-				defaultMinBounds.put(short.class, new Short((short) getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(short.class, new Short((short) getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(short.class, new Short((short) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(short.class, new Short((short) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("short[]")) {
 				short l = (Short) defaultMinBounds.get(short[].class);
 				short u = (Short) defaultMaxBounds.get(short[].class);
-				defaultMinBounds.put(short[].class, new Short((short) getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(short[].class, new Short((short) getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(short[].class, new Short((short) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(short[].class, new Short((short) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("char")) {
 				char l = (Character) defaultMinBounds.get(char.class);
 				char u = (Character) defaultMaxBounds.get(char.class);
-				defaultMinBounds.put(char.class, new Character((char) getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(char.class, new Character((char) getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(char.class, new Character((char) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(char.class, new Character((char) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("char[]")) {
 				char l = (Character) defaultMinBounds.get(char[].class);
 				char u = (Character) defaultMaxBounds.get(char[].class);
-				defaultMinBounds.put(char[].class, new Character((char) getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(char[].class, new Character((char) getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(char[].class, new Character((char) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(char[].class, new Character((char) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("int")) {
 				int l = (Integer) defaultMinBounds.get(int.class);
 				int u = (Integer) defaultMaxBounds.get(int.class);
-				defaultMinBounds.put(int.class, new Integer((int) getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(int.class, new Integer((int) getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(int.class, new Integer((int) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(int.class, new Integer((int) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("int[]")) {
 				int l = (Integer) defaultMinBounds.get(int[].class);
 				int u = (Integer) defaultMaxBounds.get(int[].class);
-				defaultMinBounds.put(int[].class, new Integer((int) getConfig().getInt(key + ".min", l)));
-				defaultMaxBounds.put(int[].class, new Integer((int) getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(int[].class, new Integer((int) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(int[].class, new Integer((int) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("long")) {
 				long l = (Long) defaultMinBounds.get(long.class);
 				long u = (Long) defaultMaxBounds.get(long.class);
-				defaultMinBounds.put(long.class, new Long((long) getConfig().getLong(key + ".min", l)));
-				defaultMaxBounds.put(long.class, new Long((long) getConfig().getLong(key + ".max", u)));
+				defaultMinBounds.put(long.class, new Long((long) bounds.getLong(key + ".min", l)));
+				defaultMaxBounds.put(long.class, new Long((long) bounds.getLong(key + ".max", u)));
 			} else if (key.equals("long[]")) {
 				long l = (Long) defaultMinBounds.get(long[].class);
 				long u = (Long) defaultMaxBounds.get(long[].class);
-				defaultMinBounds.put(long[].class, new Long((long) getConfig().getLong(key + ".min", l)));
-				defaultMaxBounds.put(long[].class, new Long((long) getConfig().getLong(key + ".max", u)));
+				defaultMinBounds.put(long[].class, new Long((long) bounds.getLong(key + ".min", l)));
+				defaultMaxBounds.put(long[].class, new Long((long) bounds.getLong(key + ".max", u)));
 			} else if (key.equals("float")) {
 				float l = (Float) defaultMinBounds.get(float.class);
 				float u = (Float) defaultMaxBounds.get(float.class);
-				defaultMinBounds.put(float.class, new Float((float) getConfig().getFloat(key + ".min", l)));
-				defaultMaxBounds.put(float.class, new Float((float) getConfig().getFloat(key + ".max", u)));
+				defaultMinBounds.put(float.class, new Float((float) bounds.getFloat(key + ".min", l)));
+				defaultMaxBounds.put(float.class, new Float((float) bounds.getFloat(key + ".max", u)));
 			} else if (key.equals("float[]")) {
 				float l = (Float) defaultMinBounds.get(float[].class);
 				float u = (Float) defaultMaxBounds.get(float[].class);
-				defaultMinBounds.put(float[].class, new Float((float) getConfig().getFloat(key + ".min", l)));
-				defaultMaxBounds.put(float[].class, new Float((float) getConfig().getFloat(key + ".max", u)));
+				defaultMinBounds.put(float[].class, new Float((float) bounds.getFloat(key + ".min", l)));
+				defaultMaxBounds.put(float[].class, new Float((float) bounds.getFloat(key + ".max", u)));
 			} else if (key.equals("double")) {
 				double l = (Double) defaultMinBounds.get(double.class);
 				double u = (Double) defaultMaxBounds.get(double.class);
-				defaultMinBounds.put(double.class, new Double((double) getConfig().getDouble(key + ".min", l)));
-				defaultMaxBounds.put(double.class, new Double((double) getConfig().getDouble(key + ".max", u)));
+				defaultMinBounds.put(double.class, new Double((double) bounds.getDouble(key + ".min", l)));
+				defaultMaxBounds.put(double.class, new Double((double) bounds.getDouble(key + ".max", u)));
 			} else if (key.equals("double[]")) {
 				double l = (Double) defaultMinBounds.get(double[].class);
 				double u = (Double) defaultMaxBounds.get(double[].class);
-				defaultMinBounds.put(double[].class, new Double((double) getConfig().getDouble(key + ".min", l)));
-				defaultMaxBounds.put(double[].class, new Double((double) getConfig().getDouble(key + ".max", u)));
-//			} else if (key.equals("String")) {
-//				char l = (Character) defaultMinBounds.get(String.class);
-//				char u = (Character) defaultMaxBounds.get(String.class);
-//				defaultMinBounds.put(String.class, new Character((char) getConfig().getInt(key + ".min", l)));
-//				defaultMaxBounds.put(String.class, new Character((char) getConfig().getInt(key + ".max", u)));
+				defaultMinBounds.put(double[].class, new Double((double) bounds.getDouble(key + ".min", l)));
+				defaultMaxBounds.put(double[].class, new Double((double) bounds.getDouble(key + ".max", u)));
+			} else if (key.equals("String")) {
+				char l = (Character) defaultMinBounds.get(String.class);
+				char u = (Character) defaultMaxBounds.get(String.class);
+				defaultMinBounds.put(String.class, new Character((char) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(String.class, new Character((char) bounds.getInt(key + ".max", u)));
 //			} else if (key.equals("String[]")) {
 //				char l = (Character) defaultMinBounds.get(String[].class);
 //				char u = (Character) defaultMaxBounds.get(String[].class);
-//				defaultMinBounds.put(String[].class, new Character((char) getConfig().getInt(key + ".min", l)));
-//				defaultMaxBounds.put(String[].class, new Character((char) getConfig().getInt(key + ".max", u)));
+//				defaultMinBounds.put(String[].class, new Character((char) bounds.getInt(key + ".min", l)));
+//				defaultMaxBounds.put(String[].class, new Character((char) bounds.getInt(key + ".max", u)));
 			} else {
 				addBound(minBounds, "coastal.bounds." + key + ".min", key);
 				addBound(maxBounds, "coastal.bounds." + key + ".max", key);
@@ -996,27 +1007,27 @@ public class COASTAL {
 		TaskInfo sti = new TaskInfo(this, surferFactory, st, sl, su);
 		surferManager = (SurferManager) sti.getManager();
 		tasks.add(sti);
-		String[] strategies = getConfig().getString("coastal.strategies", "").split(",");
 		int sfCount = 0;
-		for (String strategy : strategies) {
-			if (strategy.trim().length() == 0) {
-				break;
+		String strategyString = getConfig().getString("coastal.strategies", "").trim();
+		if (strategyString.length() > 0) {
+			boolean multipleStrategies = strategyString.contains(",");
+			if (!multipleStrategies) {
+				if (getConfig().containsKey("coastal.strategies." + strategyString)) {
+					multipleStrategies = true;
+				}
 			}
-			String key = "coastal.strategies." + strategy.trim();
-			String sfClass = getConfig().getString(key);
-			Object sfObject = Configuration.createInstance(this, getConfig().subset(key), sfClass);
-			if ((sfObject == null) || !(sfObject instanceof StrategyFactory)) {
-				Banner bn = new Banner('@');
-				bn.println("UNKNOWN STRATEGY IGNORED:\n" + sfClass);
-				bn.display(log);
-				continue;
+			if (multipleStrategies) {
+				String[] strategies = strategyString.split(",");
+				for (String strategy : strategies) {
+					if (strategy.trim().length() > 0) {
+						if (parseConfigStrategy("coastal.strategies." + strategy.trim())) {
+							sfCount++;
+						}
+					}
+				}
+			} else if (parseConfigStrategy("coastal.strategies")) {
+				sfCount++;
 			}
-			int sft = getConfig().getInt(key + ".threads", 1);
-			int sfl = getConfig().getInt(key + ".min-threads", 0);
-			int sfu = getConfig().getInt(key + ".max-threads", 128);
-			StrategyFactory sf = (StrategyFactory) sfObject;
-			tasks.add(new TaskInfo(this, sf, sft, sfl, sfu));
-			sfCount += sft;
 		}
 		if (sfCount == 0) {
 			log.fatal("NO STRATEGY SPECIFIED -- TERMINATING");
@@ -1024,39 +1035,72 @@ public class COASTAL {
 		}
 	}
 
+	private boolean parseConfigStrategy(String prefix) {
+		String sfClass = getConfig().getString(prefix);
+		Object sfObject = Configuration.createInstance(this, getConfig().subset(prefix), sfClass);
+		if ((sfObject == null) || !(sfObject instanceof StrategyFactory)) {
+			Banner bn = new Banner('@');
+			bn.println("UNKNOWN STRATEGY IGNORED:\n" + sfClass);
+			bn.display(log);
+			return false;
+		}
+		int sft = getConfig().getInt(prefix + ".threads", 1);
+		int sfl = getConfig().getInt(prefix + ".min-threads", 0);
+		int sfu = getConfig().getInt(prefix + ".max-threads", 128);
+		StrategyFactory sf = (StrategyFactory) sfObject;
+		tasks.add(new TaskInfo(this, sf, sft, sfl, sfu));
+		return true;
+	}
+	
 	/**
 	 * Parse the COASTAL configuration to extract the observers.
 	 */
 	private void parseConfigObservers() {
-		String[] observers = getConfig().getString("coastal.observers", "").split(",");
-		for (String observer : observers) {
-			if (observer.trim().length() == 0) {
-				break;
+		String observerString = getConfig().getString("coastal.observers", "").trim();
+		if (observerString.length() == 0) {
+			return;
+		}
+		boolean multipleObservers = observerString.contains(",");
+		if (!multipleObservers) {
+			if (getConfig().containsKey("coastal.observers." + observerString)) {
+				multipleObservers = true;
 			}
-			String key = "coastal.observers." + observer.trim();
-			String observerName = getConfig().getString(key);
-			if (observerName == null) {
-				break;
+		}
+		if (multipleObservers) {
+			String[] observers = observerString.split(",");
+			for (String observer : observers) {
+				if (observer.trim().length() > 0) {
+					parseConfigObserver("coastal.observers." + observer.trim());
+				}
 			}
-			Object observerFactory = Configuration.createInstance(this, getConfig().subset(key), observerName.trim());
-			if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
-				ObserverFactory factory = (ObserverFactory) observerFactory;
-				ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
-				Tuple fm = new Tuple(observerFactory, manager);
-				allObservers.add(fm);
-				int freq = factory.getFrequencyflags();
-				if ((freq & ObserverFactory.ONCE_PER_RUN) != 0) {
-					observersPerRun.add(fm);
-				}
-				if ((freq & ObserverFactory.ONCE_PER_TASK) != 0) {
-					observersPerTask.add(fm);
-				}
-				if ((freq & ObserverFactory.ONCE_PER_DIVER) != 0) {
-					observersPerDiver.add(fm);
-				}
-				if ((freq & ObserverFactory.ONCE_PER_SURFER) != 0) {
-					observersPerSurfer.add(fm);
-				}
+		} else {
+			parseConfigObserver("coastal.observers");
+		}
+	}
+
+	private void parseConfigObserver(String prefx) {
+		String observerName = getConfig().getString(prefx);
+		if (observerName == null) {
+			return;
+		}
+		Object observerFactory = Configuration.createInstance(this, getConfig().subset(prefx), observerName.trim());
+		if ((observerFactory != null) && (observerFactory instanceof ObserverFactory)) {
+			ObserverFactory factory = (ObserverFactory) observerFactory;
+			ObserverManager manager = ((ObserverFactory) observerFactory).createManager(this);
+			Tuple fm = new Tuple(observerFactory, manager);
+			allObservers.add(fm);
+			int freq = factory.getFrequencyflags();
+			if ((freq & ObserverFactory.ONCE_PER_RUN) != 0) {
+				observersPerRun.add(fm);
+			}
+			if ((freq & ObserverFactory.ONCE_PER_TASK) != 0) {
+				observersPerTask.add(fm);
+			}
+			if ((freq & ObserverFactory.ONCE_PER_DIVER) != 0) {
+				observersPerDiver.add(fm);
+			}
+			if ((freq & ObserverFactory.ONCE_PER_SURFER) != 0) {
+				observersPerSurfer.add(fm);
 			}
 		}
 	}
@@ -1065,29 +1109,45 @@ public class COASTAL {
 	 * Parse the COASTAL configuration to extract the delegates.
 	 */
 	private void parseConfigDelegates() {
-		String[] delegates = getConfig().getString("coastal.delegates", "").split(",");
-		for (String delegate : delegates) {
-			if (delegate.trim().length() == 0) {
-				// log.info("Empty delegate ignored");
-				continue;
+		String delegateString = getConfig().getString("coastal.delegates", "").trim();
+		String delegateForString = getConfig().getString("coastal.delegates.for", "").trim();
+		if ((delegateString.length() == 0) && (delegateForString.length() == 0)) {
+			return;
+		}
+		boolean multipleDelegates = delegateString.contains(",");
+		if (!multipleDelegates) {
+			if (getConfig().containsKey("coastal.delegates." + delegateString + ".for")) {
+				multipleDelegates = true;
 			}
-			String key = "coastal.delegates." + delegate.trim();
-			String target = getConfig().getString(key + ".for");
-			if (target == null) {
-				log.info("No target for delegate {} -- ignored", delegate.trim());
-				continue;
+		}
+		if (multipleDelegates) {
+			String[] delegates = delegateString.split(",");
+			for (String delegate : delegates) {
+				if (delegate.trim().length() > 0) {
+					parseConfigDelegate("coastal.delegates." + delegate.trim());
+				}
 			}
-			String model = getConfig().getString(key + ".model");
-			if (model == null) {
-				log.info("No model for delegate {} -- ignored", delegate.trim());
-				continue;
-			}
-			Object modelObject = Configuration.createInstance(this, getConfig().subset(key), model.trim());
-			if (modelObject == null) {
-				log.info("Failed to create model for delegate {}", delegate.trim());
-			} else {
-				this.delegates.put(target.trim(), modelObject);
-			}
+		} else {
+			parseConfigDelegate("coastal.delegates");
+		}
+	}
+	
+	private void parseConfigDelegate(String prefix) {
+		String target = getConfig().getString(prefix + ".for");
+		if (target == null) {
+			log.info("No target for delegate {} -- ignored", prefix.trim());
+			return;
+		}
+		String model = getConfig().getString(prefix + ".model");
+		if (model == null) {
+			log.info("No model for delegate {} -- ignored", prefix.trim());
+			return;
+		}
+		Object modelObject = Configuration.createInstance(this, getConfig().subset(prefix), model.trim());
+		if (modelObject == null) {
+			log.info("Failed to create model for delegate {}", prefix.trim());
+		} else {
+			this.delegates.put(target.trim(), modelObject);
 		}
 	}
 

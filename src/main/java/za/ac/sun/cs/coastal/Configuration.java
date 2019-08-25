@@ -22,6 +22,8 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Encapsulation of COASTAL properties.
  */
-public class Configuration {
+public final class Configuration {
 
 	/**
 	 * Prefix added to log messages.
@@ -189,10 +191,12 @@ public class Configuration {
 	 */
 	public int getInt(String key, int defaultValue) {
 		String value = (String) properties.get(key);
-		try {
-			return Integer.parseInt(value);
-		} catch (NumberFormatException x) {
-			// do nothing
+		if (value != null) {
+			try {
+				return Integer.parseInt(value);
+			} catch (NumberFormatException x) {
+				// do nothing
+			}
 		}
 		return defaultValue;
 	}
@@ -305,10 +309,12 @@ public class Configuration {
 
 	public long getLong(String key, long defaultValue) {
 		String value = (String) properties.get(key);
-		try {
-			return Long.parseLong(value);
-		} catch (NumberFormatException x) {
-			// do nothing
+		if (value != null) {
+			try {
+				return Long.parseLong(value);
+			} catch (NumberFormatException x) {
+				// do nothing
+			}
 		}
 		return defaultValue;
 	}
@@ -347,20 +353,24 @@ public class Configuration {
 
 	public float getFloat(String key, float defaultValue) {
 		String value = (String) properties.get(key);
-		try {
-			return Float.parseFloat(value);
-		} catch (NumberFormatException x) {
-			// do nothing
+		if (value != null) {
+			try {
+				return Float.parseFloat(value);
+			} catch (NumberFormatException x) {
+				// do nothing
+			}
 		}
 		return defaultValue;
 	}
 	
 	public double getDouble(String key, double defaultValue) {
 		String value = (String) properties.get(key);
-		try {
-			return Double.parseDouble(value);
-		} catch (NumberFormatException x) {
-			// do nothing
+		if (value != null) {
+			try {
+				return Double.parseDouble(value);
+			} catch (NumberFormatException x) {
+				// do nothing
+			}
 		}
 		return defaultValue;
 	}
@@ -543,7 +553,7 @@ public class Configuration {
 	 *           the bit set to format
 	 * @return a string representation of the bit set
 	 */
-	public static final String toString(BitSet bs) {
+	public static String toString(BitSet bs) {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
 		boolean isFirst = true;
@@ -960,6 +970,27 @@ public class Configuration {
 			}
 		}
 		return clas;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		SortedSet<String> keys = new TreeSet<>();
+		for (Object key : properties.keySet()) {
+			if (key instanceof String) {
+				keys.add((String) key);
+			}
+		}
+		boolean isFirst = true;
+		for (String key : keys) {
+			if (isFirst) {
+				isFirst = false;
+			} else {
+				sb.append('\n');
+			}
+			sb.append(key).append(" = ").append(properties.get(key));
+		}
+		return sb.toString();
 	}
 
 }

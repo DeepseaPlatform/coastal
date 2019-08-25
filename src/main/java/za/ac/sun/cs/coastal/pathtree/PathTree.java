@@ -272,8 +272,8 @@ public class PathTree implements Comparator<PathTreeNode> {
 		} else {
 			if (isInfeasible) {
 				assert n.isInfeasible();
-			} else {
-				assert n.isLeaf();
+//			} else {
+//				assert n.isLeaf();
 			}
 			n = null;
 			revisitCount.incrementAndGet();

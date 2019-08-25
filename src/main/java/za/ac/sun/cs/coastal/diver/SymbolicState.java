@@ -21,6 +21,7 @@ import za.ac.sun.cs.coastal.instrument.Bytecodes;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.solver.Constant;
+import za.ac.sun.cs.coastal.solver.Evaluator;
 import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.solver.IntegerConstant;
 import za.ac.sun.cs.coastal.solver.IntegerVariable;
@@ -189,7 +190,8 @@ public final class SymbolicState extends State {
 		constantElimination = coastal.getConfig().getBoolean("coastal.settings.constant-elimination", true);
 		if (constantElimination) {
 			if (coastal.getConfig().getInt("coastal.divers.threads", 0) > 0) {
-				// log.info("Cannot eliminate constants when surfer threads > 0 -- switched off elimination");
+				// log.info("Cannot eliminate constants when surfer threads > 0 -- switched off
+				// elimination");
 				constantElimination = false;
 			}
 		}
@@ -2022,12 +2024,7 @@ public final class SymbolicState extends State {
 			// size
 			int i = 0;
 			Expression idx = pop().toExpression();
-			if (idx instanceof IntegerVariable) {
-				String name = ((IntegerVariable) idx).getName();
-				i = (int) new IntegerConstant((Long) input.get(name), 32).getValue();
-			} else {
-				i = (int) ((IntegerConstant) idx).getValue();
-			}
+			i = (int) ((IntegerConstant) Evaluator.evaluate(input, idx)).getValue();
 			int a = (int) (pop().toValue());
 			push(getArrayValue(a, i));
 			Expression len = getField(a, "length").toExpression();
@@ -2054,12 +2051,7 @@ public final class SymbolicState extends State {
 		case Opcodes.IASTORE:
 			SymbolicValue v = pop();
 			idx = pop().toExpression();
-			if (idx instanceof IntegerVariable) {
-				String name = ((IntegerVariable) idx).getName();
-				i = (int) new IntegerConstant((Long) input.get(name), 32).getValue();
-			} else {
-				i = (int) ((IntegerConstant) idx).getValue();
-			}
+			i = (int) ((IntegerConstant) Evaluator.evaluate(input, idx)).getValue();
 			a = (int) (pop().toValue());
 			setArrayValue(a, i, v);
 			len = getField(a, "length").toExpression();
@@ -2081,6 +2073,13 @@ public final class SymbolicState extends State {
 			break;
 		case Opcodes.DUP:
 			push(peek());
+			break;
+		case Opcodes.DUP2:
+			SymbolicValue x2 = pop(), x1 = pop();
+			push(x1);
+			push(x2);
+			push(x1);
+			push(x2);
 			break;
 		case Opcodes.LNEG:
 			push(pop().mul(symbolicValueFactory.createSymbolicValue(new IntegerConstant(-1, 64))));
@@ -2257,7 +2256,8 @@ public final class SymbolicState extends State {
 			pop();
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2324,8 +2324,8 @@ public final class SymbolicState extends State {
 			push(new IntegerConstant(id, 32), 32);
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), operand,
-					opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), operand, opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2360,7 +2360,8 @@ public final class SymbolicState extends State {
 			setLocal(var, pop());
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2393,7 +2394,8 @@ public final class SymbolicState extends State {
 			push(new IntegerConstant(id, 32), 32);
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2431,8 +2433,8 @@ public final class SymbolicState extends State {
 			putField(id, name, v);
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode),
-					owner, name, descriptor, opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), owner, name, descriptor, opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2486,8 +2488,8 @@ public final class SymbolicState extends State {
 			}
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode),
-					owner, name, descriptor, opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), owner, name, descriptor, opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2509,7 +2511,8 @@ public final class SymbolicState extends State {
 		lastInvokingInstruction = instr;
 		switch (opcode) {
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2629,7 +2632,8 @@ public final class SymbolicState extends State {
 				pushConjunct(v.ne(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			default:
-				log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+				log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+						Bytecodes.toString(opcode), opcode);
 				System.exit(1);
 			}
 		} else {
@@ -2658,7 +2662,8 @@ public final class SymbolicState extends State {
 				pop();
 				break;
 			default:
-				log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+				log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+						Bytecodes.toString(opcode), opcode);
 				System.exit(1);
 			}
 		}
@@ -2712,7 +2717,8 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {} {} {}", LOG_PREFIX, instr, Bytecodes.toString(opcode), value, value.getClass().getSimpleName());
+		log.trace("{} <{}> {} {} {}", LOG_PREFIX, instr, Bytecodes.toString(opcode), value,
+				value.getClass().getSimpleName());
 		broker.publishThread("ldc-insn", new Tuple(instr, opcode, value));
 		checkLimitConjuncts();
 		switch (opcode) {
@@ -2739,7 +2745,8 @@ public final class SymbolicState extends State {
 			}
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2817,7 +2824,8 @@ public final class SymbolicState extends State {
 		checkLimitConjuncts();
 		switch (opcode) {
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2838,7 +2846,8 @@ public final class SymbolicState extends State {
 		checkLimitConjuncts();
 		switch (opcode) {
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();

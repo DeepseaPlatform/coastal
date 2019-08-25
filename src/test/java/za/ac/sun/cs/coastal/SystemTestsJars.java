@@ -2,7 +2,6 @@ package za.ac.sun.cs.coastal;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -12,8 +11,8 @@ public class SystemTestsJars extends SystemTests {
 	@Test
 	public void testJar00() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar00.xml" },
-				"<coastal><target><jar directory=\"ZZ\">tests/jars/testJar.jar</jar></target></coastal>");
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "jars/testJar00.properties" },
+				"coastal.target.jar = jars/testJar.jar\ncoastal.target.jar.directory = ZZ");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -28,7 +27,7 @@ public class SystemTestsJars extends SystemTests {
 	@Test
 	public void testJar01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar01.xml" });
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "jars/testJar01.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -43,7 +42,7 @@ public class SystemTestsJars extends SystemTests {
 	@Test
 	public void testJar02() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar02.xml" });
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "jars/testJar02.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -58,7 +57,7 @@ public class SystemTestsJars extends SystemTests {
 	@Test
 	public void testJar03() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/jars/testJar03.xml" });
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "jars/testJar03.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);

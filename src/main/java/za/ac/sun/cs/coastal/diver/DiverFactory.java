@@ -16,7 +16,6 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.symbolic.Input;
-import za.ac.sun.cs.coastal.symbolic.VM;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 
@@ -203,7 +202,7 @@ public class DiverFactory implements TaskFactory {
 						log.trace(Banner.getBannerLine(input.toString(), '*'));
 					}
 					ClassLoader classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
-					performRun(classLoader);
+					performRun(symbolicState, classLoader);
 					manager.recordTime(System.currentTimeMillis() - t1);
 					coastal.addPc(symbolicState.getExecution());
 					broker.publishThread("dive-end", this);
@@ -218,7 +217,7 @@ public class DiverFactory implements TaskFactory {
 			}
 		}
 
-		private void performRun(ClassLoader classLoader) {
+		private void performRun(SymbolicState symbolicState, ClassLoader classLoader) {
 			for (Tuple observer : coastal.getObserversPerDiver()) {
 				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 				ObserverManager observerManager = (ObserverManager) observer.get(1);
@@ -237,19 +236,19 @@ public class DiverFactory implements TaskFactory {
 				Throwable t = x.getCause();
 				if (t == null) {
 					try {
-						VM.startCatch(-1);
+						symbolicState.startCatch(-1);
 					} catch (SymbolicException e) {
 						// ignore, since run is over in any case
 					}
 				} else if (t instanceof SystemExitException) {
 					broker.publish("system-exit", new Tuple(this, null));
 				} else if (!(t instanceof SymbolicException)) {
-					log.info("P R O G R A M   E X C E P T I O N:", LOG_PREFIX, t);
+					log.trace("P R O G R A M   E X C E P T I O N:", LOG_PREFIX, t);
 					if (t instanceof AssertionError) {
 						broker.publish("assert-failed", new Tuple(this, null));
 					}
 					try {
-						VM.startCatch(-1);
+						symbolicState.startCatch(-1);
 					} catch (SymbolicException e) {
 						// ignore, since run is over in any case
 					}

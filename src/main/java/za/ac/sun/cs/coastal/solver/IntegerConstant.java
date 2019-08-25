@@ -10,6 +10,10 @@ public class IntegerConstant extends Constant {
 	
 	public static final Constant ONE64 = new IntegerConstant(1, 64);
 	
+	public static final Constant MONE32 = new IntegerConstant(-1, 32);
+	
+	public static final Constant MONE64 = new IntegerConstant(-1, 64);
+	
 	protected final long value;
 
 	protected final int size;

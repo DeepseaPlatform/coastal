@@ -67,9 +67,9 @@ public class InstrumentationClassManager {
 	private final AtomicLong postInstrumentedSize = new AtomicLong(0);
 
 	private final Map<String, byte[]> clearCache = new HashMap<>();
-	
+
 	private final Map<String, byte[]> heavyCache = new HashMap<>();
-	
+
 	private final Map<String, byte[]> lightCache = new HashMap<>();
 
 	public InstrumentationClassManager(COASTAL coastal, String classPath) {
@@ -84,15 +84,26 @@ public class InstrumentationClassManager {
 			classPaths.add(path);
 		}
 		classPaths.add(".");
-		for (int i = 0; true; i++) {
-			String key = "coastal.target.jar(" + i + ")";
-			String jar = coastal.getConfig().getString(key);
-			if (jar == null) {
-				break;
+		String jarString = coastal.getConfig().getString("coastal.target.jars", "").trim();
+		if (jarString.length() > 0) {
+			String[] jars = jarString.split(",");
+			for (String jar : jars) {
+				if (jar.trim().length() > 0) {
+					parseJar("coastal.target.jars." + jar.trim());
+				}
 			}
-			String dir = coastal.getConfig().getString(key + "[@directory]");
-			jars.put(jar, dir);
+		} else {
+			parseJar("coastal.target.jar");
 		}
+	}
+
+	private void parseJar(String prefix) {
+		String jar = coastal.getConfig().getString(prefix);
+		if (jar == null) {
+			return;
+		}
+		String dir = coastal.getConfig().getString(prefix + ".directory");
+		jars.put(jar, dir);
 	}
 
 	public ClassLoader createHeavyClassLoader(SymbolicState symbolicState) {
@@ -348,15 +359,15 @@ public class InstrumentationClassManager {
 	public int getNextMethodCounter() {
 		return ++methodCounter;
 	}
-	
+
 	public int getNewVariableCounter() {
 		return newVariableCounter;
 	}
-	
+
 	public int getNextNewVariableCounter() {
 		return ++newVariableCounter;
 	}
-	
+
 	public void registerFirstInstruction() {
 		firstInstruction.put(methodCounter, instructionCounter + 1);
 	}

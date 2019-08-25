@@ -2,7 +2,6 @@ package za.ac.sun.cs.coastal;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -12,7 +11,7 @@ public class SystemTestsArrays extends SystemTests {
 	@Test
 	public void testArray01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/arrays/Array01.xml" });
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "arrays/Array01.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -27,7 +26,7 @@ public class SystemTestsArrays extends SystemTests {
 	@Test
 	public void testArray02() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/arrays/Array02.xml" });
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "arrays/Array02.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -42,7 +41,7 @@ public class SystemTestsArrays extends SystemTests {
 	@Test
 	public void testArray03() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/arrays/Array03.xml" });
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "arrays/Array03.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -57,7 +56,7 @@ public class SystemTestsArrays extends SystemTests {
 	@Test
 	public void testArray04() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/arrays/Array04.xml" });
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "arrays/Array04.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -72,7 +71,7 @@ public class SystemTestsArrays extends SystemTests {
 	@Test
 	public void testArray05() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/arrays/Array05.xml" });
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "arrays/Array05.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -87,7 +86,7 @@ public class SystemTestsArrays extends SystemTests {
 	@Test
 	public void testArray06() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/arrays/Array06.xml" });
+		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "arrays/Array06.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -102,7 +101,7 @@ public class SystemTestsArrays extends SystemTests {
 //	@Test
 //	public void testSorting01() {
 //		final Logger log = LogManager.getLogger("COASTAL-TEST");
-//		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/arrays/Sorting01.xml" });
+//		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "Test01.properties", "arrays/Sorting01.properties" });
 //		assertNotNull(config);
 //		COASTAL coastal = new COASTAL(log, config);
 //		coastal.start(false);
@@ -117,7 +116,7 @@ public class SystemTestsArrays extends SystemTests {
 //	@Test
 //	public void testSorting02() {
 //		final Logger log = LogManager.getLogger("COASTAL-TEST");
-//		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "tests/Test01.xml", "tests/arrays/Sorting02.xml" });
+//		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "Test01.properties", "arrays/Sorting02.properties" });
 //		assertNotNull(config);
 //		COASTAL coastal = new COASTAL(log, config);
 //		coastal.start(false);

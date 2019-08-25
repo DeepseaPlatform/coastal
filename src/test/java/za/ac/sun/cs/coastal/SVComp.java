@@ -6,7 +6,6 @@ import java.util.Collection;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotEquals;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;
@@ -294,9 +293,9 @@ public class SVComp {
 	@Ignore @Test
 	public void testSVComp() {
 		final Logger log = LogManager.getLogger("COASTAL");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/jars/" + testDir + ".xml" }, "<coastal><target><jar directory=\"tmp/" + testSubDir
-						+ "\">tests/jars/" + testDir + ".jar</jar></target></coastal>");
+		Configuration config = Configuration.load(log,
+				new String[] { "jars/" + testDir + ".properties" },
+					"coastal.target.jar = jars/" + testDir + "\ncoastal.target.jar.directory= tmp/" + testSubDir);
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);

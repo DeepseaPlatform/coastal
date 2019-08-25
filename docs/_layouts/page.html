@@ -13,7 +13,8 @@ layout: default
 	</section>
 	{% if page.toc %}
 	<section class="toc">
-		{% include toc.html html=content h_max=3 %}
+		{% assign td = page.tocdepth | default: 3 %}
+		{% include toc.html html=content h_max=td %}
 	</section>
 	{% endif %}
 </div></div>

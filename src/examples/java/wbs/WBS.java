@@ -1,3 +1,4 @@
+// CHECKSTYLE:OFF
 package wbs;// This is a mutant program.
 // Author : ysma
 
@@ -16,6 +17,7 @@ public class WBS {
 
 	private int Nor_Pressure;
 
+	@SuppressWarnings("unused")
 	private int Alt_Pressure;
 
 	private int Sys_Mode;
@@ -245,7 +247,7 @@ public class WBS {
     public static  void main( java.lang.String[] args )
     {
         args = new String[6];
-  
+
         args[0] = "0";
         args[1] = "true";
         args[2] = "true";

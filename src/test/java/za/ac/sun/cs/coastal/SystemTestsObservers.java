@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.commons.configuration2.ImmutableConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -14,8 +13,8 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testInstructionCoverage01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/observers/InstructionCoverage01.xml" });
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "observers/InstructionCoverage01.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -32,8 +31,8 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testLineCoverage01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/observers/LineCoverage01.xml" });
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "observers/LineCoverage01.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -47,12 +46,12 @@ public class SystemTestsObservers extends SystemTests {
 		assertEquals(10, reporter.getLong("LineCoverage.potential-total"));
 		assertEquals("{21}", reporter.getString("LineCoverage.uncovered"));
 	}
-	
+
 	@Test
 	public void testMarkerCoverage01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/observers/MarkerCoverage01.xml" });
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "observers/MarkerCoverage01.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -75,8 +74,8 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testMarkerCoverage02() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/observers/MarkerCoverage02.xml" });
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "observers/MarkerCoverage02.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -107,8 +106,8 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testMarkerCoverage03() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/observers/MarkerCoverage03.xml" });
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "observers/MarkerCoverage03.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);
@@ -139,8 +138,8 @@ public class SystemTestsObservers extends SystemTests {
 	@Test
 	public void testStopController01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
-		ImmutableConfiguration config = ConfigHelper.loadConfiguration(log,
-				new String[] { "tests/Test01.xml", "tests/observers/StopController01.xml" });
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "observers/StopController01.properties" });
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);

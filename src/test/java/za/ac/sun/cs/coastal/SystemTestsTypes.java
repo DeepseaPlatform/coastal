@@ -7,7 +7,7 @@ public class SystemTestsTypes extends SystemTests {
 
 	@Test
 	public void testBoolean01() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Boolean01.xml");
+		Reporter reporter = setup("Test01.properties", "types/Boolean01.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -20,7 +20,7 @@ public class SystemTestsTypes extends SystemTests {
 
 	@Test
 	public void testByte01() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Byte01.xml");
+		Reporter reporter = setup("Test01.properties", "types/Byte01.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -33,7 +33,7 @@ public class SystemTestsTypes extends SystemTests {
 
 	@Test
 	public void testChar01() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Char01.xml");
+		Reporter reporter = setup("Test01.properties", "types/Char01.properties");
 		checkDivers(reporter, 1, 5);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -47,7 +47,7 @@ public class SystemTestsTypes extends SystemTests {
 	
 	@Test
 	public void testShort01() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Short01.xml");
+		Reporter reporter = setup("Test01.properties", "types/Short01.properties");
 		checkDivers(reporter, 1, 3);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -60,7 +60,7 @@ public class SystemTestsTypes extends SystemTests {
 
 	@Test
 	public void testInt01() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Int01.xml");
+		Reporter reporter = setup("Test01.properties", "types/Int01.properties");
 		checkDivers(reporter, 1, 13);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -75,7 +75,7 @@ public class SystemTestsTypes extends SystemTests {
 	
 	@Test
 	public void testLong01() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Long01.xml");
+		Reporter reporter = setup("Test01.properties", "types/Long01.properties");
 		checkDivers(reporter, 1, 6);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -89,7 +89,7 @@ public class SystemTestsTypes extends SystemTests {
 
 	@Ignore @Test
 	public void testFloat01() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Float01.xml");
+		Reporter reporter = setup("Test01.properties", "types/Float01.properties");
 		checkDivers(reporter, 1, 5);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -103,7 +103,7 @@ public class SystemTestsTypes extends SystemTests {
 	
 	@Ignore @Test
 	public void testFloat02() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Float02.xml");
+		Reporter reporter = setup("Test01.properties", "types/Float02.properties");
 		checkDivers(reporter, 1, 6);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -116,7 +116,7 @@ public class SystemTestsTypes extends SystemTests {
 
 	@Test
 	public void testDouble01() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Double01.xml");
+		Reporter reporter = setup("Test01.properties", "types/Double01.properties");
 		checkDivers(reporter, 1, 6);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -129,7 +129,7 @@ public class SystemTestsTypes extends SystemTests {
 	
 	@Test
 	public void testMixed01() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Mixed01.xml");
+		Reporter reporter = setup("Test01.properties", "types/Mixed01.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -142,7 +142,7 @@ public class SystemTestsTypes extends SystemTests {
 
 	@Test
 	public void testMixed02() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Mixed02.xml");
+		Reporter reporter = setup("Test01.properties", "types/Mixed02.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -155,7 +155,7 @@ public class SystemTestsTypes extends SystemTests {
 
 	@Test
 	public void testMixed03() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/types/Mixed03.xml");
+		Reporter reporter = setup("Test01.properties", "types/Mixed03.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);

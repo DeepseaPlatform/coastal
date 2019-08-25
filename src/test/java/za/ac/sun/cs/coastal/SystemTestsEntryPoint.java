@@ -6,7 +6,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 
 	@Test
 	public void testEntryPoint01A() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint01-A.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint01-A.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -18,7 +18,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 
 	@Test
 	public void testEntryPoint01B() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint01-B.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint01-B.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -30,7 +30,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 	
 	@Test
 	public void testEntryPoint01C() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint01-C.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint01-C.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -42,7 +42,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 	
 	@Test
 	public void testEntryPoint01D() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint01-D.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint01-D.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -54,7 +54,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 	
 	@Test
 	public void testEntryPoint01E() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint01-E.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint01-E.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -66,7 +66,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 	
 	@Test
 	public void testEntryPoint01F() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint01-F.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint01-F.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -78,7 +78,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 	
 	@Test
 	public void testEntryPoint01G() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint01-G.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint01-G.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -90,7 +90,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 	
 	@Test
 	public void testEntryPoint02A() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint02-A.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint02-A.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -102,7 +102,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 	
 	@Test
 	public void testEntryPoint03A() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint03-A.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint03-A.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
@@ -114,7 +114,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 
 	@Test
 	public void testEntryPoint03B() {
-		Reporter reporter = setup("tests/Test01.xml", "tests/entrypoint/EntryPoint03-B.xml");
+		Reporter reporter = setup("Test01.properties", "entrypoint/EntryPoint03-B.properties");
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
