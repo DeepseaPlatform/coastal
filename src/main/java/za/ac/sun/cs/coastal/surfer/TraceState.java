@@ -1214,14 +1214,24 @@ public final class TraceState extends State {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see za.ac.sun.cs.coastal.symbolic.State#lookupSwitchInsn(int, int)
 	 */
 	@Override
 	public void lookupSwitchInsn(int instr, int opcode) throws SymbolicException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see za.ac.sun.cs.coastal.symbolic.State#lookupCaseInsn(int, int)
+	 */
+	@Override
+	public void lookupCaseInsn(int id, int choice) throws SymbolicException {
+		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 

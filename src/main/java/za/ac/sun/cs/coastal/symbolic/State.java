@@ -874,6 +874,11 @@ public abstract class State {
 	 */
 	public abstract void lookupSwitchInsn(int instr, int opcode) throws SymbolicException;
 
+	/*
+	 * ????????
+	 */
+	public abstract void lookupCaseInsn(int id, int choice) throws SymbolicException;
+	
 	/**
 	 * Handle a {@code MULTIANEWARRAY} instruction.
 	 *

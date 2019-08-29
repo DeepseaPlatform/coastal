@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,8 @@ public class InstrumentationClassManager {
 	private final Map<String, byte[]> heavyCache = new HashMap<>();
 
 	private final Map<String, byte[]> lightCache = new HashMap<>();
+
+	private final Map<Integer, int[]> lookupKeys = new HashMap<>();
 
 	public InstrumentationClassManager(COASTAL coastal, String classPath) {
 		this.coastal = coastal;
@@ -320,12 +323,29 @@ public class InstrumentationClassManager {
 		broker.publish("report", new Tuple("Instrumentation.uninstrumented-time", uninstrumentedTime.get()));
 	}
 
+	public int addLookupKeys(int id, int[] keys) {
+		if (!lookupKeys.containsKey(id)) {
+			lookupKeys.put(id, Arrays.copyOf(keys, keys.length));
+		}
+		return id;
+	}
+
+	public int[] findLookupKeys(int id) {
+		return lookupKeys.get(id);
+	}
+
 	private int instructionCounter = 0;
+
 	private int methodCounter = 0;
+
 	private int newVariableCounter = 0;
+
 	private Map<Integer, Integer> firstInstruction = new TreeMap<>();
+
 	private Map<Integer, Integer> lastInstruction = new TreeMap<>();
+
 	private Map<Integer, BitSet> linenumbers = new TreeMap<>();
+
 	private Map<Integer, BitSet> branchInstructions = new TreeMap<>();
 
 	public Integer getFirstInstruction(int methodNumber) {

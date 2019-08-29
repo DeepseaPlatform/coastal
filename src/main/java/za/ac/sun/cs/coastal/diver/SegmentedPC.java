@@ -48,7 +48,8 @@ public abstract class SegmentedPC extends Branch {
 	 * Check whether or not the given expression is constant (= consists only of
 	 * constant expressions and operators).
 	 * 
-	 * @param expression the input expression to check
+	 * @param expression
+	 *                   the input expression to check
 	 * @return {@code true} if and only if the expression is a constant
 	 */
 	public static final boolean isConstant(Expression expression) {
@@ -109,8 +110,10 @@ public abstract class SegmentedPC extends Branch {
 		/**
 		 * Construct a new binary branch.
 		 * 
-		 * @param activeConjunct  the active conjunct
-		 * @param passiveConjunct the passive conjunct
+		 * @param activeConjunct
+		 *                        the active conjunct
+		 * @param passiveConjunct
+		 *                        the passive conjunct
 		 */
 		public Binary(Expression activeConjunct, Expression passiveConjunct) {
 			super(passiveConjunct);
@@ -172,7 +175,8 @@ public abstract class SegmentedPC extends Branch {
 		 * Return the negation of the expression (which is assumed to be a boolean
 		 * expression).
 		 * 
-		 * @param expression the expression to negate
+		 * @param expression
+		 *                   the expression to negate
 		 * @return the negated expression
 		 */
 		private static Expression negate(Expression expression) {
@@ -273,7 +277,7 @@ public abstract class SegmentedPC extends Branch {
 		 */
 		@Override
 		public String getAlternativeRepr(long alternative) {
-			return ((alternative < 0) || (alternative >= max - min + 1)) ? "DF" : Long.toString(alternative + min);
+			return ((alternative < 0) || (alternative >= max - min + 1)) ? "DFLT" : Long.toString(alternative + min);
 		}
 
 		/*
@@ -289,6 +293,108 @@ public abstract class SegmentedPC extends Branch {
 				return Operation.or(lo, hi);
 			} else {
 				return Operation.eq(expression, new IntegerConstant(alternative + min, 32));
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getPCContribution(int)
+		 */
+		@Override
+		public Expression getPCContribution(long alternative) {
+			Expression condition = getAlternative(alternative);
+			if (getPassiveConjunct() == null) {
+				return condition;
+			} else {
+				return Operation.and(condition, this.getPassiveConjunct());
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.coastal.diver.SegmentedPC#getExpression()
+		 */
+		@Override
+		public Expression getExpression() {
+			return expression;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.coastal.symbolic.Branch#toString0()
+		 */
+		@Override
+		protected String toString0() {
+			return getExpression().toString();
+		}
+
+	}
+
+	// ======================================================================
+	//
+	// K-ARY CHOICES
+	//
+	// ======================================================================
+
+	/**
+	 * Representation of a k-ary branch with potential choices that are listed
+	 * explicitly.
+	 */
+	public static final class Kary extends SegmentedPC {
+
+		private final Expression expression;
+
+		private final int[] keys;
+
+		public Kary(Expression expression, int[] keys, Expression passiveConjunct) {
+			super(passiveConjunct);
+			this.expression = expression;
+			this.keys = keys;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getNumberOfAlternatives()
+		 */
+		@Override
+		public long getNumberOfAlternatives() {
+			return (keys.length + 1);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getAlternative(int)
+		 */
+		@Override
+		public String getAlternativeRepr(long alternative) {
+			return ((alternative < 0) || (alternative >= keys.length)) ? "DFLT" : Integer.toString(keys[(int) alternative]);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see za.ac.sun.cs.coastal.symbolic.Branch#getPCContribution(int)
+		 */
+		@Override
+		public Expression getAlternative(long alternative) {
+			if ((alternative < 0) || (alternative >= keys.length)) {
+				Expression alt = null;
+				for (int i = 0; i < keys.length; i++) {
+					Expression choice = Operation.ne(expression, new IntegerConstant(keys[i], 32));
+					if (i == 0) {
+						alt = choice;
+					} else {
+						alt = Operation.or(choice, alt);
+					}
+				}
+				return alt;
+			} else {
+				return Operation.eq(expression, new IntegerConstant(keys[(int) alternative], 32));
 			}
 		}
 

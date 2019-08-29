@@ -332,6 +332,10 @@ public class VM {
 		state.lookupSwitchInsn(instr, opcode);
 	}
 
+	public static void lookupCaseInsn(int id, int choice) throws SymbolicException {
+		state.lookupCaseInsn(id, choice);
+	}
+	
 	public static void multiANewArrayInsn(int instr, int opcode) throws SymbolicException {
 		state.multiANewArrayInsn(instr, opcode);
 	}

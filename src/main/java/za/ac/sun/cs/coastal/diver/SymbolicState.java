@@ -909,7 +909,7 @@ public final class SymbolicState extends State {
 	 * @param max
 	 *                   the largest value handled by the n-ary branching point
 	 * @param cur
-	 *                   the current value taken at the n-ary branching point
+	 *                   the number of the branch taken at the n-ary branching point
 	 */
 	private void pushConjunct(Expression expression, long min, long max, long cur) {
 		if (!SegmentedPC.isConstant(expression)) {
@@ -930,6 +930,40 @@ public final class SymbolicState extends State {
 		}
 	}
 
+	/**
+	 * Add an k-ary conjunct to the current path. This also adds the accumulated
+	 * passive conjuncts to the current path.
+	 * 
+	 * @param expression
+	 *                   the expression that determines the choice at this branching
+	 *                   point
+	 * @param keys
+	 *                   the values of the choice for each branching point
+	 * @param choice     the number of the branch taken (or -1)
+	 */
+	private void pushConjunct(Expression expression, int[] keys, int choice) {
+		if (!SegmentedPC.isConstant(expression)) {
+			Expression conjunct = null;
+			if (choice == keys.length) {
+				for (int i = 0; i < keys.length; i++) {
+					Expression clause = Operation.ne(expression, new IntegerConstant(keys[i], 32));
+					if (i == 0) {
+						conjunct = clause;
+					} else {
+						conjunct = Operation.or(conjunct, clause);
+					}
+				}
+			} else {
+				conjunct = Operation.eq(expression, new IntegerConstant(keys[choice], 32));
+			}
+			Branch branch = new SegmentedPC.Kary(expression, keys, pendingExtraCondition);
+			path = new Path(path, new Choice(branch, choice));
+			pendingExtraCondition = null;
+			log.trace("{} >>> adding (lookup switch) conjunct: {}", LOG_PREFIX, conjunct.toString());
+			log.trace("{} >>> path is now: {}", LOG_PREFIX, path.getPathCondition().toString());
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2822,13 +2856,37 @@ public final class SymbolicState extends State {
 		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
 		broker.publishThread("lookup-switch-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
-		switch (opcode) {
-		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
-					Bytecodes.toString(opcode), opcode);
-			System.exit(1);
-		}
+		pendingSwitch.push(pop());
 		dumpFrames();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#tableCaseInsn(int, int, int)
+	 */
+	@Override
+	public void lookupCaseInsn(int id, int choice) throws SymbolicException {
+		if (!getTrackingMode()) {
+			return;
+		}
+		if (getRecordingMode()) {
+			int[] keys = coastal.getClassManager().findLookupKeys(id);
+			if (choice == keys.length) {
+				log.trace("{} DEFAULT CASE FOR LOOKUPSWITCH", LOG_PREFIX);
+				checkLimitConjuncts();
+				if (!pendingSwitch.isEmpty()) {
+					pushConjunct(pendingSwitch.pop().toExpression(), keys, keys.length);
+				}
+			} else {
+				log.trace("{} CASE {} FOR LOOKUPSWITCH", LOG_PREFIX, keys[choice]);
+				checkLimitConjuncts();
+				if (!pendingSwitch.isEmpty()) {
+					pushConjunct(pendingSwitch.pop().toExpression(), keys, choice);
+				}
+			}
+			dumpFrames();
+		}
 	}
 
 	/*

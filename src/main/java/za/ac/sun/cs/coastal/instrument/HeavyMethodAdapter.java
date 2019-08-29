@@ -46,18 +46,29 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	private final int argCount;
 
-	private static final class Tuple {
+	private static final class TableSwitchTuple {
 		final int min, max, cur;
 
-		Tuple(int min, int max, int cur) {
+		TableSwitchTuple(int min, int max, int cur) {
 			this.min = min;
 			this.max = max;
 			this.cur = cur;
 		}
 	}
 
-	private static Map<Label, Stack<Tuple>> caseLabels = new HashMap<>();
+	private static final class LookupSwitchTuple {
+		final int lookupId, choiceNr;
+		
+		LookupSwitchTuple(int lookupId, int choiceNr) {
+			this.lookupId = lookupId;
+			this.choiceNr = choiceNr;
+		}
+	}
+	
+	private static Map<Label, Stack<TableSwitchTuple>> tableCaseLabels = new HashMap<>();
 
+	private static Map<Label, Stack<LookupSwitchTuple>> lookupCaseLabels = new HashMap<>();
+	
 	private static Set<Label> catchLabels = new HashSet<>();
 
 	private BitSet currentLinenumbers;
@@ -489,19 +500,19 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableSwitchInsn", "(II)V", false);
 		assert labels.length == (max - min + 1);
 		for (int value = min; value <= max; value++) {
-			Stack<Tuple> pending = caseLabels.get(labels[value - min]);
+			Stack<TableSwitchTuple> pending = tableCaseLabels.get(labels[value - min]);
 			if (pending == null) {
 				pending = new Stack<>();
-				caseLabels.put(labels[value - min], pending);
+				tableCaseLabels.put(labels[value - min], pending);
 			}
-			pending.push(new Tuple(min, max, value));
+			pending.push(new TableSwitchTuple(min, max, value));
 		}
-		Stack<Tuple> pending = caseLabels.get(dflt);
+		Stack<TableSwitchTuple> pending = tableCaseLabels.get(dflt);
 		if (pending == null) {
 			pending = new Stack<>();
-			caseLabels.put(dflt, pending);
+			tableCaseLabels.put(dflt, pending);
 		}
-		pending.push(new Tuple(min, max, min - 1));
+		pending.push(new TableSwitchTuple(min, max, min - 1));
 		mv.visitTableSwitchInsn(min, max, dflt, labels);
 	}
 
@@ -512,26 +523,49 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		if (catchLabels.contains(label)) {
 			mv.visitLdcInsn(classManager.getInstructionCounter());
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startCatch", "(I)V", false);
-		} else {
-			Stack<Tuple> pending = caseLabels.get(label);
-			if (pending != null) {
-				while (!pending.isEmpty()) {
-					Tuple t = pending.pop();
-					mv.visitLdcInsn(t.min);
-					mv.visitLdcInsn(t.max);
-					mv.visitLdcInsn(t.cur);
-					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableCaseInsn", "(III)V", false);
-				}
+		} else if (tableCaseLabels.containsKey(label)) {
+			Stack<TableSwitchTuple> pending = tableCaseLabels.get(label);
+			while (!pending.isEmpty()) {
+				TableSwitchTuple t = pending.pop();
+				mv.visitLdcInsn(t.min);
+				mv.visitLdcInsn(t.max);
+				mv.visitLdcInsn(t.cur);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableCaseInsn", "(III)V", false);
+			}
+		} else if (lookupCaseLabels.containsKey(label)) {
+			Stack<LookupSwitchTuple> pending = lookupCaseLabels.get(label);
+			while (!pending.isEmpty()) {
+				LookupSwitchTuple t = pending.pop();
+				mv.visitLdcInsn(t.lookupId);
+				mv.visitLdcInsn(t.choiceNr);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "lookupCaseInsn", "(II)V", false);
 			}
 		}
 	}
 
 	@Override
 	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
+		int insnCounter = classManager.getNextInstructionCounter();
 		log.trace("{} visitLookupSwitchInsn(dflt:{})", LOG_PREFIX, dflt);
-		mv.visitLdcInsn(classManager.getNextInstructionCounter());
+		mv.visitLdcInsn(insnCounter);
 		mv.visitLdcInsn(171);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "lookupSwitchInsn", "(II)V", false);
+		int numCases = keys.length;
+		int lookupId = classManager.addLookupKeys(insnCounter, keys);
+		for (int i = 0; i < numCases; i++) {
+			Stack<LookupSwitchTuple> pending = lookupCaseLabels.get(labels[i]);
+			if (pending == null) {
+				pending = new Stack<>();
+				lookupCaseLabels.put(labels[i], pending);
+			}
+			pending.push(new LookupSwitchTuple(lookupId, i));
+		}
+		Stack<LookupSwitchTuple> pending = lookupCaseLabels.get(dflt);
+		if (pending == null) {
+			pending = new Stack<>();
+			lookupCaseLabels.put(dflt, pending);
+		}
+		pending.push(new LookupSwitchTuple(lookupId, numCases));
 		mv.visitLookupSwitchInsn(dflt, keys, labels);
 	}
 
