@@ -1,7 +1,9 @@
 package za.ac.sun.cs.coastal.surfer;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -53,6 +55,8 @@ public final class TraceState extends State {
 
 	private final Set<Integer> incValues = new HashSet<>();
 
+	private final List<String> lines = new ArrayList<>();
+
 	/**
 	 * Create a new instance of the tracing state.
 	 * 
@@ -96,6 +100,7 @@ public final class TraceState extends State {
 		Execution result = new Execution(path, input);
 		result.setPayload("setValues", new HashSet<Integer>(setValues));
 		result.setPayload("incValues", new HashSet<Integer>(incValues));
+		result.setPayload("lines", lines);
 		return result;
 	}
 
@@ -878,11 +883,14 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#linenumber(int, int)
 	 */
 	@Override
-	public void linenumber(int instr, int line) {
+	public void linenumber(int instr, int line, String filename) {
 		if (!getTrackingMode()) {
 			return;
 		}
 		log.trace("{} ### LINENUMBER {}", LOG_PREFIX, line);
+		if (getRecordingMode()) {
+			lines.add(filename + ":" + line);
+		}
 		broker.publishThread("linenumber", new Tuple(instr, line));
 	}
 

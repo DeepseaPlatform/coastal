@@ -175,6 +175,8 @@ public final class SymbolicState extends State {
 	 */
 	private final SymbolicValueFactory symbolicValueFactory;
 
+	private final List<String> lines = new ArrayList<>();
+
 	/**
 	 * Create a new instance of the symbolic state.
 	 * 
@@ -242,7 +244,9 @@ public final class SymbolicState extends State {
 	 * @return result of the execution
 	 */
 	public Execution getExecution() {
-		return new Execution(path, input);
+		Execution result = new Execution(path, input);
+		result.setPayload("lines", lines);
+		return result;
 	}
 
 	/**
@@ -1009,7 +1013,9 @@ public final class SymbolicState extends State {
 			return 0;
 		}
 		pop();
-		push(new IntegerVariable(name, 8, Byte.MIN_VALUE, Byte.MAX_VALUE), 8);
+		long min = ((Number) coastal.getMinBound(name, byte.class)).longValue();
+		long max = ((Number) coastal.getMaxBound(name, byte.class)).longValue();
+		push(new IntegerVariable(name, 8, min, max), 8);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 8);
 		if (concrete == null) {
@@ -1028,7 +1034,9 @@ public final class SymbolicState extends State {
 			return 0;
 		}
 		pop();
-		push(new IntegerVariable(name, 16, Short.MIN_VALUE, Short.MAX_VALUE), 16);
+		long min = ((Number) coastal.getMinBound(name, short.class)).longValue();
+		long max = ((Number) coastal.getMaxBound(name, short.class)).longValue();
+		push(new IntegerVariable(name, 16, min, max), 16);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
 		if (concrete == null) {
@@ -1066,7 +1074,9 @@ public final class SymbolicState extends State {
 			return 0;
 		}
 		pop();
-		push(new IntegerVariable(name, 32, Integer.MIN_VALUE, Integer.MAX_VALUE), 32);
+		long min = ((Number) coastal.getMinBound(name, int.class)).longValue();
+		long max = ((Number) coastal.getMaxBound(name, int.class)).longValue();
+		push(new IntegerVariable(name, 32, min, max), 32);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
 		if (concrete == null) {
@@ -1085,7 +1095,9 @@ public final class SymbolicState extends State {
 			return 0;
 		}
 		pop();
-		push(new IntegerVariable(name, 64, Long.MIN_VALUE, Long.MAX_VALUE), 64);
+		long min = ((Number) coastal.getMinBound(name, long.class)).longValue();
+		long max = ((Number) coastal.getMaxBound(name, long.class)).longValue();
+		push(new IntegerVariable(name, 64, min, max), 64);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 64);
 		if (concrete == null) {
@@ -1972,11 +1984,14 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#linenumber(int, int)
 	 */
 	@Override
-	public void linenumber(int instr, int line) {
+	public void linenumber(int instr, int line, String filename) {
 		if (!getTrackingMode()) {
 			return;
 		}
 		log.trace("{} ### LINENUMBER {}", LOG_PREFIX, line);
+		if (getRecordingMode()) {
+			lines.add(filename + ":" + line);
+		}
 		broker.publishThread("linenumber", new Tuple(instr, line));
 	}
 
@@ -2106,14 +2121,25 @@ public final class SymbolicState extends State {
 			pop();
 			break;
 		case Opcodes.DUP:
+		case Opcodes.DUP2:
 			push(peek());
 			break;
-		case Opcodes.DUP2:
+		case Opcodes.DUP_X1:
+		case Opcodes.DUP2_X1:
+		case Opcodes.DUP2_X2:
 			SymbolicValue x2 = pop(), x1 = pop();
 			push(x1);
 			push(x2);
 			push(x1);
+			break;
+		case Opcodes.DUP_X2:
+			SymbolicValue x3 = pop();
+			x2 = pop();
+			x1 = pop();
+			push(x1);
 			push(x2);
+			push(x3);
+			push(x1);
 			break;
 		case Opcodes.LNEG:
 			push(pop().mul(symbolicValueFactory.createSymbolicValue(new IntegerConstant(-1, 64))));

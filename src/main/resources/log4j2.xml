@@ -17,6 +17,7 @@
 		</Logger>
 		-->
 		<Logger name="COASTAL-TEST" level="ALL" additivity="false"/>
+		<Logger name="COASTAL-BRIEF" level="ALL" additivity="false"/>
 		<Logger name="COASTAL-QUIET" level="ALL" additivity="false">
 			<AppenderRef ref="CONSOLE"/>
 		</Logger>

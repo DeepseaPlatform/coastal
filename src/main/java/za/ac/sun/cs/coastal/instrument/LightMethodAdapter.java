@@ -29,6 +29,8 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	private final InstrumentationClassManager classManager;
 
+	private final String filename;
+
 	private final int triggerIndex;
 
 	private final boolean isStatic;
@@ -37,11 +39,12 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	private BitSet currentLinenumbers;
 
-	public LightMethodAdapter(COASTAL coastal, MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
+	public LightMethodAdapter(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.coastal = coastal;
 		this.log = coastal.getLog();
 		this.classManager = coastal.getClassManager();
+		this.filename = filename;
 		this.triggerIndex = triggerIndex;
 		this.isStatic = isStatic;
 		this.argCount = argCount;
@@ -190,7 +193,8 @@ public class LightMethodAdapter extends MethodVisitor {
 		log.trace("{} visitLineNumber(line:{}, label:{})", LOG_PREFIX, line, start);
 		mv.visitLdcInsn(classManager.getInstructionCounter());
 		mv.visitLdcInsn(line);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(II)V", false);
+		mv.visitLdcInsn(filename);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(IILjava/lang/String;)V", false);
 		mv.visitLineNumber(line, start);
 		currentLinenumbers.set(line);
 	}

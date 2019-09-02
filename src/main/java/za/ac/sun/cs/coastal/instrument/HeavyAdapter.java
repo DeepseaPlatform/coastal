@@ -51,7 +51,7 @@ public class HeavyAdapter extends ClassVisitor {
 			mv = new TraceMethodVisitor(mv, p);
 		}
 		if (mv != null) {
-			mv = new HeavyMethodAdapter(coastal, mv, triggerIndex, isStatic, argCount);
+			mv = new HeavyMethodAdapter(coastal, mv, this.name, triggerIndex, isStatic, argCount);
 		}
 		return mv;
 	}

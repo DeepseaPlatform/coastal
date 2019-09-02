@@ -238,8 +238,8 @@ public class VM {
 	//
 	// ======================================================================
 
-	public static void linenumber(int instr, int line) {
-		state.linenumber(instr, line);
+	public static void linenumber(int instr, int line, String filename) {
+		state.linenumber(instr, line, filename);
 	}
 
 	public static void label(int instr, String label) {

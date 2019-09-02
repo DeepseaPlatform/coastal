@@ -3,6 +3,8 @@ title: "Example: Apache Flink"
 permalink: /userguide/examples/flink/
 ---
 
+{% include svg/work-in-progress.svg %}
+
 Integer parser taken from Apache Flink project.
 
 ## Files

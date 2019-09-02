@@ -205,11 +205,16 @@ public class COASTAL {
 		/**
 		 * Construct a new task summary.
 		 * 
-		 * @param coastal     instance of COASTAL
-		 * @param factory     the task factory
-		 * @param initThreads initial number of threads
-		 * @param minThreads  minimum number of threads
-		 * @param maxThreads  maximum number of threads
+		 * @param coastal
+		 *                    instance of COASTAL
+		 * @param factory
+		 *                    the task factory
+		 * @param initThreads
+		 *                    initial number of threads
+		 * @param minThreads
+		 *                    minimum number of threads
+		 * @param maxThreads
+		 *                    maximum number of threads
 		 */
 		TaskInfo(final COASTAL coastal, final TaskFactory factory, final int initThreads, final int minThreads,
 				final int maxThreads) {
@@ -224,7 +229,8 @@ public class COASTAL {
 		 * Create a new task of this kind. Sometimes, each task is in fact an array of
 		 * tasks, which work together.
 		 * 
-		 * @param coastal instance of COASTAL
+		 * @param coastal
+		 *                instance of COASTAL
 		 * @return the new task(s) as an array
 		 */
 		public Task[] create(COASTAL coastal) {
@@ -361,6 +367,7 @@ public class COASTAL {
 	 * A null {@link PrintStream} for suppressing output and error.
 	 */
 	private static final PrintStream NUL = new PrintStream(new OutputStream() {
+
 		@Override
 		public void write(int b) throws IOException {
 			// do nothing
@@ -557,8 +564,10 @@ public class COASTAL {
 	/**
 	 * Initialize the final fields for this analysis run of COASTAL.
 	 * 
-	 * @param log    the logger to use for this analysis run
-	 * @param configuration the configuration to use for this analysis run
+	 * @param log
+	 *                      the logger to use for this analysis run
+	 * @param configuration
+	 *                      the configuration to use for this analysis run
 	 */
 	public COASTAL(Logger log, Configuration configuration) {
 		this.log = log;
@@ -735,7 +744,8 @@ public class COASTAL {
 	 * 
 	 * @since 0.0.3
 	 * 
-	 * @param st A string optionally containing standard java escape sequences.
+	 * @param st
+	 *           A string optionally containing standard java escape sequences.
 	 * @return The translated string.
 	 */
 	public static String unescape(String st) {
@@ -957,9 +967,12 @@ public class COASTAL {
 	/**
 	 * Add a minimum/maximum bounds for a variable.
 	 * 
-	 * @param bounds the mapping of variable names to bounds
-	 * @param key    the configuration key that stores the bound
-	 * @param var    the name of the variable
+	 * @param bounds
+	 *               the mapping of variable names to bounds
+	 * @param key
+	 *               the configuration key that stores the bound
+	 * @param var
+	 *               the name of the variable
 	 */
 	private void addBound(Map<String, Object> bounds, String key, String var) {
 		if (getConfig().containsKey(key)) {
@@ -1051,7 +1064,7 @@ public class COASTAL {
 		tasks.add(new TaskInfo(this, sf, sft, sfl, sfu));
 		return true;
 	}
-	
+
 	/**
 	 * Parse the COASTAL configuration to extract the observers.
 	 */
@@ -1131,7 +1144,7 @@ public class COASTAL {
 			parseConfigDelegate("coastal.delegates");
 		}
 	}
-	
+
 	private void parseConfigDelegate(String prefix) {
 		String target = getConfig().getString(prefix + ".for");
 		if (target == null) {
@@ -1286,6 +1299,15 @@ public class COASTAL {
 	}
 
 	/**
+	 * Return the stopping time of the analysis run in milliseconds.
+	 * 
+	 * @return the stopping time in milliseconds
+	 */
+	public long getStoppingTime() {
+		return stoppingTime.getTimeInMillis();
+	}
+	
+	/**
 	 * Return the class manager for this analysis run of COASTAL.
 	 * 
 	 * @return the class manager
@@ -1299,7 +1321,8 @@ public class COASTAL {
 	 * simply a class name that is compared to all known targets to see if any are
 	 * prefixes of the potential target.
 	 * 
-	 * @param potentialTarget the name of class
+	 * @param potentialTarget
+	 *                        the name of class
 	 * @return true if and only if the potential target is prefixed by a known
 	 *         target
 	 */
@@ -1316,8 +1339,10 @@ public class COASTAL {
 	 * Find the index of the trigger with the corresponding name and signature. If
 	 * no such trigger exists, return -1.
 	 * 
-	 * @param name      the method name of the (potential) trigger
-	 * @param signature the signature of the (potential) trigger
+	 * @param name
+	 *                  the method name of the (potential) trigger
+	 * @param signature
+	 *                  the signature of the (potential) trigger
 	 * @return the index of the trigger in the list of triggers, or -1
 	 */
 	public int findTrigger(String name, String signature) {
@@ -1334,7 +1359,8 @@ public class COASTAL {
 	/**
 	 * Return the trigger with a specified index.
 	 * 
-	 * @param index the index we are searching for
+	 * @param index
+	 *              the index we are searching for
 	 * @return the corresponding trigger or {@code null} if there is no such trigger
 	 */
 	public Trigger getTrigger(int index) {
@@ -1355,7 +1381,8 @@ public class COASTAL {
 	/**
 	 * Return the recorded size of the parameter. This is used for arrays.
 	 * 
-	 * @param name the name of the parameter
+	 * @param name
+	 *             the name of the parameter
 	 * @return the recorded size of the parameter or zero
 	 */
 	public int getParameterSize(String name) {
@@ -1366,8 +1393,10 @@ public class COASTAL {
 	/**
 	 * Record size of a parameter. This is used for arrays.
 	 * 
-	 * @param name the name of the parameter
-	 * @param size the size of the parameter
+	 * @param name
+	 *             the name of the parameter
+	 * @param size
+	 *             the size of the parameter
 	 */
 	public void setParameterSize(String name, int size) {
 		if (parameters.containsKey(name)) {
@@ -1402,7 +1431,8 @@ public class COASTAL {
 	/**
 	 * Find a delegate for a specified class name.
 	 * 
-	 * @param className the name of the class to search for
+	 * @param className
+	 *                  the name of the class to search for
 	 * @return the delegate object or {@code null} if there is none
 	 */
 	public Object findDelegate(String className) {
@@ -1419,9 +1449,12 @@ public class COASTAL {
 	/**
 	 * Find a delegate method.
 	 * 
-	 * @param owner      the method class name
-	 * @param name       the method name
-	 * @param descriptor the method signature
+	 * @param owner
+	 *                   the method class name
+	 * @param name
+	 *                   the method name
+	 * @param descriptor
+	 *                   the method signature
 	 * @return a Java reflection of the method or {@code null} if it was not found
 	 */
 	public Method findDelegate(String owner, String name, String descriptor) {
@@ -1505,7 +1538,8 @@ public class COASTAL {
 	 * Return the lower bound for symbolic variables without an explicit bound of
 	 * their own.
 	 * 
-	 * @param type the type of the variable
+	 * @param type
+	 *             the type of the variable
 	 * @return the lower bound for symbolic variables
 	 */
 	public Object getDefaultMinValue(Class<?> type) {
@@ -1515,8 +1549,10 @@ public class COASTAL {
 	/**
 	 * Return the lower bound for the specified symbolic variable.
 	 * 
-	 * @param variable the name of the variable
-	 * @param type     the type of the variable
+	 * @param variable
+	 *                 the name of the variable
+	 * @param type
+	 *                 the type of the variable
 	 * @return the lower bound for the variable
 	 */
 	public Object getMinBound(String variable, Class<?> type) {
@@ -1531,9 +1567,12 @@ public class COASTAL {
 	 * This is used for array where the specific variable is the array index and the
 	 * more general variable is the array as a whole.
 	 * 
-	 * @param variable1 the name of the specific variable
-	 * @param variable2 the name of the more general variable
-	 * @param type      the type of the variables
+	 * @param variable1
+	 *                  the name of the specific variable
+	 * @param variable2
+	 *                  the name of the more general variable
+	 * @param type
+	 *                  the type of the variables
 	 * @return the lower bound for either variable
 	 */
 	public Object getMinBound(String variable1, String variable2, Class<?> type) {
@@ -1544,8 +1583,10 @@ public class COASTAL {
 	 * Return the lower bound for the specified symbolic variable. If there is no
 	 * explicit bound, the specified default value is returned.
 	 * 
-	 * @param variable     the name of the variable
-	 * @param defaultValue the default lower bound
+	 * @param variable
+	 *                     the name of the variable
+	 * @param defaultValue
+	 *                     the default lower bound
 	 * @return the lower bound for the variable
 	 */
 	public Object getMinBound(String variable, Object defaultValue) {
@@ -1560,7 +1601,8 @@ public class COASTAL {
 	 * Return the upper bound for symbolic variables without an explicit bound of
 	 * their own.
 	 * 
-	 * @param type the type of the variable
+	 * @param type
+	 *             the type of the variable
 	 * @return the upper bound for symbolic variables
 	 */
 	public Object getDefaultMaxValue(Class<?> type) {
@@ -1570,8 +1612,10 @@ public class COASTAL {
 	/**
 	 * Return the upper bound for the specified symbolic variable.
 	 * 
-	 * @param variable the name of the variable
-	 * @param type     the type of the variable
+	 * @param variable
+	 *                 the name of the variable
+	 * @param type
+	 *                 the type of the variable
 	 * @return the upper bound for the variable
 	 */
 	public Object getMaxBound(String variable, Class<?> type) {
@@ -1586,9 +1630,12 @@ public class COASTAL {
 	 * This is used for array where the specific variable is the array index and the
 	 * more general variable is the array as a whole.
 	 * 
-	 * @param variable1 the name of the specific variable
-	 * @param variable2 the name of the more general variable
-	 * @param type      the type of the variables
+	 * @param variable1
+	 *                  the name of the specific variable
+	 * @param variable2
+	 *                  the name of the more general variable
+	 * @param type
+	 *                  the type of the variables
 	 * @return the upper bound for either variable
 	 */
 	public Object getMaxBound(String variable1, String variable2, Class<?> type) {
@@ -1599,8 +1646,10 @@ public class COASTAL {
 	 * Return the upper bound for the specified symbolic integer variable. If there
 	 * is no explicit bound, the specified default value is returned.
 	 * 
-	 * @param variable     the name of the variable
-	 * @param defaultValue the default upper bound
+	 * @param variable
+	 *                     the name of the variable
+	 * @param defaultValue
+	 *                     the default upper bound
 	 * @return the upper bound for the variable
 	 */
 	public Object getMaxBound(String variable, Object defaultValue) {
@@ -1674,7 +1723,8 @@ public class COASTAL {
 	 * Add a list of models to the diver model queue. Only those models that have
 	 * not been enqueued before are added to the queue.
 	 * 
-	 * @param inputs the list of models to add
+	 * @param inputs
+	 *               the list of models to add
 	 * @return the number of models actually added to the queue
 	 */
 	public int addDiverInputs(List<Input> inputs) {
@@ -1696,7 +1746,8 @@ public class COASTAL {
 	 * Return the next available diver model.
 	 * 
 	 * @return the model as a variable-value mapping
-	 * @throws InterruptedException if the action of removing the model was
+	 * @throws InterruptedException
+	 *                              if the action of removing the model was
 	 *                              interrupted
 	 */
 	public Input getNextDiverInput() throws InterruptedException {
@@ -1708,7 +1759,8 @@ public class COASTAL {
 	 * 
 	 * THIS METHOD IS A PART OF THE DESIGN THAT NEEDS TO BE REFACTORED!!
 	 * 
-	 * @param firstInput the very first model to add
+	 * @param firstInput
+	 *                   the very first model to add
 	 */
 	public void addFirstModel(Input firstInput) {
 		try {
@@ -1735,7 +1787,8 @@ public class COASTAL {
 	 * Add a list of models to the surfer model queue. Only those models that have
 	 * not been enqueued before are added to the queue.
 	 * 
-	 * @param inputs the list of models to add
+	 * @param inputs
+	 *               the list of models to add
 	 * @return the number of models actually added to the queue
 	 */
 	public int addSurferInputs(List<Input> inputs) {
@@ -1757,7 +1810,8 @@ public class COASTAL {
 	 * Add a single model to the surfer model queue. The operation will only succeed
 	 * if the model has not been enqueued before.
 	 * 
-	 * @param input the model to add
+	 * @param input
+	 *              the model to add
 	 * @return {@code true} if the model has been added successfully
 	 */
 	public boolean addSurferModel(Input input) {
@@ -1776,7 +1830,8 @@ public class COASTAL {
 	 * Return the next available surfer model.
 	 * 
 	 * @return the model
-	 * @throws InterruptedException if the action of removing the model was
+	 * @throws InterruptedException
+	 *                              if the action of removing the model was
 	 *                              interrupted
 	 */
 	public Input getNextSurferInput() throws InterruptedException {
@@ -1797,7 +1852,8 @@ public class COASTAL {
 	/**
 	 * Add a new entry to the diver queue of executions.
 	 * 
-	 * @param execution the execution to add
+	 * @param execution
+	 *                  the execution to add
 	 */
 	public void addPc(Execution execution) {
 		try {
@@ -1815,7 +1871,8 @@ public class COASTAL {
 	 * Return the next available execution produced by a diver.
 	 * 
 	 * @return the next execution
-	 * @throws InterruptedException if the action of removing the execution was
+	 * @throws InterruptedException
+	 *                              if the action of removing the execution was
 	 *                              interrupted
 	 */
 	public Execution getNextPc() throws InterruptedException {
@@ -1836,7 +1893,8 @@ public class COASTAL {
 	/**
 	 * Add a new entry to the surfer queue of executions.
 	 * 
-	 * @param execution the execution to add
+	 * @param execution
+	 *                  the execution to add
 	 */
 	public void addTrace(Execution execution) {
 		try {
@@ -1854,7 +1912,8 @@ public class COASTAL {
 	 * Return the next available execution produced by a surfer.
 	 * 
 	 * @return the next execution
-	 * @throws InterruptedException if the action of removing the execution was
+	 * @throws InterruptedException
+	 *                              if the action of removing the execution was
 	 *                              interrupted
 	 */
 	public Execution getNextTrace() throws InterruptedException {
@@ -1865,9 +1924,11 @@ public class COASTAL {
 	 * Return the next available execution produced by a surfer, as long as a
 	 * timeout has not expired. If the timeout expires, return {@code null}.
 	 * 
-	 * @param timeout number of milliseconds to wait
+	 * @param timeout
+	 *                number of milliseconds to wait
 	 * @return the next execution or {@code null}
-	 * @throws InterruptedException if the action of removing the execution was
+	 * @throws InterruptedException
+	 *                              if the action of removing the execution was
 	 *                              interrupted
 	 */
 	public Execution getNextTrace(long timeout) throws InterruptedException {
@@ -1884,8 +1945,10 @@ public class COASTAL {
 	 * Wait for a change in the status of the workDone flag or until a specified
 	 * time has elapsed.
 	 * 
-	 * @param delay time to wait in milliseconds
-	 * @throws InterruptedException if the thread was interrupted while delaying
+	 * @param delay
+	 *              time to wait in milliseconds
+	 * @throws InterruptedException
+	 *                              if the thread was interrupted while delaying
 	 */
 	private void idle(long delay) throws InterruptedException {
 		if ((System.currentTimeMillis() - startingTime.getTimeInMillis()) / 1000 > timeLimit) {
@@ -1901,7 +1964,8 @@ public class COASTAL {
 	/**
 	 * Update the count of outstanding work items by a given amount.
 	 * 
-	 * @param delta how much to add to the number of work items
+	 * @param delta
+	 *              how much to add to the number of work items
 	 */
 	public void updateWork(long delta) {
 		long w = work.addAndGet(delta);
@@ -1923,7 +1987,8 @@ public class COASTAL {
 	/**
 	 * Set the flag to indicate that the analysis run must stop.
 	 *
-	 * @param message information message to display in the log
+	 * @param message
+	 *                information message to display in the log
 	 */
 	public void stopWork(String message) {
 		new Banner('@').println(message).display(log);
@@ -1958,19 +2023,33 @@ public class COASTAL {
 	}
 
 	/**
-	 * Start the analysis run, showing all banners by default.
+	 * Start the analysis run, showing all banners by default but no brief report.
 	 */
 	public void start() {
-		start(true);
+		start(true, false);
+	}
+
+	/**
+	 * Start the analysis run, showing banners if requested. No brief report is
+	 * generated
+	 * 
+	 * @param showBanner
+	 *                   a flag to tell whether or not to show banners
+	 */
+	public void start(boolean showBanner) {
+		start(showBanner, false);
 	}
 
 	/**
 	 * Start the analysis run, and show banners if and only the parameter flag is
 	 * true.
 	 * 
-	 * @param showBanner a flag to tell whether or not to show banners
+	 * @param showBanner
+	 *                        flag to tell whether or not to show banners
+	 * @param showBriefReport
+	 *                        flag to tell whether or not to show brief report
 	 */
-	public void start(boolean showBanner) {
+	public void start(boolean showBanner, boolean showBriefReport) {
 		startingTime = Calendar.getInstance();
 		getBroker().publish("coastal-init", this);
 		if (showBanner) {
@@ -2023,6 +2102,14 @@ public class COASTAL {
 		if (showBanner) {
 			new Banner('~').println("COASTAL DONE").display(log);
 		}
+		if (showBriefReport) {
+			PathTree p = getPathTree();
+			long numberOfPaths = p.getInsertedCount() - p.getInfeasibleCount() - p.getRevisitCount();
+			long duration = getStoppingTime() - getStartingTime();
+			System.out.println("COASTAL version " + Version.VERSION);
+			System.out.println("Paths: " + numberOfPaths);
+			System.out.println("Time: " + duration);
+		}
 	}
 
 	/**
@@ -2042,7 +2129,8 @@ public class COASTAL {
 	/**
 	 * Perform periodic reporting to the console.
 	 * 
-	 * @param object dummy object
+	 * @param object
+	 *               dummy object
 	 */
 	private void tick(Object object) {
 		long elapsedTime = System.currentTimeMillis() - getStartingTime();
@@ -2078,7 +2166,8 @@ public class COASTAL {
 	/**
 	 * Execute an emergency stop.
 	 * 
-	 * @param object dummy object
+	 * @param object
+	 *               dummy object
 	 */
 	private void emergencyStop(Object object) {
 		new Banner('@').println("EMERGENCY STOP").display(log);
@@ -2088,7 +2177,8 @@ public class COASTAL {
 	/**
 	 * Reports some statistics about the analysis run at the end of the run.
 	 * 
-	 * @param object dummy object
+	 * @param object
+	 *               dummy object
 	 */
 	private void report(Object object) {
 		getBroker().publish("report", new Tuple("COASTAL.diver-models", visitedDiverInputs.size()));
@@ -2106,6 +2196,11 @@ public class COASTAL {
 	// ======================================================================
 
 	/**
+	 * Whether or not logging should be turned off.
+	 */
+	private static boolean briefLogging = false;
+
+	/**
 	 * Whether or not logging should be reduced.
 	 */
 	private static boolean quietLogging = false;
@@ -2113,15 +2208,17 @@ public class COASTAL {
 	/**
 	 * The main function and entry point for COASTAL.
 	 * 
-	 * @param args the command-line arguments
+	 * @param args
+	 *             the command-line arguments
 	 */
 	public static void main(String[] args) {
 		args = parseOptions(args);
-		final Logger log = LogManager.getLogger(quietLogging ? "COASTAL-QUIET" : "COASTAL");
+		final Logger log = LogManager
+				.getLogger(briefLogging ? "COASTAL-BRIEF" : quietLogging ? "COASTAL-QUIET" : "COASTAL");
 		new Banner('~').println("COASTAL version " + Version.VERSION).display(log);
 		Configuration config = Configuration.load(log, args);
 		if (config != null) {
-			new COASTAL(log, config).start(false);
+			new COASTAL(log, config).start(false, briefLogging);
 		}
 		new Banner('~').println("COASTAL DONE (" + config.getString("coastal.run-name", "?") + ")").display(log);
 		LogManager.shutdown(true);
@@ -2132,7 +2229,8 @@ public class COASTAL {
 	 * various internal flags. Unrecognized options are placed in a new array which
 	 * is assumed to contain configuration files.
 	 * 
-	 * @param args the original command-line arguments
+	 * @param args
+	 *             the original command-line arguments
 	 * @return unprocessed command-line arguments
 	 */
 	private static String[] parseOptions(String[] args) {
@@ -2140,6 +2238,8 @@ public class COASTAL {
 		for (String arg : args) {
 			if (arg.equals("-quiet")) {
 				quietLogging = true;
+			} else if (arg.equals("-brief")) {
+				briefLogging = true;
 			} else {
 				newArgs.add(arg);
 			}

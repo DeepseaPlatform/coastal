@@ -39,6 +39,8 @@ public abstract class PathBasedFactory implements StrategyFactory {
 
 		protected final PathTree pathTree;
 
+		protected final boolean showLines;
+
 		/**
 		 * Counter of number of refinements.
 		 */
@@ -74,10 +76,15 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
 			pathTree = coastal.getPathTree();
+			showLines = coastal.getConfig().getBoolean("coastal.settings.show-lines", false);
 		}
 
 		public PathTree getPathTree() {
 			return pathTree;
+		}
+
+		public boolean getShowLines() {
+			return showLines;
 		}
 
 		public PathTreeNode insertPath0(Execution execution, boolean infeasible) {
@@ -233,6 +240,15 @@ public abstract class PathBasedFactory implements StrategyFactory {
 				return null;
 			}
 			Path path = execution.getPath();
+			if (manager.getShowLines()) {
+				@SuppressWarnings("unchecked")
+				List<String> lines = (List<String>) execution.getPayload("lines");
+				if (lines != null) {
+					for (String line : lines) {
+						log.trace("{} <<{}>>", LOG_PREFIX, line);
+					}
+				}
+			}
 			if (path == null) {
 				log.trace("{} explored <> EMPTY PATH", LOG_PREFIX);
 				manager.insertPath(execution, false); // ignore revisited return value

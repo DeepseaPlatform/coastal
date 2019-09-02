@@ -369,18 +369,24 @@ class BinomialHeap {
 
 	public static void main(String[] Argv) {
 
-		runTestDriver(5);
+		// runTestDriver(5);
+
+		BinomialHeap b = new BinomialHeap();
+		b.delete(0);
+		b.delete(0);
+		b.insert(1);
+		b.insert(2);
+		b.insert(1);
 
 		/*
-		BinomialHeap b = new BinomialHeap();
-
 		b.insert(3);
 		b.insert(5);
+		*/
 		System.out.println("min: " + b.findMinimum());
 		System.out.println("size: " + b.size);
 		b.extractMin();
 		System.out.println("min: " + b.findMinimum());
-		*/
+		
 	}
 
 }

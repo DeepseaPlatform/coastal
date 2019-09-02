@@ -40,6 +40,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	private final InstrumentationClassManager classManager;
 
+	private final String filename;
+
 	private final int triggerIndex;
 
 	private final boolean isStatic;
@@ -58,7 +60,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	private static final class LookupSwitchTuple {
 		final int lookupId, choiceNr;
-		
+
 		LookupSwitchTuple(int lookupId, int choiceNr) {
 			this.lookupId = lookupId;
 			this.choiceNr = choiceNr;
@@ -75,12 +77,13 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	// private static BitSet currentBranchInstructions;
 
-	public HeavyMethodAdapter(COASTAL coastal, MethodVisitor cv, int triggerIndex, boolean isStatic, int argCount) {
+	public HeavyMethodAdapter(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.coastal = coastal;
 		this.log = coastal.getLog();
 		this.useConcreteValues = coastal.getConfig().getBoolean("coastal.settings.concrete-values", false);
 		this.classManager = coastal.getClassManager();
+		this.filename = filename;
 		this.triggerIndex = triggerIndex;
 		this.isStatic = isStatic;
 		this.argCount = argCount;
@@ -229,7 +232,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		log.trace("{} visitLineNumber(line:{}, label:{})", LOG_PREFIX, line, start);
 		mv.visitLdcInsn(classManager.getInstructionCounter());
 		mv.visitLdcInsn(line);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(II)V", false);
+		mv.visitLdcInsn(filename);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "linenumber", "(IILjava/lang/String;)V", false);
 		mv.visitLineNumber(line, start);
 		currentLinenumbers.set(line);
 	}

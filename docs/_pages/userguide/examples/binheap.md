@@ -18,6 +18,8 @@ Java PathFinder
 ## Results
 
 ~~~
-diver-models: 2759
-time: 230507
+$ coastal bintree/BinTree2.properties -brief
+COASTAL version 0.0.0
+Paths: 8
+Time: 206
 ~~~

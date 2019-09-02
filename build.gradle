@@ -31,6 +31,7 @@ sourceSets {
 	examples {
 		java.srcDir file('src/examples/java')
 		resources.srcDir file('src/examples/resources')
+		output.resourcesDir = 'build/classes/java/examples'
 		compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
 		runtimeClasspath += output + compileClasspath
 	}

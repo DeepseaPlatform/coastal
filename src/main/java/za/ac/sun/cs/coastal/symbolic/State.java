@@ -633,7 +633,7 @@ public abstract class State {
 	 * @param instr the number of the instruction
 	 * @param line  the line number
 	 */
-	public abstract void linenumber(int instr, int line);
+	public abstract void linenumber(int instr, int line, String filename);
 
 	/**
 	 * Handle a label.

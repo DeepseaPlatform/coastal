@@ -204,7 +204,15 @@ public class PathTree implements Comparator<PathTreeNode> {
 				lock.writeLock().unlock();
 			}
 		}
-		PathTreeNode lastNode = insert(execution, paths, isInfeasible);
+//		PathTreeNode lastNode = insert(execution, paths, isInfeasible);
+		PathTreeNode lastNode = null;
+		try {
+			lastNode = insert(execution, paths, isInfeasible);
+		} catch (Throwable th) {
+			System.out.println("OOPS:");
+			th.printStackTrace();
+			throw th;
+		}
 		/*
 		 * Step 3: Dump the tree if required
 		 */

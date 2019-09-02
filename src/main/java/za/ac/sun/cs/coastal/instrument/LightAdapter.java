@@ -51,7 +51,7 @@ public class LightAdapter extends ClassVisitor {
 			mv = new TraceMethodVisitor(mv, p);
 		}
 		if (mv != null) {
-			mv = new LightMethodAdapter(coastal, mv, triggerIndex, isStatic, argCount);
+			mv = new LightMethodAdapter(coastal, mv, this.name, triggerIndex, isStatic, argCount);
 		}
 		return mv;
 	}
