@@ -18,8 +18,8 @@ Java PathFinder
 ## Results
 
 ~~~
-$ coastal bintree/BinTree2.properties -brief
+$ coastal binheap/BinomialHeap.properties -brief
 COASTAL version 0.0.0
-Paths: 8
-Time: 206
+Paths: 1392
+Time: 60096
 ~~~

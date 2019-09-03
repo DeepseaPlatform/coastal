@@ -298,6 +298,9 @@ public final class SymbolicState extends State {
 	 *                  the new symbolic expression for the field
 	 */
 	private void putField(int objectId, String fieldName, SymbolicValue value) {
+		if (objectId == 0) {
+			assert objectId != 0;
+		}
 		putField(Integer.toString(objectId), fieldName, value);
 	}
 
@@ -326,6 +329,9 @@ public final class SymbolicState extends State {
 	 * @return the symbolic expression for the value of the field
 	 */
 	private SymbolicValue getField(int objectId, String fieldName) {
+		if (objectId == 0) {
+			assert objectId != 0;
+		}
 		return getField(Integer.toString(objectId), fieldName);
 	}
 
@@ -2127,15 +2133,15 @@ public final class SymbolicState extends State {
 		case Opcodes.DUP_X1:
 		case Opcodes.DUP2_X1:
 		case Opcodes.DUP2_X2:
-			SymbolicValue x2 = pop(), x1 = pop();
+			SymbolicValue x1 = pop(), x2 = pop();
 			push(x1);
 			push(x2);
 			push(x1);
 			break;
 		case Opcodes.DUP_X2:
-			SymbolicValue x3 = pop();
-			x2 = pop();
 			x1 = pop();
+			x2 = pop();
+			SymbolicValue x3 = pop();
 			push(x1);
 			push(x2);
 			push(x3);

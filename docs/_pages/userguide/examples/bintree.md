@@ -29,30 +29,24 @@ Java PathFinder
 
 ## Results
 
-### BinTree
-
 ~~~
-diver-models: 47
-time: 1660
-~~~
+$ coastal bintree/BinTree.properties -brief
+COASTAL version 0.0.0
+Paths: 48
+Time: 1457
 
-### BinTree2
+$ coastal bintree/BinTree2.properties -brief
+COASTAL version 0.0.0
+Paths: 8
+Time: 201
 
-~~~
-diver-models: 7
-time: 232
-~~~
+$ coastal bintree/BinTree3.properties -brief
+COASTAL version 0.0.0
+Paths: 48
+Time: 1266
 
-### BinTree3
-
-~~~
-diver-models: 47
-time: 1329
-~~~
-
-### BinTree4-DepthFirst
-
-~~~
-diver-models: 383
-time: 8761
+$ coastal bintree/BinTree4-DepthFirst.properties -brief
+COASTAL version 0.0.0
+Paths: 384
+Time: 8736
 ~~~
