@@ -298,9 +298,7 @@ public final class SymbolicState extends State {
 	 *                  the new symbolic expression for the field
 	 */
 	private void putField(int objectId, String fieldName, SymbolicValue value) {
-		if (objectId == 0) {
-			assert objectId != 0;
-		}
+		assert objectId != 0;
 		putField(Integer.toString(objectId), fieldName, value);
 	}
 
@@ -329,9 +327,7 @@ public final class SymbolicState extends State {
 	 * @return the symbolic expression for the value of the field
 	 */
 	private SymbolicValue getField(int objectId, String fieldName) {
-		if (objectId == 0) {
-			assert objectId != 0;
-		}
+		assert objectId != 0;
 		return getField(Integer.toString(objectId), fieldName);
 	}
 
