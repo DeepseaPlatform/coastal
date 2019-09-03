@@ -50,6 +50,9 @@ public class SymbolicFrame {
 	}
 
 	public SymbolicValue peek() {
+		if (stack.isEmpty()) {
+			System.out.println("EMPTY STACK!");
+		}
 		return stack.peek();
 	}
 

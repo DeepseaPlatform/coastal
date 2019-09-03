@@ -199,7 +199,7 @@ public class GenerationalFactory extends PathBasedFactory {
 		}
 
 		private Path generateAltPath(Path path, int targetDepth, long alternative) {
-			if (targetDepth > 0) {
+			if (targetDepth > 1) {
 				return new Path(generateAltPath(path.getParent(), targetDepth - 1, alternative), path.getChoice());
 			} else {
 				return new Path(path.getParent(), path.getChoice().getAlternative(alternative));
