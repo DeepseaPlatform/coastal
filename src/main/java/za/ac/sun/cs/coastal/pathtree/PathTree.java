@@ -139,14 +139,24 @@ public class PathTree implements Comparator<PathTreeNode> {
 	}
 
 	/**
+	 * Return the number of unique paths.
+	 * 
+	 * @return number of unique paths
+	 */
+	public long getUniqueCount() {
+		return getInsertedCount() - getRevisitCount() - getInfeasibleCount();
+	}
+	
+	/**
 	 * Publish a report about the use of the path tree.
 	 * 
 	 * @param object dummy
 	 */
 	public void report(Object object) {
-		broker.publish("report", new Tuple("PathTree.inserted-count", insertedCount.get()));
-		broker.publish("report", new Tuple("PathTree.revisit-count", revisitCount.get()));
-		broker.publish("report", new Tuple("PathTree.infeasible-count", infeasibleCount.get()));
+		broker.publish("report", new Tuple("PathTree.inserted-count", getInsertedCount()));
+		broker.publish("report", new Tuple("PathTree.revisit-count", getRevisitCount()));
+		broker.publish("report", new Tuple("PathTree.infeasible-count", getInfeasibleCount()));
+		broker.publish("report", new Tuple("PathTree.unique-count", getUniqueCount()));
 		broker.publish("report", new Tuple("PathTree.insert-time", insertTime.get()));
 	}
 

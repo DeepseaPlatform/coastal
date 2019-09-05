@@ -61,14 +61,14 @@ public class GenerationalFactory extends PathBasedFactory {
 
 		GenerationalManager(COASTAL coastal, Configuration config) {
 			super(coastal);
-			if (config.getBoolean("topdown", false)) {
+			if (config.getBoolean("top-down", false)) {
 				priorityStart = 0;
 				priorityDelta = 1;
 			} else {
 				priorityStart = 10000;
 				priorityDelta = -1;
 			}
-			full = config.getBoolean("full", true);
+			full = config.getBoolean("full", false);
 		}
 
 		protected void incrementTaskCount() {
