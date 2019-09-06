@@ -191,7 +191,7 @@ public final class SymbolicState extends State {
 		trackAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		constantElimination = coastal.getConfig().getBoolean("coastal.settings.constant-elimination", true);
 		if (constantElimination) {
-			if (coastal.getConfig().getInt("coastal.divers.threads", 0) > 0) {
+			if (coastal.getConfig().getInt("coastal.surfer.threads", 0) > 0) {
 				// log.info("Cannot eliminate constants when surfer threads > 0 -- switched off
 				// elimination");
 				constantElimination = false;
