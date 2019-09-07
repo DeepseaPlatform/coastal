@@ -35,6 +35,9 @@ sourceSets {
 		compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
 		runtimeClasspath += output + compileClasspath
 	}
+	test {
+		output.resourcesDir = 'build/classes/java/test'
+	}
 }
 
 // So that XML files in src/test/java/tests/* are copied
