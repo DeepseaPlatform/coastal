@@ -143,7 +143,9 @@ public class GenerationalFactory extends PathBasedFactory {
 					Expression pc = altPath.getPathCondition();
 					String sig = altPath.getSignature();
 					log.trace("{} trying   <{}> {}", LOG_PREFIX, sig, pc.toString());
+					long t = System.currentTimeMillis();
 					Input input = solver.solve(pc);
+					manager.recordSolverTime(System.currentTimeMillis() - t);
 					if (input == null) {
 						log.trace("{} no model", LOG_PREFIX);
 						log.trace("{} (The path is {})", LOG_PREFIX, altPath.getPathCondition().toString());
