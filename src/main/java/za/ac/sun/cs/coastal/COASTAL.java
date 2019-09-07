@@ -2206,6 +2206,11 @@ public class COASTAL {
 	private static boolean quietLogging = false;
 
 	/**
+	 * Additional configuration settings that were given on the command line.
+	 */
+	private static String extraConfig = null;
+
+	/**
 	 * The main function and entry point for COASTAL.
 	 * 
 	 * @param args
@@ -2216,7 +2221,7 @@ public class COASTAL {
 		final Logger log = LogManager
 				.getLogger(briefLogging ? "COASTAL-BRIEF" : quietLogging ? "COASTAL-QUIET" : "COASTAL");
 		new Banner('~').println("COASTAL version " + Version.VERSION).display(log);
-		Configuration config = Configuration.load(log, args);
+		Configuration config = Configuration.load(log, args, extraConfig);
 		if (config != null) {
 			new COASTAL(log, config).start(false, briefLogging);
 		}
@@ -2235,11 +2240,19 @@ public class COASTAL {
 	 */
 	private static String[] parseOptions(String[] args) {
 		List<String> newArgs = new LinkedList<>();
-		for (String arg : args) {
+		for (int i = 0; i < args.length; i++) {
+			String arg = args[i];
 			if (arg.equals("-quiet")) {
 				quietLogging = true;
 			} else if (arg.equals("-brief")) {
 				briefLogging = true;
+			} else if (arg.equals("-set")) {
+				String set = args[++i];
+				if (extraConfig == null) {
+					extraConfig = set;
+				} else {
+					extraConfig = extraConfig + "\n" + set;
+				}
 			} else {
 				newArgs.add(arg);
 			}
