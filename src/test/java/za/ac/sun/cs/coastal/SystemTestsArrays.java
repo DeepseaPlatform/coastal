@@ -19,7 +19,7 @@ public class SystemTestsArrays extends SystemTests {
 		checkDivers(reporter, 1, 3);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
-		checkPathTree(reporter, 9, 0, 6);
+		checkPathTree(reporter, 3, 0, 0);
 		checkInstrumentation(reporter, 15, 4, 1);
 	}
 
@@ -34,7 +34,7 @@ public class SystemTestsArrays extends SystemTests {
 		checkDivers(reporter, 1, 3);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
-		checkPathTree(reporter, 9, 0, 6);
+		checkPathTree(reporter, 3, 0, 0);
 		checkInstrumentation(reporter, 24, 4, 1);
 	}
 	

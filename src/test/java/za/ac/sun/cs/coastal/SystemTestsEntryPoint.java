@@ -106,7 +106,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
-		checkPathTree(reporter, 8, 0, 4);
+		checkPathTree(reporter, 4, 0, 0);
 		checkInstrumentation(reporter, 24, 6, 1);
 		checkMarkerCoverage(reporter, 0, 0, 1);
 		checkMarkerCoverage(reporter, 1, 2, 3, 4, 5);
@@ -118,7 +118,7 @@ public class SystemTestsEntryPoint extends SystemTests {
 		checkDivers(reporter, 1, 4);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
-		checkPathTree(reporter, 8, 0, 4);
+		checkPathTree(reporter, 4, 0, 0);
 		checkInstrumentation(reporter, 24, 6, 1);
 		checkMarkerCoverage(reporter, 0, 0, 1);
 		checkMarkerCoverage(reporter, 1, 2, 3, 4, 5);
