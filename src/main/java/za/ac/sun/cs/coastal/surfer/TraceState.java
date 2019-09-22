@@ -410,7 +410,9 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) {
-		return (byte) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		int value = (int) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		input.put(index, value);
+		return (byte) value;
 	}
 
 	/*
@@ -421,7 +423,9 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public short getConcreteShort(int triggerIndex, int index, int address, short currentValue) {
-		return (short) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		int value = (int) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		input.put(index, value);
+		return (short) value;
 	}
 
 	/*
@@ -431,7 +435,9 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public char getConcreteChar(int triggerIndex, int index, int address, char currentValue) {
-		return (char) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		int value = (int) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		input.put(index, value);
+		return (char) value;
 	}
 
 	/*
@@ -441,7 +447,9 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public int getConcreteInt(int triggerIndex, int index, int address, int currentValue) {
-		return (int) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		int value = (int) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		input.put(index, value);
+		return (int) value;
 	}
 
 	/*
@@ -451,7 +459,9 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public long getConcreteLong(int triggerIndex, int index, int address, long currentValue) {
-		return (long) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		long value = (long) getConcreteIntegral(triggerIndex, index, address, currentValue);
+		input.put(index, value);
+		return (long) value;
 	}
 
 	/*
@@ -462,7 +472,9 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public float getConcreteFloat(int triggerIndex, int index, int address, float currentValue) {
-		return (float) getConcreteReal(triggerIndex, index, address, currentValue);
+		float value = (float) getConcreteReal(triggerIndex, index, address, currentValue);
+		input.put(index, value);
+		return (float) value;
 	}
 
 	/*
@@ -473,7 +485,9 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public double getConcreteDouble(int triggerIndex, int index, int address, double currentValue) {
-		return (double) getConcreteReal(triggerIndex, index, address, currentValue);
+		double value = (double) getConcreteReal(triggerIndex, index, address, currentValue);
+		input.put(index, value);
+		return (double) value;
 	}
 
 	/*
@@ -494,6 +508,7 @@ public final class TraceState extends State {
 					input.put(name + CHAR_SEPARATOR + i, (long) currentValue.charAt(i));
 				}
 			}
+			input.put(index, currentValue);
 			return currentValue;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
@@ -512,6 +527,7 @@ public final class TraceState extends State {
 				chars[i] = currentValue.charAt(i);
 			}
 		}
+		input.put(index, new String(chars));
 		return new String(chars);
 	}
 
@@ -557,11 +573,13 @@ public final class TraceState extends State {
 					}
 				}
 			}
+			input.put(index, currentArray);
 			return currentArray;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
+			input.put(index, currentArray);
 			return currentArray;
 		}
 		int length = Array.getLength(currentArray);
@@ -578,6 +596,7 @@ public final class TraceState extends State {
 				Array.set(newArray, i, Array.get(currentArray, i));
 			}
 		}
+		input.put(index, newArray);
 		return newArray;
 	}
 
@@ -616,11 +635,13 @@ public final class TraceState extends State {
 					input.put(name + INDEX_SEPARATOR + i, (double) Array.get(currentArray, i));
 				}
 			}
+			input.put(index, currentArray);
 			return currentArray;
 		}
 		Trigger trigger = coastal.getTrigger(triggerIndex);
 		String name = trigger.getParamName(index);
 		if (name == null) { // not symbolic
+			input.put(index, currentArray);
 			return currentArray;
 		}
 		int length = Array.getLength(currentArray);
@@ -634,6 +655,7 @@ public final class TraceState extends State {
 				Array.set(newArray, i, Array.get(currentArray, i));
 			}
 		}
+		input.put(index, newArray);
 		return newArray;
 	}
 
@@ -1332,7 +1354,9 @@ public final class TraceState extends State {
 	 */
 	private String gatherConcreteValue0(Class<?> argType, Object value) {
 		StringBuilder repr = new StringBuilder();
-		if (argType == boolean.class) {
+		if (value == null) {
+			repr.append("NULL");
+		} else if (argType == boolean.class) {
 			repr.append((Boolean) value);
 		} else if (argType == byte.class) {
 			repr.append((Integer) value);
