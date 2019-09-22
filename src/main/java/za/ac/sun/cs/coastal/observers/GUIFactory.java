@@ -180,7 +180,7 @@ public class GUIFactory implements ObserverFactory {
 		}
 
 		public void createAndShowGUI() {
-			final JLabel topLabel = new JLabel(coastal.getConfig().getString("run-name", "?"));
+			final JLabel topLabel = new JLabel(coastal.getConfig().getString("coastal.run-name", "?"));
 			topLabel.setFont(new Font("Arial", Font.BOLD, 20));
 			topLabel.setForeground(Color.WHITE);
 			topLabel.setHorizontalAlignment(SwingConstants.CENTER);
