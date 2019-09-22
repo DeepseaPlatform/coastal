@@ -228,9 +228,9 @@ public class PathTree implements Comparator<PathTreeNode> {
 		 */
 		if (drawPaths && (root != null)) {
 			log.trace("{}", LOG_PREFIX);
-			for (String ll : stringRepr()) {
-				log.trace("{} {}", LOG_PREFIX, ll);
-			}
+//			for (String ll : stringRepr()) {
+//				log.trace("{} {}", LOG_PREFIX, ll);
+//			}
 		}
 		insertTime.addAndGet(System.currentTimeMillis() - t);
 		return lastNode;
