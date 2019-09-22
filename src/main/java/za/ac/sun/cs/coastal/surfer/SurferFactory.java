@@ -16,7 +16,6 @@ import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
-import za.ac.sun.cs.coastal.symbolic.VM;
 import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
@@ -238,10 +237,14 @@ public class SurferFactory implements TaskFactory {
 						} catch (InvocationTargetException x) {
 							Throwable t = x.getCause();
 							log.trace("{} InvocationTargetException, t.class={}", LOG_PREFIX, t.getClass().getName());
+//							if ((t != null) && t.getClass().getName().equals("java.lang.NullPointerException")) {
+//								x.printStackTrace(coastal.getSystemErr());
+//								System.out.println("Hello world!");
+//							}
 							if ((t == null) || !(t instanceof SymbolicException)) {
 								// x.printStackTrace();
 								try {
-									VM.startCatch(-1);
+									traceState.startCatch(-1);
 								} catch (LimitConjunctException e) {
 									// ignore, since run is over in any case
 								}
@@ -253,7 +256,7 @@ public class SurferFactory implements TaskFactory {
 									broker.publish("assert-failed", new Tuple(this, null));
 								}
 								try {
-									VM.startCatch(-1);
+								traceState.startCatch(-1);
 								} catch (SymbolicException e) {
 									// ignore, since run is over in any case
 								}
@@ -273,10 +276,14 @@ public class SurferFactory implements TaskFactory {
 						} catch (InvocationTargetException x) {
 							Throwable t = x.getCause();
 							log.trace("{} InvocationTargetException, t.class={}", LOG_PREFIX, t.getClass().getName());
+//							if ((t != null) && t.getClass().getName().equals("java.lang.NullPointerException")) {
+//								x.printStackTrace(coastal.getSystemErr());
+//								System.out.println("Hello world!");
+//							}
 							if ((t == null) || !(t instanceof SymbolicException)) {
 								// x.printStackTrace();
 								try {
-									VM.startCatch(-1);
+									traceState.startCatch(-1);
 								} catch (LimitConjunctException e) {
 									// ignore, since run is over in any case
 								}
@@ -290,7 +297,7 @@ public class SurferFactory implements TaskFactory {
 									broker.publish("assert-failed", new Tuple(this, null));
 								}
 								try {
-									VM.startCatch(-1);
+									traceState.startCatch(-1);
 								} catch (SymbolicException e) {
 									// ignore, since run is over in any case
 								}
