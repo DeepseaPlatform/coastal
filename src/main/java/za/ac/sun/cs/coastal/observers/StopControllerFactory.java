@@ -66,19 +66,21 @@ public class StopControllerFactory implements ObserverFactory {
 		}
 
 		public void stop(Object object) {
-			Tuple tuple = (Tuple) object;
-			coastal.stopWork();
-			stopMessage = (String) tuple.get(1);
-			triggerValues = (String) tuple.get(2);
-			Banner banner = new Banner('!').println("PROGRAM TERMINATION POINT REACHED");
-			if (stopMessage != null) {
-				banner.println("\n").println(stopMessage);
+			if (!coastal.workStopped()) {
+				Tuple tuple = (Tuple) object;
+				coastal.stopWork();
+				stopMessage = (String) tuple.get(1);
+				triggerValues = (String) tuple.get(2);
+				Banner banner = new Banner('!').println("PROGRAM TERMINATION POINT REACHED");
+				if (stopMessage != null) {
+					banner.println("\n").println(stopMessage);
+				}
+				if (triggerValues != null) {
+					banner.println("\nTRIGGER:").println(triggerValues);
+				}
+				banner.display(log);
+				wasStopped = true;
 			}
-			if (triggerValues != null) {
-				banner.println("\nTRIGGER:").println(triggerValues);
-			}
-			banner.display(log);
-			wasStopped = true;
 		}
 
 		@Override
