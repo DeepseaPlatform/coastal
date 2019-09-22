@@ -1974,6 +1974,10 @@ public class COASTAL {
 		}
 	}
 
+	public boolean workStopped() {
+		return workDone.get();
+	}
+
 	/**
 	 * Set the flag to indicate that the analysis run must stop.
 	 */
