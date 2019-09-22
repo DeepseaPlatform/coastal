@@ -42,6 +42,7 @@ public class DiverValueFactory implements SymbolicValueFactory {
 		protected final Expression expression;
 
 		public DiverValue(Expression expression) {
+			assert expression != null;
 			this.expression = expression;
 		}
 
