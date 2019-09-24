@@ -2,7 +2,7 @@ package apachetrie;
 
 import java.util.TreeMap;
 
-import org.apache.commons.collections4.trie.PatriciaTrie;
+//import org.apache.commons.collections4.trie.PatriciaTrie;
 
 import za.ac.sun.cs.coastal.Symbolic;
 
@@ -15,8 +15,8 @@ public class TrieTest {
 		map.put(two, 2);
 		PatriciaTrie trie = new PatriciaTrie(map);
 		if (!trie.containsKey(one)) {
-			//System.out.println("BUG");
-			Symbolic.stop("BUG");
+			System.out.println("BUG");
+			//Symbolic.stop("BUG");
 		} else {
 			System.out.println("FINE");
 		}
@@ -25,7 +25,7 @@ public class TrieTest {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		analyse("one","one","one");
+		analyse("one","one\u0000","one");
 	}
 
 }
