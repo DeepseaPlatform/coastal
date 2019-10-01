@@ -18,6 +18,7 @@ package apachetrie;
 
 import java.io.Serializable;
 import java.util.AbstractMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -214,4 +215,18 @@ public abstract class AbstractBitwiseTrie<K, V> extends AbstractMap<K, V>
             return key + "=" + value;
         }
     }
+
+    /* HAVE TO ADD THIS TO WORK */
+	public void putAll(Map<? extends K, ? extends V> m) {
+		// FIXME: bogus circumlocution.
+		Iterator<?> entries2 = m.entrySet().iterator();
+		@SuppressWarnings("unchecked")
+		Iterator<Map.Entry<? extends K, ? extends V>> entries = (Iterator<Map.Entry<? extends K, ? extends V>>) entries2;
+		int pos = m.size();
+		while (--pos >= 0) {
+			Map.Entry<? extends K, ? extends V> entry = entries.next();
+			put(entry.getKey(), entry.getValue());
+		}
+	}
+
 }

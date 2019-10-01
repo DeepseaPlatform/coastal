@@ -14,9 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package apachetrie.analyzer;
-
-import apachetrie.KeyAnalyzer;
+package apachetrie;
 
 /**
  * An {@link KeyAnalyzer} for {@link String}s.

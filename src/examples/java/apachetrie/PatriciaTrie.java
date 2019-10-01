@@ -18,8 +18,6 @@ package apachetrie;
 
 import java.util.Map;
 
-import apachetrie.analyzer.StringKeyAnalyzer;
-
 //import org.apache.commons.collections4.trie.analyzer.StringKeyAnalyzer;
 
 

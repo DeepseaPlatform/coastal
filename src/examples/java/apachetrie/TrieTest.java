@@ -16,7 +16,7 @@ public class TrieTest {
 		PatriciaTrie trie = new PatriciaTrie(map);
 		if (!trie.containsKey(one)) {
 			System.out.println("BUG");
-			//Symbolic.stop("BUG");
+			Symbolic.stop("BUG");
 		} else {
 			System.out.println("FINE");
 		}
