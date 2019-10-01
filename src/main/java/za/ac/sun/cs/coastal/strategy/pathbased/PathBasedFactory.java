@@ -20,11 +20,6 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 
 public abstract class PathBasedFactory implements StrategyFactory {
 
-	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "^^^";
-
 	// ======================================================================
 	//
 	// PATH-BASED SEARCH STRATEGY MANAGER
@@ -197,7 +192,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 
 		@Override
 		public Void call() throws Exception {
-			log.trace("{} strategy task starting", LOG_PREFIX);
+			log.trace("starting strategy task");
 			try {
 				while (true) {
 					long t0 = System.currentTimeMillis();
@@ -205,7 +200,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					manager.incrementRefinements();
-					log.trace("{} starting refinement", LOG_PREFIX);
+					log.trace("--------- starting refinement --------");
 					List<Input> inputs = refine(execution);
 					// We start at -1 (and not at 0) to account for the
 					// fact that one item of work has been removed from
@@ -219,11 +214,11 @@ public abstract class PathBasedFactory implements StrategyFactory {
 						}
 						inputs = refine1();
 					}
-					log.trace("{} added {} models", LOG_PREFIX, d + 1);
+					log.trace("removed 1 model, added {} models", d);
 					coastal.updateWork(d);
 				}
 			} catch (InterruptedException e) {
-				log.trace("{} strategy task canceled", LOG_PREFIX);
+				log.trace("stoppping strategy task");
 				throw e;
 			}
 		}
@@ -245,16 +240,16 @@ public abstract class PathBasedFactory implements StrategyFactory {
 				List<String> lines = (List<String>) execution.getPayload("lines");
 				if (lines != null) {
 					for (String line : lines) {
-						log.trace("{} <<{}>>", LOG_PREFIX, line);
+						log.trace("line <<{}>>", line);
 					}
 				}
 			}
 			if (path == null) {
-				log.trace("{} explored <> EMPTY PATH", LOG_PREFIX);
+				log.trace("explored <> EMPTY PATH");
 				manager.insertPath(execution, false); // ignore revisited return value
 				return null;
 			} else {
-				log.trace("{} explored <{}> {}", LOG_PREFIX, path.getSignature(), path.getPathCondition().toString());
+				log.trace("explored path <{}> {}", path.getSignature(), path.getPathCondition().toString());
 				manager.insertPath(execution, false); // ignore revisited return value
 				return refine1();
 			}
@@ -264,28 +259,28 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			while (true) {
 				Path path = findNewPath(manager.getPathTree());
 				if (path == null) {
-					log.trace("{} no further paths", LOG_PREFIX);
+					log.trace("no more unexplored paths found in path tree");
 					return null;
 					// log.trace("...Tree shape: {}", pathTree.getShape());
 				}
 				Expression pc = path.getPathCondition();
 				String sig = path.getSignature();
-				log.trace("{} trying   <{}> {}", LOG_PREFIX, sig, pc.toString());
+				log.trace("about to explore path <{}> {}", sig, pc.toString());
 				long t = System.currentTimeMillis();
 				Input input = solver.solve(pc);
 				manager.recordSolverTime(System.currentTimeMillis() - t);
 				if (input == null) {
-					log.trace("{} no model", LOG_PREFIX);
-					log.trace("{} (The spc is {})", LOG_PREFIX, path.getPathCondition().toString());
+					log.trace("no model was found for this path");
+					log.trace("the path condition is {}", path.getPathCondition().toString());
 					manager.insertPath(path, true);
 				} else {
 					String inputString = input.toMapString();
-					log.trace("{} new model: {}", LOG_PREFIX, inputString);
+					log.trace("new model found for this path: {}", inputString);
 					if (visitedInputs.add(inputString)) {
 						return Collections.singletonList(input);
 					} else {
 						manager.insertPath(path, false);
-						log.trace("{} model {} has been visited before, retrying", LOG_PREFIX, inputString);
+						log.trace("model {} has been visited before, retrying", inputString);
 					}
 				}
 			}

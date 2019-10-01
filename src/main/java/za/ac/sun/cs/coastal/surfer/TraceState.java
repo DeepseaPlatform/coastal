@@ -31,11 +31,6 @@ import za.ac.sun.cs.coastal.utility.Translator;
 
 public final class TraceState extends State {
 
-	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "&&&";
-
 	private boolean useCurrentValues;
 
 	private int frameCount = 0;
@@ -117,7 +112,7 @@ public final class TraceState extends State {
 		assert frameCount > 0;
 		frameCount--;
 		if ((frameCount == 0) && getRecordingMode()) {
-			log.trace("{} symbolic record mode switched off", LOG_PREFIX);
+			log.trace("******** symbolic record mode switched off (trace) ********");
 			setRecordingMode(false);
 			mayRecord = false;
 			setTrackingMode(false);
@@ -798,7 +793,7 @@ public final class TraceState extends State {
 		if (!getRecordingMode()) {
 			setRecordingMode(mayRecord);
 			if (getRecordingMode()) {
-				log.trace("{} symbolic record mode switched on", LOG_PREFIX);
+				log.trace("******** symbolic record mode switched on (trace) ********");
 				mayRecord = false;
 				setTrackingMode(true);
 				frameCount++;
@@ -818,7 +813,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} transferring arguments", LOG_PREFIX);
+		log.trace("transferring {} arguments, methodNumber={}", argCount, methodNumber);
 		frameCount++;
 		broker.publishThread("enter-method", methodNumber);
 	}
@@ -909,7 +904,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} ### LINENUMBER {}", LOG_PREFIX, line);
+		log.trace("--> LINENUMBER {}", line);
 		if (getRecordingMode()) {
 			lines.add(filename + ":" + line);
 		}
@@ -936,7 +931,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		// case Opcodes.IDIV:
@@ -1036,16 +1031,16 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.GOTO:
 			break;
 		case Opcodes.JSR:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		default:
-			log.fatal("{} UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 	}
@@ -1060,7 +1055,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.IFEQ:
@@ -1082,7 +1077,7 @@ public final class TraceState extends State {
 			jumpInsn(instr, opcode, value >= 0);
 			break;
 		default:
-			log.fatal("{} UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 	}
@@ -1097,7 +1092,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		switch (opcode) {
 		case Opcodes.IFNULL:
 			jumpInsn(instr, opcode, value == null);
@@ -1106,7 +1101,7 @@ public final class TraceState extends State {
 			jumpInsn(instr, opcode, value != null);
 			break;
 		default:
-			log.fatal("{} UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 	}
@@ -1121,7 +1116,7 @@ public final class TraceState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		switch (opcode) {
 		case Opcodes.IF_ACMPEQ:
@@ -1153,7 +1148,7 @@ public final class TraceState extends State {
 			jumpInsn(instr, opcode, value1 <= value2);
 			break;
 		default:
-			log.fatal("{} UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr, Bytecodes.toString(opcode), opcode);
+			log.fatal("UNEXPECTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 	}
@@ -1179,7 +1174,7 @@ public final class TraceState extends State {
 					pathTreeNode = pathTreeNode.getChild(0);
 				}
 				if (pathTreeNode != null) {
-					log.trace("{} PTN: #{} -> #{}", LOG_PREFIX, ptn, pathTreeNode.getId());
+					log.trace("path tree node: #{} -> #{}", ptn, pathTreeNode.getId());
 				}
 				if ((pathTreeNode != null) && pathTreeNode.isFullyExplored()) {
 					throw new AbortedRunException();

@@ -20,11 +20,6 @@ import za.ac.sun.cs.green.util.Reporter;
 
 public class SolverGreen extends Solver {
 
-	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "///";
-
 	protected static int problemCounter = 0;
 
 	protected final Logger log;
@@ -56,9 +51,9 @@ public class SolverGreen extends Solver {
 //			Map<IntVariable, Integer> model = (Map<IntVariable, Integer>) instance.request("model");
 			return (model == null) ? null : retrieveModel(model);
 		} catch (AssertionError x) {
-			log.trace(LOG_PREFIX + " VISITOR ASSERTION EXCEPTION", x);
+			log.trace("VISITOR ASSERTION EXCEPTION", x);
 		} catch (VisitorException x) {
-			log.trace(LOG_PREFIX + " VISITOR EXCEPTION", x);
+			log.trace("VISITOR EXCEPTION", x);
 		}
 		return null;
 	}

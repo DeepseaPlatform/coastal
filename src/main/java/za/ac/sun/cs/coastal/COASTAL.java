@@ -62,11 +62,6 @@ import za.ac.sun.cs.coastal.symbolic.Input;
 public class COASTAL {
 
 	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = ">>>";
-
-	/**
 	 * The logger for this analysis run. This is not created but set by the outside
 	 * world.
 	 */
@@ -1306,7 +1301,7 @@ public class COASTAL {
 	public long getStoppingTime() {
 		return stoppingTime.getTimeInMillis();
 	}
-	
+
 	/**
 	 * Return the class manager for this analysis run of COASTAL.
 	 * 
@@ -2017,7 +2012,7 @@ public class COASTAL {
 				traceQueue.clear();
 				if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
 					executor.shutdownNow();
-					log.trace("{} (still awaiting termination)", LOG_PREFIX);
+					log.trace("(still awaiting termination)");
 				}
 			}
 		} catch (InterruptedException x) {
@@ -2199,20 +2194,24 @@ public class COASTAL {
 	//
 	// ======================================================================
 
-	/**
-	 * Whether or not logging should be turned off.
-	 */
-	private static boolean briefLogging = false;
+	private enum Verbosity {
+		BRIEF, QUIET, VERBOSE, PROLIX
+	};
 
 	/**
-	 * Whether or not logging should be reduced.
+	 * How verbose the output should be.
 	 */
-	private static boolean quietLogging = false;
+	private static Verbosity verbosity = Verbosity.VERBOSE;
 
 	/**
 	 * Additional configuration settings that were given on the command line.
 	 */
 	private static String extraConfig = null;
+
+	/**
+	 * Warning generated while parsing command-line options.
+	 */
+	private static String commandLineWarning = null;
 
 	/**
 	 * The main function and entry point for COASTAL.
@@ -2222,14 +2221,34 @@ public class COASTAL {
 	 */
 	public static void main(String[] args) {
 		args = parseOptions(args);
-		final Logger log = LogManager
-				.getLogger(briefLogging ? "COASTAL-BRIEF" : quietLogging ? "COASTAL-QUIET" : "COASTAL");
-		new Banner('~').println("COASTAL version " + Version.VERSION).display(log);
-		Configuration config = Configuration.load(log, args, extraConfig);
-		if (config != null) {
-			new COASTAL(log, config).start(false, briefLogging);
+		final Logger log;
+		switch (verbosity) {
+		case BRIEF:
+			log = LogManager.getLogger("COASTAL-BRIEF");
+			break;
+		case QUIET:
+			log = LogManager.getLogger("COASTAL-QUIET");
+			break;
+		case PROLIX:
+			log = LogManager.getLogger("COASTAL-PROLIX");
+			break;
+		default:
+			log = LogManager.getLogger("COASTAL");
+			break;
 		}
-		new Banner('~').println("COASTAL DONE (" + config.getString("coastal.run-name", "?") + ")").display(log);
+		new Banner('~').println("COASTAL version " + Version.VERSION).display(log);
+		Configuration config = null;
+		String runName = "";
+		if (commandLineWarning == null) {
+			config = Configuration.load(log, args, extraConfig);
+			runName = String.format(" (%s)", config.getString("coastal.run-name", "?"));
+		} else {
+			new Banner('@').println("COASTAL PROBLEM\n").println(commandLineWarning).display(log);
+		}
+		if (config != null) {
+			new COASTAL(log, config).start(false, verbosity == Verbosity.BRIEF);
+		}
+		new Banner('~').println("COASTAL DONE" + runName).display(log);
 		LogManager.shutdown(true);
 	}
 
@@ -2244,24 +2263,67 @@ public class COASTAL {
 	 */
 	private static String[] parseOptions(String[] args) {
 		List<String> newArgs = new LinkedList<>();
+		boolean noMoreFlags = false;
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
-			if (arg.equals("-quiet")) {
-				quietLogging = true;
-			} else if (arg.equals("-brief")) {
-				briefLogging = true;
-			} else if (arg.equals("-set")) {
+			if (arg.equals("-quiet") || arg.equals("--quiet")) {
+				verbosity = Verbosity.QUIET;
+			} else if (arg.equals("-brief") || arg.equals("--brief")) {
+				verbosity = Verbosity.BRIEF;
+			} else if (arg.equals("-verbose") || arg.equals("--verbose")) {
+				verbosity = Verbosity.VERBOSE;
+			} else if (arg.equals("-prolix") || arg.equals("--prolix")) {
+				verbosity = Verbosity.PROLIX;
+			} else if (arg.equals("-set") || arg.equals("--set")) {
 				String set = args[++i];
 				if (extraConfig == null) {
 					extraConfig = set;
 				} else {
 					extraConfig = extraConfig + "\n" + set;
 				}
+			} else if (arg.equals("-version") || arg.equals("--version")) {
+				displayVersion();
+			} else if (arg.equals("-help") || arg.equals("--help")) {
+				displayHelpMessage();
+			} else if (arg.equals("-") || arg.equals("--")) {
+				noMoreFlags = true;
+			} else if (!noMoreFlags && arg.startsWith("-")) {
+				if (commandLineWarning == null) {
+					commandLineWarning = String.format("UNKNOWN OPTION \"%s\"", arg);
+				}
 			} else {
 				newArgs.add(arg);
 			}
 		}
 		return newArgs.toArray(new String[0]);
+	}
+
+	private static void displayVersion() {
+		System.out.println("COASTAL version " + Version.VERSION);
+		System.out.println("Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.");
+		System.out.println("License: GNU GPL version 3 or later, http://gnu.org/licenses/gpl.html");
+		System.out.println("Documentation: https://deepseaplatform.github.io/coastal/");
+		System.exit(0);
+	}
+
+	private static void displayHelpMessage() {
+		System.out.println("Usage:");
+		System.out.println("  coastal [OPTIONS]... <FILE>... ");
+		System.out.println();
+		// --------------------------------------------------------------------------------
+		System.out.println("The files are Java property files.  For detailed information, see");
+		System.out.println("https://deepseaplatform.github.io/coastal/userguide/configuration/");
+		System.out.println();
+		System.out.println("Options:");
+		System.out.println("  -brief      run without logging; only print running time and unique paths");
+		System.out.println("  -quiet      run without generating a detailed log");
+		System.out.println("  -verbose    run with a detailed log (written to log file)");
+		System.out.println("  -prolix     run with a detailed log (written to standard output)");
+		System.out.println("  -set K=V    add the key K with value V to end of configuration");
+		System.out.println("  -version    display version information and exit");
+		System.out.println("  -help       display this help message and exit");
+		System.out.println();
+		System.exit(0);
 	}
 
 }

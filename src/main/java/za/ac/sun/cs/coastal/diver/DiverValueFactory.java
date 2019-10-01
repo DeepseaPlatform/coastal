@@ -8,6 +8,7 @@
  */
 package za.ac.sun.cs.coastal.diver;
 
+import za.ac.sun.cs.coastal.solver.Constant;
 import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.solver.IntegerConstant;
 import za.ac.sun.cs.coastal.solver.Operation;
@@ -49,6 +50,11 @@ public class DiverValueFactory implements SymbolicValueFactory {
 		@Override
 		public Expression toExpression() {
 			return expression;
+		}
+
+		@Override
+		public boolean isConstant() {
+			return expression instanceof Constant;
 		}
 
 		@Override

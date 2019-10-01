@@ -33,11 +33,6 @@ import org.apache.logging.log4j.Logger;
  */
 public final class Configuration {
 
-	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "!!!";
-
 	// ======================================================================
 	//
 	// CONFIGURATION PARAMETERS
@@ -772,11 +767,11 @@ public final class Configuration {
 			InputStream inputStream = new FileInputStream(filename);
 			Configuration configuration = loadFromStream(log, inputStream);
 			if (configuration == null) {
-				log.trace("{} failed to load configuration from {}", LOG_PREFIX, filename);
+				log.trace("failed to load configuration from {}", filename);
 			}
 			return configuration;
 		} catch (FileNotFoundException e) {
-			log.trace("{} failed to load configuration from {}", LOG_PREFIX, filename);
+			log.trace("failed to load configuration from {}", filename);
 		}
 		return null;
 	}
@@ -796,7 +791,7 @@ public final class Configuration {
 		InputStream resourceStream = loader.getResourceAsStream(resourceName);
 		Configuration configuration = loadFromStream(log, resourceStream);
 		if (configuration == null) {
-			log.trace("{} failed to load configuration from {}", LOG_PREFIX, resourceName);
+			log.trace("failed to load configuration from {}", resourceName);
 		}
 		return configuration;
 	}
@@ -811,12 +806,15 @@ public final class Configuration {
 	 * @return an immutable configuration
 	 */
 	private static Configuration loadFromStream(Logger log, InputStream inputStream) {
+		if (inputStream == null) {
+			return null;
+		}
 		try {
 			Properties properties = new Properties();
 			properties.load(inputStream);
 			return new Configuration(properties);
 		} catch (IOException x) {
-			log.trace(LOG_PREFIX + " IO error", x);
+			log.trace("IO ERROR", x);
 		}
 		return null;
 	}
@@ -832,7 +830,7 @@ public final class Configuration {
 	 */
 	private static Configuration loadFromString(Logger log, String configString) {
 		if (configString == null) {
-			log.trace("{} configString is null", LOG_PREFIX);
+			log.trace("configString is null");
 			return null;
 		}
 		InputStream in = new ByteArrayInputStream(configString.getBytes());
@@ -887,15 +885,15 @@ public final class Configuration {
 				log.info("CONSTRUCTOR NOT FOUND: " + className, x);
 			}
 		} catch (SecurityException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR SECURITY ERROR: " + className, x);
+			log.trace("CONSTRUCTOR SECURITY ERROR: " + className, x);
 		} catch (IllegalArgumentException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR ARGUMENT ERROR: " + className, x);
+			log.trace("CONSTRUCTOR ARGUMENT ERROR: " + className, x);
 		} catch (InstantiationException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR INSTANTIATION ERROR: " + className, x);
+			log.trace("CONSTRUCTOR INSTANTIATION ERROR: " + className, x);
 		} catch (IllegalAccessException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR ACCESS ERROR: " + className, x);
+			log.trace("CONSTRUCTOR ACCESS ERROR: " + className, x);
 		} catch (InvocationTargetException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR INVOCATION ERROR: " + className, x);
+			log.trace("CONSTRUCTOR INVOCATION ERROR: " + className, x);
 		}
 		return null;
 	}
@@ -934,15 +932,15 @@ public final class Configuration {
 				log.info("CONSTRUCTOR NOT FOUND: " + className, x);
 			}
 		} catch (SecurityException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR SECURITY ERROR: " + className, x);
+			log.trace("CONSTRUCTOR SECURITY ERROR: " + className, x);
 		} catch (IllegalArgumentException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR ARGUMENT ERROR: " + className, x);
+			log.trace("CONSTRUCTOR ARGUMENT ERROR: " + className, x);
 		} catch (InstantiationException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR INSTANTIATION ERROR: " + className, x);
+			log.trace("CONSTRUCTOR INSTANTIATION ERROR: " + className, x);
 		} catch (IllegalAccessException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR ACCESS ERROR: " + className, x);
+			log.trace("CONSTRUCTOR ACCESS ERROR: " + className, x);
 		} catch (InvocationTargetException x) {
-			log.trace(LOG_PREFIX + " CONSTRUCTOR INVOCATION ERROR: " + className, x);
+			log.trace("CONSTRUCTOR INVOCATION ERROR: " + className, x);
 		}
 		return null;
 	}
@@ -964,9 +962,9 @@ public final class Configuration {
 				ClassLoader cl = COASTAL.class.getClassLoader();
 				clas = cl.loadClass(className);
 			} catch (ClassNotFoundException x) {
-				log.trace(LOG_PREFIX + " CLASS NOT FOUND: " + className, x);
+				log.trace("CLASS NOT FOUND: " + className, x);
 			} catch (ExceptionInInitializerError x) {
-				log.trace(LOG_PREFIX + " CLASS NOT FOUND: " + className, x);
+				log.trace("CLASS NOT FOUND: " + className, x);
 			}
 		}
 		return clas;

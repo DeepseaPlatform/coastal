@@ -16,17 +16,25 @@ import za.ac.sun.cs.coastal.diver.SymbolicValueFactory.SymbolicValue;
 
 public class SymbolicFrame {
 
+	private static int frameCounter = 0;
+
+	protected final int frameId = ++frameCounter;
+
 	protected final int methodNumber;
 	
 	protected final int invokingInstruction;
 	
-	protected final Stack<SymbolicValue> stack = new Stack<>();
+	protected volatile Stack<SymbolicValue> stack = new Stack<>();
 
 	protected final Map<Integer, SymbolicValue> locals = new HashMap<>();
 
 	public SymbolicFrame(int methodNumber, int invokingInstruction) {
 		this.methodNumber = methodNumber;
 		this.invokingInstruction = invokingInstruction;
+	}
+
+	public int getFrameId() {
+		return frameId;
 	}
 
 	public int getMethodNumber() {
@@ -46,13 +54,12 @@ public class SymbolicFrame {
 	}
 	
 	public SymbolicValue pop() {
+		assert !isEmpty();
 		return stack.pop();
 	}
 
 	public SymbolicValue peek() {
-		if (stack.isEmpty()) {
-			System.out.println("EMPTY STACK!");
-		}
+		assert !isEmpty();
 		return stack.peek();
 	}
 

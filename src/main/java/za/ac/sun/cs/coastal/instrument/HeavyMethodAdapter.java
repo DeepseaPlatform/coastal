@@ -19,11 +19,6 @@ import za.ac.sun.cs.coastal.diver.SymbolicState;
 
 public class HeavyMethodAdapter extends MethodVisitor {
 
-	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "[[[";
-
 	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
 
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/VM";
@@ -221,7 +216,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					"(III[Ljava/lang/String;)[Ljava/lang/String;", false);
 			mv.visitIntInsn(Opcodes.ASTORE, address);
 		} else {
-			log.fatal("{} UNHANDLED PARAMETER TYPE", LOG_PREFIX);
+			log.fatal("UNHANDLED PARAMETER TYPE");
 			System.exit(1);
 		}
 		return size;
@@ -229,7 +224,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitLineNumber(int line, Label start) {
-		log.trace("{} visitLineNumber(line:{}, label:{})", LOG_PREFIX, line, start);
+		log.trace("Hinstrument visitLineNumber(line:{}, label:{})", line, start);
 		mv.visitLdcInsn(classManager.getInstructionCounter());
 		mv.visitLdcInsn(line);
 		mv.visitLdcInsn(filename);
@@ -240,7 +235,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitEnd() {
-		log.trace("{} visitEnd()", LOG_PREFIX);
+		log.trace("Hinstrument visitEnd()");
 		classManager.registerLastInstruction();
 		classManager.registerLinenumbers(currentLinenumbers);
 		// branchInstructions.put(methodCounter, currentBranchInstructions);
@@ -249,14 +244,14 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-		log.trace("{} visitTryCatchBlock(start:{}, end:{}, handler:{}, type:{})", LOG_PREFIX, start, end, handler, type);
+		log.trace("Hinstrument visitTryCatchBlock(start:{}, end:{}, handler:{}, type:{})", start, end, handler, type);
 		catchLabels.add(handler);
 		mv.visitTryCatchBlock(start, end, handler, type);
 	}
 
 	@Override
 	public void visitCode() {
-		log.trace("{} visitCode()", LOG_PREFIX);
+		log.trace("Hinstrument visitCode()");
 		if (triggerIndex >= 0) {
 			//--- IF (symbolicMode) {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getRecordingMode", "()Z", false);
@@ -300,7 +295,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitInsn(int opcode) {
-		log.trace("{} visitInsn(opcode:{})", LOG_PREFIX, opcode);
+		log.trace("Hinstrument visitInsn(opcode:{})", opcode);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(II)V", false);
@@ -312,7 +307,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitIntInsn(int opcode, int operand) {
-		log.trace("{} visitIntInsn(opcode:{}, operand:{})", LOG_PREFIX, opcode, operand);
+		log.trace("Hinstrument visitIntInsn(opcode:{}, operand:{})", opcode, operand);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(operand);
@@ -322,7 +317,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitVarInsn(int opcode, int var) {
-		log.trace("{} visitVarInsn(opcode:{}, var:{})", LOG_PREFIX, opcode, var);
+		log.trace("Hinstrument visitVarInsn(opcode:{}, var:{})", opcode, var);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(var);
@@ -332,7 +327,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
-		log.trace("{} visitTypeInsn(opcode:{}, type:{})", LOG_PREFIX, opcode, type);
+		log.trace("Hinstrument visitTypeInsn(opcode:{}, type:{})", opcode, type);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "typeInsn", "(II)V", false);
@@ -341,7 +336,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-		log.trace("{} visitFieldInsn(opcode:{}, owner:{}, name:{})", LOG_PREFIX, opcode, owner, name);
+		log.trace("Hinstrument visitFieldInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(owner);
@@ -373,7 +368,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-		log.trace("{} visitMethodInsn(opcode:{}, owner:{}, name:{})", LOG_PREFIX, opcode, owner, name);
+		log.trace("Hinstrument visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
 		if (owner.equals(SYMBOLIC)) {
 			mv.visitMethodInsn(opcode, LIBRARY, name, descriptor, isInterface);
 			// pop params !!!!!!!!!!!
@@ -424,7 +419,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					break;
 				case "nondetString":
 				default:
-					log.fatal("{} unimplemented verifier method {}.{}", LOG_PREFIX, owner, name);
+					log.fatal("instrument unimplemented verifier method {}.{}", owner, name);
 					System.exit(1);					
 				}
 			} else {
@@ -444,7 +439,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 	@Override
 	public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle,
 			Object... bootstrapMethodArguments) {
-		log.trace("{} visitInvokeDynamicInsn(name:{})", LOG_PREFIX, name);
+		log.trace("Hinstrument visitInvokeDynamicInsn(name:{})", name);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(186);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "invokeDynamicInsn", "(II)V", false);
@@ -453,7 +448,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
-		log.trace("{} visitJumpInsn(opcode:{}, label:{})", LOG_PREFIX, opcode, label);
+		log.trace("Hinstrument visitJumpInsn(opcode:{}, label:{})", opcode, label);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(II)V", false);
@@ -468,7 +463,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitLdcInsn(Object value) {
-		log.trace("{} visitLdcInsn(value:{})", LOG_PREFIX, value);
+		log.trace("Hinstrument visitLdcInsn(value:{})", value);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(18);
 		mv.visitLdcInsn(value);
@@ -488,7 +483,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitIincInsn(int var, int increment) {
-		log.trace("{} visitJumpInsn(var:{}, increment:{})", LOG_PREFIX, var, increment);
+		log.trace("Hinstrument visitJumpInsn(var:{}, increment:{})", var, increment);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(var);
 		mv.visitLdcInsn(increment);
@@ -498,7 +493,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-		log.trace("{} visitTableSwitchInsn(min:{}, max:{}, dflt:{})", LOG_PREFIX, min, max, dflt);
+		log.trace("Hinstrument visitTableSwitchInsn(min:{}, max:{}, dflt:{})", min, max, dflt);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(170);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "tableSwitchInsn", "(II)V", false);
@@ -522,7 +517,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitLabel(Label label) {
-		log.trace("{} visitLabel(label:{})", LOG_PREFIX, label);
+		log.trace("Hinstrument visitLabel(label:{})", label);
 		mv.visitLabel(label);
 		if (catchLabels.contains(label)) {
 			mv.visitLdcInsn(classManager.getInstructionCounter());
@@ -550,7 +545,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 	@Override
 	public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
 		int insnCounter = classManager.getNextInstructionCounter();
-		log.trace("{} visitLookupSwitchInsn(dflt:{})", LOG_PREFIX, dflt);
+		log.trace("Hinstrument visitLookupSwitchInsn(dflt:{})", dflt);
 		mv.visitLdcInsn(insnCounter);
 		mv.visitLdcInsn(171);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "lookupSwitchInsn", "(II)V", false);
@@ -575,7 +570,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
-		log.trace("{} visitMultiANewArrayInsn(numDimensions:{})", LOG_PREFIX, numDimensions);
+		log.trace("Hinstrument visitMultiANewArrayInsn(numDimensions:{})", numDimensions);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(197);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "multiANewArrayInsn", "(II)V", false);

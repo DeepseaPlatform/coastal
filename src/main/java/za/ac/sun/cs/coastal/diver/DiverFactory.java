@@ -2,6 +2,7 @@ package za.ac.sun.cs.coastal.diver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.logging.log4j.Logger;
@@ -22,14 +23,13 @@ import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 public class DiverFactory implements TaskFactory {
 
 	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "***";
-
-	/**
 	 * The number of diver tasks started (ever).
 	 */
-	private int diverTaskCount = 0;
+	private AtomicInteger diverTaskCount = new AtomicInteger(0);
+
+	private int getDiverTaskCount() {
+		return diverTaskCount.get();
+	}
 
 	@Override
 	public DiverManager createManager(COASTAL coastal) {
@@ -38,8 +38,7 @@ public class DiverFactory implements TaskFactory {
 
 	@Override
 	public Diver[] createTask(COASTAL coastal, TaskManager manager) {
-		diverTaskCount++;
-		return new Diver[] { new Diver(coastal, (DiverManager) manager) };
+		return new Diver[] { new Diver(coastal, (DiverManager) manager, diverTaskCount.getAndIncrement()) };
 	}
 
 	// ======================================================================
@@ -57,7 +56,7 @@ public class DiverFactory implements TaskFactory {
 		/**
 		 * Counter for the number of dives undertaken.
 		 */
-		private final AtomicLong diverCount = new AtomicLong(0);
+		private final AtomicLong diveCount = new AtomicLong(0);
 
 		/**
 		 * Accumulator of all the dive times.
@@ -85,7 +84,7 @@ public class DiverFactory implements TaskFactory {
 		 * @return the incremented value of the diver counter
 		 */
 		public long getNextDiveCount() {
-			return diverCount.incrementAndGet();
+			return diveCount.incrementAndGet();
 		}
 
 		/**
@@ -94,26 +93,26 @@ public class DiverFactory implements TaskFactory {
 		 * @return the value of the diver counter
 		 */
 		public long getDiveCount() {
-			return diverCount.get();
+			return diveCount.get();
 		}
 
 		/**
-		 * Add a reported dive time to the accumulator that tracks how long the
-		 * dives took.
+		 * Add a reported dive time to the accumulator that tracks how long the dives
+		 * took.
 		 * 
 		 * @param time
-		 *            the time for this dive
+		 *             the time for this dive
 		 */
 		public void recordTime(long time) {
 			diverTime.addAndGet(time);
 		}
 
 		/**
-		 * Add a reported dive wait time. This is used to determine if it makes
-		 * sense to create additional threads (or destroy them).
+		 * Add a reported dive wait time. This is used to determine if it makes sense to
+		 * create additional threads (or destroy them).
 		 * 
 		 * @param time
-		 *            the wait time for this dive
+		 *             the wait time for this dive
 		 */
 		public void recordWaitTime(long time) {
 			diverWaitTime.addAndGet(time);
@@ -122,7 +121,7 @@ public class DiverFactory implements TaskFactory {
 
 		public void report(Object object) {
 			double dwt = diverWaitTime.get() / diverWaitCount.doubleValue();
-			broker.publish("report", new Tuple("Divers.tasks", diverTaskCount));
+			broker.publish("report", new Tuple("Divers.tasks", getDiverTaskCount()));
 			broker.publish("report", new Tuple("Divers.count", getDiveCount()));
 			broker.publish("report", new Tuple("Divers.time", diverTime.get()));
 			broker.publish("report", new Tuple("Divers.wait-time", dwt));
@@ -142,9 +141,10 @@ public class DiverFactory implements TaskFactory {
 		public Object[] getPropertyValues() {
 			Object[] propertyValues = new Object[4];
 			double dwt = diverWaitTime.get() / diverWaitCount.doubleValue();
+			int dtc = getDiverTaskCount();
 			long c = getDiveCount();
 			long t = diverTime.get();
-			propertyValues[0] = diverTaskCount;
+			propertyValues[0] = dtc;
 			propertyValues[1] = String.format("%d (%.1f/sec)", c, c / (0.001 * t));
 			propertyValues[2] = dwt;
 			propertyValues[3] = t;
@@ -171,17 +171,20 @@ public class DiverFactory implements TaskFactory {
 
 		protected final DiverManager manager;
 
-		public Diver(COASTAL coastal, DiverManager manager) {
+		protected final int diverTaskId;
+
+		public Diver(COASTAL coastal, DiverManager manager, int id) {
 			this.coastal = coastal;
 			log = coastal.getLog();
 			configuration = coastal.getConfig();
 			broker = coastal.getBroker();
 			this.manager = manager;
+			diverTaskId = id;
 		}
 
 		@Override
 		public Void call() throws Exception {
-			log.trace("{} diver task starting", LOG_PREFIX);
+			log.trace("starting diver task, diverTaskId={}", diverTaskId);
 			for (Tuple observer : coastal.getObserversPerTask()) {
 				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 				ObserverManager observerManager = (ObserverManager) observer.get(1);
@@ -194,7 +197,8 @@ public class DiverFactory implements TaskFactory {
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					SymbolicState symbolicState = new SymbolicState(coastal, input);
-					String banner = "starting dive " + manager.getNextDiveCount() + " @" + Banner.getElapsed(coastal);
+					String banner = "(" + diverTaskId + ") starting dive " + manager.getNextDiveCount() + " @"
+							+ Banner.getElapsed(coastal);
 					log.trace(Banner.getBannerLine(banner, '-'));
 					if (input == null) {
 						log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
@@ -212,21 +216,22 @@ public class DiverFactory implements TaskFactory {
 				}
 			} catch (InterruptedException e) {
 				broker.publishThread("diver-task-end", this);
-				log.trace("{} diver task canceled", LOG_PREFIX);
+				log.trace("stopping diver task, diverTaskId={}", diverTaskId);
 				throw e;
 			}
 		}
 
 		private void performRun(SymbolicState symbolicState, ClassLoader classLoader) {
+			log.trace("start run, diverTaskCount={}, symbolicState={}", diverTaskCount, symbolicState);
 			for (Tuple observer : coastal.getObserversPerDiver()) {
 				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 				ObserverManager observerManager = (ObserverManager) observer.get(1);
 				observerFactory.createObserver(coastal, observerManager);
 			}
 			try {
-				Trigger trigger = coastal.getMainEntrypoint();
-				Class<?> clas = classLoader.loadClass(trigger.getClassName());
-				Method meth = clas.getMethod(trigger.getMethodName(), trigger.getParamTypes());
+				Trigger entryPoint = coastal.getMainEntrypoint();
+				Class<?> clas = classLoader.loadClass(entryPoint.getClassName());
+				Method meth = clas.getMethod(entryPoint.getMethodName(), entryPoint.getParamTypes());
 				meth.setAccessible(true);
 				meth.invoke(null, coastal.getMainArguments());
 			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
@@ -243,7 +248,8 @@ public class DiverFactory implements TaskFactory {
 				} else if (t instanceof SystemExitException) {
 					broker.publish("system-exit", new Tuple(this, null));
 				} else if (!(t instanceof SymbolicException)) {
-					log.trace("P R O G R A M   E X C E P T I O N:", LOG_PREFIX, t);
+					log.trace("exception in run, diverTaskCount={}, symbolicState={}", diverTaskCount, symbolicState);
+					log.trace("P R O G R A M   E X C E P T I O N:", t);
 					if (t instanceof AssertionError) {
 						broker.publish("assert-failed", new Tuple(this, null));
 					}
@@ -254,6 +260,7 @@ public class DiverFactory implements TaskFactory {
 					}
 				}
 			}
+			log.trace("end of run, diverTaskCount={}, symbolicState={}", diverTaskCount, symbolicState);
 		}
 
 	}

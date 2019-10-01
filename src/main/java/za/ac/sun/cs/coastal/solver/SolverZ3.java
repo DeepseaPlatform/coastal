@@ -27,11 +27,6 @@ import za.ac.sun.cs.coastal.symbolic.Input;
 
 public class SolverZ3 extends Solver {
 
-	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "///";
-
 	protected static final String DEFAULT_Z3_PATH = "/usr/local/bin/z3";
 
 	protected static final String DEFAULT_Z3_ARGS = "-smt2 -in";
@@ -59,7 +54,7 @@ public class SolverZ3 extends Solver {
 			expression.accept(t);
 			String smt = t.getTranslation();
 
-			log.trace("{} smt: {}", LOG_PREFIX, smt);
+			log.trace("SMT generated: {}", smt.replace('\n', ' '));
 			Process process = Runtime.getRuntime().exec(z3Command);
 			OutputStream stdin = process.getOutputStream();
 			InputStream stdout = process.getInputStream();
@@ -86,7 +81,7 @@ public class SolverZ3 extends Solver {
 				PrintWriter writer = new PrintWriter(filename, "UTF-8");
 				writer.println(smt);
 				writer.close();
-				log.trace("{} Z3 input written to \"{}\"", LOG_PREFIX, filename);
+				log.trace("SMT input written to \"{}\"", filename);
 				return null;
 			}
 
@@ -96,14 +91,14 @@ public class SolverZ3 extends Solver {
 			output = outReader.lines().collect(Collectors.joining());
 			stdout.close();
 			process.destroy();
-			log.trace("{} output: {}", LOG_PREFIX, output);
+			log.trace("Z3 output: {}", output);
 			return retrieveModel(output, t.getVariables());
 		} catch (AssertionError x) {
-			log.trace(LOG_PREFIX + " VISITOR ASSERTION EXCEPTION", x);
+			log.trace("VISITOR ASSERTION EXCEPTION", x);
 		} catch (VisitorException x) {
-			log.trace(LOG_PREFIX + " VISITOR EXCEPTION", x);
+			log.trace("VISITOR EXCEPTION", x);
 		} catch (IOException x) {
-			log.trace(LOG_PREFIX + " IO EXCEPTION", x);
+			log.trace("IO EXCEPTION", x);
 		}
 		return null;
 	}

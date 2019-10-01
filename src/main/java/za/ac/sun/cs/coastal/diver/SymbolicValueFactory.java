@@ -51,6 +51,13 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 */
 		long toValue();
 
+		/**
+		 * Return {@code true} if and only if the value is a constant.
+		 *
+		 * @return {@code true} if and only if constant
+		 */
+		boolean isConstant();
+
 		// ----------------------------------------------------------------------
 		//
 		// COMPARISONS

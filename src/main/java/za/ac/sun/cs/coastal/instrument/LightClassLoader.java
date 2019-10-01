@@ -10,11 +10,6 @@ import za.ac.sun.cs.coastal.symbolic.State;
 
 public class LightClassLoader extends ClassLoader {
 
-	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "}}}";
-
 	private static final String VM_NAME = "za.ac.sun.cs.coastal.symbolic.VM";
 
 	private static final String TRACE_STATE_NAME = "za.ac.sun.cs.coastal.symbolic.TraceState";
@@ -49,43 +44,43 @@ public class LightClassLoader extends ClassLoader {
 	public Class<?> loadClass0(String name, boolean resolve) throws ClassNotFoundException {
 		Class<?> clas = findLoadedClass(name);
 		if (clas != null) {
-			log.trace("{} loading class {}, found in cache", LOG_PREFIX, name);
+			log.trace("|> loading class {}, found in cache", name);
 			return clas;
 		}
 		if (name.equals(TRACE_STATE_NAME)) {
-			log.trace("{} loading class {} from parent", LOG_PREFIX, name);
+			log.trace("|> loading class {} from parent", name);
 			return traceState.getClass();
 		} else if (name.equals(STATE_NAME)) {
-			log.trace("{} loading class {} from parent", LOG_PREFIX, name);
+			log.trace("|> loading class {} from parent", name);
 			return State.class;
 		}
 		if (coastal.isTarget(name)) {
-			log.trace("{} loading class {}, identified as target", LOG_PREFIX, name);
+			log.trace("|> loading class {}, identified as target", name);
 			byte[] raw = manager.loadLightInstrumented(name);
 			if (raw != null) {
-				log.trace("{} class {} instrumented", LOG_PREFIX, name);
+				log.trace("|> class {} instrumented", name);
 				clas = defineClass(name, raw, 0, raw.length);
 			}
 		}
 		if (clas == null) {
 			byte[] raw = manager.loadUninstrumented(name);
 			if (raw != null) {
-				log.trace("{} loading class {}, uninstrumented (1)", LOG_PREFIX, name);
+				log.trace("|> loading class {}, uninstrumented (1)", name);
 				clas = defineClass(name, raw, 0, raw.length);
 			}
 		}
 		if (clas == null) {
 			clas = findSystemClass(name);
 			if (clas != null) {
-				log.trace("{} loading class {}, uninstrumented (2)", LOG_PREFIX, name);
+				log.trace("|> loading class {}, uninstrumented (2)", name);
 			}
 		}
 		if (resolve && clas != null) {
-			log.trace("{} resolving class {}", LOG_PREFIX, name);
+			log.trace("|> resolving class {}", name);
 			resolveClass(clas);
 		}
 		if (clas == null) {
-			log.trace("{} class {} not found", LOG_PREFIX, name);
+			log.trace("|> class {} not found", name);
 			throw new ClassNotFoundException(name);
 		}
 		if ((clas != null) && name.equals(VM_NAME)) {

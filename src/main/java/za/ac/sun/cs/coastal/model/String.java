@@ -29,8 +29,13 @@ public class String {
 	}
 
 	public boolean length____I(SymbolicState state) {
-		int thisAddress = (int) intConstantValue(state.pop().toExpression());
-		state.push(state.getStringLength(thisAddress));
+		SymbolicValue stringValue = state.pop();
+		if ((stringValue == null) || !stringValue.isConstant()) {
+			state.push(new IntegerVariable(state.getNewVariableName(), 32, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		} else {
+			int thisAddress = (int) intConstantValue(state.pop().toExpression());
+			state.push(state.getStringLength(thisAddress));
+		}
 		return true;
 	}
 

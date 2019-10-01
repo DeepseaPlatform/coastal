@@ -3,8 +3,11 @@ package za.ac.sun.cs.coastal.diver;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -48,11 +51,6 @@ import za.ac.sun.cs.coastal.utility.Translator;
 public final class SymbolicState extends State {
 
 	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "$$$";
-
-	/**
 	 * The limit on path lengths. In other words, this is the maximum number of
 	 * branches per path.
 	 */
@@ -90,7 +88,7 @@ public final class SymbolicState extends State {
 	 * A symbolic representation of the method invocation stack of the true
 	 * execution.
 	 */
-	private final Stack<SymbolicFrame> frames = new Stack<>();
+	private final Deque<SymbolicFrame> frames = new ArrayDeque<>();
 
 	/**
 	 * The number of objects created during this execution.
@@ -371,7 +369,7 @@ public final class SymbolicState extends State {
 		assert !frames.isEmpty();
 		int methodNumber = frames.pop().getMethodNumber();
 		if (frames.isEmpty() && getRecordingMode()) {
-			log.trace("{} symbolic record mode switched off", LOG_PREFIX);
+			log.trace("******** symbolic record mode switched off ********");
 			setRecordingMode(false);
 			mayRecord = false;
 			setTrackingMode(trackAll);
@@ -389,16 +387,47 @@ public final class SymbolicState extends State {
 		return ++objectIdCount;
 	}
 
+	private static final int LINE_LENGTH = 120;
+
 	/**
 	 * Dump the stack of invocation frames to the log.
 	 */
 	private void dumpFrames() {
-		int n = frames.size();
-		for (int i = n - 1; i >= 0; i--) {
-			log.trace("{} st{} locals:{} <{}>", LOG_PREFIX, frames.get(i).stack, frames.get(i).locals,
-					frames.get(i).getInvokingInstruction());
+//		log.trace("@@@@@@@@ frames={} n={} frames.st={}", (Object) frames, n, (n == 0) ? "?" : (Object) frames.get(n - 1));
+		for (Iterator<SymbolicFrame> iter = frames.iterator(); iter.hasNext();) {
+			SymbolicFrame frame = iter.next();
+			log.trace("    id={} st{} locals:{} <{}>", frame.getFrameId(), frame.stack, frame.locals,
+					frame.getInvokingInstruction());
 		}
-		log.trace("{} data:{}", LOG_PREFIX, instanceData);
+		StringBuilder b = new StringBuilder();
+		StringBuilder bb = new StringBuilder();
+		b.append("    data:{");
+		boolean startOfLine = true;
+		for (Map.Entry<String, SymbolicValue> entry : instanceData.entrySet()) {
+			bb.setLength(0);
+			bb.append(entry.getKey()).append('=').append(entry.getValue().toString());
+			if (startOfLine) {
+				if (b.length() + bb.length() > LINE_LENGTH) {
+					log.trace(b.toString());
+					b.setLength(0);
+					b.append("          ");
+				}
+				b.append(bb.toString());
+				startOfLine = false;
+			} else {
+				if (b.length() + bb.length() + 2 > LINE_LENGTH) {
+					b.append(',');
+					log.trace(b.toString());
+					b.setLength(0);
+					b.append("          ");
+				} else {
+					b.append(", ");
+				}
+				b.append(bb.toString());
+			}
+		}
+		b.append('}');
+		log.trace(b.toString());
 	}
 
 	/**
@@ -423,11 +452,11 @@ public final class SymbolicState extends State {
 		try {
 			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, DELEGATE_PARAMETERS);
 		} catch (NoSuchMethodException | SecurityException e) {
-			log.trace("{} no delegate: {}", LOG_PREFIX, methodName);
+			log.trace("no delegate: {}", methodName);
 			return false;
 		}
 		assert delegateMethod != null;
-		log.trace("{} found delegate: {}", LOG_PREFIX, methodName);
+		log.trace("found delegate: {}", methodName);
 		try {
 			if ((boolean) delegateMethod.invoke(delegate, delegateArguments)) {
 				justExecutedDelegate = true;
@@ -853,7 +882,7 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public SymbolicValue pop() {
-		return frames.peek().pop();
+		return frames.isEmpty() ? null : frames.peek().pop();
 	}
 
 	/**
@@ -884,8 +913,8 @@ public final class SymbolicState extends State {
 			Branch branch = new SegmentedPC.Binary(conjunct, pendingExtraCondition);
 			path = new Path(path, new Choice(branch, truthValue ? 1 : 0));
 			pendingExtraCondition = null;
-			log.trace("{} >>> adding conjunct: {}", LOG_PREFIX, conjunct.toString());
-			log.trace("{} >>> path is now: {}", LOG_PREFIX, path.getPathCondition().toString());
+			log.trace("    adding conjunct: {}", conjunct.toString());
+			log.trace("    path is now: {}", path.getPathCondition().toString());
 			lastConjunctWasConstant = false;
 		} else {
 			lastConjunctWasConstant = true;
@@ -931,8 +960,8 @@ public final class SymbolicState extends State {
 			Branch branch = new SegmentedPC.Nary(expression, min, max, pendingExtraCondition);
 			path = new Path(path, new Choice(branch, cur - min));
 			pendingExtraCondition = null;
-			log.trace("{} >>> adding (switch) conjunct: {}", LOG_PREFIX, conjunct.toString());
-			log.trace("{} >>> path is now: {}", LOG_PREFIX, path.getPathCondition().toString());
+			log.trace("    adding (switch) conjunct: {}", conjunct.toString());
+			log.trace("    path is now: {}", path.getPathCondition().toString());
 		}
 	}
 
@@ -965,8 +994,8 @@ public final class SymbolicState extends State {
 			Branch branch = new SegmentedPC.Kary(expression, keys, pendingExtraCondition);
 			path = new Path(path, new Choice(branch, choice));
 			pendingExtraCondition = null;
-			log.trace("{} >>> adding (lookup switch) conjunct: {}", LOG_PREFIX, conjunct.toString());
-			log.trace("{} >>> path is now: {}", LOG_PREFIX, path.getPathCondition().toString());
+			log.trace("    adding (lookup switch) conjunct: {}", conjunct.toString());
+			log.trace("    path is now: {}", path.getPathCondition().toString());
 		}
 	}
 	
@@ -1000,12 +1029,12 @@ public final class SymbolicState extends State {
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
 		if (concrete == null) {
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, currentValue);
+			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue ? 1 : 0));
 			return currentValue;
 		} else {
 			boolean newValue = concrete.getValue() != 0;
-			log.trace("{} >>> get symbolic var {}, default value of {}", LOG_PREFIX, name, newValue);
+			log.trace("get symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
 	}
@@ -1021,12 +1050,12 @@ public final class SymbolicState extends State {
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 8);
 		if (concrete == null) {
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, currentValue);
+			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue));
 			return currentValue;
 		} else {
 			byte newValue = (byte) concrete.getValue();
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, newValue);
+			log.trace("create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
 	}
@@ -1042,12 +1071,12 @@ public final class SymbolicState extends State {
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
 		if (concrete == null) {
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, currentValue);
+			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue));
 			return currentValue;
 		} else {
 			short newValue = (short) concrete.getValue();
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, newValue);
+			log.trace("create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
 	}
@@ -1061,12 +1090,12 @@ public final class SymbolicState extends State {
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
 		if (concrete == null) {
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, currentValue);
+			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue));
 			return currentValue;
 		} else {
 			char newValue = (char) concrete.getValue();
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, newValue);
+			log.trace("create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
 	}
@@ -1082,12 +1111,12 @@ public final class SymbolicState extends State {
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
 		if (concrete == null) {
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, currentValue);
+			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue));
 			return currentValue;
 		} else {
 			int newValue = (int) concrete.getValue();
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, newValue);
+			log.trace("create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
 	}
@@ -1103,12 +1132,12 @@ public final class SymbolicState extends State {
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 64);
 		if (concrete == null) {
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, currentValue);
+			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue));
 			return currentValue;
 		} else {
 			long newValue = (long) concrete.getValue();
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, newValue);
+			log.trace("create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
 	}
@@ -1122,12 +1151,12 @@ public final class SymbolicState extends State {
 		Double concreteVal = (input == null) ? null : (Double) input.get(name);
 		RealConstant concrete = concreteVal == null ? null : new RealConstant(concreteVal, 32);
 		if (concrete == null) {
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, currentValue);
+			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Double(currentValue));
 			return currentValue;
 		} else {
 			float newValue = (float) concrete.getValue();
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, newValue);
+			log.trace("create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
 	}
@@ -1141,12 +1170,12 @@ public final class SymbolicState extends State {
 		Double concreteVal = (input == null) ? null : (Double) input.get(name);
 		RealConstant concrete = concreteVal == null ? null : new RealConstant(concreteVal, 64);
 		if (concrete == null) {
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, currentValue);
+			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Double(currentValue));
 			return currentValue;
 		} else {
 			double newValue = (double) concrete.getValue();
-			log.trace("{} >>> create symbolic var {}, default value of {}", LOG_PREFIX, name, newValue);
+			log.trace("create symbolic var {}, default value of {}", name, newValue);
 			return newValue;
 		}
 	}
@@ -1817,7 +1846,7 @@ public final class SymbolicState extends State {
 		if (!getRecordingMode()) {
 			setRecordingMode(mayRecord);
 			if (getRecordingMode()) {
-				log.trace("{} >>> symbolic record mode switched on", LOG_PREFIX);
+				log.trace("******** symbolic record mode switched on ********");
 				mayRecord = false;
 				setTrackingMode(true);
 				SymbolicValue thisValue = isStatic ? null : peek();
@@ -1825,7 +1854,7 @@ public final class SymbolicState extends State {
 				if (!isStatic) {
 					setLocal(0, thisValue);
 				}
-				dumpFrames();
+				// dumpFrames();
 				triggeringIndex = triggerIndex;
 			}
 		}
@@ -1847,7 +1876,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} >>> transferring arguments", LOG_PREFIX);
+		log.trace("transferring {} arguments, methodNumber={}", argCount, methodNumber);
 		if (frames.isEmpty()) {
 			frames.push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
 			for (int i = 0; i < argCount; i++) {
@@ -1904,7 +1933,7 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public void returnValue(double returnValue) {
-		log.fatal("{} UNIMPLEMENTED RETURN VALUE OF TYPE double", LOG_PREFIX);
+		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE double");
 		System.exit(1);
 	}
 
@@ -1915,7 +1944,7 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public void returnValue(float returnValue) {
-		log.fatal("{} UNIMPLEMENTED RETURN VALUE OF TYPE float", LOG_PREFIX);
+		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE float");
 		System.exit(1);
 	}
 
@@ -1944,7 +1973,7 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public void returnValue(long returnValue) {
-		log.fatal("{} UNIMPLEMENTED RETURN VALUE OF TYPE long", LOG_PREFIX);
+		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE long");
 		System.exit(1);
 	}
 
@@ -1990,7 +2019,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} ### LINENUMBER {}", LOG_PREFIX, line);
+		log.trace("--> LINENUMBER {}", line);
 		if (getRecordingMode()) {
 			lines.add(filename + ":" + line);
 		}
@@ -2007,7 +2036,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} ### LABEL {}", LOG_PREFIX, label);
+		log.trace("--> LABEL {}", label);
 		broker.publishThread("label", new Tuple(instr, label));
 	}
 
@@ -2021,7 +2050,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
@@ -2318,7 +2347,7 @@ public final class SymbolicState extends State {
 			pop();
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
 					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
@@ -2335,7 +2364,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {} {}", LOG_PREFIX, instr, Bytecodes.toString(opcode), operand);
+		log.trace("--> {} {} (offset={})", Bytecodes.toString(opcode), operand, instr);
 		broker.publishThread("int-insn", new Tuple(instr, opcode, operand));
 		checkLimitConjuncts();
 		switch (opcode) {
@@ -2386,7 +2415,7 @@ public final class SymbolicState extends State {
 			push(new IntegerConstant(id, 32), 32);
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", LOG_PREFIX, instr,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", instr,
 					Bytecodes.toString(opcode), operand, opcode);
 			System.exit(1);
 		}
@@ -2403,7 +2432,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {} {}", LOG_PREFIX, instr, Bytecodes.toString(opcode), var);
+		log.trace("--> {} {} (offset={})", Bytecodes.toString(opcode), var, instr);
 		broker.publishThread("var-insn", new Tuple(instr, opcode, var));
 		checkLimitConjuncts();
 		switch (opcode) {
@@ -2422,7 +2451,7 @@ public final class SymbolicState extends State {
 			setLocal(var, pop());
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
 					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
@@ -2439,7 +2468,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("type-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
@@ -2456,7 +2485,7 @@ public final class SymbolicState extends State {
 			push(new IntegerConstant(id, 32), 32);
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
 					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
@@ -2475,7 +2504,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {} {} {} {}", LOG_PREFIX, instr, Bytecodes.toString(opcode), owner, name, descriptor);
+		log.trace("--> {} {} {} {} (offset={})", Bytecodes.toString(opcode), owner, name, descriptor, instr);
 		broker.publishThread("field-insn", new Tuple(instr, opcode, owner, name, descriptor));
 		checkLimitConjuncts();
 		switch (opcode) {
@@ -2495,7 +2524,7 @@ public final class SymbolicState extends State {
 			putField(id, name, v);
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", LOG_PREFIX, instr,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr,
 					Bytecodes.toString(opcode), owner, name, descriptor, opcode);
 			System.exit(1);
 		}
@@ -2514,7 +2543,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {} {} {} {}", LOG_PREFIX, instr, Bytecodes.toString(opcode), owner, name, descriptor);
+		log.trace("--> {} {} {} {} (offset={})", Bytecodes.toString(opcode), owner, name, descriptor, instr);
 		broker.publishThread("method-insn", new Tuple(instr, opcode, owner, name, descriptor));
 		checkLimitConjuncts();
 		lastInvokingInstruction = instr;
@@ -2550,7 +2579,7 @@ public final class SymbolicState extends State {
 			}
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", LOG_PREFIX, instr,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr,
 					Bytecodes.toString(opcode), owner, name, descriptor, opcode);
 			System.exit(1);
 		}
@@ -2567,13 +2596,13 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("invoke-dynamic-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		lastInvokingInstruction = instr;
 		switch (opcode) {
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
 					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
@@ -2620,7 +2649,9 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		// dumpFrames();
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
+		// dumpFrames();
 		broker.publishThread("jump-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		if (getRecordingMode()) {
@@ -2694,7 +2725,7 @@ public final class SymbolicState extends State {
 				pushConjunct(v.ne(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			default:
-				log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+				log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
 						Bytecodes.toString(opcode), opcode);
 				System.exit(1);
 			}
@@ -2724,7 +2755,7 @@ public final class SymbolicState extends State {
 				pop();
 				break;
 			default:
-				log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+				log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
 						Bytecodes.toString(opcode), opcode);
 				System.exit(1);
 			}
@@ -2745,10 +2776,10 @@ public final class SymbolicState extends State {
 		if (getRecordingMode()) {
 			if (lastConjunctWasConstant) {
 				lastConjunctWasConstant = false;
-				log.trace("{} >>> previous conjunct was constant", LOG_PREFIX);
+				log.trace("    previous conjunct is a constant");
 			} else {
-				log.trace("{} (POST) {}", LOG_PREFIX, Bytecodes.toString(opcode));
-				log.trace("{} >>> previous conjunct is false", LOG_PREFIX);
+				log.trace("--> POST {}", Bytecodes.toString(opcode));
+				log.trace("    previous conjunct is false");
 				broker.publishThread("post-jump-insn", new Tuple(instr, opcode));
 				Choice lastChoice = path.getChoice();
 				Branch lastBranch = lastChoice.getBranch();
@@ -2756,7 +2787,7 @@ public final class SymbolicState extends State {
 				long otherAlternative = 1 - lastChoice.getAlternative();
 				path = new Path(path.getParent(), new Choice(lastBranch, otherAlternative));
 				checkLimitConjuncts();
-				log.trace("{} >>> path is now: {}", LOG_PREFIX, path.getPathCondition().toString());
+				log.trace("    path is now: {}", path.getPathCondition().toString());
 			}
 		}
 	}
@@ -2779,8 +2810,8 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {} {} {}", LOG_PREFIX, instr, Bytecodes.toString(opcode), value,
-				value.getClass().getSimpleName());
+		log.trace("--> {} {} {} (offset={})", Bytecodes.toString(opcode), value,
+				value.getClass().getSimpleName(), instr);
 		broker.publishThread("ldc-insn", new Tuple(instr, opcode, value));
 		checkLimitConjuncts();
 		switch (opcode) {
@@ -2807,7 +2838,7 @@ public final class SymbolicState extends State {
 			}
 			break;
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
 					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
@@ -2825,7 +2856,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {} {}", LOG_PREFIX, instr, Bytecodes.toString(opcode), increment);
+		log.trace("--> {} {} (offset={})", Bytecodes.toString(opcode), increment, instr);
 		broker.publishThread("iinc-insn", new Tuple(instr, var, increment));
 		checkLimitConjuncts();
 		SymbolicValue v0 = getLocal(var);
@@ -2844,7 +2875,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("table-switch-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		pendingSwitch.push(pop());
@@ -2862,7 +2893,7 @@ public final class SymbolicState extends State {
 			return;
 		}
 		if (getRecordingMode()) {
-			log.trace("{} CASE {} FOR TABLESWITCH ({} .. {})", LOG_PREFIX, value, min, max);
+			log.trace("CASE {} FOR TABLESWITCH ({} .. {})", value, min, max);
 			checkLimitConjuncts();
 			if (!pendingSwitch.isEmpty()) {
 				pushConjunct(pendingSwitch.pop().toExpression(), min, max, value);
@@ -2881,7 +2912,7 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("lookup-switch-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		pendingSwitch.push(pop());
@@ -2901,13 +2932,13 @@ public final class SymbolicState extends State {
 		if (getRecordingMode()) {
 			int[] keys = coastal.getClassManager().findLookupKeys(id);
 			if (choice == keys.length) {
-				log.trace("{} DEFAULT CASE FOR LOOKUPSWITCH", LOG_PREFIX);
+				log.trace("DEFAULT CASE FOR LOOKUPSWITCH");
 				checkLimitConjuncts();
 				if (!pendingSwitch.isEmpty()) {
 					pushConjunct(pendingSwitch.pop().toExpression(), keys, keys.length);
 				}
 			} else {
-				log.trace("{} CASE {} FOR LOOKUPSWITCH", LOG_PREFIX, keys[choice]);
+				log.trace("CASE {} FOR LOOKUPSWITCH", keys[choice]);
 				checkLimitConjuncts();
 				if (!pendingSwitch.isEmpty()) {
 					pushConjunct(pendingSwitch.pop().toExpression(), keys, choice);
@@ -2927,12 +2958,12 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} <{}> {}", LOG_PREFIX, instr, Bytecodes.toString(opcode));
+		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
 		broker.publishThread("multi-anew-array-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		default:
-			log.fatal("{} UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", LOG_PREFIX, instr,
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
 					Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
@@ -2955,14 +2986,14 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} >>> no exception", LOG_PREFIX);
+		log.trace("no exception occurred");
 		for (Expression e : noExceptionExpression) {
 			pushConjunct(e);
 		}
 		noExceptionExpression.clear();
 		checkLimitConjuncts();
 		String p = (path == null) ? null : path.getPathCondition().toString();
-		log.trace("{} >>> path is now: {}", LOG_PREFIX, p);
+		log.trace("path is now: {}", p);
 		dumpFrames();
 	}
 
@@ -2976,15 +3007,16 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("{} >>> exception occurred", LOG_PREFIX);
+		log.trace("exception occurred");
 		int catchDepth = Thread.currentThread().getStackTrace().length;
 		int deltaDepth = exceptionDepth - catchDepth;
 		if (deltaDepth >= frames.size()) {
-			log.trace("{} >>> symbolic record mode switched off", LOG_PREFIX);
+			log.trace("******** symbolic record mode switched off ********");
 			setRecordingMode(false);
 			mayRecord = false;
 			setTrackingMode(trackAll);
 		} else {
+			// log.trace("@@@@@@@@@@ POP IN startCatch");
 			while (deltaDepth-- > 0) {
 				frames.pop();
 			}
@@ -2997,7 +3029,7 @@ public final class SymbolicState extends State {
 		noExceptionExpression.clear();
 		checkLimitConjuncts();
 		String p = (path == null) ? null : path.getPathCondition().toString();
-		log.trace("{} >>> path is now: {}", LOG_PREFIX, p);
+		log.trace("path is now: {}", p);
 		dumpFrames();
 	}
 
@@ -3164,7 +3196,7 @@ public final class SymbolicState extends State {
 		}
 		final String pc = path.getPathCondition().toString();
 		broker.publish("print-pc", new Tuple(this, label, pc));
-		log.trace("{} {}: {}", LOG_PREFIX, label, pc);
+		log.trace("{}: {}", label, pc);
 	}
 
 	/*
@@ -3179,7 +3211,7 @@ public final class SymbolicState extends State {
 		}
 		final String pc = path.getPathCondition().toString();
 		broker.publish("print-pc", new Tuple(this, null, pc));
-		log.trace("{} {}: {}", LOG_PREFIX, null, pc);
+		log.trace("{}: {}", null, pc);
 	}
 
 	// ======================================================================

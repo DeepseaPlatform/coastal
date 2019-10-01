@@ -1,6 +1,8 @@
 package za.ac.sun.cs.coastal.pathtree;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -19,11 +21,6 @@ import za.ac.sun.cs.coastal.symbolic.Path;
  * Representation of all execution paths in a single tree.
  */
 public class PathTree implements Comparator<PathTreeNode> {
-
-	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = ":::";
 
 	/**
 	 * The one-and-only logger.
@@ -84,7 +81,8 @@ public class PathTree implements Comparator<PathTreeNode> {
 	/**
 	 * Constructor.
 	 * 
-	 * @param coastal reference to the analysis run controller
+	 * @param coastal
+	 *                reference to the analysis run controller
 	 */
 	public PathTree(COASTAL coastal) {
 		log = coastal.getLog();
@@ -96,7 +94,8 @@ public class PathTree implements Comparator<PathTreeNode> {
 	/**
 	 * Set the status of the {@code recordDeepest} flag.
 	 * 
-	 * @param recordDeepest the new value for the flag
+	 * @param recordDeepest
+	 *                      the new value for the flag
 	 */
 	public void setRecordDeepest(boolean recordDeepest) {
 		this.recordDeepest = recordDeepest;
@@ -146,11 +145,12 @@ public class PathTree implements Comparator<PathTreeNode> {
 	public long getUniqueCount() {
 		return getInsertedCount() - getRevisitCount() - getInfeasibleCount();
 	}
-	
+
 	/**
 	 * Publish a report about the use of the path tree.
 	 * 
-	 * @param object dummy
+	 * @param object
+	 *               dummy
 	 */
 	public void report(Object object) {
 		broker.publish("report", new Tuple("PathTree.inserted-count", getInsertedCount()));
@@ -174,8 +174,10 @@ public class PathTree implements Comparator<PathTreeNode> {
 	 * the execution will contain a path, but no inputs. The {@code isInfeasible}
 	 * flag indicates when this is the case.
 	 * 
-	 * @param execution    the execution associated with the path
-	 * @param isInfeasible whether or not the execution was infeasible
+	 * @param execution
+	 *                     the execution associated with the path
+	 * @param isInfeasible
+	 *                     whether or not the execution was infeasible
 	 * @return the terminal node of the newly-inserted path in the path tree
 	 */
 	public PathTreeNode insertPath(Execution execution, boolean isInfeasible) {
@@ -199,7 +201,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 			paths[--idx] = p;
 		}
 		assert idx == 0;
-		log.trace("{} depth:{}", LOG_PREFIX, depth);
+		log.trace("depth:{}", depth);
 		/*
 		 * Step 2: Add the new path to the path tree
 		 */
@@ -207,7 +209,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 			lock.writeLock().lock();
 			try {
 				if (root == null) {
-					log.trace("{} creating root", LOG_PREFIX);
+					log.trace("  creating root");
 					root = PathTreeNode.createRoot(paths[0]);
 				}
 			} finally {
@@ -227,10 +229,9 @@ public class PathTree implements Comparator<PathTreeNode> {
 		 * Step 3: Dump the tree if required
 		 */
 		if (drawPaths && (root != null)) {
-			log.trace("{}", LOG_PREFIX);
-//			for (String ll : stringRepr()) {
-//				log.trace("{} {}", LOG_PREFIX, ll);
-//			}
+			for (String ll : stringRepr()) {
+				log.trace("{}", ll);
+			}
 		}
 		insertTime.addAndGet(System.currentTimeMillis() - t);
 		return lastNode;
@@ -241,11 +242,14 @@ public class PathTree implements Comparator<PathTreeNode> {
 	 * that this routine assumes that the root exists, and that the path that
 	 * corresponds to the execution has been separated into its prefixes.
 	 * 
-	 * @param execution    the execution associated with the path
-	 * @param paths        the prefixes of the path that corresponds to the
+	 * @param execution
+	 *                     the execution associated with the path
+	 * @param paths
+	 *                     the prefixes of the path that corresponds to the
 	 *                     execution
-	 * @param isInfeasible whether or not the execution was infeasible
-	 * @return deepest node on the newly inserted path 
+	 * @param isInfeasible
+	 *                     whether or not the execution was infeasible
+	 * @return deepest node on the newly inserted path
 	 */
 	private PathTreeNode insert(Execution execution, Path[] paths, boolean isInfeasible) {
 		int depth = paths.length;
@@ -255,10 +259,10 @@ public class PathTree implements Comparator<PathTreeNode> {
 		long alt = paths[0].getChoice().getAlternative();
 		for (int j = 1; j < depth; j++) {
 			if (paths[j].getChoice().getBranch() instanceof Trace) {
-				log.trace("{} insert(parent:{}, cur/depth:{}/{})", LOG_PREFIX, getId(parent), j, depth);
+				log.trace("  insert(parent:{}, cur/depth:{}/{})", getId(parent), j, depth);
 			} else {
 				Expression conjunct = paths[j].getChoice().getActiveConjunct();
-				log.trace("{} insert(parent:{}, conjunct:{}, cur/depth:{}/{})", LOG_PREFIX, getId(parent), conjunct, j, depth);
+				log.trace("  insert(parent:{}, conjunct:{}, cur/depth:{}/{})", getId(parent), conjunct, j, depth);
 			}
 			PathTreeNode n = parent.getChild(alt);
 			if (n == null) {
@@ -311,7 +315,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 				if (full) {
 					node.lock();
 					if (!node.isFullyExplored()) {
-						log.trace("{} setting {} as fully explored", LOG_PREFIX, getId(node));
+						log.trace("  setting {} as fully explored", getId(node));
 						node.setFullyExplored();
 					}
 					node.unlock();
@@ -319,7 +323,7 @@ public class PathTree implements Comparator<PathTreeNode> {
 			}
 		}
 		if (recordDeepest && (n != null) && !n.isFullyExplored()) {
-			log.trace("{} %%%%%%% DEEPEST NODE ADDED: {}", LOG_PREFIX, n);
+			log.trace("  new deepest node: {}", n);
 			deepest.add(n);
 		}
 		return n;
@@ -335,7 +339,8 @@ public class PathTree implements Comparator<PathTreeNode> {
 	 * Return a formatted string to represent the {@code id} of a
 	 * {@link PathTreeNode}.
 	 * 
-	 * @param node the node to compute the representation for
+	 * @param node
+	 *             the node to compute the representation for
 	 * @return a string representation of the node's {@code id}
 	 */
 	private String getId(PathTreeNode node) {
@@ -356,17 +361,10 @@ public class PathTree implements Comparator<PathTreeNode> {
 		if (root == null) {
 			return new String[] { "EMPTY PATH TREE" };
 		}
-		int h = root.height() * 4 - 1;
-		int w = root.width();
 		/*
-		 * Step 1: create and clear the character array
+		 * Step 1: create and clear the character region
 		 */
-		char[][] lines = new char[h][w];
-		for (int i = 0; i < h; i++) {
-			for (int j = 0; j < w; j++) {
-				lines[i][j] = ' ';
-			}
-		}
+		Lines lines = new Lines();
 		/*
 		 * Step 2: draw the path tree
 		 */
@@ -374,24 +372,127 @@ public class PathTree implements Comparator<PathTreeNode> {
 		/*
 		 * Step 3: convert the character array to strings
 		 */
-		String[] finalLines = new String[h];
-		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < h; i++) {
-			b.setLength(0);
-			int k = w - 1;
-			while ((k >= 0) && (lines[i][k] == ' ')) {
-				k--;
-			}
-			for (int j = 0; j <= k; j++) {
-				b.append(lines[i][j]);
-			}
-			finalLines[i] = b.toString();
+		String[] finalLines = new String[lines.getHeight()];
+		int minY = lines.getMinY();
+		int maxY = lines.getMaxY();
+		for (int y = minY; y <= maxY; y++) {
+			finalLines[y - minY] = lines.getLine(y);
 		}
 		return finalLines;
 	}
 
+	/**
+	 * Return a linear representation of the path tree. This is a string with nested
+	 * parenthesized strings and the characters '<code>L</code>' (for leaf),
+	 * '<code>I</code>' (for infeasible node), and '<code>0</code>' (for an explored
+	 * stub).
+	 *
+	 * @return linear string representation of path tree
+	 */
 	public String getShape() {
 		return (root == null) ? "0" : root.getShape();
+	}
+
+	/**
+	 * Class for storing a rectangular drawing region for constructing the tree.
+	 */
+	public static class Lines {
+
+		/**
+		 * The minimum x-coordinate covered by the region.
+		 */
+		private int minX = Integer.MAX_VALUE;
+
+		/**
+		 * The maximum x-coordinate covered by the region.
+		 */
+		private int maxX = Integer.MIN_VALUE;
+
+		/**
+		 * The minimum y-coordinate covered by the region.
+		 */
+		private int minY = Integer.MAX_VALUE;
+
+		/**
+		 * The maximum y-coordinate covered by the region.
+		 */
+		private int maxY = Integer.MIN_VALUE;
+
+		/**
+		 * The content of the region as a map of y-coordinates to lines. Each line is a
+		 * map of x-coordinates to characters.
+		 */
+		private final Map<Integer, Map<Integer, Character>> region = new HashMap<>();
+
+		/**
+		 * Return the computed height of the region.
+		 *
+		 * @return height of the region
+		 */
+		public int getHeight() {
+			return maxY - minY + 1;
+		}
+
+		/**
+		 * Return the minimum y-coordinate of the region.
+		 *
+		 * @return minimum y-coordinate of the region
+		 */
+		public int getMinY() {
+			return minY;
+		}
+
+		/**
+		 * Return the maximum y-coordinate of the region.
+		 *
+		 * @return maximum y-coordinate of the region
+		 */
+		public int getMaxY() {
+			return maxY;
+		}
+
+		public void put(int x, int y, char ch) {
+			if (x < minX) {
+				minX = x;
+			}
+			if (x > maxX) {
+				maxX = x;
+			}
+			if (y < minY) {
+				minY = y;
+			}
+			if (y > maxY) {
+				maxY = y;
+			}
+			Map<Integer, Character> line = region.get(y);
+			if (line == null) {
+				line = new HashMap<>();
+				region.put(y, line);
+			}
+			line.put(x, ch);
+		}
+
+		public char get(int x, int y) {
+			Map<Integer, Character> line = region.get(y);
+			if (line == null) {
+				return ' ';
+			}
+			Character ch = line.get(x);
+			return (ch == null) ? ' ' : ch;
+		}
+
+		public String getLine(int y) {
+			StringBuilder b = new StringBuilder();
+			int stopX = maxX;
+			while ((stopX >= minX) && (get(stopX, y) == ' ')) {
+				stopX--;
+			}
+			for (int x = minX; x <= stopX; x++) {
+				b.append(get(x, y));
+			}
+			return b.toString();
+		}
+
 	}
 
 	// ======================================================================

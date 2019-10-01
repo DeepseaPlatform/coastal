@@ -4,6 +4,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import za.ac.sun.cs.coastal.diver.SegmentedPC;
+import za.ac.sun.cs.coastal.pathtree.PathTree.Lines;
 import za.ac.sun.cs.coastal.symbolic.Branch;
 import za.ac.sun.cs.coastal.symbolic.Choice;
 import za.ac.sun.cs.coastal.symbolic.Execution;
@@ -225,28 +226,28 @@ public abstract class PathTreeNode {
 
 	private static final int SPACING = 2;
 
-	/**
-	 * Return the height of the subtree starting at this node.
-	 * 
-	 * @return the height of the subtree
-	 */
-	public int height() {
-		if (isLeaf()) {
-			return 1;
-		} else if (isInfeasible()) {
-			return 1;
-		} else {
-			int numChildren = getChildCount();
-			int totalHeight = 0;
-			for (int i = 0; i < numChildren; i++) {
-				PathTreeNode child = getChild(i);
-				totalHeight = Math.max(totalHeight, (child == null) ? 1 : child.height());
-			}
-			return 1 + totalHeight;
-		}
-	}
+//	/**
+//	 * Return the height of the subtree starting at this node.
+//	 * 
+//	 * @return the height of the subtree
+//	 */
+//	private int height() {
+//		if (isLeaf()) {
+//			return 1;
+//		} else if (isInfeasible()) {
+//			return 1;
+//		} else {
+//			int numChildren = getChildCount();
+//			int totalHeight = 0;
+//			for (int i = 0; i < numChildren; i++) {
+//				PathTreeNode child = getChild(i);
+//				totalHeight = Math.max(totalHeight, (child == null) ? 1 : child.height());
+//			}
+//			return 1 + totalHeight;
+//		}
+//	}
 
-	public int width() {
+	private int width() {
 		// Calculate the label width
 		int labelWidth = 2 + Integer.toString(id).length();
 		int conditionWidth = 0;
@@ -273,7 +274,7 @@ public abstract class PathTreeNode {
 		return 1 + Math.max(labelWidth, Math.max(conditionWidth, childrenWidth));
 	}
 
-	public int stringFill(char[][] lines, int x, int y) {
+	public int stringFill(Lines lines, int x, int y) {
 		// Construct the label
 		StringBuilder b = new StringBuilder();
 		if (hasBeenGenerated()) {
@@ -340,17 +341,17 @@ public abstract class PathTreeNode {
 			}
 			// Write the horizontal line
 			for (int i = firstHook + 1; i < lastHook; i++) {
-				if (lines[y + 2][i] == ' ') {
-					lines[y + 2][i] = '-';
+				if (lines.get(i, y + 2) == ' ') {
+					lines.put(i, y + 2, '-');
 				}
 			}
 		}
 		return middle;
 	}
 
-	private static void stringWrite(char[][] lines, int x, int y, String string) {
+	private static void stringWrite(Lines lines, int x, int y, String string) {
 		for (int i = 0; i < string.length(); i++) {
-			lines[y][x++] = string.charAt(i);
+			lines.put(x++, y, string.charAt(i));
 		}
 	}
 
