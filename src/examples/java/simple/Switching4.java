@@ -1,4 +1,3 @@
-// CHECKSTYLE:OFF
 package simple;
 
 public class Switching4 {

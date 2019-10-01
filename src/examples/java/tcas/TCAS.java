@@ -1,4 +1,3 @@
-// CHECKSTYLE:OFF
 package tcas;
 
 public class TCAS {

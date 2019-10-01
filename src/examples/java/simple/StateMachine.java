@@ -1,4 +1,3 @@
-// CHECKSTYLE:OFF
 package simple;
 
 import za.ac.sun.cs.coastal.symbolic.VM;

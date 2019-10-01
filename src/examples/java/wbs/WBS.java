@@ -1,4 +1,3 @@
-// CHECKSTYLE:OFF
 package wbs;// This is a mutant program.
 // Author : ysma
 

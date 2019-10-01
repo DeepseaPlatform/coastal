@@ -1,4 +1,3 @@
-// CHECKSTYLE:OFF
 package binheap;//import gov.nasa.jpf.jvm.Verify;
 
 //import gov.nasa.jpf.symbc.Debug;
