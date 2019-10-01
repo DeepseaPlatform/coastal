@@ -24,6 +24,7 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.12'
 	testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.25'
 	implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
+	compile files('libs/commons-collections4-4.4.jar')
 }
 
 // Includes sources for examples
@@ -63,6 +64,6 @@ javadoc {
 }
 
 run {
-    if (project.hasProperty('args'))
-       args findProperty('args')
+	if (project.hasProperty('args'))
+		args findProperty('args')
 }
