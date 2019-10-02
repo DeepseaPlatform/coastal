@@ -11,7 +11,7 @@ From time to time it needs to be updated.  Follow these steps:
   3. Perform a final build:
      * `docker build . -t coastal-local -f Dockerfile-base`
   4. Re-tag the image:
-     * `docker tag coastal-local jacogeld/coastal-base:latests`
+     * `docker tag coastal-local jacogeld/coastal-base:latest`
   5. Log in to Docker:
      * `docker login --username jacogeld --password '...'`
   6. Push the image to the repository:

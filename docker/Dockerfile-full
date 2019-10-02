@@ -40,6 +40,6 @@ RUN apt-get -y update && apt-get -y upgrade && apt-get -y install openjdk-8-jdk 
 COPY --from=base /usr/local /usr/local
 COPY --from=base /coastal/build/install/coastal/bin/coastal /usr/bin
 COPY --from=base /coastal/build/install/coastal/lib /usr/lib
-COPY /home/jaco/coastal-in-docker.sh /
+COPY ./coastal-in-docker.sh /
 ENTRYPOINT ["/coastal-in-docker.sh"]
 CMD []
