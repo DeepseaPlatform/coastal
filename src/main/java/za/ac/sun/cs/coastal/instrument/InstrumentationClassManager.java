@@ -83,7 +83,16 @@ public class InstrumentationClassManager {
 		}
 		classPaths.add(".");
 		String jarString = coastal.getConfig().getString("coastal.target.jars", "").trim();
-		if (jarString.length() > 0) {
+		if (jarString.length() == 0) {
+			return;
+		}
+		boolean multipleJars = jarString.contains(",");
+		if (!multipleJars) {
+			if (coastal.getConfig().containsKey("coastal.target.jars." + jarString)) {
+				multipleJars = true;
+			}
+		}
+		if (multipleJars) {
 			String[] jars = jarString.split(",");
 			for (String jar : jars) {
 				if (jar.trim().length() > 0) {
@@ -93,6 +102,7 @@ public class InstrumentationClassManager {
 		} else {
 			parseJar("coastal.target.jars");
 		}
+
 	}
 
 	private void parseJar(String prefix) {

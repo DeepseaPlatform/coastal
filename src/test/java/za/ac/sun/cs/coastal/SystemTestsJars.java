@@ -12,7 +12,7 @@ public class SystemTestsJars extends SystemTests {
 	public void testJar00() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
 		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "jars/testJar00.properties" },
-				"coastal.target.jar = jars/testJar.jar\ncoastal.target.jar.directory = ZZ");
+				"coastal.target.jars = jars/testJar.jar\ncoastal.target.jars.directory = ZZ");
 		assertNotNull(config);
 		COASTAL coastal = new COASTAL(log, config);
 		coastal.start(false);

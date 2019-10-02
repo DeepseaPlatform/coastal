@@ -25,7 +25,6 @@ import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.Logger;
 
 /**
@@ -668,7 +667,8 @@ public final class Configuration {
 	 *         found
 	 */
 	public static Configuration load(Logger log, String[] args, String extra) {
-		String runName = (args.length > 0) ? FilenameUtils.getName(args[args.length - 1]) : null;
+		File file = new File(args[args.length - 1]);
+		String runName = (args.length > 0) ? file.getName() : null;
 		return load(log, runName, args, extra);
 	}
 
