@@ -5,19 +5,21 @@ permalink: /userguide/configuration/
 
 {% include svg/work-in-progress.svg %}
 
-To learn how to analyze programs with COASTAL, you should read the Usage page.
+To learn how to analyze programs with COASTAL, you should read the [Usage]({{ "/userguide/basic-usage/" | relative_url }}) page.
 As it explains, the convention is to create a file `XYZ.properties` that instructs COASTAL how to analyze program `XYZ.java`.
-The property file is then passed as the first command-line argument to COASTAL.
+The property file is then passed as a command-line argument to COASTAL.
 
-However, COASTAL also reads properties from two other locations.  In all, it checks the following files in the following order:
+However, COASTAL also reads properties from other locations.  In all, it checks the following files in the following order:
 
   1. The `coastal.properties` file is loaded first (if it exists).  This file is part of the resources distributed with the project.  It allows the user to specify default values for properties so that they do not have to be repeated over and over in individual property files.
   
   2. Next, the `~/.coastal/coastal.properties` file is loaded (if it exists).  The "`~`" refers to the user's home directory.  On Windows, this is _**TODO**_.
   
-  3. Lastly, the properties file specified on the command-line is loaded.
+  3. Next, the properties files specified on the command-line are loaded.
   
-Settings in later files, and override settings in earlier files.
+  4. Lastly, any `-set` command-line options may add additional properties for the current run.
+  
+Settings in later files override settings in earlier files.
 Once all properties has been loaded, they are processed.
 
 ## Logging
@@ -33,25 +35,34 @@ instead of the default file distributed with COASTAL.
 
 ## Summary of properties
 
+There are eight major categories of properties.
+
 | Setting | Description | Default |
 |:--------|:------------|:--------|
-| `coastal.targets` | Classes to be instrumented | - |
-| `coastal.main` | Class to execute | - |
-| `coastal.args` | Arguments passe to `main` | - |
-| `coastal.strategy` | Strategy for generating new path conditions | - |
-| `coastal.triggers` | Classes to instrument | - |
-| `coastal.bounds` | Bounds on symbolic variables | - |
-| `coastal.delegates` | Delegated classes | - |
-| `coastal.echooutput` | Whether program output is displayed | `false` |
-| `coastal.draw.paths` | Whether path trees are displayed in detailed log | `false` |
-| `coastal.concrete.values` | Whether actual return values are used | `true` | 
-| `coastal.trace.all` | Whether all code is symbolically traced | `false` |
+| `coastal.target...` | Information about the system under test | - |
+| `coastal.bounds...` | Bounds on symbolic variables | - |
+| `coastal.settings...` | Configuration of COASTAL behaviour | - |
+| `coastal.divers...` | Configure divers | - |
+| `coastal.surfers...` | Configure surfers | - |
+| `coastal.strategies...` | Strategies for generating new path conditions | - |
+| `coastal.observers...` | Observers | - |
+| `coastal.delegates...` | Delegated classes | - |
+
 | `coastal.limit.run` | Limit on number of runs executed | 0 |
 | `coastal.limit.time` | Limit on number of seconds allowed for runs | 0 |
 | `coastal.limit.path` | Limit on number of paths investigated | 0 |
 | `coastal.limit.conjuncts` | Limit on number of conjuncts investigated per path | 0 |
 
-## coastal.targets
+## coastal.target...
+
+| Setting | Description | Default |
+|:--------|:------------|:--------|
+| `coastal.target.args` | Arguments passed when execution starts | - |
+| `coastal.target.entrypoint` | Method to start execution | - |
+| `coastal.target.instrument` | Classes to instrument | - |
+| `coastal.target.jars` | Additional jar files that contain classes | - |
+| `coastal.target.main` | Class to execute | - |
+| `coastal.target.trigger` | Methods that switch symbolic mode on | - |
 
 List of class prefixes that will be instrumented.
 Multiple prefixes are separated with a semicolon ("`;`").
@@ -59,6 +70,100 @@ Any class whose full name starts with one or more prefixes, will be instrumented
 
 ~~~
 coastal.targets = examples.spf
+~~~
+
+### coastal.target.jars
+
+~~~
+coastal.target.jars.directory
+~~~
+
+## coastal.bounds...
+
+Variable lower and upper bounds.  For each symbolic variable name that
+appears in the triggers, a lower and upper bound can be specified.
+To specify a lower bound for variable "`X`", write
+
+~~~
+coastal.bounds.X.min = 2
+~~~
+
+To specify an upper bound for variable "`X`", write
+
+~~~
+coastal.bounds.X.max = 20
+~~~
+
+These two settings can be combined in one setting:
+
+~~~
+coastal.bounds.X = 2..20
+~~~
+
+## coastal.bounds...
+
+## coastal.settings...
+
+| Setting | Description | Default |
+|:--------|:------------|:--------|
+| `coastal.settings.concrete-values` | Whether actual return values are used | `false` |
+| `coastal.settings.constant-elimination` | Whether constant conjuncts are ignored | `true` |
+| `coastal.settings.echo-output` | Whether program output is displayed | `false` |
+| `coastal.settings.draw-final-tree` | Whether path tree is displayed at end of run | `false` |
+| `coastal.settings.draw-paths` | Whether path trees are displayed in detailed log | `false` |
+| `coastal.settings.solver` | Specify the constraint solver to use | - |
+| `coastal.settings.show-instrumentation` | Whether instrumented instructions are logged | `false` |
+| `coastal.settings.trace-all` | Whether all instructions are tracked symbolically | `false` |
+| `coastal.settings.value-factory` | Specify the value factory to use | - |
+| `coastal.settings.write-classfile` | Where instrumented class files are written | - |
+
+### coastal.settings.concrete-values
+
+### coastal.settings.constant-elimination
+
+### coastal.settings.echo-output
+
+A boolean setting to control whether the output of the class under analysis
+is displayed (true) or suppressed (false).  This is useful if the analysis
+does not behave as expected.
+
+~~~
+coastal.settings.echo-output = true
+~~~
+
+The default value is _false_.
+Values that count as _true_ are: "`true`", "`yes`", "`on`", and "`1`".
+Case is ignored.  All other values count as _false_.
+
+### coastal.settings.draw-final-tree
+
+### coastal.settings.draw-paths
+
+A boolean setting to control whether the tree of explored paths is displayed
+after each path insertion.  This is only output to the detailed log, but for
+large trees it is time consuming and slows down the exploration.
+
+~~~
+coastal.settings.draw-paths = true
+~~~
+
+The default value is _false_.
+
+### coastal.settings.show-instrumentation
+
+### coastal.settings.trace-all
+
+### coastal.settings.write-classfile
+
+## coastal.strategies...
+
+A fully-qualified name of a class that implements a strategy for generating
+new path conditions and therefore new inputs for the program-under-test.
+
+This is an important property that is required for COASTAL to execute at all.
+
+~~~
+coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
 ~~~
 
 ## coastal.main
@@ -77,17 +182,6 @@ The command-line arguments required to run the class under analysis.
 
 ~~~
 coastal.args = 2 3
-~~~
-
-## coastal.strategy
-
-A fully-qualified name of a class that implements a strategy for generating
-new path conditions and therefore new inputs for the program-under-test.
-
-This is an important property that is required for COASTAL to execute at all.
-
-~~~
-coastal.strategy = za.ac.sun.cs.coastal.strategy.DepthFirstStrategy
 ~~~
 
 ## coastal.triggers
@@ -117,29 +211,7 @@ The following types are supported:
 - `String`
 - `String[]`
 
-## coastal.bounds
-
-Variable lower and upper bounds.  For each symbolic variable name that
-appears in the triggers, a lower and upper bound can be specified.
-To specify a lower bound for variable "`X`", write
-
-~~~
-coastal.bounds.X.min = 2
-~~~
-
-To specify an upper bound for variable "`X`", write
-
-~~~
-coastal.bounds.X.max = 20
-~~~
-
-These two settings can be combined in one setting:
-
-~~~
-coastal.bounds.X = 2..20
-~~~
-
-## coastal.delegates
+## coastal.delegates...
 
 List of delegated classes.
 Multiple delegates are separated with a semicolon ("`;`").
@@ -154,30 +226,6 @@ coastal.delegates = java.lang.Math:za.ac.sun.cs.coastal.models.Math
 ~~~
 
 ## coastal.echooutput
-
-A boolean setting to control whether the output of the class under analysis
-is displayed (true) or suppressed (false).  This is useful if the analysis
-does not behave as expected.
-
-~~~
-coastal.echooutput = true
-~~~
-
-The default value is _false_.
-Values that count as _true_ are: "`true`", "`yes`", "`on`", and "`1`".
-Case is ignored.  All other values count as _false_.
-
-## coastal.draw.paths
-
-A boolean setting to control whether the tree of explored paths is displayed
-after each path insertion.  This is only output to the detailed log, but for
-large trees it is time consuming and slows down the exploration.
-
-~~~
-coastal.draw.paths = true
-~~~
-
-The default value is _false_.
 
 ## coastal.concrete.values
 
@@ -246,3 +294,11 @@ coastal.limit.conjuncts = 50
 The default value is 0.
 
 The default value is _false_.
+
+## green...
+
+		greenProperties.setProperty("green.log.level", "ALL");
+		greenProperties.setProperty("green.services", "model");
+		greenProperties.setProperty("green.service.model", "(modeller)");
+		greenProperties.setProperty("green.service.model.bounder", "za.ac.sun.cs.green.service.bounder.BounderService");
+		greenProperties.setProperty("green.service.model.modeller", "za.ac.sun.cs.green.service.z3.ModelZ3Service");
