@@ -100,8 +100,7 @@ public class DiverFactory implements TaskFactory {
 		 * Add a reported dive time to the accumulator that tracks how long the dives
 		 * took.
 		 * 
-		 * @param time
-		 *             the time for this dive
+		 * @param time the time for this dive
 		 */
 		public void recordTime(long time) {
 			diverTime.addAndGet(time);
@@ -111,8 +110,7 @@ public class DiverFactory implements TaskFactory {
 		 * Add a reported dive wait time. This is used to determine if it makes sense to
 		 * create additional threads (or destroy them).
 		 * 
-		 * @param time
-		 *             the wait time for this dive
+		 * @param time the wait time for this dive
 		 */
 		public void recordWaitTime(long time) {
 			diverWaitTime.addAndGet(time);
@@ -196,16 +194,20 @@ public class DiverFactory implements TaskFactory {
 					Input input = coastal.getNextDiverInput();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
-					SymbolicState symbolicState = new SymbolicState(coastal, input);
-					String banner = "(" + diverTaskId + ") starting dive " + manager.getNextDiveCount() + " @"
-							+ Banner.getElapsed(coastal);
-					log.trace(Banner.getBannerLine(banner, '-'));
-					if (input == null) {
-						log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
-					} else {
-						log.trace(Banner.getBannerLine(input.toString(), '*'));
+					SymbolicState symbolicState = null;
+					ClassLoader classLoader = null;
+					synchronized (coastal) {
+						symbolicState = new SymbolicState(coastal, input, diverTaskId);
+						String banner = "(" + diverTaskId + ") starting dive " + manager.getNextDiveCount() + " @"
+								+ Banner.getElapsed(coastal);
+						log.trace(Banner.getBannerLine(banner, '-'));
+						if (input == null) {
+							log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
+						} else {
+							log.trace(Banner.getBannerLine(input.toString(), '*'));
+						}
+						classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
 					}
-					ClassLoader classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
 					performRun(symbolicState, classLoader);
 					manager.recordTime(System.currentTimeMillis() - t1);
 					coastal.addPc(symbolicState.getExecution());
@@ -248,7 +250,8 @@ public class DiverFactory implements TaskFactory {
 				} else if (t instanceof SystemExitException) {
 					broker.publish("system-exit", new Tuple(this, null));
 				} else if (!(t instanceof SymbolicException)) {
-					log.trace("exception in run, diverTaskCount={}, symbolicState={}", diverTaskCount, symbolicState);
+					log.trace("exception in run, diverTaskCount={}, symbolicState={} frames={}", diverTaskCount,
+							symbolicState, symbolicState.frames.hashCode());
 					log.trace("P R O G R A M   E X C E P T I O N:", t);
 					if (t instanceof AssertionError) {
 						broker.publish("assert-failed", new Tuple(this, null));

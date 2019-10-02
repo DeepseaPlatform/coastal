@@ -88,7 +88,7 @@ public final class SymbolicState extends State {
 	 * A symbolic representation of the method invocation stack of the true
 	 * execution.
 	 */
-	private final Deque<SymbolicFrame> frames = new ArrayDeque<>();
+	public final Deque<SymbolicFrame> frames = new ArrayDeque<>();
 
 	/**
 	 * The number of objects created during this execution.
@@ -175,16 +175,17 @@ public final class SymbolicState extends State {
 
 	private final List<String> lines = new ArrayList<>();
 
+	private final int diverTaskId;
+
 	/**
 	 * Create a new instance of the symbolic state.
 	 * 
-	 * @param coastal
-	 *                instance of COASTAL that started this run
-	 * @param input
-	 *                input values for the run
+	 * @param coastal instance of COASTAL that started this run
+	 * @param input   input values for the run
 	 */
-	public SymbolicState(COASTAL coastal, Input input) { // throws InterruptedException
+	public SymbolicState(COASTAL coastal, Input input, int dtid) { // throws InterruptedException
 		super(coastal, input);
+		diverTaskId = dtid;
 		limitConjuncts = coastal.getConfig().getLongMaxed("coastal.settings.conjunct-limit");
 		trackAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		constantElimination = coastal.getConfig().getBoolean("coastal.settings.constant-elimination", true);
@@ -207,8 +208,7 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the class loader to the given value.
 	 * 
-	 * @param classLoader
-	 *                    the actual class loader used for the system-under-test
+	 * @param classLoader the actual class loader used for the system-under-test
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
@@ -251,11 +251,11 @@ public final class SymbolicState extends State {
 	 * Return the symbolic value of a local variable in the topmost invocation
 	 * frame.
 	 * 
-	 * @param index
-	 *              the index of the variable
+	 * @param index the index of the variable
 	 * @return the symbolic value of the local variable
 	 */
 	private SymbolicValue getLocal(int index) {
+		log.trace("## getLocal frames=={}", (Object) frames);
 		return frames.peek().getLocal(index);
 	}
 
@@ -263,12 +263,11 @@ public final class SymbolicState extends State {
 	 * Return the symbolic value of a local variable in the topmost invocation
 	 * frame.
 	 * 
-	 * @param index
-	 *              the index of the variable
-	 * @param value
-	 *              the new symbolic value of the local variable
+	 * @param index the index of the variable
+	 * @param value the new symbolic value of the local variable
 	 */
 	private void setLocal(int index, SymbolicValue value) {
+		log.trace("## setLocal frames=={}", (Object) frames);
 		frames.peek().setLocal(index, value);
 	}
 
@@ -276,10 +275,8 @@ public final class SymbolicState extends State {
 	 * Return the symbolic value of a local variable in the topmost invocation
 	 * frame.
 	 * 
-	 * @param index
-	 *              the index of the variable
-	 * @param value
-	 *              the new symbolic value of the local variable
+	 * @param index the index of the variable
+	 * @param value the new symbolic value of the local variable
 	 */
 	private void setLocal(int index, Expression value) {
 		setLocal(index, symbolicValueFactory.createSymbolicValue(value));
@@ -288,12 +285,9 @@ public final class SymbolicState extends State {
 	/**
 	 * Update the symbolic value of a field in a particular object instance.
 	 * 
-	 * @param objectId
-	 *                  the identifier of the object
-	 * @param fieldName
-	 *                  the name of the field
-	 * @param value
-	 *                  the new symbolic expression for the field
+	 * @param objectId  the identifier of the object
+	 * @param fieldName the name of the field
+	 * @param value     the new symbolic expression for the field
 	 */
 	private void putField(int objectId, String fieldName, SymbolicValue value) {
 		assert objectId != 0;
@@ -303,12 +297,9 @@ public final class SymbolicState extends State {
 	/**
 	 * Update the symbolic value of a field in a particular object instance.
 	 * 
-	 * @param objectName
-	 *                   the name of the object
-	 * @param fieldName
-	 *                   the name of the field
-	 * @param value
-	 *                   the new symbolic expression for the field
+	 * @param objectName the name of the object
+	 * @param fieldName  the name of the field
+	 * @param value      the new symbolic expression for the field
 	 */
 	private void putField(String objectName, String fieldName, SymbolicValue value) {
 		String fullFieldName = objectName + FIELD_SEPARATOR + fieldName;
@@ -318,10 +309,8 @@ public final class SymbolicState extends State {
 	/**
 	 * Return the symbolic value of a field in a particular object instance.
 	 * 
-	 * @param objectId
-	 *                  the identifier of the object
-	 * @param fieldName
-	 *                  the name of the field
+	 * @param objectId  the identifier of the object
+	 * @param fieldName the name of the field
 	 * @return the symbolic expression for the value of the field
 	 */
 	private SymbolicValue getField(int objectId, String fieldName) {
@@ -334,10 +323,8 @@ public final class SymbolicState extends State {
 	 * object is identifier by its "name", which could simply be a string version of
 	 * the object number, or a more complex name.
 	 * 
-	 * @param objectName
-	 *                   the name of the object
-	 * @param fieldName
-	 *                   the name of the field
+	 * @param objectName the name of the object
+	 * @param fieldName  the name of the field
 	 * @return the symbolic expression for the value of the field
 	 */
 	private SymbolicValue getField(String objectName, String fieldName) {
@@ -393,7 +380,9 @@ public final class SymbolicState extends State {
 	 * Dump the stack of invocation frames to the log.
 	 */
 	private void dumpFrames() {
-//		log.trace("@@@@@@@@ frames={} n={} frames.st={}", (Object) frames, n, (n == 0) ? "?" : (Object) frames.get(n - 1));
+		int n = frames.size();
+		log.trace("@@@@@@@@ dtid={} symbolicstate={} frames={} n={} frames.st={}", diverTaskId, hashCode(),
+				frames.hashCode(), n, (n == 0) ? "?" : frames.peek().hashCode());
 		for (Iterator<SymbolicFrame> iter = frames.iterator(); iter.hasNext();) {
 			SymbolicFrame frame = iter.next();
 			log.trace("    id={} st{} locals:{} <{}>", frame.getFrameId(), frame.stack, frame.locals,
@@ -474,8 +463,7 @@ public final class SymbolicState extends State {
 	 * exceeds the path length limit. If so, an exception is raised. If the danger
 	 * flag is set, it is reset to {@code false}.
 	 * 
-	 * @throws SymbolicException
-	 *                           if the path length limit has been reached or
+	 * @throws SymbolicException if the path length limit has been reached or
 	 *                           exceeded
 	 */
 	private void checkLimitConjuncts() throws SymbolicException {
@@ -491,8 +479,7 @@ public final class SymbolicState extends State {
 	 * Parse a Java type descriptor of a method and count and return the number of
 	 * formal parameters.
 	 * 
-	 * @param descriptor
-	 *                   the type descriptor of a method
+	 * @param descriptor the type descriptor of a method
 	 * @return the number of formal arguments
 	 */
 	private static int getArgumentCount(String descriptor) {
@@ -526,8 +513,7 @@ public final class SymbolicState extends State {
 	 * The return type is returned in the Java type descriptor format and is not
 	 * converted to an integer code or even an instance of {@link Class}.
 	 * 
-	 * @param descriptor
-	 *                   the type descriptor of a method
+	 * @param descriptor the type descriptor of a method
 	 * @return a type descriptor for the return type of the method as specified in
 	 *         the given type descriptor
 	 */
@@ -558,8 +544,7 @@ public final class SymbolicState extends State {
 	 * </li>
 	 * </ul>
 	 * 
-	 * @param descriptor
-	 *                   the original Java type descriptor
+	 * @param descriptor the original Java type descriptor
 	 * @return the sanitized type descriptor
 	 */
 	public static String getAsciiSignature(String descriptor) {
@@ -573,8 +558,7 @@ public final class SymbolicState extends State {
 	 * method. The nature of the symbolic variable is based on the Java type
 	 * descriptor of the method's return type.
 	 * 
-	 * @param type
-	 *             the method's return type as a Java type descriptor
+	 * @param type the method's return type as a Java type descriptor
 	 */
 	private void pushReturnValue(char type) {
 		if (type == 'Z') { // boolean
@@ -653,10 +637,8 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the type of the elements of an array.
 	 * 
-	 * @param arrayId
-	 *                the array identifier
-	 * @param type
-	 *                the type of the array elements
+	 * @param arrayId the array identifier
+	 * @param type    the type of the array elements
 	 */
 	private void setArrayType(int arrayId, int type) {
 		SymbolicValue value = symbolicValueFactory.createSymbolicValue(new IntegerConstant(type, 32));
@@ -666,10 +648,8 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the length of an array.
 	 * 
-	 * @param arrayId
-	 *                the array identifier
-	 * @param length
-	 *                the length of the array
+	 * @param arrayId the array identifier
+	 * @param length  the length of the array
 	 */
 	private void setArrayLength(int arrayId, int length) {
 		SymbolicValue value = symbolicValueFactory.createSymbolicValue(new IntegerConstant(length, 32));
@@ -679,10 +659,8 @@ public final class SymbolicState extends State {
 	/**
 	 * Return the symbolic value stored in an array at a particular index.
 	 * 
-	 * @param arrayId
-	 *                the array identifier
-	 * @param index
-	 *                the index of the element
+	 * @param arrayId the array identifier
+	 * @param index   the index of the element
 	 * @return the symbolic element value in the array
 	 */
 	private SymbolicValue getArrayValue(int arrayId, int index) {
@@ -692,12 +670,9 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the symbolic value stored in an array at a particular index.
 	 * 
-	 * @param arrayId
-	 *                the array identifier
-	 * @param index
-	 *                the index of the element
-	 * @param value
-	 *                the new symbolic value of the array element
+	 * @param arrayId the array identifier
+	 * @param index   the index of the element
+	 * @param value   the new symbolic value of the array element
 	 */
 	private void setArrayValue(int arrayId, int index, SymbolicValue value) {
 		if (index < 0) {
@@ -721,12 +696,9 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the symbolic value stored in an array at a particular index.
 	 * 
-	 * @param arrayId
-	 *                the array identifier
-	 * @param index
-	 *                the index of the element
-	 * @param value
-	 *                the new symbolic value of the array element
+	 * @param arrayId the array identifier
+	 * @param index   the index of the element
+	 * @param value   the new symbolic value of the array element
 	 */
 	private void setArrayValue(int arrayId, int index, Expression value) {
 		setArrayValue(arrayId, index, symbolicValueFactory.createSymbolicValue(value));
@@ -759,10 +731,8 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the length for a string instance.
 	 * 
-	 * @param stringId
-	 *                 unique string identifier
-	 * @param length
-	 *                 new length
+	 * @param stringId unique string identifier
+	 * @param length   new length
 	 */
 	private void setStringLength(int stringId, SymbolicValue length) {
 		putField(stringId, "length", length);
@@ -771,10 +741,8 @@ public final class SymbolicState extends State {
 	/**
 	 * Set the length for a string instance.
 	 * 
-	 * @param stringId
-	 *                 unique string identifier
-	 * @param length
-	 *                 new length
+	 * @param stringId unique string identifier
+	 * @param length   new length
 	 */
 	private void setStringLength(int stringId, Expression length) {
 		setStringLength(stringId, symbolicValueFactory.createSymbolicValue(length));
@@ -793,12 +761,9 @@ public final class SymbolicState extends State {
 	/**
 	 * Set a character inside a string.
 	 * 
-	 * @param stringId
-	 *                 unique string identifier
-	 * @param index
-	 *                 character index to set
-	 * @param value
-	 *                 value for the character
+	 * @param stringId unique string identifier
+	 * @param index    character index to set
+	 * @param value    value for the character
 	 */
 	private void setStringChar(int stringId, int index, SymbolicValue value) {
 		putField(stringId, "" + index, value);
@@ -807,12 +772,9 @@ public final class SymbolicState extends State {
 	/**
 	 * Set a character inside a string.
 	 * 
-	 * @param stringId
-	 *                 unique string identifier
-	 * @param index
-	 *                 character index to set
-	 * @param value
-	 *                 value for the character
+	 * @param stringId unique string identifier
+	 * @param index    character index to set
+	 * @param value    value for the character
 	 */
 	private void setStringChar(int stringId, int index, Expression value) {
 		setStringChar(stringId, index, symbolicValueFactory.createSymbolicValue(value));
@@ -839,6 +801,7 @@ public final class SymbolicState extends State {
 	}
 
 	public void push(SymbolicValue expr, int bitSize) {
+		log.trace("## push(1) frames={}", frames.hashCode());
 		frames.peek().push(expr);
 //		if (expr.isReal()) {
 //			frames.peek().push(expr);
@@ -855,8 +818,7 @@ public final class SymbolicState extends State {
 	 * IWrap an expression inside a symbolic value and push it onto the expression
 	 * stack.
 	 *
-	 * @param expr
-	 *             expression to wrap
+	 * @param expr expression to wrap
 	 */
 	public void push(Expression expr) {
 		push(symbolicValueFactory.createSymbolicValue(expr));
@@ -866,10 +828,8 @@ public final class SymbolicState extends State {
 	 * Internal routine to wrap an expression inside a symbolic value and push it
 	 * onto the expression stack.
 	 *
-	 * @param expr
-	 *                expression to wrap
-	 * @param bitSize
-	 *                bit size
+	 * @param expr    expression to wrap
+	 * @param bitSize bit size
 	 */
 	private void push(Expression expr, int bitSize) {
 		push(symbolicValueFactory.createSymbolicValue(expr), bitSize);
@@ -903,10 +863,8 @@ public final class SymbolicState extends State {
 	 * Add a binary conjunct to the current path. This also adds the accumulated
 	 * passive conjuncts to the current path.
 	 * 
-	 * @param conjunct
-	 *                   the conjunct to add
-	 * @param truthValue
-	 *                   the value of the conjunct
+	 * @param conjunct   the conjunct to add
+	 * @param truthValue the value of the conjunct
 	 */
 	private void pushConjunct(Expression conjunct, boolean truthValue) {
 		if (!SegmentedPC.isConstant(conjunct) || !constantElimination) {
@@ -925,8 +883,7 @@ public final class SymbolicState extends State {
 	 * Add a binary conjunct to the current path. The conjunct is assumed to be
 	 * true.
 	 * 
-	 * @param conjunct
-	 *                 the conjunct to add
+	 * @param conjunct the conjunct to add
 	 */
 	private void pushConjunct(Expression conjunct) {
 		pushConjunct(conjunct, true);
@@ -936,15 +893,11 @@ public final class SymbolicState extends State {
 	 * Add an n-ary conjunct to the current path. This also adds the accumulated
 	 * passive conjuncts to the current path.
 	 * 
-	 * @param expression
-	 *                   the expression that determines the choice at this branching
+	 * @param expression the expression that determines the choice at this branching
 	 *                   point
-	 * @param min
-	 *                   the smallest value handled by the n-ary branching point
-	 * @param max
-	 *                   the largest value handled by the n-ary branching point
-	 * @param cur
-	 *                   the number of the branch taken at the n-ary branching point
+	 * @param min        the smallest value handled by the n-ary branching point
+	 * @param max        the largest value handled by the n-ary branching point
+	 * @param cur        the number of the branch taken at the n-ary branching point
 	 */
 	private void pushConjunct(Expression expression, long min, long max, long cur) {
 		if (!SegmentedPC.isConstant(expression)) {
@@ -969,11 +922,9 @@ public final class SymbolicState extends State {
 	 * Add an k-ary conjunct to the current path. This also adds the accumulated
 	 * passive conjuncts to the current path.
 	 * 
-	 * @param expression
-	 *                   the expression that determines the choice at this branching
+	 * @param expression the expression that determines the choice at this branching
 	 *                   point
-	 * @param keys
-	 *                   the values of the choice for each branching point
+	 * @param keys       the values of the choice for each branching point
 	 * @param choice     the number of the branch taken (or -1)
 	 */
 	private void pushConjunct(Expression expression, int[] keys, int choice) {
@@ -998,7 +949,7 @@ public final class SymbolicState extends State {
 			log.trace("    path is now: {}", path.getPathCondition().toString());
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1318,16 +1269,11 @@ public final class SymbolicState extends State {
 	 * execution, the symbolic variable is set to that values. If not, the default
 	 * value (that the system-under-test would have used naturally), is used.
 	 * 
-	 * @param triggerIndex
-	 *                     index of the triggering method
-	 * @param index
-	 *                     index of the formal parameter
-	 * @param address
-	 *                     local variable address where parameter is stored
-	 * @param sizeInBits
-	 *                     size of the desired type
-	 * @param currentValue
-	 *                     default values to use (if concolic execution does not
+	 * @param triggerIndex index of the triggering method
+	 * @param index        index of the formal parameter
+	 * @param address      local variable address where parameter is stored
+	 * @param sizeInBits   size of the desired type
+	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return value that will be used during the execution
 	 */
@@ -1371,16 +1317,11 @@ public final class SymbolicState extends State {
 	 * execution, the symbolic variable is set to that values. If not, the default
 	 * value (that the system-under-test would have used naturally), is used.
 	 * 
-	 * @param triggerIndex
-	 *                     index of the triggering method
-	 * @param index
-	 *                     index of the formal parameter
-	 * @param address
-	 *                     local variable address where parameter is stored
-	 * @param sizeInBits
-	 *                     size of the desired type
-	 * @param currentValue
-	 *                     default values to use (if concolic execution does not
+	 * @param triggerIndex index of the triggering method
+	 * @param index        index of the formal parameter
+	 * @param address      local variable address where parameter is stored
+	 * @param sizeInBits   size of the desired type
+	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return value that will be used during the execution
 	 */
@@ -1564,22 +1505,15 @@ public final class SymbolicState extends State {
 	 * default values (that the system-under-test would have used naturally), are
 	 * used.
 	 * 
-	 * @param triggerIndex
-	 *                     index of the triggering method
-	 * @param index
-	 *                     index of the formal parameter
-	 * @param address
-	 *                     local variable address where parameter is stored
-	 * @param sizeInBits
-	 *                     size of the desired type
-	 * @param currentArray
-	 *                     default values to use (if concolic execution does not
+	 * @param triggerIndex index of the triggering method
+	 * @param index        index of the formal parameter
+	 * @param address      local variable address where parameter is stored
+	 * @param sizeInBits   size of the desired type
+	 * @param currentArray default values to use (if concolic execution does not
 	 *                     override the values)
-	 * @param unconvert
-	 *                     {@link Function} to convert an object to a {@link Long}
+	 * @param unconvert    {@link Function} to convert an object to a {@link Long}
 	 *                     value
-	 * @param convert
-	 *                     {@link Function} to convert a {@link Long} value to the
+	 * @param convert      {@link Function} to convert a {@link Long} value to the
 	 *                     desired type
 	 * @return array of concrete values that will be used during the execution
 	 */
@@ -1644,21 +1578,14 @@ public final class SymbolicState extends State {
 	 * default values (that the system-under-test would have used naturally), are
 	 * used.
 	 * 
-	 * @param triggerIndex
-	 *                     index of the triggering method
-	 * @param index
-	 *                     index of the formal parameter
-	 * @param address
-	 *                     local variable address where parameter is stored
-	 * @param sizeInBits
-	 *                     size of the desired type
-	 * @param currentArray
-	 *                     default values to use (if concolic execution does not
+	 * @param triggerIndex index of the triggering method
+	 * @param index        index of the formal parameter
+	 * @param address      local variable address where parameter is stored
+	 * @param sizeInBits   size of the desired type
+	 * @param currentArray default values to use (if concolic execution does not
 	 *                     override the values)
-	 * @param unconvert
-	 *                     {@link Function} to convert an object to a {@link Double}
-	 * @param convert
-	 *                     {@link Function} to convert a {@link Double} value to the
+	 * @param unconvert    {@link Function} to convert an object to a {@link Double}
+	 * @param convert      {@link Function} to convert a {@link Double} value to the
 	 *                     desired type
 	 * @return array of concrete values that will be used during the execution
 	 */
@@ -2347,8 +2274,7 @@ public final class SymbolicState extends State {
 			pop();
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
-					Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2415,8 +2341,8 @@ public final class SymbolicState extends State {
 			push(new IntegerConstant(id, 32), 32);
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", instr,
-					Bytecodes.toString(opcode), operand, opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", instr, Bytecodes.toString(opcode), operand,
+					opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2451,8 +2377,7 @@ public final class SymbolicState extends State {
 			setLocal(var, pop());
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
-					Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2485,8 +2410,7 @@ public final class SymbolicState extends State {
 			push(new IntegerConstant(id, 32), 32);
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
-					Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2524,8 +2448,8 @@ public final class SymbolicState extends State {
 			putField(id, name, v);
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr,
-					Bytecodes.toString(opcode), owner, name, descriptor, opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr, Bytecodes.toString(opcode),
+					owner, name, descriptor, opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2579,8 +2503,8 @@ public final class SymbolicState extends State {
 			}
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr,
-					Bytecodes.toString(opcode), owner, name, descriptor, opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr, Bytecodes.toString(opcode),
+					owner, name, descriptor, opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2602,8 +2526,7 @@ public final class SymbolicState extends State {
 		lastInvokingInstruction = instr;
 		switch (opcode) {
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
-					Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2725,8 +2648,7 @@ public final class SymbolicState extends State {
 				pushConjunct(v.ne(symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32)).toExpression());
 				break;
 			default:
-				log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
-						Bytecodes.toString(opcode), opcode);
+				log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 				System.exit(1);
 			}
 		} else {
@@ -2755,8 +2677,7 @@ public final class SymbolicState extends State {
 				pop();
 				break;
 			default:
-				log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
-						Bytecodes.toString(opcode), opcode);
+				log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 				System.exit(1);
 			}
 		}
@@ -2810,8 +2731,8 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("--> {} {} {} (offset={})", Bytecodes.toString(opcode), value,
-				value.getClass().getSimpleName(), instr);
+		log.trace("--> {} {} {} (offset={})", Bytecodes.toString(opcode), value, value.getClass().getSimpleName(),
+				instr);
 		broker.publishThread("ldc-insn", new Tuple(instr, opcode, value));
 		checkLimitConjuncts();
 		switch (opcode) {
@@ -2838,8 +2759,7 @@ public final class SymbolicState extends State {
 			}
 			break;
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
-					Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -2963,8 +2883,7 @@ public final class SymbolicState extends State {
 		checkLimitConjuncts();
 		switch (opcode) {
 		default:
-			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr,
-					Bytecodes.toString(opcode), opcode);
+			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
 			System.exit(1);
 		}
 		dumpFrames();
@@ -3072,10 +2991,8 @@ public final class SymbolicState extends State {
 	 * Return a string representation for the value of a particular parameter
 	 * (identified by {@code index}) of a given {@code trigger}.
 	 * 
-	 * @param trigger
-	 *                the specific trigger
-	 * @param index
-	 *                the index of the parameter
+	 * @param trigger the specific trigger
+	 * @param index   the index of the parameter
 	 * @return a string representation of the value of the parameter
 	 */
 	private String gatherConcreteValue(Trigger trigger, int index) {
@@ -3085,10 +3002,8 @@ public final class SymbolicState extends State {
 	/**
 	 * Return a string representation of a {@code value} given its type.
 	 * 
-	 * @param argType
-	 *                the type of the value
-	 * @param value
-	 *                the value itself
+	 * @param argType the type of the value
+	 * @param value   the value itself
 	 * @return a string representation of the value
 	 */
 	private String gatherConcreteValue0(Class<?> argType, Object value) {
