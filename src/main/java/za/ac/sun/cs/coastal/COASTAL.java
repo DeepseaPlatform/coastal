@@ -2241,7 +2241,9 @@ public class COASTAL {
 		String runName = "";
 		if (commandLineWarning == null) {
 			config = Configuration.load(log, args, extraConfig);
-			runName = String.format(" (%s)", config.getString("coastal.run-name", "?"));
+			if (config != null) {
+				runName = String.format(" (%s)", config.getString("coastal.run-name", "?"));
+			}
 		} else {
 			new Banner('@').println("COASTAL PROBLEM\n").println(commandLineWarning).display(log);
 		}
@@ -2299,18 +2301,21 @@ public class COASTAL {
 	}
 
 	private static void displayVersion() {
+		System.out.println();
 		System.out.println("COASTAL version " + Version.VERSION);
+		System.out.println();
 		System.out.println("Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.");
 		System.out.println("License: GNU GPL version 3 or later, http://gnu.org/licenses/gpl.html");
 		System.out.println("Documentation: https://deepseaplatform.github.io/coastal/");
+		System.out.println();
 		System.exit(0);
 	}
 
 	private static void displayHelpMessage() {
+		System.out.println();
 		System.out.println("Usage:");
 		System.out.println("  coastal [OPTIONS]... <FILE>... ");
 		System.out.println();
-		// --------------------------------------------------------------------------------
 		System.out.println("The files are Java property files.  For detailed information, see");
 		System.out.println("https://deepseaplatform.github.io/coastal/userguide/configuration/");
 		System.out.println();

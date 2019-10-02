@@ -84,16 +84,17 @@ public final class Configuration {
 	// ======================================================================
 
 	/**
-	 * Create a COASTAL configuration object. 
+	 * Create a COASTAL configuration object.
 	 */
 	private Configuration() {
 		properties = new Properties();
 	}
 
 	/**
-	 * Create a COASTAL configuration object. 
+	 * Create a COASTAL configuration object.
 	 * 
-	 * @param properties configuration settings
+	 * @param properties
+	 *                   configuration settings
 	 */
 	private Configuration(Properties properties) {
 		this.properties = properties;
@@ -107,6 +108,7 @@ public final class Configuration {
 			}
 		}
 		keys.sort(new Comparator<String>() {
+
 			@Override
 			public int compare(String s1, String s2) {
 				return s1.compareTo(s2);
@@ -122,7 +124,8 @@ public final class Configuration {
 	/**
 	 * Return the configuration setting associated with the key.
 	 *
-	 * @param key setting key
+	 * @param key
+	 *            setting key
 	 * @return setting value for given key
 	 */
 	public String getString(String key) {
@@ -132,7 +135,8 @@ public final class Configuration {
 	/**
 	 * Return the configuration setting associated with the key.
 	 *
-	 * @param key setting key
+	 * @param key
+	 *            setting key
 	 * @return setting value for given key
 	 */
 	public String getString(String key, String defaultValue) {
@@ -143,21 +147,25 @@ public final class Configuration {
 			return value;
 		}
 	}
-	
+
 	/**
 	 * Return the boolean configuration setting associated with the key.
 	 *
-	 * @param key setting key
-	 * @param defaultValue default value to return
+	 * @param key
+	 *                     setting key
+	 * @param defaultValue
+	 *                     default value to return
 	 * @return the boolean value of the key, if found, or the supplied default value
 	 */
 	public boolean getBoolean(String key, boolean defaultValue) {
 		String value = getString(key);
 		if (value == null) {
 			return defaultValue;
-		} else if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("on") || value.equals("1")) {
+		} else if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("on")
+				|| value.equals("1")) {
 			return true;
-		} else if (value.equalsIgnoreCase("false") || value.equalsIgnoreCase("no") || value.equalsIgnoreCase("off") || value.equals("0")) {
+		} else if (value.equalsIgnoreCase("false") || value.equalsIgnoreCase("no") || value.equalsIgnoreCase("off")
+				|| value.equals("0")) {
 			return false;
 		} else {
 			return defaultValue;
@@ -175,12 +183,15 @@ public final class Configuration {
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Return the integer configuration setting associated with the key. If the key is not present, the given default value is used.
+	 * Return the integer configuration setting associated with the key. If the key
+	 * is not present, the given default value is used.
 	 *
-	 * @param key setting key
-	 * @param defaultValue default value to return
+	 * @param key
+	 *                     setting key
+	 * @param defaultValue
+	 *                     default value to return
 	 * @return the integer value of the key, if found, or the supplied default value
 	 */
 	public int getInt(String key, int defaultValue) {
@@ -194,14 +205,18 @@ public final class Configuration {
 		}
 		return defaultValue;
 	}
-	
+
 	/**
-	 * Return the integer configuration setting associated with the key. If the key is not present, the given default value is used.
-	 * In all cases, if the value is zero, the given zero value is returned instead
+	 * Return the integer configuration setting associated with the key. If the key
+	 * is not present, the given default value is used. In all cases, if the value
+	 * is zero, the given zero value is returned instead
 	 *
-	 * @param key setting key
-	 * @param defaultValue default value to use
-	 * @param zeroValue value to return if computed value is zero
+	 * @param key
+	 *                     setting key
+	 * @param defaultValue
+	 *                     default value to use
+	 * @param zeroValue
+	 *                     value to return if computed value is zero
 	 * @return the integer value of the key, if found, or the supplied default value
 	 */
 	public int getInt(String key, int defaultValue, int zeroValue) {
@@ -221,7 +236,7 @@ public final class Configuration {
 		}
 		return value;
 	}
-	
+
 	public Short getShort(String key) {
 		String value = (String) properties.get(key);
 		if (value != null) {
@@ -233,7 +248,7 @@ public final class Configuration {
 		}
 		return null;
 	}
-	
+
 	public Byte getByte(String key) {
 		String value = (String) properties.get(key);
 		if (value != null) {
@@ -245,7 +260,7 @@ public final class Configuration {
 		}
 		return null;
 	}
-	
+
 	public Long getLong(String key) {
 		String value = (String) properties.get(key);
 		if (value != null) {
@@ -257,7 +272,7 @@ public final class Configuration {
 		}
 		return null;
 	}
-	
+
 	public Float getFloat(String key) {
 		String value = (String) properties.get(key);
 		if (value != null) {
@@ -269,7 +284,7 @@ public final class Configuration {
 		}
 		return null;
 	}
-	
+
 	public Double getDouble(String key) {
 		String value = (String) properties.get(key);
 		if (value != null) {
@@ -281,13 +296,16 @@ public final class Configuration {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Return the long integer configuration setting associated with the key.
 	 *
-	 * @param key setting key
-	 * @param defaultValue default value to return
-	 * @return the long integer value of the key, if found, or the supplied default value
+	 * @param key
+	 *                     setting key
+	 * @param defaultValue
+	 *                     default value to return
+	 * @return the long integer value of the key, if found, or the supplied default
+	 *         value
 	 */
 //	public Long getLong(String key) {
 //		String value = (String) properties.get(key);
@@ -312,7 +330,7 @@ public final class Configuration {
 		}
 		return defaultValue;
 	}
-	
+
 	public long getLong(String key, long defaultValue, long zeroValue) {
 		long value = getLong(key, defaultValue);
 		if (value == 0) {
@@ -320,7 +338,7 @@ public final class Configuration {
 		}
 		return value;
 	}
-	
+
 	public long getLong(String key, long defaultValue, long minValue, long maxValue) {
 		long value = getLong(key, defaultValue);
 		if (value < minValue) {
@@ -330,7 +348,7 @@ public final class Configuration {
 		}
 		return value;
 	}
-	
+
 	public long getLong(String key, long defaultValue, long zeroValue, long minValue, long maxValue) {
 		long value = getLong(key, defaultValue, zeroValue);
 		if (value < minValue) {
@@ -356,7 +374,7 @@ public final class Configuration {
 		}
 		return defaultValue;
 	}
-	
+
 	public double getDouble(String key, double defaultValue) {
 		String value = (String) properties.get(key);
 		if (value != null) {
@@ -368,7 +386,7 @@ public final class Configuration {
 		}
 		return defaultValue;
 	}
-	
+
 	public double getDouble(String key, double defaultValue, double zeroValue) {
 		double value = getDouble(key, defaultValue);
 		if (value == 0) {
@@ -386,16 +404,16 @@ public final class Configuration {
 		}
 		return value;
 	}
-	
+
 	/**
 	 * The {@code int} value associated with the key in the supplied configuration.
 	 * The value is clamped to minimum and maximum {@code int} values. If the key is
 	 * not present, the maximum {@code int} value is returned.
 	 * 
 	 * @param configuration
-	 *                the configuration to consult
+	 *                      the configuration to consult
 	 * @param key
-	 *                the key of the value
+	 *                      the key of the value
 	 * @return the {@code int} value associated with the key
 	 */
 //	public int limitInt(String key) {
@@ -408,9 +426,9 @@ public final class Configuration {
 	 * is not present, the maximum {@code long} value is returned.
 	 * 
 	 * @param configuration
-	 *                the configuration to consult
+	 *                      the configuration to consult
 	 * @param key
-	 *                the key of the value
+	 *                      the key of the value
 	 * @return the {@code long} value associated with the key
 	 */
 //	public long limitLong(String key) {
@@ -426,7 +444,7 @@ public final class Configuration {
 //		long value = getLong(key, 0);
 //		return (value == 0) ? zero : value;
 //	}
-	
+
 	public Configuration subset(String prefix) {
 		prefix += ".";
 		Configuration configuration = new Configuration();
@@ -450,7 +468,7 @@ public final class Configuration {
 		}
 		return newProperties;
 	}
-	
+
 	// ======================================================================
 	//
 	// CONFIGURATION VALUE UTILITIES
@@ -667,8 +685,7 @@ public final class Configuration {
 	 *         found
 	 */
 	public static Configuration load(Logger log, String[] args, String extra) {
-		File file = new File(args[args.length - 1]);
-		String runName = (args.length > 0) ? file.getName() : null;
+		String runName = (args.length > 0) ? new File(args[args.length - 1]).getName() : null;
 		return load(log, runName, args, extra);
 	}
 
