@@ -1,5 +1,5 @@
 #==============================================================================
-# Docker image for testing COASTAL
+# Docker image for running COASTAL
 #==============================================================================
 
 FROM ubuntu:bionic AS base
@@ -26,8 +26,20 @@ WORKDIR /
 #RUN ./configure --prefix=/usr/local --with-gmp-prefix=/usr/local --without-pic --with-gnu-ld --disable-gold --enable-shared=no && make && make check && make install
 #WORKDIR /
 
+#--- COASTAL ---
+RUN git clone https://github.com/DeepseaPlatform/coastal.git
+WORKDIR /coastal/
+RUN ./gradlew dependencies -Phttp.socketTimeout=1000000 -Phttp.connectionTimeout=1000000
+RUN ./gradlew build -Phttp.socketTimeout=1000000 -Phttp.connectionTimeout=1000000
+RUN ./gradlew installDist
+WORKDIR /
+
 #--- FINAL ---
 FROM ubuntu:bionic
-RUN apt-get -y update && apt-get -y upgrade && apt-get -y install openjdk-8-jdk openjfx git
+RUN apt-get -y update && apt-get -y upgrade && apt-get -y install openjdk-8-jdk openjfx
 COPY --from=base /usr/local /usr/local
-CMD [ "/bin/bash" ]
+COPY --from=base /coastal/build/install/coastal/bin/coastal /usr/bin
+COPY --from=base /coastal/build/install/coastal/lib /usr/lib
+COPY /home/jaco/coastal-in-docker.sh /
+ENTRYPOINT ["/coastal-in-docker.sh"]
+CMD []
