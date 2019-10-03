@@ -32,7 +32,7 @@ public class SystemTestsSimple extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 0, 0, 0);
-		checkInstrumentation(reporter, 7, 0, 1);
+		checkInstrumentation(reporter, 15, 0, 1);
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class SystemTestsSimple extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 2, 0, 0);
-		checkInstrumentation(reporter, 14, 2, 1);
+		checkInstrumentation(reporter, 30, 5, 1);
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class SystemTestsSimple extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 4, 0, 0);
-		checkInstrumentation(reporter, 28, 6, 1);
+		checkInstrumentation(reporter, 60, 15, 1);
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class SystemTestsSimple extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
-		checkInstrumentation(reporter, 56, 14, 1);
+		checkInstrumentation(reporter, 120, 35, 1);
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class SystemTestsSimple extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 1);
-		checkInstrumentation(reporter, 35, 8, 1);
+		checkInstrumentation(reporter, 75, 20, 1);
 	}
 
 }

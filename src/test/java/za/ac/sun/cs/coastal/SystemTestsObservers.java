@@ -23,7 +23,7 @@ public class SystemTestsObservers extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
-		checkInstrumentation(reporter, 56, 14, 1);
+		checkInstrumentation(reporter, 120, 35, 1);
 		assertEquals(38, reporter.getLong("InstructionCoverage.covered-count"));
 		assertEquals(38, reporter.getLong("InstructionCoverage.potential-total"));
 	}
@@ -41,7 +41,7 @@ public class SystemTestsObservers extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 3);
-		checkInstrumentation(reporter, 35, 8, 1);
+		checkInstrumentation(reporter, 75, 20, 1);
 		assertEquals(9, reporter.getLong("LineCoverage.covered-count"));
 		assertEquals(10, reporter.getLong("LineCoverage.potential-total"));
 		assertEquals("{21}", reporter.getString("LineCoverage.uncovered"));
@@ -60,7 +60,7 @@ public class SystemTestsObservers extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
-		checkInstrumentation(reporter, 56, 14, 1);
+		checkInstrumentation(reporter, 120, 35, 1);
 		assertEquals(0, reporter.getLong("MarkerCoverage.marker[0]"));
 		assertEquals(8, reporter.getLong("MarkerCoverage.marker[1]"));
 		assertEquals(4, reporter.getLong("MarkerCoverage.marker[10]"));
@@ -84,7 +84,7 @@ public class SystemTestsObservers extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
-		checkInstrumentation(reporter, 56, 14, 1);
+		checkInstrumentation(reporter, 120, 35, 1);
 		assertEquals(0, reporter.getLong("MarkerCoverage.marker[0]"));
 		assertEquals(8, reporter.getLong("MarkerCoverage.marker[1]"));
 		assertEquals(4, reporter.getLong("MarkerCoverage.marker[10]"));
@@ -116,7 +116,7 @@ public class SystemTestsObservers extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 0);
-		checkInstrumentation(reporter, 56, 14, 1);
+		checkInstrumentation(reporter, 120, 35, 1);
 		assertEquals(0, reporter.getLong("MarkerCoverage.marker[never]"));
 		assertEquals(8, reporter.getLong("MarkerCoverage.marker[compute-8]"));
 		assertEquals(4, reporter.getLong("MarkerCoverage.marker[<5-4]"));
@@ -148,7 +148,7 @@ public class SystemTestsObservers extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		// checkPathTree(reporter, 1, 0, 0);
-		// checkInstrumentation(reporter, 2, 1);
+		checkInstrumentation(reporter, 5, 1);
 		assertTrue(reporter.getBool("StopController.was-stopped"));
 	}
 

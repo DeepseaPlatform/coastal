@@ -20,7 +20,7 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 15, 4, 1);
+		checkInstrumentation(reporter, 39, 10, 1);
 	}
 
 	@Test
@@ -35,7 +35,7 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 24, 4, 1);
+		checkInstrumentation(reporter, 48, 10, 1);
 	}
 	
 	@Test
@@ -50,7 +50,7 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 15, 4, 1);
+		checkInstrumentation(reporter, 39, 10, 1);
 	}
 	
 	@Test
@@ -65,7 +65,7 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 15, 4, 1);
+		checkInstrumentation(reporter, 39, 10, 1);
 	}
 	
 	@Test
@@ -80,7 +80,7 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 15, 4, 1);
+		checkInstrumentation(reporter, 39, 10, 1);
 	}
 	
 	@Test
@@ -95,7 +95,7 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 15, 4, 1);
+		checkInstrumentation(reporter, 39, 10, 1);
 	}
 	
 //	@Test
