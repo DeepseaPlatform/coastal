@@ -1,7 +1,5 @@
 package za.ac.sun.cs.coastal;
 
-import java.util.concurrent.Callable;
-
 import za.ac.sun.cs.coastal.Reporter.Reportable;
 
 /**
@@ -51,7 +49,7 @@ public interface TaskFactory {
 	/**
 	 * A task that will be run inside its own threads.
 	 */
-	public interface Task extends Callable<Void> {
+	public interface Task extends Runnable {
 	}
 
 }

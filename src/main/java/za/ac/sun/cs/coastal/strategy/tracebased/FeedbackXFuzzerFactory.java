@@ -301,7 +301,7 @@ public class FeedbackXFuzzerFactory implements StrategyFactory {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			log.trace("{} strategy task starting", LOG_PREFIX);
 			try {
 				long t0 = System.currentTimeMillis();
@@ -348,7 +348,7 @@ public class FeedbackXFuzzerFactory implements StrategyFactory {
 				}
 			} catch (InterruptedException e) {
 				log.trace("{} strategy task canceled", LOG_PREFIX);
-				throw e;
+				// throw e;
 			}
 		}
 

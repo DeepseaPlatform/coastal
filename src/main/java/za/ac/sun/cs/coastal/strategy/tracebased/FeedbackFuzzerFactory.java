@@ -328,7 +328,7 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			log.trace("{} strategy task starting", LOG_PREFIX);
 			try {
 				ExecutionCollection keepers = new ExecutionCollection(keepTop);
@@ -385,10 +385,10 @@ public class FeedbackFuzzerFactory implements StrategyFactory {
 				}
 			} catch (InterruptedException e) {
 				log.trace("{} strategy task canceled", LOG_PREFIX);
-				throw e;
+				// throw e;
 			}
 			log.trace("{} strategy task finished", LOG_PREFIX);
-			return null;
+			// return null;
 		}
 
 		protected void refine(Execution execution, int score) {

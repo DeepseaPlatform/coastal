@@ -24,13 +24,15 @@ public class HeavyClassLoader extends ClassLoader {
 
 	private final InstrumentationClassManager manager;
 
-	private final SymbolicState symbolicState;
+	private volatile SymbolicState symbolicState;
 	
 	public HeavyClassLoader(COASTAL coastal, InstrumentationClassManager manager, SymbolicState symbolicState) {
 		this.coastal = coastal;
 		this.log = coastal.getLog();
 		this.manager = manager;
-		this.symbolicState = symbolicState;
+		synchronized (coastal) {
+			this.symbolicState = symbolicState;
+		}
 	}
 
 	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
@@ -90,10 +92,10 @@ public class HeavyClassLoader extends ClassLoader {
 		if ((clas != null) && name.equals(VM_NAME)) {
 			synchronized (log) {
 				try {
-					log.trace("> try to set symbolic state {}", symbolicState);
+					log.trace("> try to set symbolic state {}", symbolicState.hashCode());
 					Field ss = clas.getDeclaredField(STATE_FIELD_NAME);
 					ss.set(null, symbolicState);
-					log.trace("> symbolic state was set to {}", ss.get(null));
+					log.trace("> symbolic state was set to {}", ss.get(null).hashCode());
 				} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 					e.printStackTrace();
 				}

@@ -191,7 +191,7 @@ public abstract class PathBasedFactory implements StrategyFactory {
 		}
 
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			log.trace("starting strategy task");
 			try {
 				while (true) {
@@ -214,12 +214,12 @@ public abstract class PathBasedFactory implements StrategyFactory {
 						}
 						inputs = refine1();
 					}
-					log.trace("removed 1 model, added {} models", d);
+					log.trace("removed 1 model, added {} models", d + 1);
 					coastal.updateWork(d);
 				}
 			} catch (InterruptedException e) {
 				log.trace("stoppping strategy task");
-				throw e;
+				// throw e;
 			}
 		}
 

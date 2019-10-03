@@ -22,11 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -441,24 +436,25 @@ public class COASTAL {
 	/**
 	 * The maximum number of threads to use for divers and strategies.
 	 */
-	private final int maxThreads;
+	// private final int maxThreads;
 
 	/**
 	 * The task manager for concurrent divers and strategies.
 	 */
-	private final ExecutorService executor;
+	//private final ExecutorService executor;
 
 	/**
 	 * The task completion manager that collects the "results" from divers and
 	 * strategies. In this case, there are no actual results; instead, all products
 	 * are either consumed or collected by the reporter.
 	 */
-	private final CompletionService<Void> completionService;
+	//private final CompletionService<Void> completionService;
 
 	/**
 	 * A list of outstanding tasks.
 	 */
-	private final List<Future<Void>> futures;
+	//private final List<Future<Void>> futures;
+	private final List<Thread> threads = new ArrayList<>();
 
 	// ======================================================================
 	//
@@ -581,10 +577,10 @@ public class COASTAL {
 		// TIMING INFORMATION
 		timeLimit = getConfig().getLongMaxed("coastal.settings.time-limit");
 		// TASK MANAGEMENT
-		maxThreads = getConfig().getInt("coastal.settings.max-threads", 32, 2, Short.MAX_VALUE);
-		executor = Executors.newCachedThreadPool();
-		completionService = new ExecutorCompletionService<Void>(executor);
-		futures = new ArrayList<Future<Void>>(maxThreads);
+		// maxThreads = getConfig().getInt("coastal.settings.max-threads", 32, 2, Short.MAX_VALUE);
+		//executor = Executors.newCachedThreadPool();
+		//completionService = new ExecutorCompletionService<Void>(executor);
+		//futures = new ArrayList<Future<Void>>(maxThreads);
 	}
 
 	/**
@@ -1998,30 +1994,6 @@ public class COASTAL {
 	}
 
 	/**
-	 * Stop the still-executing tasks and the thread manager itself.
-	 */
-	public void shutdown() {
-		futures.forEach(f -> f.cancel(true));
-		executor.shutdown();
-		try {
-			if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
-				executor.shutdownNow();
-				diverInputQueue.clear();
-				surferInputQueue.clear();
-				pcQueue.clear();
-				traceQueue.clear();
-				if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
-					executor.shutdownNow();
-					log.trace("(still awaiting termination)");
-				}
-			}
-		} catch (InterruptedException x) {
-			executor.shutdownNow();
-			Thread.currentThread().interrupt();
-		}
-	}
-
-	/**
 	 * Start the analysis run, showing all banners by default but no brief report.
 	 */
 	public void start() {
@@ -2085,7 +2057,7 @@ public class COASTAL {
 			log.info(Banner.getBannerLine("main thread interrupted", '!'));
 		} finally {
 			getBroker().publish("tock", this);
-			shutdown();
+			stopTasks();
 		}
 		stoppingTime = Calendar.getInstance();
 		getBroker().publish("coastal-stop", this);
@@ -2119,10 +2091,56 @@ public class COASTAL {
 		for (TaskInfo task : tasks) {
 			for (int i = 0; i < task.getInitThreads(); i++) {
 				for (Task taskComponent : task.create(this)) {
-					futures.add(completionService.submit(taskComponent));
+					Thread newThread = new Thread(taskComponent);
+					assert (newThread != null);
+					threads.add(newThread);
+					newThread.start();
+					// futures.add(completionService.submit(taskComponent));
 				}
 			}
 		}
+	}
+
+	/**
+	 * Stop the still-executing tasks and the thread manager itself.
+	 * @throws InterruptedException 
+	 */
+	public void stopTasks() {
+		for (Thread thread : threads) {
+			thread.interrupt();
+		}
+		try {
+			int n = 10;
+			while ((--n > 0) && (Thread.activeCount() > 1)) {
+				Thread.sleep(50);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			diverInputQueue.clear();
+			surferInputQueue.clear();
+			pcQueue.clear();
+			traceQueue.clear();
+		}
+//		futures.forEach(f -> f.cancel(true));
+//		executor.shutdown();
+//		try {
+//			if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+//				executor.shutdownNow();
+//				diverInputQueue.clear();
+//				surferInputQueue.clear();
+//				pcQueue.clear();
+//				traceQueue.clear();
+//				if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+//					executor.shutdownNow();
+//					log.trace("(still awaiting termination)");
+//				}
+//			}
+//		} catch (InterruptedException x) {
+//			executor.shutdownNow();
+//			Thread.currentThread().interrupt();
+//		}
 	}
 
 	/**

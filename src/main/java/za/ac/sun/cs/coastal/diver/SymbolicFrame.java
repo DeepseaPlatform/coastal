@@ -11,14 +11,15 @@ package za.ac.sun.cs.coastal.diver;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import za.ac.sun.cs.coastal.diver.SymbolicValueFactory.SymbolicValue;
 
 public class SymbolicFrame {
 
-	private static int frameCounter = 0;
+	private static AtomicInteger frameCounter = new AtomicInteger();
 
-	protected final int frameId = ++frameCounter;
+	protected final int frameId = frameCounter.incrementAndGet();
 
 	protected final int methodNumber;
 	

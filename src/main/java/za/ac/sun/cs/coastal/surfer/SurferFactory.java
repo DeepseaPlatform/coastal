@@ -197,7 +197,7 @@ public class SurferFactory implements TaskFactory {
 		}
 
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			log.trace("{} surfer task starting", LOG_PREFIX);
 			for (Tuple observer : coastal.getObserversPerTask()) {
 				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
@@ -247,6 +247,8 @@ public class SurferFactory implements TaskFactory {
 									traceState.startCatch(-1);
 								} catch (LimitConjunctException e) {
 									// ignore, since run is over in any case
+								} catch (SymbolicException e) {
+									// should we do something here?
 								}
 							} else if (t instanceof AbortedRunException) {
 								aborted = true;
@@ -286,6 +288,8 @@ public class SurferFactory implements TaskFactory {
 									traceState.startCatch(-1);
 								} catch (LimitConjunctException e) {
 									// ignore, since run is over in any case
+								} catch (SymbolicException e) {
+									// should we do something here?
 								}
 							} else if (t instanceof SystemExitException) {
 								broker.publish("system-exit", new Tuple(this, null));
@@ -320,13 +324,13 @@ public class SurferFactory implements TaskFactory {
 					}
 				}
 			} catch (InterruptedException e) {
-				broker.publishThread("surfer-task-end", this);
-				log.trace("{} surfer task canceled", LOG_PREFIX);
-				throw e;
+				// broker.publishThread("surfer-task-end", this);
+				// log.trace("{} surfer task canceled", LOG_PREFIX);
+				// throw e;
 			}
 			broker.publishThread("surfer-task-end", this);
 			log.trace("{} surfer task canceled", LOG_PREFIX);
-			return null;
+			// return null;
 		}
 
 	}

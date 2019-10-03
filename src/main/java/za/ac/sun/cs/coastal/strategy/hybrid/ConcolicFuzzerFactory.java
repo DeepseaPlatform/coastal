@@ -335,7 +335,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			log.trace("{} strategy task (ConcolicFuzzerStrategy) starting", LOG_PREFIX);
 			try {
 				ExecutionCollection keepers = new ExecutionCollection(keepTop);
@@ -392,10 +392,10 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 				}
 			} catch (InterruptedException e) {
 				log.trace("{} strategy task (ConcolicFuzzerStrategy) canceled", LOG_PREFIX);
-				throw e;
+				// throw e;
 			}
 			log.trace("{} strategy task (ConcolicFuzzerStrategy) finished", LOG_PREFIX);
-			return null;
+			// return null;
 		}
 
 		protected void refine(Execution execution, int score) {
@@ -602,7 +602,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 		}
 
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			log.trace("{} strategy task (ConcolicFuzzerPlanter) starting", LOG_PREFIX);
 			try {
 				while (true) {
@@ -616,13 +616,13 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 				}
 			} catch (ClassCastException e) {
 				log.info("CLASSCASTEXCEPTION", e);
-				throw e;
+				// throw e;
 			} catch (InterruptedException e) {
 				log.trace("{} strategy task (ConcolicFuzzerPlanter) canceled", LOG_PREFIX);
-				throw e;
+				// throw e;
 			}
 			log.trace("{} strategy task (ConcolicFuzzerPlanter) finished", LOG_PREFIX);
-			return null;
+			// return null;
 		}
 
 		private boolean plant() {
@@ -691,7 +691,7 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 		}
 
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			log.trace("{} strategy task (ConcolicFuzzerHarvester) starting", LOG_PREFIX);
 			try {
 				while (true) {
@@ -716,10 +716,10 @@ public class ConcolicFuzzerFactory implements StrategyFactory {
 				}
 			} catch (InterruptedException e) {
 				log.trace("{} strategy task (ConcolicFuzzerHarvester) canceled", LOG_PREFIX);
-				throw e;
+				// throw e;
 			}
 			log.trace("{} strategy task (ConcolicFuzzerHarvester) finished", LOG_PREFIX);
-			return null;
+			// return null;
 		}
 
 	}

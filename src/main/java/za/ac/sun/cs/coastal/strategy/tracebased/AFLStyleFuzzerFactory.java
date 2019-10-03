@@ -272,7 +272,7 @@ public class AFLStyleFuzzerFactory implements StrategyFactory {
 		}
 
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			log.trace("{} strategy task starting", LOG_PREFIX);
 			try {
 				while (true) {
@@ -286,7 +286,7 @@ public class AFLStyleFuzzerFactory implements StrategyFactory {
 				}
 			} catch (InterruptedException e) {
 				log.trace("{} strategy task canceled", LOG_PREFIX);
-				throw e;
+				// throw e;
 			}
 		}
 

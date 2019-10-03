@@ -181,7 +181,7 @@ public class DiverFactory implements TaskFactory {
 		}
 
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			log.trace("starting diver task, diverTaskId={}", diverTaskId);
 			for (Tuple observer : coastal.getObserversPerTask()) {
 				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
@@ -219,7 +219,7 @@ public class DiverFactory implements TaskFactory {
 			} catch (InterruptedException e) {
 				broker.publishThread("diver-task-end", this);
 				log.trace("stopping diver task, diverTaskId={}", diverTaskId);
-				throw e;
+				// throw e;
 			}
 		}
 
@@ -251,7 +251,7 @@ public class DiverFactory implements TaskFactory {
 					broker.publish("system-exit", new Tuple(this, null));
 				} else if (!(t instanceof SymbolicException)) {
 					log.trace("exception in run, diverTaskCount={}, symbolicState={} frames={}", diverTaskCount,
-							symbolicState, symbolicState.frames.hashCode());
+							symbolicState.hashCode(), symbolicState.frames.hashCode());
 					log.trace("P R O G R A M   E X C E P T I O N:", t);
 					if (t instanceof AssertionError) {
 						broker.publish("assert-failed", new Tuple(this, null));
