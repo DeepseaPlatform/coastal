@@ -3,8 +3,13 @@ plugins {
 	id 'java'
 	id 'eclipse'
 	id 'checkstyle'
-	id 'de.set.ecj' version '1.4.1'
+	// FOR USING THE ECLIPSE COMPILER
+	// id 'de.set.ecj' version '1.4.1'
 }
+
+// FOR USING THE ECLIPSE COMPILER
+// (VERSION FROM "ABOUT" INFORMATION FOR "Eclipse Java Development Tools")
+// ecj.toolVersion = '3.18.0'
 
 mainClassName = 'za.ac.sun.cs.coastal.COASTAL'
 
@@ -26,18 +31,6 @@ dependencies {
 	testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.25'
 	implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
 	compile files('libs/commons-collections4-4.4.jar')
-}
-
-ecj.toolVersion = '3.18.0'
-
-compileJava {
-	// options.compilerArgs << '-properties' << '$projectDir/.settings/org.eclipse.jdt.core.prefs'
-	options.compilerArgs << '-nowarn' << '-g' << '-preserveAllLocals'
-}
-
-compileTestJava {
-	// options.compilerArgs << '-properties' << '$projectDir/.settings/org.eclipse.jdt.core.prefs'
-	options.compilerArgs << '-nowarn' << '-g' << '-preserveAllLocals'
 }
 
 // Includes sources for examples

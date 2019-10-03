@@ -100,7 +100,8 @@ public class DiverFactory implements TaskFactory {
 		 * Add a reported dive time to the accumulator that tracks how long the dives
 		 * took.
 		 * 
-		 * @param time the time for this dive
+		 * @param time
+		 *             the time for this dive
 		 */
 		public void recordTime(long time) {
 			diverTime.addAndGet(time);
@@ -110,7 +111,8 @@ public class DiverFactory implements TaskFactory {
 		 * Add a reported dive wait time. This is used to determine if it makes sense to
 		 * create additional threads (or destroy them).
 		 * 
-		 * @param time the wait time for this dive
+		 * @param time
+		 *             the wait time for this dive
 		 */
 		public void recordWaitTime(long time) {
 			diverWaitTime.addAndGet(time);
@@ -196,18 +198,16 @@ public class DiverFactory implements TaskFactory {
 					manager.recordWaitTime(t1 - t0);
 					SymbolicState symbolicState = null;
 					ClassLoader classLoader = null;
-					synchronized (coastal) {
-						symbolicState = new SymbolicState(coastal, input, diverTaskId);
-						String banner = "(" + diverTaskId + ") starting dive " + manager.getNextDiveCount() + " @"
-								+ Banner.getElapsed(coastal);
-						log.trace(Banner.getBannerLine(banner, '-'));
-						if (input == null) {
-							log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
-						} else {
-							log.trace(Banner.getBannerLine(input.toString(), '*'));
-						}
-						classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
+					symbolicState = new SymbolicState(coastal, input);
+					String banner = "(" + diverTaskId + ") starting dive " + manager.getNextDiveCount() + " @"
+							+ Banner.getElapsed(coastal);
+					log.trace(Banner.getBannerLine(banner, '-'));
+					if (input == null) {
+						log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
+					} else {
+						log.trace(Banner.getBannerLine(input.toString(), '*'));
 					}
+					classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
 					performRun(symbolicState, classLoader);
 					manager.recordTime(System.currentTimeMillis() - t1);
 					coastal.addPc(symbolicState.getExecution());

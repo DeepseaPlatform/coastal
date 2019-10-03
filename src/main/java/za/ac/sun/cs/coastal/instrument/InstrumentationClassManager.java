@@ -231,7 +231,7 @@ public class InstrumentationClassManager {
 		return instrumented;
 	}
 
-	public void writeFile(String filename, byte[] contents) {
+	public synchronized void writeFile(String filename, byte[] contents) {
 		try (FileOutputStream fos = new FileOutputStream(filename)) {
 			fos.write(contents);
 		} catch (FileNotFoundException e) {
@@ -328,7 +328,7 @@ public class InstrumentationClassManager {
 		broker.publish("report", new Tuple("Instrumentation.uninstrumented-time", uninstrumentedTime.get()));
 	}
 
-	public int addLookupKeys(int id, int[] keys) {
+	public synchronized int addLookupKeys(int id, int[] keys) {
 		if (!lookupKeys.containsKey(id)) {
 			lookupKeys.put(id, Arrays.copyOf(keys, keys.length));
 		}

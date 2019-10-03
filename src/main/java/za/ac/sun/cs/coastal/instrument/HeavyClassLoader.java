@@ -1,6 +1,7 @@
 package za.ac.sun.cs.coastal.instrument;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import org.apache.logging.log4j.Logger;
 
@@ -13,41 +14,33 @@ public class HeavyClassLoader extends ClassLoader {
 	private static final String VM_NAME = "za.ac.sun.cs.coastal.symbolic.VM";
 
 	private static final String SYMBOLIC_STATE_NAME = "za.ac.sun.cs.coastal.symbolic.SymbolicState";
-	
+
 	private static final String STATE_NAME = "za.ac.sun.cs.coastal.symbolic.State";
-	
-	private static final String STATE_FIELD_NAME = "state";
 
 	private final COASTAL coastal;
-	
+
 	private final Logger log;
 
 	private final InstrumentationClassManager manager;
 
-	private volatile SymbolicState symbolicState;
-	
+	private final SymbolicState symbolicState;
+
 	public HeavyClassLoader(COASTAL coastal, InstrumentationClassManager manager, SymbolicState symbolicState) {
 		this.coastal = coastal;
 		this.log = coastal.getLog();
 		this.manager = manager;
-		synchronized (coastal) {
-			this.symbolicState = symbolicState;
-		}
+		this.symbolicState = symbolicState;
 	}
 
 	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		// log.trace("##====## LOADCLASS({}, {})", name, resolve);
 		long t = System.currentTimeMillis();
 		manager.startLoad();
 		Class<?> clas = loadClass0(name, resolve);
 		manager.endLoad(t);
-		// String aa = (clas == null) ? "??" : clas.getName();
-		// ClassLoader bb = (clas == null) ? null : clas.getClassLoader();
-		// log.trace("#----# LOADING CLASS {} WITH LOADER {}", aa, bb);
 		return clas;
 	}
 
-	public Class<?> loadClass0(String name, boolean resolve) throws ClassNotFoundException {
+	public synchronized Class<?> loadClass0(String name, boolean resolve) throws ClassNotFoundException {
 		Class<?> clas = findLoadedClass(name);
 		if (clas != null) {
 			log.trace("> loading class {}, found in cache", name);
@@ -90,15 +83,13 @@ public class HeavyClassLoader extends ClassLoader {
 			throw new ClassNotFoundException(name);
 		}
 		if ((clas != null) && name.equals(VM_NAME)) {
-			synchronized (log) {
-				try {
-					log.trace("> try to set symbolic state {}", symbolicState.hashCode());
-					Field ss = clas.getDeclaredField(STATE_FIELD_NAME);
-					ss.set(null, symbolicState);
-					log.trace("> symbolic state was set to {}", ss.get(null).hashCode());
-				} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				}
+			try {
+				log.trace("> try to set symbolic state {}", symbolicState.hashCode());
+				Method st = clas.getDeclaredMethod("setState", State.class);
+				st.invoke(null, symbolicState);
+			} catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException
+					| InvocationTargetException e) {
+				e.printStackTrace();
 			}
 		}
 		return clas;

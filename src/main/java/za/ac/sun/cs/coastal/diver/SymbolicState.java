@@ -3,9 +3,7 @@ package za.ac.sun.cs.coastal.diver;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -88,7 +86,7 @@ public final class SymbolicState extends State {
 	 * A symbolic representation of the method invocation stack of the true
 	 * execution.
 	 */
-	public volatile Deque<SymbolicFrame> frames = new ArrayDeque<>();
+	public final Stack<SymbolicFrame> frames = new Stack<>();
 
 	/**
 	 * The number of objects created during this execution.
@@ -175,8 +173,6 @@ public final class SymbolicState extends State {
 
 	private final List<String> lines = new ArrayList<>();
 
-	private final int diverTaskId;
-
 	/**
 	 * Create a new instance of the symbolic state.
 	 * 
@@ -185,9 +181,8 @@ public final class SymbolicState extends State {
 	 * @param input
 	 *                input values for the run
 	 */
-	public SymbolicState(COASTAL coastal, Input input, int dtid) { // throws InterruptedException
+	public SymbolicState(COASTAL coastal, Input input) { // throws InterruptedException
 		super(coastal, input);
-		diverTaskId = dtid;
 		limitConjuncts = coastal.getConfig().getLongMaxed("coastal.settings.conjunct-limit");
 		trackAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		constantElimination = coastal.getConfig().getBoolean("coastal.settings.constant-elimination", true);
@@ -259,7 +254,6 @@ public final class SymbolicState extends State {
 	 * @return the symbolic value of the local variable
 	 */
 	private SymbolicValue getLocal(int index) {
-		log.trace("@@@@@@@@ getLocal frames=={}", frames.hashCode());
 		return frames.peek().getLocal(index);
 	}
 
@@ -273,7 +267,6 @@ public final class SymbolicState extends State {
 	 *              the new symbolic value of the local variable
 	 */
 	private void setLocal(int index, SymbolicValue value) {
-		log.trace("@@@@@@@@ setLocal frames=={}", frames.hashCode());
 		frames.peek().setLocal(index, value);
 	}
 
@@ -398,9 +391,6 @@ public final class SymbolicState extends State {
 	 * Dump the stack of invocation frames to the log.
 	 */
 	private void dumpFrames() {
-		int n = frames.size();
-		log.trace("@@@@@@@@ dtid={} symbolicstate={} frames={} n={} frames.st={}", diverTaskId, hashCode(),
-				frames.hashCode(), n, (n == 0) ? "?" : frames.peek().hashCode());
 		for (Iterator<SymbolicFrame> iter = frames.iterator(); iter.hasNext();) {
 			SymbolicFrame frame = iter.next();
 			log.trace("    id={} st{} locals:{} <{}>", frame.getFrameId(), frame.stack, frame.locals,
@@ -838,25 +828,10 @@ public final class SymbolicState extends State {
 	@Override
 	public void push(Value expr) {
 		frames.peek().push((SymbolicValue) expr);
-//		if (expr == null) {
-//			push(IntegerConstant.ZERO32);
-//		} else {
-//			push(expr, expr.getBitSize());
-//		}
 	}
 
 	public void push(SymbolicValue expr, int bitSize) {
-		log.trace("@@@@@@@@ push(1) symbolicstate={} frames={}", hashCode(), frames.hashCode());
 		frames.peek().push(expr);
-//		if (expr.isReal()) {
-//			frames.peek().push(expr);
-//		} else if (bitSize == 8) {
-//			frames.peek().push(Operation.b2i(expr));
-//		} else if (bitSize == 16) {
-//			frames.peek().push(Operation.s2i(expr));
-//		} else {
-//			frames.peek().push(expr);
-//		}
 	}
 
 	/**
@@ -1887,12 +1862,7 @@ public final class SymbolicState extends State {
 		}
 		log.trace("transferring {} arguments, methodNumber={}", argCount, methodNumber);
 		if (frames.isEmpty()) {
-			int n = frames.size();
-			log.trace("@@@@@@@@ startMethod(1a) dtid={} symbolicstate={} frames={} n={} frames.st={}", diverTaskId,
-					hashCode(), frames.hashCode(), n, (n == 0) ? "?" : frames.peek().hashCode());
 			frames.push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
-			log.trace("@@@@@@@@ startMethod(1b) dtid={} symbolicstate={} frames={} frames.st={}", diverTaskId,
-					hashCode(), frames.hashCode(), frames.peek().hashCode());
 			for (int i = 0; i < argCount; i++) {
 				setLocal(1, IntegerConstant.ZERO32);
 			}
@@ -1901,12 +1871,7 @@ public final class SymbolicState extends State {
 			for (int i = 0; i < argCount; i++) {
 				params.push(pop());
 			}
-			int n = frames.size();
-			log.trace("@@@@@@@@ startMethod(2a) dtid={} symbolicstate={} frames={} n={} frames.st={}", diverTaskId,
-					hashCode(), frames.hashCode(), n, (n == 0) ? "?" : frames.peek().hashCode());
 			frames.push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
-			log.trace("@@@@@@@@ startMethod(2b) dtid={} symbolicstate={} frames={} frames.st={}", diverTaskId,
-					hashCode(), frames.hashCode(), frames.peek().hashCode());
 			for (int i = 0; i < argCount; i++) {
 				setLocal(i, params.pop());
 			}
@@ -3027,7 +2992,6 @@ public final class SymbolicState extends State {
 			mayRecord = false;
 			setTrackingMode(trackAll);
 		} else {
-			// log.trace("@@@@@@@@@@ POP IN startCatch");
 			while (deltaDepth-- > 0) {
 				frames.pop();
 			}

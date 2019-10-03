@@ -25,7 +25,7 @@ public class SymbolicFrame {
 	
 	protected final int invokingInstruction;
 	
-	protected volatile Stack<SymbolicValue> stack = new Stack<>();
+	protected final Stack<SymbolicValue> stack = new Stack<>();
 
 	protected final Map<Integer, SymbolicValue> locals = new HashMap<>();
 
