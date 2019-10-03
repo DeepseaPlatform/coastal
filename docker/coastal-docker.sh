@@ -1,2 +1,2 @@
 #!/bin/sh
-docker run -it -v `pwd`:/coastal coastal-full ${@}
+docker run -it -v `pwd`:/coastal jacogeld/coastal-full ${@}
