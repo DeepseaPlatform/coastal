@@ -50,8 +50,8 @@ public class TreeMap {
 		return ((IntegerConstant) expr).getValue();
 	}
 
-	private long intConstantValue(SymbolicValue expr) {
-		return intConstantValue(expr.toExpression());
-	}
+//	private long intConstantValue(SymbolicValue expr) {
+//		return intConstantValue(expr.toExpression());
+//	}
 	
 }
