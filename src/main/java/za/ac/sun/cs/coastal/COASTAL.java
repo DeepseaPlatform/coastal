@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -51,13 +52,10 @@ import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 
-import com.sun.management.OperatingSystemMXBean;
-
 /**
  * A COASTAL analysis run. The main function (or some outside client) constructs
  * an instance of this class to execute one analysis run of the system.
  */
-@SuppressWarnings("restriction")
 public class COASTAL {
 
 	/**
@@ -414,11 +412,13 @@ public class COASTAL {
 	 * The wall-clock-time that the analysis run was started.
 	 */
 	private Calendar startingTime;
+	private long startingCpuTime;
 
 	/**
 	 * The wall-clock-time that the analysis run was stopped.
 	 */
 	private Calendar stoppingTime;
+	private long stoppingCpuTime;
 
 	/**
 	 * The number of milliseconds of elapsed time when we next write a console
@@ -2002,7 +2002,7 @@ public class COASTAL {
 	 * Start the analysis run, showing all banners by default but no brief report.
 	 */
 	public void start() {
-		start(true, false);
+		start(true, false, null);
 	}
 
 	/**
@@ -2013,7 +2013,7 @@ public class COASTAL {
 	 *                   a flag to tell whether or not to show banners
 	 */
 	public void start(boolean showBanner) {
-		start(showBanner, false);
+		start(showBanner, false, null);
 	}
 
 	/**
@@ -2025,8 +2025,9 @@ public class COASTAL {
 	 * @param showBriefReport
 	 *                        flag to tell whether or not to show brief report
 	 */
-	public void start(boolean showBanner, boolean showBriefReport) {
+	public void start(boolean showBanner, boolean showBriefReport, String runName) {
 		startingTime = Calendar.getInstance();
+		startingCpuTime = getCpuTime();
 		getBroker().publish("coastal-init", this);
 		if (showBanner) {
 			new Banner('~').println("COASTAL version " + Version.VERSION).display(log);
@@ -2065,6 +2066,7 @@ public class COASTAL {
 			stopTasks();
 		}
 		stoppingTime = Calendar.getInstance();
+		stoppingCpuTime = getCpuTime();
 		getBroker().publish("coastal-stop", this);
 		getBroker().publish("coastal-report", this);
 		System.setOut(getSystemOut());
@@ -2079,12 +2081,15 @@ public class COASTAL {
 			new Banner('~').println("COASTAL DONE").display(log);
 		}
 		if (showBriefReport) {
-			PathTree p = getPathTree();
-			long numberOfPaths = p.getInsertedCount() - p.getInfeasibleCount() - p.getRevisitCount();
 			long duration = getStoppingTime() - getStartingTime();
-			System.out.println("COASTAL version " + Version.VERSION);
-			System.out.println("Paths: " + numberOfPaths);
-			System.out.println("Time: " + duration);
+			long cpuDuration = stoppingCpuTime - startingCpuTime;
+			System.out.print("COASTAL");
+			System.out.print(" version: " + Version.VERSION);
+			System.out.print(" model: " + runName);
+			System.out.print(" paths: " + getPathTree().getUniqueCount());
+			System.out.print(" cputime: " + cpuDuration);
+			System.out.print(" time: " + duration);
+			System.out.println();
 		}
 	}
 
@@ -2202,16 +2207,14 @@ public class COASTAL {
 	 *
 	 * @return CPU time used by the process in nanoseconds
 	 */
+	@SuppressWarnings("restriction")
 	private long getCpuTime() {
-		OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-		long prevProcessCpuTime = osBean.getProcessCpuTime();
-		try {
-			Thread.sleep(500);
-		} catch (Exception ignored) {
-			// ignore
+		OperatingSystemMXBean bean = ManagementFactory.getOperatingSystemMXBean();
+		if (!(bean instanceof com.sun.management.OperatingSystemMXBean)) {
+			return 0L;
+		} else {	
+			return ((com.sun.management.OperatingSystemMXBean) bean).getProcessCpuTime() / 1000000;
 		}
-		osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-		return (osBean.getProcessCpuTime() - prevProcessCpuTime);
 	}
 
 	/**
@@ -2226,8 +2229,9 @@ public class COASTAL {
 		getBroker().publish("report", new Tuple("COASTAL.start", startingTime));
 		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
 		long duration = stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis();
+		long cpuDuration = stoppingCpuTime - startingCpuTime;
 		getBroker().publish("report", new Tuple("COASTAL.time", duration));
-		getBroker().publish("report", new Tuple("COASTAL.cpu-time", getCpuTime()));
+		getBroker().publish("report", new Tuple("COASTAL.cpu-time", cpuDuration));
 	}
 
 	// ======================================================================
@@ -2280,19 +2284,20 @@ public class COASTAL {
 		}
 		new Banner('~').println("COASTAL version " + Version.VERSION).display(log);
 		Configuration config = null;
-		String runName = "";
+		String runName = "", runNameParens = "";
 		if (commandLineWarning == null) {
 			config = Configuration.load(log, args, extraConfig);
 			if (config != null) {
-				runName = String.format(" (%s)", config.getString("coastal.run-name", "?"));
+				runName = config.getString("coastal.run-name", "?");
+				runNameParens = String.format(" (%s)", runName);
 			}
 		} else {
 			new Banner('@').println("COASTAL PROBLEM\n").println(commandLineWarning).display(log);
 		}
 		if (config != null) {
-			new COASTAL(log, config).start(false, verbosity == Verbosity.BRIEF);
+			new COASTAL(log, config).start(false, verbosity == Verbosity.BRIEF, runName);
 		}
-		new Banner('~').println("COASTAL DONE" + runName).display(log);
+		new Banner('~').println("COASTAL DONE" + runNameParens).display(log);
 		LogManager.shutdown(true);
 	}
 
