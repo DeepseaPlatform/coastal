@@ -11,6 +11,7 @@ package za.ac.sun.cs.coastal;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,10 +51,13 @@ import za.ac.sun.cs.coastal.surfer.SurferFactory.SurferManager;
 import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 
+import com.sun.management.OperatingSystemMXBean;
+
 /**
  * A COASTAL analysis run. The main function (or some outside client) constructs
  * an instance of this class to execute one analysis run of the system.
  */
+@SuppressWarnings("restriction")
 public class COASTAL {
 
 	/**
@@ -441,19 +445,19 @@ public class COASTAL {
 	/**
 	 * The task manager for concurrent divers and strategies.
 	 */
-	//private final ExecutorService executor;
+	// private final ExecutorService executor;
 
 	/**
 	 * The task completion manager that collects the "results" from divers and
 	 * strategies. In this case, there are no actual results; instead, all products
 	 * are either consumed or collected by the reporter.
 	 */
-	//private final CompletionService<Void> completionService;
+	// private final CompletionService<Void> completionService;
 
 	/**
 	 * A list of outstanding tasks.
 	 */
-	//private final List<Future<Void>> futures;
+	// private final List<Future<Void>> futures;
 	private final List<Thread> threads = new ArrayList<>();
 
 	// ======================================================================
@@ -577,10 +581,11 @@ public class COASTAL {
 		// TIMING INFORMATION
 		timeLimit = getConfig().getLongMaxed("coastal.settings.time-limit");
 		// TASK MANAGEMENT
-		// maxThreads = getConfig().getInt("coastal.settings.max-threads", 32, 2, Short.MAX_VALUE);
-		//executor = Executors.newCachedThreadPool();
-		//completionService = new ExecutorCompletionService<Void>(executor);
-		//futures = new ArrayList<Future<Void>>(maxThreads);
+		// maxThreads = getConfig().getInt("coastal.settings.max-threads", 32, 2,
+		// Short.MAX_VALUE);
+		// executor = Executors.newCachedThreadPool();
+		// completionService = new ExecutorCompletionService<Void>(executor);
+		// futures = new ArrayList<Future<Void>>(maxThreads);
 	}
 
 	/**
@@ -2103,7 +2108,8 @@ public class COASTAL {
 
 	/**
 	 * Stop the still-executing tasks and the thread manager itself.
-	 * @throws InterruptedException 
+	 * 
+	 * @throws InterruptedException
 	 */
 	public void stopTasks() {
 		for (Thread thread : threads) {
@@ -2192,6 +2198,23 @@ public class COASTAL {
 	}
 
 	/**
+	 * Calculate and return CPU usage.
+	 *
+	 * @return CPU time used by the process in nanoseconds
+	 */
+	private long getCpuTime() {
+		OperatingSystemMXBean osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+		long prevProcessCpuTime = osBean.getProcessCpuTime();
+		try {
+			Thread.sleep(500);
+		} catch (Exception ignored) {
+			// ignore
+		}
+		osBean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+		return (osBean.getProcessCpuTime() - prevProcessCpuTime);
+	}
+
+	/**
 	 * Reports some statistics about the analysis run at the end of the run.
 	 * 
 	 * @param object
@@ -2204,6 +2227,7 @@ public class COASTAL {
 		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
 		long duration = stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis();
 		getBroker().publish("report", new Tuple("COASTAL.time", duration));
+		getBroker().publish("report", new Tuple("COASTAL.cpu-time", getCpuTime()));
 	}
 
 	// ======================================================================
