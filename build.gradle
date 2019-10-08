@@ -77,7 +77,7 @@ jar {
 }
 
 // Add JVM runtime option for  instrumenter for system classes (java.*)
-applicationDefaultJvmArgs = [ '-javaagent:COASTAL_APP_HOME/lib/coastal.jar' ]
+applicationDefaultJvmArgs = [ '-Xint -javaagent:COASTAL_APP_HOME/lib/coastal.jar' ]
 
 // Fix to make scripts more portable 
 startScripts {
