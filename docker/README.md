@@ -9,11 +9,20 @@ From time to time it needs to be updated.  Follow these steps:
      * `cd coastal`
      * `./gradlew check`
   3. Perform a final build:
-     * `docker build . -t coastal-local -f Dockerfile-base`
+     * `docker build --tag coastal-base --file Dockerfile-base .`
   4. Re-tag the image:
-     * `docker tag coastal-local jacogeld/coastal-base:latest`
+     * `docker tag coastal-base jacogeld/coastal-base:latest`
   5. Log in to Docker:
-     * `docker login --username jacogeld --password '...'`
+     * `docker login --username jacogeld --password-stdin`
   6. Push the image to the repository:
      * `docker push jacogeld/coastal-base:latest`
   
+# Steps to create the production image
+
+The full docker image (`jacogeld/coastal-full`) is used for running COASTAL
+inside docker.
+
+  * ``docker build --build-arg update=`date '+%s'` --tag coastal-full --file Dockerfile-full .``
+  * `docker tag coastal-full jacogeld/coastal-full:latest`
+  * `docker login --username jacogeld --password-stdin`
+  * `docker push jacogeld/coastal-full:latest`

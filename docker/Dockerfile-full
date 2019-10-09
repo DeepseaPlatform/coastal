@@ -27,7 +27,8 @@ WORKDIR /
 #WORKDIR /
 
 #--- COASTAL ---
-RUN echo '2019-10-04-d' > /dev/null && git clone https://github.com/DeepseaPlatform/coastal.git
+ARG update=0
+RUN echo $update > /dev/null && git clone https://github.com/DeepseaPlatform/coastal.git
 WORKDIR /coastal/
 RUN ./gradlew dependencies -Phttp.socketTimeout=1000000 -Phttp.connectionTimeout=1000000
 RUN ./gradlew build -Phttp.socketTimeout=1000000 -Phttp.connectionTimeout=1000000
