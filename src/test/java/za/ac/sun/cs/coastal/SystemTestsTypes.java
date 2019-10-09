@@ -12,7 +12,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
-		checkInstrumentation(reporter, 52, 15, 1);
+		checkInstrumentation(reporter, 40, 15, 1);
 		checkMarkerCoverage(reporter, 0, 9, 18, 29);
 		checkMarkerCoverage(reporter, 1, 16, 20, 25, 27);
 		checkMarkerCoverage(reporter, 2, 14, 23);
@@ -25,7 +25,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
-		checkInstrumentation(reporter, 52, 15, 1);
+		checkInstrumentation(reporter, 40, 15, 1);
 		checkMarkerCoverage(reporter, 0, 9, 16, 25);
 		checkMarkerCoverage(reporter, 1, 18, 20, 27, 29);
 		checkMarkerCoverage(reporter, 2, 14, 23);
@@ -38,7 +38,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 1);
-		checkInstrumentation(reporter, 65, 20, 1);
+		checkInstrumentation(reporter, 50, 20, 1);
 		checkMarkerCoverage(reporter, 0, 9, 25);
 		checkMarkerCoverage(reporter, 1, 16, 18, 20, 27, 29);
 		checkMarkerCoverage(reporter, 2, 23);
@@ -52,7 +52,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 3);
-		checkInstrumentation(reporter, 40, 10, 1);
+		checkInstrumentation(reporter, 31, 10, 1);
 		checkMarkerCoverage(reporter, 0, 10, 17, 19, 28);
 		checkMarkerCoverage(reporter, 1, 15, 21, 26, 30);
 		checkMarkerCoverage(reporter, 2, 24);
@@ -65,7 +65,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 13, 0, 0);
-		checkInstrumentation(reporter, 181, 60, 1);
+		checkInstrumentation(reporter, 142, 60, 1);
 		checkMarkerCoverage(reporter, 0, 0);
 		checkMarkerCoverage(reporter, 1, 1);
 		checkMarkerCoverage(reporter, 3, 5, 6, 7, 8);
@@ -80,7 +80,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 0);
-		checkInstrumentation(reporter, 78, 25, 1);
+		checkInstrumentation(reporter, 64, 25, 1);
 		checkMarkerCoverage(reporter, 0, 9);
 		checkMarkerCoverage(reporter, 1, 17, 19, 24, 26, 28, 30);
 		checkMarkerCoverage(reporter, 2, 15);
@@ -121,7 +121,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 0);
-		checkInstrumentation(reporter, 84, 25, 1);
+		checkInstrumentation(reporter, 66, 25, 1);
 		checkMarkerCoverage(reporter, 0, 0, 21);
 		checkMarkerCoverage(reporter, 1, 222, 333, 444, 666, 777);
 		checkMarkerCoverage(reporter, 3, 111, 555);
@@ -134,7 +134,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
-		checkInstrumentation(reporter, 53, 15, 1);
+		checkInstrumentation(reporter, 41, 15, 1);
 		checkMarkerCoverage(reporter, 0, 10, 17, 19);
 		checkMarkerCoverage(reporter, 1, 15, 21, 26, 28, 30);
 		checkMarkerCoverage(reporter, 3, 24);
@@ -147,7 +147,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
-		checkInstrumentation(reporter, 53, 15, 1);
+		checkInstrumentation(reporter, 41, 15, 1);
 		checkMarkerCoverage(reporter, 0, 1000, 1002, 1003);
 		checkMarkerCoverage(reporter, 1, 1001, 1004, 1006, 1007, 1008);
 		checkMarkerCoverage(reporter, 3, 1005);
@@ -160,7 +160,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 6, 0, 2);
-		checkInstrumentation(reporter, 52, 15, 1);
+		checkInstrumentation(reporter, 44, 15, 1);
 		checkMarkerCoverage(reporter, 0, 1000, 1002, 1003);
 		checkMarkerCoverage(reporter, 1, 1001, 1004, 1006, 1007, 1008);
 		checkMarkerCoverage(reporter, 3, 1005);
