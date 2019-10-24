@@ -53,11 +53,19 @@ public class HeavyClassLoader extends ClassLoader {
 			log.trace("> loading class {} from parent", name);
 			return State.class;
 		}
-		if (coastal.isTarget(name)) {
+		String trueName = name.substring(4);
+		if (name.startsWith("ins.") && coastal.isTarget(trueName)) {
+			log.trace("> loading class {}, identified as target", trueName);
+			byte[] raw = manager.loadHeavyInstrumented(name, trueName);
+			if (raw != null) {
+				log.trace("> defining class {} instrumented as {}", trueName, name);
+				clas = defineClass(name, raw, 0, raw.length);
+			}
+		} else if (coastal.isTarget(name)) {
 			log.trace("> loading class {}, identified as target", name);
 			byte[] raw = manager.loadHeavyInstrumented(name);
 			if (raw != null) {
-				log.trace("> class {} instrumented", name);
+				log.trace("> defining class {} instrumented", name);
 				clas = defineClass(name, raw, 0, raw.length);
 			}
 		}

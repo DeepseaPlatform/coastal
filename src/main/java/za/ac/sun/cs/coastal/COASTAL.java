@@ -99,8 +99,13 @@ public class COASTAL {
 	/**
 	 * A list of all prefixes of classes that will be instrumented.
 	 */
-	private final List<String> prefixes = new ArrayList<>();
+	private final List<String> prefixesToInstrument = new ArrayList<>();
 
+	/**
+	 * A list of all full class names that will be instrumented.
+	 */
+	private final List<String> fullNamesToInstrument = new ArrayList<>();
+	
 	/**
 	 * A list of all triggers that switch on symbolic execution.
 	 */
@@ -608,7 +613,12 @@ public class COASTAL {
 		for (String instr : instrumented) {
 			String instrument = instr.trim();
 			if (instrument.length() > 0) {
-				prefixes.add(instrument);
+				if (instrument.endsWith(".*")) {
+					prefixesToInstrument.add(instrument.substring(0, instrument.length() - 1));
+				} else {
+					fullNamesToInstrument.add(instrument);
+					prefixesToInstrument.add(instrument + "$");
+				}
 			}
 		}
 		String mainClass = getConfig().getString("coastal.target.main", null);
@@ -1323,8 +1333,16 @@ public class COASTAL {
 	 *         target
 	 */
 	public boolean isTarget(String potentialTarget) {
-		for (String target : prefixes) {
+		if (potentialTarget.indexOf('/') != -1) {
+			potentialTarget = potentialTarget.replaceAll("/", ".");
+		}
+		for (String target : prefixesToInstrument) {
 			if (potentialTarget.startsWith(target)) {
+				return true;
+			}
+		}
+		for (String target : fullNamesToInstrument) {
+			if (potentialTarget.equals(target)) {
 				return true;
 			}
 		}
@@ -2073,8 +2091,8 @@ public class COASTAL {
 		System.setErr(getSystemErr());
 		if ((diverManager.getDiveCount() + surferManager.getSurfCount()) < 2) {
 			Banner bn = new Banner('@');
-			bn.println("ONLY A SINGLE RUN EXECUTED\n");
-			bn.println("CHECK YOUR SETTINGS -- THERE MIGHT BE A PROBLEM SOMEWHERE");
+			bn.println("Only a single run executed\n");
+			bn.println("Check you settings -- there might be a problem somewhere");
 			bn.display(log);
 		}
 		if (showBanner) {
@@ -2105,7 +2123,6 @@ public class COASTAL {
 					assert (newThread != null);
 					threads.add(newThread);
 					newThread.start();
-					// futures.add(completionService.submit(taskComponent));
 				}
 			}
 		}
@@ -2126,7 +2143,6 @@ public class COASTAL {
 				Thread.sleep(50);
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			diverInputQueue.clear();
@@ -2134,24 +2150,6 @@ public class COASTAL {
 			pcQueue.clear();
 			traceQueue.clear();
 		}
-//		futures.forEach(f -> f.cancel(true));
-//		executor.shutdown();
-//		try {
-//			if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
-//				executor.shutdownNow();
-//				diverInputQueue.clear();
-//				surferInputQueue.clear();
-//				pcQueue.clear();
-//				traceQueue.clear();
-//				if (!executor.awaitTermination(500, TimeUnit.MILLISECONDS)) {
-//					executor.shutdownNow();
-//					log.trace("(still awaiting termination)");
-//				}
-//			}
-//		} catch (InterruptedException x) {
-//			executor.shutdownNow();
-//			Thread.currentThread().interrupt();
-//		}
 	}
 
 	/**
@@ -2292,7 +2290,7 @@ public class COASTAL {
 				runNameParens = String.format(" (%s)", runName);
 			}
 		} else {
-			new Banner('@').println("COASTAL PROBLEM\n").println(commandLineWarning).display(log);
+			new Banner('@').println("WARNING:\n").println(commandLineWarning).display(log);
 		}
 		if (config != null) {
 			new COASTAL(log, config).start(false, verbosity == Verbosity.BRIEF, runName);
@@ -2338,7 +2336,7 @@ public class COASTAL {
 				noMoreFlags = true;
 			} else if (!noMoreFlags && arg.startsWith("-")) {
 				if (commandLineWarning == null) {
-					commandLineWarning = String.format("UNKNOWN OPTION \"%s\"", arg);
+					commandLineWarning = String.format("Unrecognized option \"%s\"", arg);
 				}
 			} else {
 				newArgs.add(arg);

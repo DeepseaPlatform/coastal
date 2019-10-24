@@ -24,9 +24,9 @@ dependencies {
 	compile group: 'commons-io', name: 'commons-io', version: '2.6'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
 	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
-	compile group: 'org.ow2.asm', name: 'asm', version: '7.0'
-	compile group: 'org.ow2.asm', name: 'asm-commons', version: '7.0'
-	compile group: 'org.ow2.asm', name: 'asm-util', version: '7.0'
+	compile group: 'org.ow2.asm', name: 'asm', version: '7.2'
+	compile group: 'org.ow2.asm', name: 'asm-commons', version: '7.2'
+	compile group: 'org.ow2.asm', name: 'asm-util', version: '7.2'
 	testCompile group: 'junit', name: 'junit', version: '4.12'
 	testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.25'
 	implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
@@ -76,8 +76,8 @@ jar {
 	}
 }
 
-// Add JVM runtime option for  instrumenter for system classes (java.*)
-applicationDefaultJvmArgs = [ '-Xint -javaagent:COASTAL_APP_HOME/lib/coastal.jar' ]
+// Add JVM runtime option to switch off JIT compilation
+applicationDefaultJvmArgs = [ '-Xint -ea' ]
 
 // Fix to make scripts more portable 
 startScripts {

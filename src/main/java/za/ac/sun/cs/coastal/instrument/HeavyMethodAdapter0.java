@@ -17,7 +17,7 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
 
-public class HeavyMethodAdapter extends MethodVisitor {
+public class HeavyMethodAdapter0 extends MethodVisitor {
 
 	private static final String SYMBOLIC = "za/ac/sun/cs/coastal/Symbolic";
 
@@ -74,7 +74,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	// private static BitSet currentBranchInstructions;
 
-	public HeavyMethodAdapter(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, boolean isStatic,
+	public HeavyMethodAdapter0(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, boolean isStatic,
 			int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.coastal = coastal;
@@ -296,6 +296,15 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		mv.visitCode();
 	}
 
+	/*
+	 * 
+	 * Instructions that can refer to a class in the constant pool
+	 * 
+	 * ANEWARRAY CHECKCAST GETSTATIC INSTANCEOF INVOKEDYNAMIC??? INVOKEINTERFACE???
+	 * INVOKESPECIAL??? INVOKESTATIC INVOKEVIRTUAL??? MULTIANEWARRAY NEW PUTSTATIC
+	 * 
+	 */
+
 	@Override
 	public void visitInsn(int opcode) {
 		log.trace("Hinstrument visitInsn(opcode:{})", opcode);
@@ -382,7 +391,15 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		} else if (owner.equals(SYSTEM) && name.equals("exit")) {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "systemExit", "(I)V", false);
 		} else {
+			mv.visitLdcInsn(classManager.getNextInstructionCounter());
+			mv.visitLdcInsn(opcode);
+			mv.visitLdcInsn(owner);
+			mv.visitLdcInsn(name);
+			mv.visitLdcInsn(descriptor);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn",
+					"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 			if (owner.equals(VERIFIER)) {
+				mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 				switch (name) {
 				case "nondetInt":
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
@@ -422,13 +439,6 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					System.exit(1);
 				}
 			} else {
-				mv.visitLdcInsn(classManager.getNextInstructionCounter());
-				mv.visitLdcInsn(opcode);
-				mv.visitLdcInsn(owner);
-				mv.visitLdcInsn(name);
-				mv.visitLdcInsn(descriptor);
-				mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn",
-						"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 				String className = owner.replace('/', '.');
 				if (coastal.isTarget(className) && className.startsWith("java.")) {
 					mv.visitMethodInsn(opcode, "ins/" + owner, name, descriptor, isInterface);

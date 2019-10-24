@@ -21,12 +21,8 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.logging.log4j.Logger;
-import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.commons.ClassRemapper;
-import org.objectweb.asm.commons.Remapper;
 
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
@@ -35,7 +31,7 @@ import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.surfer.TraceState;
 
-public class InstrumentationClassManager {
+public class InstrumentationClassManager0 {
 
 	private final COASTAL coastal;
 
@@ -75,7 +71,7 @@ public class InstrumentationClassManager {
 
 	private final Map<Integer, int[]> lookupKeys = new HashMap<>();
 
-	public InstrumentationClassManager(COASTAL coastal, String classPath) {
+	public InstrumentationClassManager0(COASTAL coastal, String classPath) {
 		this.coastal = coastal;
 		log = coastal.getLog();
 		broker = coastal.getBroker();
@@ -132,13 +128,13 @@ public class InstrumentationClassManager {
 	}
 
 	public ClassLoader createHeavyClassLoader(SymbolicState symbolicState) {
-		ClassLoader classLoader = new HeavyClassLoader(coastal, this, symbolicState);
+		ClassLoader classLoader = null; //new HeavyClassLoader(coastal, this, symbolicState);
 		symbolicState.setClassLoader(classLoader);
 		return classLoader;
 	}
 
 	public ClassLoader createLightClassLoader(TraceState traceState) {
-		return new LightClassLoader(coastal, this, traceState);
+		return null; // new LightClassLoader(coastal, this, traceState);
 	}
 
 	public void startLoad() {
@@ -204,42 +200,7 @@ public class InstrumentationClassManager {
 	 */
 
 	public byte[] loadHeavyInstrumented(String name) {
-		long t = System.currentTimeMillis();
-		byte[] instrumented = heavyCache.get(name);
-		if (instrumented == null) {
-			instrumented = loadHeavyInstrumented0(name);
-		} else {
-			cacheHitCount.incrementAndGet();
-		}
-		instrumentedTime.addAndGet(System.currentTimeMillis() - t);
-		return instrumented;
-	}
-
-	private synchronized byte[] loadHeavyInstrumented0(String name) {
-		byte[] instrumented = heavyCache.get(name);
-		if (instrumented == null) {
-			byte[] in = loadFile(name.replace('.', '/').concat(".class"), true, true);
-			if (in == null) {
-				return null;
-			}
-			ClassReader cr = new ClassReader(in);
-			ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
-			HeavyAdapter ia = new HeavyAdapter(coastal, name, cw);
-			cr.accept(ia, 0);
-			instrumented = cw.toByteArray();
-			instrumentedCount.incrementAndGet();
-			preInstrumentedSize.addAndGet(in.length);
-			postInstrumentedSize.addAndGet(instrumented.length);
-			log.trace("instrumented {}: {} -> {} bytes", name, in.length, instrumented.length);
-			if (writeClassfile != null) {
-				writeFile(writeClassfile, name, instrumented);
-			}
-			if (showInstrumentation) {
-				ia.showInstrumentation();
-			}
-			heavyCache.put(name, instrumented);
-		}
-		return instrumented;
+		return loadHeavyInstrumented(name, name);
 	}
 
 	public byte[] loadHeavyInstrumented(String name, String trueName) {
@@ -261,53 +222,24 @@ public class InstrumentationClassManager {
 			if (in == null) {
 				return null;
 			}
-			try {
-				ClassReader cr = new PrefixingClassReader(in, coastal);
-				ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
-				HeavyAdapter ia = new HeavyAdapter(coastal, trueName, cw);
-				cr.accept(ia, 0);
-				instrumented = cw.toByteArray();
-				instrumentedCount.incrementAndGet();
-				preInstrumentedSize.addAndGet(in.length);
-				postInstrumentedSize.addAndGet(instrumented.length);
-				log.trace("instrumented {}: {} -> {} bytes", trueName, in.length, instrumented.length);
-				if (writeClassfile != null) {
-					writeFile(writeClassfile, name, instrumented);
-				}
-				if (showInstrumentation) {
-					ia.showInstrumentation();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			ClassReader cr = new ClassReader(in);
+			ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
+			HeavyAdapter ia = new HeavyAdapter(coastal, name, cw); // new HeavyAdapter(coastal, name, trueName, cw);
+			cr.accept(ia, 0);
+			instrumented = cw.toByteArray();
+			instrumentedCount.incrementAndGet();
+			preInstrumentedSize.addAndGet(in.length);
+			postInstrumentedSize.addAndGet(instrumented.length);
+			log.trace("instrumented {}: {} -> {} bytes", name, in.length, instrumented.length);
+			if (writeClassfile != null) {
+				writeFile(writeClassfile, name, instrumented);
+			}
+			if (showInstrumentation) {
+				ia.showInstrumentation();
 			}
 			heavyCache.put(name, instrumented);
 		}
 		return instrumented;
-	}
-
-	private static class PrefixingClassReader extends ClassReader {
-
-		private final COASTAL coastal;
-
-		PrefixingClassReader(byte[] classFile, COASTAL coastal) throws IOException {
-			super(classFile);
-			this.coastal = coastal;
-		}
-
-		@Override
-		public void accept(ClassVisitor cv, Attribute[] attrs, int flags) {
-			cv = new ClassRemapper(cv, new Remapper() {
-				@Override
-				public String map(String typeName) {
-					if (coastal.isTarget(typeName) && typeName.startsWith("java/")) {
-						return "ins/" + typeName;
-					}
-					return typeName;
-				}
-			});
-			super.accept(cv, attrs, flags);
-		}
-
 	}
 
 	public byte[] loadLightInstrumented(String name) {

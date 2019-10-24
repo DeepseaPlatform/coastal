@@ -14,47 +14,47 @@ import org.objectweb.asm.util.TraceMethodVisitor;
 
 import za.ac.sun.cs.coastal.COASTAL;
 
-public class HeavyAdapter extends ClassVisitor {
+public class HeavyAdapter0 extends ClassVisitor {
 
 	private final COASTAL coastal;
 
 	private final String name;
 
-//	private final String nameWithSlashes;
-//	
-//	private final String trueName;
-//
-//	private final boolean renamingOn;
+	private final String nameWithSlashes;
+	
+	private final String trueName;
+
+	private final boolean renamingOn;
 	
 	private final StringWriter swriter = new StringWriter();
 
 	private final PrintWriter pwriter = new PrintWriter(swriter);
 
-	public HeavyAdapter(COASTAL coastal, String name, ClassVisitor cv) {
+	public HeavyAdapter0(COASTAL coastal, String name, String trueName, ClassVisitor cv) {
 		super(Opcodes.ASM7, cv);
 		this.coastal = coastal;
 		this.name = name;
-//		this.nameWithSlashes = name.replace('.', '/');
-//		this.trueName = trueName.replace('.', '/');
-//		this.renamingOn = !name.equals(trueName);
+		this.nameWithSlashes = name.replace('.', '/');
+		this.trueName = trueName.replace('.', '/');
+		this.renamingOn = !name.equals(trueName);
 	}
 
-//	@Override
-//	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-//		coastal.getLog().trace("###### Outer class: {}, {}, {}", name, superName, String.join(":", interfaces));
-//		cv.visit(version, access, nameWithSlashes, signature, superName, interfaces);
-//	}
-//
-//	@Override
-//	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-//		coastal.getLog().trace("###### Inner class: {}, {}, {}", name, outerName, innerName);
-//		if (renamingOn && outerName.equals(trueName)) {
-//			cv.visitInnerClass(nameWithSlashes + "$" + innerName, nameWithSlashes, innerName, access);			
-//			coastal.getLog().trace("###### Inner class: -> {}", nameWithSlashes + "$" + innerName);
-//		} else {
-//			cv.visitInnerClass(name, outerName, innerName, access);
-//		}
-//	}
+	@Override
+	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+		coastal.getLog().trace("###### Outer class: {}, {}, {}", name, superName, String.join(":", interfaces));
+		cv.visit(version, access, nameWithSlashes, signature, superName, interfaces);
+	}
+
+	@Override
+	public void visitInnerClass(String name, String outerName, String innerName, int access) {
+		coastal.getLog().trace("###### Inner class: {}, {}, {}", name, outerName, innerName);
+		if (renamingOn && outerName.equals(trueName)) {
+			cv.visitInnerClass(nameWithSlashes + "$" + innerName, nameWithSlashes, innerName, access);			
+			coastal.getLog().trace("###### Inner class: -> {}", nameWithSlashes + "$" + innerName);
+		} else {
+			cv.visitInnerClass(name, outerName, innerName, access);
+		}
+	}
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
