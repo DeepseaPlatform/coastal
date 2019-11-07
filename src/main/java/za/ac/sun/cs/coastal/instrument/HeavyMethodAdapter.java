@@ -382,7 +382,15 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		} else if (owner.equals(SYSTEM) && name.equals("exit")) {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "systemExit", "(I)V", false);
 		} else {
+			mv.visitLdcInsn(classManager.getNextInstructionCounter());
+			mv.visitLdcInsn(opcode);
+			mv.visitLdcInsn(owner);
+			mv.visitLdcInsn(name);
+			mv.visitLdcInsn(descriptor);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn",
+					"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 			if (owner.equals(VERIFIER)) {
+				mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 				switch (name) {
 				case "nondetInt":
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
@@ -422,13 +430,6 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					System.exit(1);
 				}
 			} else {
-				mv.visitLdcInsn(classManager.getNextInstructionCounter());
-				mv.visitLdcInsn(opcode);
-				mv.visitLdcInsn(owner);
-				mv.visitLdcInsn(name);
-				mv.visitLdcInsn(descriptor);
-				mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "methodInsn",
-						"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
 				String className = owner.replace('/', '.');
 				if (coastal.isTarget(className) && className.startsWith("java.")) {
 					mv.visitMethodInsn(opcode, "ins/" + owner, name, descriptor, isInterface);

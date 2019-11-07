@@ -486,6 +486,11 @@ public class COASTAL {
 	 */
 	private final AtomicBoolean workDone = new AtomicBoolean(false);
 
+	/**
+	 * A flag to indicate that all COASTAL work has terminated.
+	 */
+	private final AtomicBoolean coastalDone = new AtomicBoolean(false);
+	
 	// ======================================================================
 	//
 	// CONSTRUCTOR
@@ -1765,7 +1770,11 @@ public class COASTAL {
 	 *                              interrupted
 	 */
 	public Input getNextDiverInput() throws InterruptedException {
-		return diverInputQueue.take();
+		if (coastalDone.get()) {
+			return Input.DONE_INPUT;
+		} else {
+			return diverInputQueue.take();
+		}
 	}
 
 	/**
@@ -2142,6 +2151,9 @@ public class COASTAL {
 			while ((--n > 0) && (Thread.activeCount() > 1)) {
 				Thread.sleep(50);
 			}
+			if (n == 0) {
+				log.trace("??? not sure if all threads terminated...");
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
@@ -2149,6 +2161,7 @@ public class COASTAL {
 			surferInputQueue.clear();
 			pcQueue.clear();
 			traceQueue.clear();
+			coastalDone.set(true);
 		}
 	}
 
@@ -2297,6 +2310,9 @@ public class COASTAL {
 		}
 		new Banner('~').println("COASTAL DONE" + runNameParens).display(log);
 		LogManager.shutdown(true);
+		if (config.getBoolean("coastal.settings.hard-exit", false)) {
+			System.exit(0);
+		}
 	}
 
 	/**
