@@ -24,24 +24,27 @@ public class ChoiceVerify {
 	
 	private static void testLoop() {
 		int i = 0;
+		int state=0;
 		
 		while (i < 2) {
 			boolean b1 = Verifier.nondetBoolean();
 			boolean b2 = Verifier.nondetBoolean();
 		
-			if (b1 == b2) {
-				b1 = b2;
+			if (b1 && b2) {
+				state += 2;
+			} else if (b1 && !b2) {
+				state += 102;
+			} else if (!b1 && b2) {
+				state += 1002;
 			} else {
-				if (b1) {
-					b1 = true;
-				} else if (b2) {
-					b2 = true;
-				}
+				state += 10000;
 			}
 			
-			System.out.println(i + " b1 = " + b1 + " b2 = " + b2);
+			//System.out.println(i + " b1 = " + b1 + " b2 = " + b2);
 			i++;
 		}
+		System.out.println(state);
+		
 	}
 	
 	public static void main(String[] args) {
