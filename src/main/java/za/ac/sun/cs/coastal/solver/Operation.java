@@ -322,9 +322,9 @@ public class Operation extends Expression {
 				// return new RealConstant(((RealConstant) a).getValue() / ((IntegerConstant) b).getValue());
 			} else if (b instanceof RealConstant) {
 				int z = Math.max(((RealConstant) a).getSize(), ((RealConstant) b).getSize());
-				if (((RealConstant) b).getValue() == 0.0) {
-					return null;
-				} 
+//				if (((RealConstant) b).getValue() == 0.0) {
+//					return null;
+//				} 
 				return new RealConstant(((RealConstant) a).getValue() / ((RealConstant) b).getValue(), z);
 			}
 		}

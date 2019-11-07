@@ -2239,9 +2239,11 @@ public final class SymbolicState extends State {
 		case Opcodes.DDIV:
 			v = pop();
 			push(pop().div(v));
+			/*--- Apparently, DDIV cannot cause an exception.
 			noExceptionExpression.add(Operation.ne(v.toExpression(), RealConstant.ZERO64));
 			exceptionDepth = Thread.currentThread().getStackTrace().length;
 			throwable = IntegerConstant.ZERO64;
+			---*/
 			break;
 		case Opcodes.LREM:
 			v = pop();
