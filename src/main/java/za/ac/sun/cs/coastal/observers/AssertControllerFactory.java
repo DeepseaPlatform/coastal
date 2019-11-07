@@ -54,6 +54,9 @@ public class AssertControllerFactory implements ObserverFactory {
 			broker = coastal.getBroker();
 			broker.subscribe("assert-failed", this::stop);
 			broker.subscribe("coastal-stop", this::report);
+			if (!COASTAL.class.desiredAssertionStatus()) {
+				new Banner('@').println("WARNING:\nassertions are disabled").display(log);
+			}
 		}
 
 		public void report(Object object) {

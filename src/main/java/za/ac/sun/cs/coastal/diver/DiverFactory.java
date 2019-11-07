@@ -17,6 +17,7 @@ import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.symbolic.Input;
+import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 
@@ -194,6 +195,9 @@ public class DiverFactory implements TaskFactory {
 				while (true) {
 					long t0 = System.currentTimeMillis();
 					Input input = coastal.getNextDiverInput();
+					if (input == Input.DONE_INPUT) {
+						throw new InterruptedException();
+					}
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
 					SymbolicState symbolicState = null;
@@ -244,11 +248,15 @@ public class DiverFactory implements TaskFactory {
 				if (t == null) {
 					try {
 						symbolicState.startCatch(-1);
+					} catch (LimitConjunctException e) {
+						log.trace("conjunct limit reached");
 					} catch (SymbolicException e) {
 						// ignore, since run is over in any case
 					}
 				} else if (t instanceof SystemExitException) {
 					broker.publish("system-exit", new Tuple(this, null));
+				} else if (t instanceof LimitConjunctException) {
+					log.trace("conjunct limit reached");
 				} else if (!(t instanceof SymbolicException)) {
 					log.trace("exception in run, diverTaskCount={}, symbolicState={} frames={}", diverTaskCount,
 							symbolicState.hashCode(), symbolicState.frames.hashCode());
@@ -258,6 +266,8 @@ public class DiverFactory implements TaskFactory {
 					}
 					try {
 						symbolicState.startCatch(-1);
+					} catch (LimitConjunctException e) {
+						log.trace("conjunct limit reached");
 					} catch (SymbolicException e) {
 						// ignore, since run is over in any case
 					}

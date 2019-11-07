@@ -24,6 +24,8 @@ public final class Input extends PayloadCarrierImpl {
 	 */
 	private final InputVector inputVector;
 
+	public static final Input DONE_INPUT = new Input();
+
 	/**
 	 * Construct a new, empty input.
 	 */
