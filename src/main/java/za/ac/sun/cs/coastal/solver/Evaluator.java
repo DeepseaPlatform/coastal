@@ -55,7 +55,11 @@ public final class Evaluator extends Visitor {
 	@Override
 	public void postVisit(IntegerVariable integerVariable) throws VisitorException {
 		Long value = (Long) (input.get(integerVariable.getName()));
-		stack.push(new IntegerConstant((long) value, 64));
+		if (value == null) {
+			stack.push(new IntegerConstant((long) 0, 64));
+		} else {
+			stack.push(new IntegerConstant((long) value, 64));
+		}
 	}
 
 	@Override
