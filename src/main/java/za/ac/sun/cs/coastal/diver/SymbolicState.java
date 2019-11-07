@@ -173,6 +173,7 @@ public final class SymbolicState extends State {
 
 	private final List<String> lines = new ArrayList<>();
 
+	private int newSymbolicVariableCounter = 0;
 	/**
 	 * Create a new instance of the symbolic state.
 	 * 
@@ -1171,7 +1172,8 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public boolean createSymbolicBoolean(boolean currentValue, int uniqueId) {
-		return createSymbolicBoolean(currentValue, CREATE_VAR_PREFIX + uniqueId);
+		return createSymbolicBoolean(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		// return createSymbolicBoolean(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
 	/*
@@ -1181,7 +1183,8 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public byte createSymbolicByte(byte currentValue, int uniqueId) {
-		return createSymbolicByte(currentValue, CREATE_VAR_PREFIX + uniqueId);
+		return createSymbolicByte(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		// return createSymbolicByte(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
 	/*
@@ -1191,7 +1194,8 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public short createSymbolicShort(short currentValue, int uniqueId) {
-		return createSymbolicShort(currentValue, CREATE_VAR_PREFIX + uniqueId);
+		return createSymbolicShort(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		// return createSymbolicShort(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
 	/*
@@ -1201,7 +1205,8 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public char createSymbolicChar(char currentValue, int uniqueId) {
-		return createSymbolicChar(currentValue, CREATE_VAR_PREFIX + uniqueId);
+		return createSymbolicChar(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		// return createSymbolicChar(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
 	/*
@@ -1211,7 +1216,8 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public int createSymbolicInt(int currentValue, int uniqueId) {
-		return createSymbolicInt(currentValue, CREATE_VAR_PREFIX + uniqueId);
+		return createSymbolicInt(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		// return createSymbolicInt(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
 	/*
@@ -1221,7 +1227,8 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public long createSymbolicLong(long currentValue, int uniqueId) {
-		return createSymbolicLong(currentValue, CREATE_VAR_PREFIX + uniqueId);
+		return createSymbolicLong(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		// return createSymbolicLong(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
 	/*
@@ -1231,7 +1238,8 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public float createSymbolicFloat(float currentValue, int uniqueId) {
-		return createSymbolicFloat(currentValue, CREATE_VAR_PREFIX + uniqueId);
+		return createSymbolicFloat(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		// return createSymbolicFloat(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
 	/*
@@ -1241,7 +1249,8 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public double createSymbolicDouble(double currentValue, int uniqueId) {
-		return createSymbolicDouble(currentValue, CREATE_VAR_PREFIX + uniqueId);
+		return createSymbolicDouble(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		// return createSymbolicDouble(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
 	@Override

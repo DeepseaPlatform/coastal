@@ -7,8 +7,8 @@ public class Main {
   private static int cleanupTimeShifts = 2;
 
   public static void main(String[] args) { 
-	  //randomSequenceOfActions(3); 
-	  randomSequenceOfActions(false, false, false, false, false, false, false, false, false, false, false, false);
+	  randomSequenceOfActions(3); 
+	  //randomSequenceOfActions(false, false, false, false, false, false, false, false, false, false, false, false);
   }
 
   public static boolean getBoolean() { return Verifier.nondetBoolean(); }
