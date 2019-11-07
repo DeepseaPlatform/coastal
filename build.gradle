@@ -31,6 +31,7 @@ dependencies {
 	testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.25'
 	implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
 	compile files('libs/commons-collections4-4.4.jar')
+	compile files('libs/antlr-4.7.2-complete.jar')
 }
 
 // Includes sources for examples
