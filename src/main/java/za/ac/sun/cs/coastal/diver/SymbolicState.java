@@ -2547,10 +2547,14 @@ public final class SymbolicState extends State {
 			if (!coastal.isTarget(className)) {
 				if (!executeDelegate(className, name, descriptor)) {
 					// get rid of arguments
-					int n = 1 + getArgumentCount(descriptor);
+					int n = getArgumentCount(descriptor);
 					while (n-- > 0) {
 						pop();
 					}
+					SymbolicValue target = pop();
+					noExceptionExpression.add(Operation.ne(target.toExpression(), IntegerConstant.ZERO32));
+					exceptionDepth = Thread.currentThread().getStackTrace().length;
+					throwable = IntegerConstant.ZERO32;
 					// insert return type on stack
 					pushReturnValue(getReturnType(descriptor).charAt(0));
 				}
