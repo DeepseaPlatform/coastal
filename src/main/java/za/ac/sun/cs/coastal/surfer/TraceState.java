@@ -25,7 +25,7 @@ import za.ac.sun.cs.coastal.symbolic.State;
 import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
 import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.CompletedRunException;
-import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.COASTALException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 import za.ac.sun.cs.coastal.utility.Translator;
 
@@ -106,8 +106,9 @@ public final class TraceState extends State {
 	 * 
 	 * @return {@code true} if and only if symbolic tracking mode is still switched
 	 *         on
+	 * @throws COASTALException should never happen
 	 */
-	private boolean methodReturn() throws CompletedRunException {
+	private boolean methodReturn() throws COASTALException {
 		assert getTrackingMode();
 		assert frameCount > 0;
 		frameCount--;
@@ -270,6 +271,16 @@ public final class TraceState extends State {
 		return 0; // TODO
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicShort(short, int)
+	 */
+	@Override
+	public String createSymbolicString(String currentValue, int uniqueId) {
+		return null; // TODO
+	}
+
 	public int makeSymbolicInt(String newName) {
 		return 0;
 	}
@@ -300,6 +311,10 @@ public final class TraceState extends State {
 	
 	public double makeSymbolicDouble(String newName) {
 		return 0.0;
+	}
+	
+	public String makeSymbolicString(String newName) {
+		return null;
 	}
 	
 	// ======================================================================
@@ -789,7 +804,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#triggerMethod(int, int)
 	 */
 	@Override
-	public void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic) {
+	public void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic) throws COASTALException {
 		if (!getRecordingMode()) {
 			setRecordingMode(mayRecord);
 			if (getRecordingMode()) {
@@ -900,7 +915,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#linenumber(int, int)
 	 */
 	@Override
-	public void linenumber(int instr, int line, String filename) {
+	public void linenumber(int instr, int line, String filename) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -927,7 +942,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#insn(int, int)
 	 */
 	@Override
-	public void insn(int instr, int opcode) throws SymbolicException {
+	public void insn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -963,7 +978,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#intInsn(int, int, int)
 	 */
 	@Override
-	public void intInsn(int instr, int opcode, int operand) throws SymbolicException {
+	public void intInsn(int instr, int opcode, int operand) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -973,7 +988,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#varInsn(int, int, int)
 	 */
 	@Override
-	public void varInsn(int instr, int opcode, int var) throws SymbolicException {
+	public void varInsn(int instr, int opcode, int var) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -983,7 +998,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#typeInsn(int, int)
 	 */
 	@Override
-	public void typeInsn(int instr, int opcode) throws SymbolicException {
+	public void typeInsn(int instr, int opcode) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -995,7 +1010,7 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws SymbolicException {
+			throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1007,7 +1022,7 @@ public final class TraceState extends State {
 	 */
 	@Override
 	public void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws SymbolicException {
+			throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1017,7 +1032,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#invokeDynamicInsn(int, int)
 	 */
 	@Override
-	public void invokeDynamicInsn(int instr, int opcode) throws SymbolicException {
+	public void invokeDynamicInsn(int instr, int opcode) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1027,7 +1042,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#jumpInsn(int, int)
 	 */
 	@Override
-	public void jumpInsn(int instr, int opcode) throws SymbolicException {
+	public void jumpInsn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -1051,7 +1066,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#jumpInsn(int, int, int)
 	 */
 	@Override
-	public void jumpInsn(int value, int instr, int opcode) throws SymbolicException {
+	public void jumpInsn(int value, int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -1088,7 +1103,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#jumpInsn(java.lang.Object, int, int)
 	 */
 	@Override
-	public void jumpInsn(Object value, int instr, int opcode) throws SymbolicException {
+	public void jumpInsn(Object value, int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -1112,7 +1127,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#jumpInsn(int, int, int, int)
 	 */
 	@Override
-	public void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException {
+	public void jumpInsn(int value1, int value2, int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -1160,10 +1175,10 @@ public final class TraceState extends State {
 	 * @param instr  number of the instruction
 	 * @param opcode instruction opcode
 	 * @param result outcome of the binary branch
-	 * @throws SymbolicException if the execution is aborted because if has been
+	 * @throws COASTALException if the execution is aborted because if has been
 	 *                           explored before
 	 */
-	private void jumpInsn(int instr, int opcode, boolean result) throws SymbolicException {
+	private void jumpInsn(int instr, int opcode, boolean result) throws COASTALException {
 		if (getRecordingMode()) {
 			broker.publishThread("jump-insn", new Tuple(instr, opcode));
 			if (pathTreeNode != null) {
@@ -1193,7 +1208,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#postJumpInsn(int, int)
 	 */
 	@Override
-	public void postJumpInsn(int instr, int opcode) throws SymbolicException {
+	public void postJumpInsn(int instr, int opcode) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1203,7 +1218,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#ldcInsn(int, int, java.lang.Object)
 	 */
 	@Override
-	public void ldcInsn(int instr, int opcode, Object value) throws SymbolicException {
+	public void ldcInsn(int instr, int opcode, Object value) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1213,7 +1228,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#iincInsn(int, int, int)
 	 */
 	@Override
-	public void iincInsn(int instr, int var, int increment) throws SymbolicException {
+	public void iincInsn(int instr, int var, int increment) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1223,7 +1238,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#tableSwitchInsn(int, int)
 	 */
 	@Override
-	public void tableSwitchInsn(int instr, int opcode) throws SymbolicException {
+	public void tableSwitchInsn(int instr, int opcode) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1233,7 +1248,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#tableCaseInsn(int, int, int)
 	 */
 	@Override
-	public void tableCaseInsn(int min, int max, int value) throws SymbolicException {
+	public void tableCaseInsn(int min, int max, int value) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1243,7 +1258,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#lookupSwitchInsn(int, int)
 	 */
 	@Override
-	public void lookupSwitchInsn(int instr, int opcode) throws SymbolicException {
+	public void lookupSwitchInsn(int instr, int opcode) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 	
@@ -1253,7 +1268,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#lookupCaseInsn(int, int)
 	 */
 	@Override
-	public void lookupCaseInsn(int id, int choice) throws SymbolicException {
+	public void lookupCaseInsn(int id, int choice) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 	
@@ -1263,7 +1278,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#multiANewArrayInsn(int, int)
 	 */
 	@Override
-	public void multiANewArrayInsn(int instr, int opcode) throws SymbolicException {
+	public void multiANewArrayInsn(int instr, int opcode) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1279,7 +1294,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#noException()
 	 */
 	@Override
-	public void noException() throws SymbolicException {
+	public void noException() throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1289,7 +1304,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#startCatch(int)
 	 */
 	@Override
-	public void startCatch(int instr) throws SymbolicException {
+	public void startCatch(int instr) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 
@@ -1483,7 +1498,7 @@ public final class TraceState extends State {
 	//
 	// ======================================================================
 
-	public void systemExit(int status) throws SymbolicException {
+	public void systemExit(int status) throws COASTALException {
 		throw new SystemExitException();
 	}
 

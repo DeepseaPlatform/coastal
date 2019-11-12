@@ -37,7 +37,7 @@ import za.ac.sun.cs.coastal.symbolic.Path;
 import za.ac.sun.cs.coastal.symbolic.State;
 import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
-import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.COASTALException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 import za.ac.sun.cs.coastal.utility.Translator;
 
@@ -47,6 +47,8 @@ import za.ac.sun.cs.coastal.utility.Translator;
  * required to perform concolic execution.
  */
 public final class SymbolicState extends State {
+
+	private static final String DEFAULT_NEW_STRING = "aaaaaaaa";
 
 	/**
 	 * The limit on path lengths. In other words, this is the maximum number of
@@ -362,8 +364,9 @@ public final class SymbolicState extends State {
 	 * 
 	 * @return {@code true} if and only if symbolic tracking mode is still switched
 	 *         on
+	 * @throws COASTALException should never happen
 	 */
-	private boolean methodReturn() {
+	private boolean methodReturn() throws COASTALException {
 		assert getTrackingMode();
 		assert !frames.isEmpty();
 		int methodNumber = frames.pop().getMethodNumber();
@@ -472,11 +475,11 @@ public final class SymbolicState extends State {
 	 * exceeds the path length limit. If so, an exception is raised. If the danger
 	 * flag is set, it is reset to {@code false}.
 	 * 
-	 * @throws SymbolicException
+	 * @throws COASTALException
 	 *                           if the path length limit has been reached or
 	 *                           exceeded
 	 */
-	private void checkLimitConjuncts() throws SymbolicException {
+	private void checkLimitConjuncts() throws COASTALException {
 		if (dangerFlag) {
 			if ((path != null) && (path.getDepth() >= limitConjuncts)) {
 				throw new LimitConjunctException();
@@ -1165,6 +1168,41 @@ public final class SymbolicState extends State {
 		}
 	}
 
+	public String createSymbolicString(String currentValue, String name) {
+		if (!getTrackingMode()) {
+			return null;
+		}
+		int length = currentValue.length();
+		int stringId = createString();
+		setStringLength(stringId, new IntegerConstant(length, 32));
+		if (name == null) { // not symbolic
+			for (int i = 0; i < length; i++) {
+				IntegerConstant chValue = new IntegerConstant(currentValue.charAt(i), 32);
+				setStringChar(stringId, i, chValue);
+			}
+			push(new IntegerConstant(stringId, 32));
+			input.put(name, currentValue);
+			return currentValue;
+		} else {
+			char minChar = (Character) coastal.getDefaultMinValue(char.class);
+			char maxChar = (Character) coastal.getDefaultMaxValue(char.class);
+			char[] chars = new char[length];
+			currentValue.getChars(0, length, chars, 0); // copy string into chars[]
+			for (int i = 0; i < length; i++) {
+				String entryName = name + CHAR_SEPARATOR + i;
+				Object concrete = ((name == null) || (input == null)) ? null : input.get(entryName);
+				Expression entryExpr = new IntegerVariable(entryName, 32, minChar, maxChar);
+				if ((concrete != null) && (concrete instanceof Long)) {
+					chars[i] = (char) ((Long) concrete).intValue();
+				}
+				setArrayValue(stringId, i, entryExpr);
+			}
+			push(new IntegerConstant(stringId, 32));
+			input.put(name, new String(chars));
+			return new String(chars);
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1253,6 +1291,17 @@ public final class SymbolicState extends State {
 		// return createSymbolicDouble(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicString(String, int)
+	 */
+	@Override
+	public String createSymbolicString(String currentValue, int uniqueId) {
+		return createSymbolicString(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		// return createSymbolicString(currentValue, CREATE_VAR_PREFIX + uniqueId);
+	}
+
 	@Override
 	public boolean makeSymbolicBoolean(String newName) {
 		return createSymbolicBoolean(false, newName);
@@ -1293,6 +1342,11 @@ public final class SymbolicState extends State {
 		return createSymbolicDouble(0.0, newName);
 	}
 
+	@Override
+	public String makeSymbolicString(String newName) {
+		return createSymbolicString(DEFAULT_NEW_STRING, newName);
+	}
+	
 	// ======================================================================
 	//
 	// METHOD ROUTINES
@@ -1835,7 +1889,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#triggerMethod(int, int, boolean)
 	 */
 	@Override
-	public void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic) {
+	public void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic) throws COASTALException {
 		if (!getRecordingMode()) {
 			setRecordingMode(mayRecord);
 			if (getRecordingMode()) {
@@ -2008,7 +2062,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#linenumber(int, int)
 	 */
 	@Override
-	public void linenumber(int instr, int line, String filename) {
+	public void linenumber(int instr, int line, String filename) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2039,7 +2093,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#insn(int, int)
 	 */
 	@Override
-	public void insn(int instr, int opcode) throws SymbolicException {
+	public void insn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2239,11 +2293,6 @@ public final class SymbolicState extends State {
 		case Opcodes.DDIV:
 			v = pop();
 			push(pop().div(v));
-			/*--- Apparently, DDIV cannot cause an exception.
-			noExceptionExpression.add(Operation.ne(v.toExpression(), RealConstant.ZERO64));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO64;
-			---*/
 			break;
 		case Opcodes.LREM:
 			v = pop();
@@ -2354,7 +2403,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#intInsn(int, int, int)
 	 */
 	@Override
-	public void intInsn(int instr, int opcode, int operand) throws SymbolicException {
+	public void intInsn(int instr, int opcode, int operand) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2422,7 +2471,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#varInsn(int, int, int)
 	 */
 	@Override
-	public void varInsn(int instr, int opcode, int var) throws SymbolicException {
+	public void varInsn(int instr, int opcode, int var) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2457,7 +2506,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#typeInsn(int, int)
 	 */
 	@Override
-	public void typeInsn(int instr, int opcode) throws SymbolicException {
+	public void typeInsn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2492,7 +2541,7 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws SymbolicException {
+			throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2531,7 +2580,7 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws SymbolicException {
+			throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2588,7 +2637,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#invokeDynamicInsn(int, int)
 	 */
 	@Override
-	public void invokeDynamicInsn(int instr, int opcode) throws SymbolicException {
+	public void invokeDynamicInsn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2610,7 +2659,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#jumpInsn(int, int, int)
 	 */
 	@Override
-	public void jumpInsn(int value, int instr, int opcode) throws SymbolicException {
+	public void jumpInsn(int value, int instr, int opcode) throws COASTALException {
 		jumpInsn(instr, opcode);
 	}
 
@@ -2620,7 +2669,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#jumpInsn(java.lang.Object, int, int)
 	 */
 	@Override
-	public void jumpInsn(Object value, int instr, int opcode) throws SymbolicException {
+	public void jumpInsn(Object value, int instr, int opcode) throws COASTALException {
 		jumpInsn(instr, opcode);
 	}
 
@@ -2630,7 +2679,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#jumpInsn(int, int, int, int)
 	 */
 	@Override
-	public void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException {
+	public void jumpInsn(int value1, int value2, int instr, int opcode) throws COASTALException {
 		jumpInsn(instr, opcode);
 	}
 
@@ -2640,7 +2689,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#jumpInsn(int, int)
 	 */
 	@Override
-	public void jumpInsn(int instr, int opcode) throws SymbolicException {
+	public void jumpInsn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2762,7 +2811,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#postJumpInsn(int, int)
 	 */
 	@Override
-	public void postJumpInsn(int instr, int opcode) throws SymbolicException {
+	public void postJumpInsn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2799,7 +2848,7 @@ public final class SymbolicState extends State {
 	 * ConstantDynamic for a constant dynamic for classes whose version is 55."
 	 */
 	@Override
-	public void ldcInsn(int instr, int opcode, Object value) throws SymbolicException {
+	public void ldcInsn(int instr, int opcode, Object value) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2843,7 +2892,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#iincInsn(int, int, int)
 	 */
 	@Override
-	public void iincInsn(int instr, int var, int increment) throws SymbolicException {
+	public void iincInsn(int instr, int var, int increment) throws COASTALException {
 		final int opcode = 132;
 		if (!getTrackingMode()) {
 			return;
@@ -2863,7 +2912,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#tableSwitchInsn(int, int)
 	 */
 	@Override
-	public void tableSwitchInsn(int instr, int opcode) throws SymbolicException {
+	public void tableSwitchInsn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2880,7 +2929,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#tableCaseInsn(int, int, int)
 	 */
 	@Override
-	public void tableCaseInsn(int min, int max, int value) throws SymbolicException {
+	public void tableCaseInsn(int min, int max, int value) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2900,7 +2949,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#lookupSwitchInsn(int, int)
 	 */
 	@Override
-	public void lookupSwitchInsn(int instr, int opcode) throws SymbolicException {
+	public void lookupSwitchInsn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2917,7 +2966,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#tableCaseInsn(int, int, int)
 	 */
 	@Override
-	public void lookupCaseInsn(int id, int choice) throws SymbolicException {
+	public void lookupCaseInsn(int id, int choice) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2946,7 +2995,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#multiANewArrayInsn(int, int)
 	 */
 	@Override
-	public void multiANewArrayInsn(int instr, int opcode) throws SymbolicException {
+	public void multiANewArrayInsn(int instr, int opcode) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2973,7 +3022,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#noException()
 	 */
 	@Override
-	public void noException() throws SymbolicException {
+	public void noException() throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -2994,7 +3043,7 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#startCatch(int)
 	 */
 	@Override
-	public void startCatch(int instr) throws SymbolicException {
+	public void startCatch(int instr) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
@@ -3226,7 +3275,7 @@ public final class SymbolicState extends State {
 	//
 	// ======================================================================
 
-	public void systemExit(int status) throws SymbolicException {
+	public void systemExit(int status) throws COASTALException {
 		throw new SystemExitException();
 	}
 

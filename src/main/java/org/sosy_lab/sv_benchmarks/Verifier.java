@@ -60,7 +60,7 @@ public final class Verifier {
 
 	public static String nondetString() {
 		Random random = new Random();
-		int size = random.nextInt();
+		int size = 5; //random.nextInt();
 		assume(size >= 0);
 		byte[] bytes = new byte[size];
 		random.nextBytes(bytes);

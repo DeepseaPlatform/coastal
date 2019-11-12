@@ -10,22 +10,23 @@ package svcomp;
 
 import org.sosy_lab.sv_benchmarks.Verifier;
 
-public class UnsatFibonacci01 {
+public class UnsatAckermann01 {
 
-  static int fibonacci(int n) {
-    if (n < 1) {
-      return 0;
-    } else if (n == 1) {
-      return 1;
-    } else {
-      return fibonacci(n - 1) + fibonacci(n - 2);
+  static int ackermann(int m, int n) {
+    if (m == 0) {
+      return n + 1;
     }
+    if (n == 0) {
+      return ackermann(m - 1, 1);
+    }
+    return ackermann(m - 1, ackermann(m, n - 1));
   }
 
-  static void main(String[] args) {
-    int x = Verifier.nondetInt();
-    int result = fibonacci(x);
-    if (x != 5 || result == 3) {
+  public static void main(String[] args) {
+    int m = Verifier.nondetInt();
+    int n = Verifier.nondetInt();
+    int result = ackermann(m, n);
+    if (m < 2 || result >= 4) {
       return;
     } else {
       assert false;

@@ -9,14 +9,14 @@
 package za.ac.sun.cs.coastal.symbolic.exceptions;
 
 /**
- * Exception to signal that {@link System#exit(int)} was invoked by the system
- * under test.
+ * Exception to signal that a significant event has occurred during execution to
+ * which the system must react.
  */
-public class SystemExitException extends ControlException {
+public class ControlException extends COASTALException {
 
 	/**
 	 * Required for serialization.
 	 */
-	private static final long serialVersionUID = 7592301818476180000L;
+	private static final long serialVersionUID = 1282785987285619356L;
 
 }

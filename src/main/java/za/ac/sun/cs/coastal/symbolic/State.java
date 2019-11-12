@@ -15,7 +15,7 @@ import za.ac.sun.cs.coastal.Symbolic;
 import za.ac.sun.cs.coastal.messages.Broker;
 import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
-import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.COASTALException;
 
 /**
  * The contract that defines the behaviour of an abstract state.
@@ -141,8 +141,9 @@ public abstract class State {
 	 * Return the value of the recording mode flag.
 	 * 
 	 * @return recording mode flag
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public final boolean getRecordingMode() {
+	public final boolean getRecordingMode() throws COASTALException {
 		return recordingMode;
 	}
 
@@ -165,16 +166,18 @@ public abstract class State {
 	 * Create a new unique variable name for a symbolic variable.
 	 * 
 	 * @return new unique variable name
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract String getNewVariableName();
+	public abstract String getNewVariableName() throws COASTALException;
 
 	/**
 	 * Return the symbolic value of the length of a given string.
 	 * 
 	 * @param stringId identifier for the string
 	 * @return symbolic expression for the length of the string
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract Value getStringLength(int stringId);
+	public abstract Value getStringLength(int stringId) throws COASTALException;
 
 	/**
 	 * Return the symbolic value of the character at a given index in a given
@@ -183,32 +186,36 @@ public abstract class State {
 	 * @param stringId identifier for the string
 	 * @param index    index of the character
 	 * @return symbolic value for the character
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract Value getStringChar(int stringId, int index);
+	public abstract Value getStringChar(int stringId, int index) throws COASTALException;
 
 	/**
 	 * Push an expression onto the top of the expression stack of the topmost
 	 * invocation frame.
 	 * 
 	 * @param expr the expression to push onto the current expression stack
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void push(Value expr);
+	public abstract void push(Value expr) throws COASTALException;
 
 	/**
 	 * Pop and return the expression on the top of the expression stack of the
 	 * topmost invocation frame.
 	 * 
 	 * @return the expression removed from the current expression stack
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract Value pop();
+	public abstract Value pop() throws COASTALException;
 
 	/**
 	 * Register an additional constraint that will be added to the passive conjunct
 	 * at the next branching point.
 	 * 
 	 * @param extraCondition constraint to add
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void pushExtraCondition(Expression extraCondition);
+	public abstract void pushExtraCondition(Expression extraCondition) throws COASTALException;
 
 	/**
 	 * Create a new symbolic variable. It is the responsibility of the caller to
@@ -217,8 +224,9 @@ public abstract class State {
 	 * @param currentValue default value to use in case no overriding value exists
 	 * @param uniqueId     identifier to assign to the new variable
 	 * @return value for the new variable
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract boolean createSymbolicBoolean(boolean currentValue, int uniqueId);
+	public abstract boolean createSymbolicBoolean(boolean currentValue, int uniqueId) throws COASTALException;
 
 	/**
 	 * Create a new symbolic variable. It is the responsibility of the caller to
@@ -227,8 +235,9 @@ public abstract class State {
 	 * @param currentValue default value to use in case no overriding value exists
 	 * @param uniqueId     identifier to assign to the new variable
 	 * @return value for the new variable
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract byte createSymbolicByte(byte currentValue, int uniqueId);
+	public abstract byte createSymbolicByte(byte currentValue, int uniqueId) throws COASTALException;
 
 	/**
 	 * Create a new symbolic variable. It is the responsibility of the caller to
@@ -237,8 +246,9 @@ public abstract class State {
 	 * @param currentValue default value to use in case no overriding value exists
 	 * @param uniqueId     identifier to assign to the new variable
 	 * @return value for the new variable
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract short createSymbolicShort(short currentValue, int uniqueId);
+	public abstract short createSymbolicShort(short currentValue, int uniqueId) throws COASTALException;
 
 	/**
 	 * Create a new symbolic variable. It is the responsibility of the caller to
@@ -247,8 +257,9 @@ public abstract class State {
 	 * @param currentValue default value to use in case no overriding value exists
 	 * @param uniqueId     identifier to assign to the new variable
 	 * @return value for the new variable
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract char createSymbolicChar(char currentValue, int uniqueId);
+	public abstract char createSymbolicChar(char currentValue, int uniqueId) throws COASTALException;
 
 	/**
 	 * Create a new symbolic variable. It is the responsibility of the caller to
@@ -257,8 +268,9 @@ public abstract class State {
 	 * @param currentValue default value to use in case no overriding value exists
 	 * @param uniqueId     identifier to assign to the new variable
 	 * @return value for the new variable
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract int createSymbolicInt(int currentValue, int uniqueId);
+	public abstract int createSymbolicInt(int currentValue, int uniqueId) throws COASTALException;
 
 	/**
 	 * Create a new symbolic variable. It is the responsibility of the caller to
@@ -267,8 +279,9 @@ public abstract class State {
 	 * @param currentValue default value to use in case no overriding value exists
 	 * @param uniqueId     identifier to assign to the new variable
 	 * @return value for the new variable
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract long createSymbolicLong(long currentValue, int uniqueId);
+	public abstract long createSymbolicLong(long currentValue, int uniqueId) throws COASTALException;
 
 	/**
 	 * Create a new symbolic variable. It is the responsibility of the caller to
@@ -277,8 +290,9 @@ public abstract class State {
 	 * @param currentValue default value to use in case no overriding value exists
 	 * @param uniqueId     identifier to assign to the new variable
 	 * @return value for the new variable
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract float createSymbolicFloat(float currentValue, int uniqueId);
+	public abstract float createSymbolicFloat(float currentValue, int uniqueId) throws COASTALException;
 
 	/**
 	 * Create a new symbolic variable. It is the responsibility of the caller to
@@ -287,24 +301,38 @@ public abstract class State {
 	 * @param currentValue default value to use in case no overriding value exists
 	 * @param uniqueId     identifier to assign to the new variable
 	 * @return value for the new variable
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract double createSymbolicDouble(double currentValue, int uniqueId);
+	public abstract double createSymbolicDouble(double currentValue, int uniqueId) throws COASTALException;
 
-	public abstract int makeSymbolicInt(String newName);
+	/**
+	 * Create a new symbolic variable. It is the responsibility of the caller to
+	 * ensure that the identifier is unique.
+	 * 
+	 * @param currentValue default value to use in case no overriding value exists
+	 * @param uniqueId     identifier to assign to the new variable
+	 * @return value for the new variable
+	 * @throws COASTALException if a symbolic exception occurs during the method
+	 */
+	public abstract String createSymbolicString(String currentValue, int uniqueId) throws COASTALException;
+
+	public abstract int makeSymbolicInt(String newName) throws COASTALException;
 	
-	public abstract short makeSymbolicShort(String newName);
+	public abstract short makeSymbolicShort(String newName) throws COASTALException;
 	
-	public abstract boolean makeSymbolicBoolean(String newName);
+	public abstract boolean makeSymbolicBoolean(String newName) throws COASTALException;
 	
-	public abstract byte makeSymbolicByte(String newName);
+	public abstract byte makeSymbolicByte(String newName) throws COASTALException;
 	
-	public abstract char makeSymbolicChar(String newName);
+	public abstract char makeSymbolicChar(String newName) throws COASTALException;
 	
-	public abstract long makeSymbolicLong(String newName);
+	public abstract long makeSymbolicLong(String newName) throws COASTALException;
 	
-	public abstract float makeSymbolicFloat(String newName);
+	public abstract float makeSymbolicFloat(String newName) throws COASTALException;
 	
-	public abstract double makeSymbolicDouble(String newName);
+	public abstract double makeSymbolicDouble(String newName) throws COASTALException;
+	
+	public abstract String makeSymbolicString(String newName) throws COASTALException;
 	
 	// ======================================================================
 	//
@@ -332,8 +360,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the value to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue);
+	public abstract boolean getConcreteBoolean(int triggerIndex, int index, int address, boolean currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for a {@code byte} variable.
@@ -344,8 +373,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the value to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue);
+	public abstract byte getConcreteByte(int triggerIndex, int index, int address, byte currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for a {@code short} variable.
@@ -356,8 +386,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the value to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract short getConcreteShort(int triggerIndex, int index, int address, short currentValue);
+	public abstract short getConcreteShort(int triggerIndex, int index, int address, short currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for a {@code char} variable.
@@ -368,8 +399,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the value to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract char getConcreteChar(int triggerIndex, int index, int address, char currentValue);
+	public abstract char getConcreteChar(int triggerIndex, int index, int address, char currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for a {@code int} variable.
@@ -380,8 +412,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the value to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract int getConcreteInt(int triggerIndex, int index, int address, int currentValue);
+	public abstract int getConcreteInt(int triggerIndex, int index, int address, int currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for a {@code long} variable.
@@ -392,8 +425,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the value to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract long getConcreteLong(int triggerIndex, int index, int address, long currentValue);
+	public abstract long getConcreteLong(int triggerIndex, int index, int address, long currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for a {@code float} variable.
@@ -404,8 +438,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the value to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract float getConcreteFloat(int triggerIndex, int index, int address, float currentValue);
+	public abstract float getConcreteFloat(int triggerIndex, int index, int address, float currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for a {@code double} variable.
@@ -416,8 +451,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the value to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract double getConcreteDouble(int triggerIndex, int index, int address, double currentValue);
+	public abstract double getConcreteDouble(int triggerIndex, int index, int address, double currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for a {@code String} variable.
@@ -428,8 +464,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the value to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract String getConcreteString(int triggerIndex, int index, int address, String currentValue);
+	public abstract String getConcreteString(int triggerIndex, int index, int address, String currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for an array of {@code boolean} values.
@@ -440,8 +477,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the values to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract boolean[] getConcreteBooleanArray(int triggerIndex, int index, int address, boolean[] currentValue);
+	public abstract boolean[] getConcreteBooleanArray(int triggerIndex, int index, int address, boolean[] currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for an array of {@code byte} values.
@@ -452,8 +490,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the values to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue);
+	public abstract byte[] getConcreteByteArray(int triggerIndex, int index, int address, byte[] currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for an array of {@code short} values.
@@ -464,8 +503,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the values to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract short[] getConcreteShortArray(int triggerIndex, int index, int address, short[] currentValue);
+	public abstract short[] getConcreteShortArray(int triggerIndex, int index, int address, short[] currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for an array of {@code char} values.
@@ -476,8 +516,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the values to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue);
+	public abstract char[] getConcreteCharArray(int triggerIndex, int index, int address, char[] currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for an array of {@code int} values.
@@ -488,8 +529,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the values to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue);
+	public abstract int[] getConcreteIntArray(int triggerIndex, int index, int address, int[] currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for an array of {@code long} values.
@@ -500,8 +542,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the values to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract long[] getConcreteLongArray(int triggerIndex, int index, int address, long[] currentValue);
+	public abstract long[] getConcreteLongArray(int triggerIndex, int index, int address, long[] currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for an array of {@code float} values.
@@ -512,8 +555,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the values to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract float[] getConcreteFloatArray(int triggerIndex, int index, int address, float[] currentValue);
+	public abstract float[] getConcreteFloatArray(int triggerIndex, int index, int address, float[] currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for an array of {@code double} values.
@@ -524,8 +568,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the values to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue);
+	public abstract double[] getConcreteDoubleArray(int triggerIndex, int index, int address, double[] currentValue) throws COASTALException;
 
 	/**
 	 * Return the value to use for an array of strings.
@@ -536,8 +581,9 @@ public abstract class State {
 	 * @param currentValue default values to use (if concolic execution does not
 	 *                     override the values)
 	 * @return the values to use during the execution
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue);
+	public abstract String[] getConcreteStringArray(int triggerIndex, int index, int address, String[] currentValue) throws COASTALException;
 
 	/**
 	 * Switch on symbolic tracking because a trigger method has been invoked (and
@@ -546,8 +592,9 @@ public abstract class State {
 	 * @param methodNumber unique number of the method
 	 * @param triggerIndex index of the matching trigger
 	 * @param isStatic whether or not the triggered method is static
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic);
+	public abstract void triggerMethod(int methodNumber, int triggerIndex, boolean isStatic) throws COASTALException;
 
 	/**
 	 * Handle the invocation of a non-triggering method. Tracking may or may not be
@@ -555,64 +602,72 @@ public abstract class State {
 	 * 
 	 * @param methodNumber unique number of the method
 	 * @param argCount     number of formal parameters for the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void startMethod(int methodNumber, int argCount);
+	public abstract void startMethod(int methodNumber, int argCount) throws COASTALException;
 
 	/**
 	 * Ensure that the return value of a method is placed onto the top of the
 	 * expression stack of the topmost invocation frame.
 	 * 
 	 * @param returnValue return value expression
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void returnValue(boolean returnValue);
+	public abstract void returnValue(boolean returnValue) throws COASTALException;
 
 	/**
 	 * Ensure that the return value of a method is placed onto the top of the
 	 * expression stack of the topmost invocation frame.
 	 * 
 	 * @param returnValue return value expression
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void returnValue(char returnValue);
+	public abstract void returnValue(char returnValue) throws COASTALException;
 
 	/**
 	 * Ensure that the return value of a method is placed onto the top of the
 	 * expression stack of the topmost invocation frame.
 	 * 
 	 * @param returnValue return value expression
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void returnValue(double returnValue);
+	public abstract void returnValue(double returnValue) throws COASTALException;
 
 	/**
 	 * Ensure that the return value of a method is placed onto the top of the
 	 * expression stack of the topmost invocation frame.
 	 * 
 	 * @param returnValue return value expression
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void returnValue(float returnValue);
+	public abstract void returnValue(float returnValue) throws COASTALException;
 
 	/**
 	 * Ensure that the return value of a method is placed onto the top of the
 	 * expression stack of the topmost invocation frame.
 	 * 
 	 * @param returnValue return value expression
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void returnValue(int returnValue);
+	public abstract void returnValue(int returnValue) throws COASTALException;
 
 	/**
 	 * Ensure that the return value of a method is placed onto the top of the
 	 * expression stack of the topmost invocation frame.
 	 * 
 	 * @param returnValue return value expression
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void returnValue(long returnValue);
+	public abstract void returnValue(long returnValue) throws COASTALException;
 
 	/**
 	 * Ensure that the return value of a method is placed onto the top of the
 	 * expression stack of the topmost invocation frame.
 	 * 
 	 * @param returnValue return value expression
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void returnValue(short returnValue);
+	public abstract void returnValue(short returnValue) throws COASTALException;
 
 	// ======================================================================
 	//
@@ -632,16 +687,18 @@ public abstract class State {
 	 * 
 	 * @param instr the number of the instruction
 	 * @param line  the line number
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void linenumber(int instr, int line, String filename);
+	public abstract void linenumber(int instr, int line, String filename) throws COASTALException;
 
 	/**
 	 * Handle a label.
 	 * 
 	 * @param instr the number of the instruction following the label
 	 * @param label a unique label identifier
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void label(int instr, String label);
+	public abstract void label(int instr, String label) throws COASTALException;
 
 	/**
 	 * Handle a zero operand instruction.
@@ -673,9 +730,9 @@ public abstract class State {
 	 * 
 	 * @param instr  the number of the instruction
 	 * @param opcode the instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void insn(int instr, int opcode) throws SymbolicException;
+	public abstract void insn(int instr, int opcode) throws COASTALException;
 
 	/**
 	 * Handle an instruction with a single {@code int} operand.
@@ -685,9 +742,9 @@ public abstract class State {
 	 * @param instr   the number of the instruction
 	 * @param opcode  the instruction opcode
 	 * @param operand the operand of the instruction
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void intInsn(int instr, int opcode, int operand) throws SymbolicException;
+	public abstract void intInsn(int instr, int opcode, int operand) throws COASTALException;
 
 	/**
 	 * Handle a local variable instruction. A local variable instruction is an
@@ -700,9 +757,9 @@ public abstract class State {
 	 * @param instr  the number of the instruction
 	 * @param opcode the instruction opcode
 	 * @param var    the identifier of the local variable
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void varInsn(int instr, int opcode, int var) throws SymbolicException;
+	public abstract void varInsn(int instr, int opcode, int var) throws COASTALException;
 
 	/**
 	 * Handle a type instruction. A type instruction is an instruction that takes
@@ -713,9 +770,9 @@ public abstract class State {
 	 * 
 	 * @param instr  the number of the instruction
 	 * @param opcode the instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void typeInsn(int instr, int opcode) throws SymbolicException;
+	public abstract void typeInsn(int instr, int opcode) throws COASTALException;
 
 	/**
 	 * Handle a field instruction. A field instruction is an instruction that loads
@@ -729,10 +786,10 @@ public abstract class State {
 	 * @param owner      the internal name of the field's owner class
 	 * @param name       the name of the field
 	 * @param descriptor the type descriptor of the field
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
 	public abstract void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws SymbolicException;
+			throws COASTALException;
 
 	/**
 	 * Handle a method instruction. A method instruction is an instruction that
@@ -746,19 +803,19 @@ public abstract class State {
 	 * @param owner      the internal name of the method's owner class
 	 * @param name       the name of the method
 	 * @param descriptor the type descriptor of the method
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
 	public abstract void methodInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws SymbolicException;
+			throws COASTALException;
 
 	/**
 	 * Handle an {@code INVOKEDYNAMIC} instruction.
 	 * 
 	 * @param instr  number of the instruction
 	 * @param opcode instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void invokeDynamicInsn(int instr, int opcode) throws SymbolicException;
+	public abstract void invokeDynamicInsn(int instr, int opcode) throws COASTALException;
 
 	/**
 	 * Handle a jump instruction. A jump instruction is an instruction that may jump
@@ -774,9 +831,9 @@ public abstract class State {
 	 * 
 	 * @param instr  number of the instruction
 	 * @param opcode instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void jumpInsn(int instr, int opcode) throws SymbolicException;
+	public abstract void jumpInsn(int instr, int opcode) throws COASTALException;
 
 	/**
 	 * Handle a jump instruction where the operand used in the comparison is a
@@ -789,9 +846,9 @@ public abstract class State {
 	 * @param value  concrete value of one operand
 	 * @param instr  number of the instruction
 	 * @param opcode instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void jumpInsn(int value, int instr, int opcode) throws SymbolicException;
+	public abstract void jumpInsn(int value, int instr, int opcode) throws COASTALException;
 
 	/**
 	 * Handle a jump instruction where the operand used in the comparison is a
@@ -803,9 +860,9 @@ public abstract class State {
 	 * @param value  concrete value of one operand
 	 * @param instr  number of the instruction
 	 * @param opcode instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void jumpInsn(Object value, int instr, int opcode) throws SymbolicException;
+	public abstract void jumpInsn(Object value, int instr, int opcode) throws COASTALException;
 
 	/**
 	 * Handle a jump instruction where both the operands used in the comparison are
@@ -818,18 +875,18 @@ public abstract class State {
 	 * @param value2 concrete value of second operand
 	 * @param instr  number of the instruction
 	 * @param opcode instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void jumpInsn(int value1, int value2, int instr, int opcode) throws SymbolicException;
+	public abstract void jumpInsn(int value1, int value2, int instr, int opcode) throws COASTALException;
 
 	/**
 	 * Handle the situation where a jump has *NOT* taken place.
 	 * 
 	 * @param instr  number of the instruction
 	 * @param opcode instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void postJumpInsn(int instr, int opcode) throws SymbolicException;
+	public abstract void postJumpInsn(int instr, int opcode) throws COASTALException;
 
 	/**
 	 * Handle a {@code LDC} instruction.
@@ -837,9 +894,9 @@ public abstract class State {
 	 * @param instr  number of the instruction
 	 * @param opcode instruction opcode
 	 * @param value  constant to be loaded on the stack
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void ldcInsn(int instr, int opcode, Object value) throws SymbolicException;
+	public abstract void ldcInsn(int instr, int opcode, Object value) throws COASTALException;
 
 	/**
 	 * Handle an {@code IINC} instruction.
@@ -847,46 +904,46 @@ public abstract class State {
 	 * @param instr     number of the instruction
 	 * @param var       index of the local variable to be incremented
 	 * @param increment amount to increment the local variable by
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void iincInsn(int instr, int var, int increment) throws SymbolicException;
+	public abstract void iincInsn(int instr, int var, int increment) throws COASTALException;
 
 	/**
 	 * Handle a {@code TABLESWITCH} instruction.
 	 * 
 	 * @param instr  the number of the instruction
 	 * @param opcode the instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void tableSwitchInsn(int instr, int opcode) throws SymbolicException;
+	public abstract void tableSwitchInsn(int instr, int opcode) throws COASTALException;
 
 	/*
 	 * ????????
 	 */
-	public abstract void tableCaseInsn(int min, int max, int value) throws SymbolicException;
+	public abstract void tableCaseInsn(int min, int max, int value) throws COASTALException;
 
 	/**
 	 * Handle a {@code LOOKUPSWITCH} instruction.
 	 * 
 	 * @param instr  the number of the instruction
 	 * @param opcode the instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void lookupSwitchInsn(int instr, int opcode) throws SymbolicException;
+	public abstract void lookupSwitchInsn(int instr, int opcode) throws COASTALException;
 
 	/*
 	 * ????????
 	 */
-	public abstract void lookupCaseInsn(int id, int choice) throws SymbolicException;
+	public abstract void lookupCaseInsn(int id, int choice) throws COASTALException;
 	
 	/**
 	 * Handle a {@code MULTIANEWARRAY} instruction.
 	 *
 	 * @param instr  the number of the instruction
 	 * @param opcode the instruction opcode
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void multiANewArrayInsn(int instr, int opcode) throws SymbolicException;
+	public abstract void multiANewArrayInsn(int instr, int opcode) throws COASTALException;
 
 	// ======================================================================
 	//
@@ -906,19 +963,19 @@ public abstract class State {
 	 * Handle the case that no exception occurs after an instruction that could
 	 * potentially raise an exception
 	 * 
-	 * @throws SymbolicException if a symbolic exception has occurred during the
+	 * @throws COASTALException if a symbolic exception has occurred during the
 	 *                           method
 	 */
-	public abstract void noException() throws SymbolicException;
+	public abstract void noException() throws COASTALException;
 
 	/**
 	 * Handle the case where the execution of an instruction has raised an
 	 * exception.
 	 * 
 	 * @param instr the instruction that caused the exception
-	 * @throws SymbolicException if a symbolic exception occurs during the method
+	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void startCatch(int instr) throws SymbolicException;
+	public abstract void startCatch(int instr) throws COASTALException;
 
 	// ======================================================================
 	//
@@ -935,7 +992,7 @@ public abstract class State {
 	 * Handle the situation where the execution has reached a call to
 	 * {@link Symbolic#stop()}.
 	 */
-	public abstract void stop();
+	public abstract void stop() throws COASTALException;
 
 	/**
 	 * Handle the situation where the execution has reached a call to
@@ -943,7 +1000,7 @@ public abstract class State {
 	 * 
 	 * @param message a message passed from the call
 	 */
-	public abstract void stop(String message);
+	public abstract void stop(String message) throws COASTALException;
 
 	/**
 	 * Handle the situation where the execution has reached a symbolic marker. This
@@ -951,7 +1008,7 @@ public abstract class State {
 	 * 
 	 * @param marker the marker identity as an integer
 	 */
-	public abstract void mark(int marker);
+	public abstract void mark(int marker) throws COASTALException;
 
 	/**
 	 * Handle the situation where the execution has reached a symbolic marker. This
@@ -959,13 +1016,13 @@ public abstract class State {
 	 * 
 	 * @param marker the marker identity as a string
 	 */
-	public abstract void mark(String marker);
+	public abstract void mark(String marker) throws COASTALException;
 
 	/**
 	 * Handle the situation where the execution has reached a call to
 	 * {@link Symbolic#printPC()}.
 	 */
-	public abstract void printPC();
+	public abstract void printPC() throws COASTALException;
 
 	/**
 	 * Handle the situation where the execution has reached a call to
@@ -973,7 +1030,7 @@ public abstract class State {
 	 * 
 	 * @param label a message passed from the call
 	 */
-	public abstract void printPC(String label);
+	public abstract void printPC(String label) throws COASTALException;
 
 	// ======================================================================
 	//
@@ -981,7 +1038,7 @@ public abstract class State {
 	//
 	// ======================================================================
 
-	public abstract void loadClasses(String descriptor);
+	public abstract void loadClasses(String descriptor) throws COASTALException;
 
 	// ======================================================================
 	//
@@ -989,6 +1046,6 @@ public abstract class State {
 	//
 	// ======================================================================
 
-	public abstract void systemExit(int status) throws SymbolicException;
+	public abstract void systemExit(int status) throws COASTALException;
 
 }

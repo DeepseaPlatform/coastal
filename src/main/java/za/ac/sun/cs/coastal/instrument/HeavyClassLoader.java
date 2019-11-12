@@ -17,6 +17,8 @@ public class HeavyClassLoader extends ClassLoader {
 
 	private static final String STATE_NAME = "za.ac.sun.cs.coastal.symbolic.State";
 
+	private static final String COASTAL_EXCEPTION_PREFIX = "za.ac.sun.cs.coastal.symbolic.exceptions.";
+	
 	private final COASTAL coastal;
 
 	private final Logger log;
@@ -47,11 +49,14 @@ public class HeavyClassLoader extends ClassLoader {
 			return clas;
 		}
 		if (name.equals(SYMBOLIC_STATE_NAME)) {
-			log.trace("> loading class {} from parent", name);
+			log.trace("> loading class {} from parent (1)", name);
 			return symbolicState.getClass();
 		} else if (name.equals(STATE_NAME)) {
-			log.trace("> loading class {} from parent", name);
+			log.trace("> loading class {} from parent (2)", name);
 			return State.class;
+		} else if (name.startsWith(COASTAL_EXCEPTION_PREFIX)) {
+			log.trace("> loading class {} from parent (3)", name);
+			return super.loadClass(name, resolve);
 		}
 		String trueName = name.substring(4);
 		if (name.startsWith("ins.") && coastal.isTarget(trueName)) {

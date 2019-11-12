@@ -425,6 +425,10 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicDouble", "(DI)D", false);
 					break;
 				case "nondetString":
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicString",
+							"(Ljava/lang/String;I)Ljava/lang/String;", false);
+					break;
 				default:
 					log.fatal("instrument unimplemented verifier method {}.{}", owner, name);
 					System.exit(1);

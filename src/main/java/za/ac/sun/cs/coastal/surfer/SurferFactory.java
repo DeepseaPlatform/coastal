@@ -18,7 +18,7 @@ import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
-import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.COASTALException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 
 public class SurferFactory implements TaskFactory {
@@ -241,25 +241,25 @@ public class SurferFactory implements TaskFactory {
 //								x.printStackTrace(coastal.getSystemErr());
 //								System.out.println("Hello world!");
 //							}
-							if ((t == null) || !(t instanceof SymbolicException)) {
+							if ((t == null) || !(t instanceof COASTALException)) {
 								// x.printStackTrace();
 								try {
 									traceState.startCatch(-1);
 								} catch (LimitConjunctException e) {
 									// ignore, since run is over in any case
-								} catch (SymbolicException e) {
+								} catch (COASTALException e) {
 									// should we do something here?
 								}
 							} else if (t instanceof AbortedRunException) {
 								aborted = true;
-							} else if (!(t instanceof SymbolicException)) {
+							} else if (!(t instanceof COASTALException)) {
 								log.info("P R O G R A M   E X C E P T I O N:", t);
 								if (t instanceof AssertionError) {
 									broker.publish("assert-failed", new Tuple(this, null));
 								}
 								try {
 								traceState.startCatch(-1);
-								} catch (SymbolicException e) {
+								} catch (COASTALException e) {
 									// ignore, since run is over in any case
 								}
 							}
@@ -282,27 +282,27 @@ public class SurferFactory implements TaskFactory {
 //								x.printStackTrace(coastal.getSystemErr());
 //								System.out.println("Hello world!");
 //							}
-							if ((t == null) || !(t instanceof SymbolicException)) {
+							if ((t == null) || !(t instanceof COASTALException)) {
 								// x.printStackTrace();
 								try {
 									traceState.startCatch(-1);
 								} catch (LimitConjunctException e) {
 									// ignore, since run is over in any case
-								} catch (SymbolicException e) {
+								} catch (COASTALException e) {
 									// should we do something here?
 								}
 							} else if (t instanceof SystemExitException) {
 								broker.publish("system-exit", new Tuple(this, null));
 							} else if (t instanceof AbortedRunException) {
 								aborted = true;
-							} else if (!(t instanceof SymbolicException)) {
+							} else if (!(t instanceof COASTALException)) {
 								log.info("P R O G R A M   E X C E P T I O N:", t);
 								if (t instanceof AssertionError) {
 									broker.publish("assert-failed", new Tuple(this, null));
 								}
 								try {
 									traceState.startCatch(-1);
-								} catch (SymbolicException e) {
+								} catch (COASTALException e) {
 									// ignore, since run is over in any case
 								}
 							}

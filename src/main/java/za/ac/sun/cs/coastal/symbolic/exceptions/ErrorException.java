@@ -9,26 +9,17 @@
 package za.ac.sun.cs.coastal.symbolic.exceptions;
 
 /**
- * Parent class for all exceptions produced by the COASTAL tool. This includes
- * exceptions that are intentionally thrown to control the flow of the tool as
- * well as unintentional exceptions that happen as a result of bugs or assertion
- * violations.
+ * Exception to signal that an unexpected event ({@link Throwable}) has occurred
+ * during execution. An instance of this exception wraps the true throwable.
  */
-public class COASTALException extends Exception {
-
-	/**
-	 * Standard constructor.
-	 */
-	public COASTALException() {
-		super();
-	}
+public class ErrorException extends COASTALException {
 
 	/**
 	 * Constructor to wrap another throwable.
 	 * 
 	 * @param throwable Another {@link Throwable} to wrap
 	 */
-	public COASTALException(Throwable throwable) {
+	public ErrorException(Throwable throwable) {
 		super(throwable);
 	}
 

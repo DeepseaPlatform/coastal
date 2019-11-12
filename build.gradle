@@ -3,15 +3,28 @@ plugins {
 	id 'java'
 	id 'eclipse'
 	id 'checkstyle'
+	// FOR COLLECTING COMPILE-TIME INFORMATION
+	id 'com.peterabeles.gversion' version '1.5.2'
 	// FOR USING THE ECLIPSE COMPILER
 	// id 'de.set.ecj' version '1.4.1'
+}
+
+// FOR COLLECTING COMPILE-TIME INFORMATION
+gversion {
+	srcDir = 'src/main/java/'
+	classPackage = 'za.ac.sun.cs.coastal'
+	className = 'CompileInfo'
+	// timeZone = 'Africa/Johanesburg'
+	// debug = false
 }
 
 // FOR USING THE ECLIPSE COMPILER
 // (VERSION FROM "ABOUT" INFORMATION FOR "Eclipse Java Development Tools")
 // ecj.toolVersion = '3.18.0'
 
+group = 'za.ac.sun.cs.coastal'
 mainClassName = 'za.ac.sun.cs.coastal.COASTAL'
+version = '0.0.3'
 
 repositories {
 	jcenter()
@@ -47,6 +60,9 @@ sourceSets {
 		output.resourcesDir = 'build/classes/java/test'
 	}
 }
+
+// Update compile time information before a build
+project.compileJava.dependsOn(createVersionFile)
 
 // So that property files in src/test/java/tests/* are copied
 // to the test sources directory.

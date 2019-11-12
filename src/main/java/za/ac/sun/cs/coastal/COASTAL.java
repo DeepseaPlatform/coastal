@@ -90,6 +90,8 @@ public class COASTAL {
 	 */
 	private final InstrumentationClassManager classManager;
 
+	public static final String VERSION = CompileInfo.VERSION + " (" + CompileInfo.GIT_SHA.substring(0, 8) + '-' + Long.toHexString(CompileInfo.BUILD_UNIX_TIME) + ")";
+
 	// ======================================================================
 	//
 	// TARGET INFORMATION
@@ -1877,16 +1879,13 @@ public class COASTAL {
 	 * 
 	 * @param execution
 	 *                  the execution to add
+	 * @throws InterruptedException if interrupted
 	 */
-	public void addPc(Execution execution) {
-		try {
-			if (execution == null) {
-				pcQueue.put(Execution.NULL);
-			} else {
-				pcQueue.put(execution);
-			}
-		} catch (InterruptedException e) {
-			// ignore silently
+	public void addPc(Execution execution) throws InterruptedException {
+		if (execution == null) {
+			pcQueue.put(Execution.NULL);
+		} else {
+			pcQueue.put(execution);
 		}
 	}
 
@@ -1918,16 +1917,13 @@ public class COASTAL {
 	 * 
 	 * @param execution
 	 *                  the execution to add
+	 * @throws InterruptedException 
 	 */
-	public void addTrace(Execution execution) {
-		try {
-			if (execution == null) {
-				traceQueue.put(Execution.NULL);
-			} else {
-				traceQueue.put(execution);
-			}
-		} catch (InterruptedException e) {
-			// ignore silently
+	public void addTrace(Execution execution) throws InterruptedException {
+		if (execution == null) {
+			traceQueue.put(Execution.NULL);
+		} else {
+			traceQueue.put(execution);
 		}
 	}
 
@@ -2057,7 +2053,7 @@ public class COASTAL {
 		startingCpuTime = getCpuTime();
 		getBroker().publish("coastal-init", this);
 		if (showBanner) {
-			new Banner('~').println("COASTAL version " + Version.VERSION).display(log);
+			new Banner('~').println("COASTAL version " + VERSION).display(log);
 		}
 		// Dump the configuration
 		for (String key : configuration.getKeys()) {
@@ -2111,7 +2107,7 @@ public class COASTAL {
 			long duration = getStoppingTime() - getStartingTime();
 			long cpuDuration = stoppingCpuTime - startingCpuTime;
 			System.out.print("COASTAL");
-			System.out.print(" version: " + Version.VERSION);
+			System.out.print(" version: " + VERSION);
 			System.out.print(" model: " + runName);
 			System.out.print(" paths: " + getPathTree().getUniqueCount());
 			System.out.print(" cputime: " + cpuDuration);
@@ -2293,7 +2289,7 @@ public class COASTAL {
 			log = LogManager.getLogger("COASTAL");
 			break;
 		}
-		new Banner('~').println("COASTAL version " + Version.VERSION).display(log);
+		new Banner('~').println("COASTAL version " + VERSION).display(log);
 		Configuration config = null;
 		String runName = "", runNameParens = "";
 		if (commandLineWarning == null) {
@@ -2363,7 +2359,8 @@ public class COASTAL {
 
 	private static void displayVersion() {
 		System.out.println();
-		System.out.println("COASTAL version " + Version.VERSION);
+		System.out.println("COASTAL version " + VERSION);
+		System.out.println("Compiled: " + CompileInfo.BUILD_DATE);
 		System.out.println();
 		System.out.println("Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.");
 		System.out.println("License: GNU GPL version 3 or later, http://gnu.org/licenses/gpl.html");

@@ -4,7 +4,7 @@
 <module name="Checker">
 	<property name="fileExtensions" value="java, properties, xml" />
 	<module name="BeforeExecutionExclusionFileFilter">
-		<property name="fileNamePattern" value="src.examples"/>
+		<property name="fileNamePattern" value="(src.examples)|(CompileInfo)"/>
 	</module>
 	<!-- <module name="JavadocPackage"/> -->
 	<module name="NewlineAtEndOfFile" />

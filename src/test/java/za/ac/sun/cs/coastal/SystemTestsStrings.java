@@ -27,6 +27,24 @@ public class SystemTestsStrings extends SystemTests {
 	}
 
 	@Test
+	public void testCreateString01() {
+		final Logger log = LogManager.getLogger("COASTAL-TEST");
+		Configuration config = Configuration.load(log,
+				new String[] { "Test01.properties", "strings/CreateString01.properties" });
+		assertNotNull(config);
+		COASTAL coastal = new COASTAL(log, config);
+		coastal.start(false);
+		Reporter reporter = coastal.getReporter();
+		checkDivers(reporter, 1, 2);
+		checkSurfers(reporter, 0, 0);
+		checkDFStrategy(reporter, 1);
+		checkPathTree(reporter, 2, 0, 0);
+		checkInstrumentation(reporter, 30, 10, 1);
+		checkMarkerCoverage(reporter, 1, 1, 2);
+		checkMarkerCoverage(reporter, 2, 0, 3);
+	}
+	
+	@Test
 	public void testStarts01() {
 		final Logger log = LogManager.getLogger("COASTAL-TEST");
 		Configuration config = Configuration.load(log,

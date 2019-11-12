@@ -18,7 +18,9 @@ import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
-import za.ac.sun.cs.coastal.symbolic.exceptions.SymbolicException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.CompletedRunException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.ErrorException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 
 public class DiverFactory implements TaskFactory {
@@ -237,7 +239,7 @@ public class DiverFactory implements TaskFactory {
 			try {
 				Trigger entryPoint = coastal.getMainEntrypoint();
 				Class<?> clas = classLoader.loadClass(entryPoint.getClassName());
-				Method meth = clas.getMethod(entryPoint.getMethodName(), entryPoint.getParamTypes());
+				Method meth = clas.getDeclaredMethod(entryPoint.getMethodName(), entryPoint.getParamTypes());
 				meth.setAccessible(true);
 				meth.invoke(null, coastal.getMainArguments());
 			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
@@ -245,31 +247,36 @@ public class DiverFactory implements TaskFactory {
 				x.printStackTrace(coastal.getSystemErr());
 			} catch (InvocationTargetException x) {
 				Throwable t = x.getCause();
-				if (t == null) {
-					try {
-						symbolicState.startCatch(-1);
-					} catch (LimitConjunctException e) {
-						log.trace("conjunct limit reached");
-					} catch (SymbolicException e) {
-						// ignore, since run is over in any case
-					}
-				} else if (t instanceof SystemExitException) {
-					broker.publish("system-exit", new Tuple(this, null));
+				if (t instanceof AbortedRunException) {
+					log.trace("exception: aborted run");
+				} else if (t instanceof CompletedRunException) {
+					log.trace("exception: completed run");
 				} else if (t instanceof LimitConjunctException) {
-					log.trace("conjunct limit reached");
-				} else if (!(t instanceof SymbolicException)) {
+					log.trace("exception: conjunct limit reached");
+				} else if (t instanceof SystemExitException) {
+					log.trace("exception: System.exit() invoked");
+					broker.publish("system-exit", new Tuple(this, null));
+				} else if (t instanceof ErrorException) {
+					log.trace("*** I N T E R N A L   E R R O R ***", t.getCause());
+				} else {
 					log.trace("exception in run, diverTaskCount={}, symbolicState={} frames={}", diverTaskCount,
 							symbolicState.hashCode(), symbolicState.frames.hashCode());
-					log.trace("P R O G R A M   E X C E P T I O N:", t);
+					log.trace("exception details: ", t);
 					if (t instanceof AssertionError) {
 						broker.publish("assert-failed", new Tuple(this, null));
 					}
 					try {
 						symbolicState.startCatch(-1);
+					} catch (AbortedRunException e) {
+						log.trace("exception: aborted run");
+					} catch (CompletedRunException e) {
+						log.trace("exception: completed run");
 					} catch (LimitConjunctException e) {
-						log.trace("conjunct limit reached");
-					} catch (SymbolicException e) {
-						// ignore, since run is over in any case
+						log.trace("exception: conjunct limit reached");
+					} catch (SystemExitException e) {
+						log.trace("exception: System.exit() invoked");
+					} catch (Exception e) {
+						log.trace("exception (cause unknown): ", e);
 					}
 				}
 			}

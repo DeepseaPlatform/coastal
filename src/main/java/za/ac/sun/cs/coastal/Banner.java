@@ -166,7 +166,7 @@ public class Banner {
 	}
 
 	/**
-	 * Display the banner to the given log
+	 * Display the banner to the given log.
 	 * 
 	 * @param log
 	 *            the log
@@ -183,6 +183,24 @@ public class Banner {
 		log.info(borderLine);
 	}
 
+	/**
+	 * Display the banner to the given log using its "{@code trace}" method.
+	 * 
+	 * @param log
+	 *            the log
+	 */
+	public void trace(Logger log) {
+		log.trace(borderLine);
+		log.trace(borderLine);
+		log.trace(borderEmpty);
+		for (String line : bannerWriter.toString().split(LS)) {
+			log.trace(line);
+		}
+		log.trace(borderEmpty);
+		log.trace(borderLine);
+		log.trace(borderLine);
+	}
+	
 	/**
 	 * Display the banner to the given writer.
 	 * 

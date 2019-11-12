@@ -1,6 +1,6 @@
 package simple;
 
-import za.ac.sun.cs.coastal.symbolic.VM;
+import za.ac.sun.cs.coastal.Symbolic;
 
 public class StateMachine {
 
@@ -18,7 +18,7 @@ public class StateMachine {
 			switch (inputs[inputIndex]) {
 			case 0:
 				if (offset > 3) {
-					VM.stop("KA-CHING!");
+					Symbolic.stop("KA-CHING!");
 					System.out.println("XXX");
 					return;
 				}
