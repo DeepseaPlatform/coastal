@@ -12,7 +12,7 @@ class A {}
 
 class B {}
 
-public class ClassCastException3 {
+public class ClassCastException3X {
   public static void main(String[] args) {
     try {
       Object a = new A();

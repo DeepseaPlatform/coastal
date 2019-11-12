@@ -10,7 +10,7 @@ package svcomp;
 
 import org.sosy_lab.sv_benchmarks.Verifier;
 
-public class CharSequenceBug {
+public class CharSequenceBugX {
   public static void main(String[] args) {
     String s = Verifier.nondetString();
     CharSequence target = "b";

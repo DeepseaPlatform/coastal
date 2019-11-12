@@ -10,32 +10,26 @@ package svcomp;
 
 import org.sosy_lab.sv_benchmarks.Verifier;
 
-public class Ackermann01 {
+public class UnsatAckermann01X {
 
-  public static int ack(int m, int n) {
+  static int ackermann(int m, int n) {
     if (m == 0) {
       return n + 1;
     }
     if (n == 0) {
-      return ack(m - 1, 1);
+      return ackermann(m - 1, 1);
     }
-    return ack(m - 1, ack(m, n - 1));
+    return ackermann(m - 1, ackermann(m, n - 1));
   }
 
   public static void main(String[] args) {
     int m = Verifier.nondetInt();
-    if (m < 0 || m > 3) {
-      return;
-    }
     int n = Verifier.nondetInt();
-    if (n < 0 || n > 23) {
+    int result = ackermann(m, n);
+    if (m < 2 || result >= 4) {
       return;
-    }
-    int result = ack(m, n);
-    if (m < 0 || n < 0 || result >= 0) {
-      assert false;
     } else {
-      assert true;
+      assert false;
     }
   }
 }

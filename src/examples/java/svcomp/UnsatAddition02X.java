@@ -10,23 +10,22 @@ package svcomp;
 
 import org.sosy_lab.sv_benchmarks.Verifier;
 
-public class UnsatAckermann01 {
-
-  static int ackermann(int m, int n) {
-    if (m == 0) {
-      return n + 1;
-    }
+public class UnsatAddition02X {
+  static int addition(int m, int n) {
     if (n == 0) {
-      return ackermann(m - 1, 1);
+      return m;
+    } else if (n > 0) {
+      return addition(m + 1, n - 1);
+    } else {
+      return addition(m - 1, n + 1);
     }
-    return ackermann(m - 1, ackermann(m, n - 1));
   }
 
   public static void main(String[] args) {
     int m = Verifier.nondetInt();
     int n = Verifier.nondetInt();
-    int result = ackermann(m, n);
-    if (m < 2 || result >= 4) {
+    int result = addition(m, n);
+    if (m < 100 || n < 100 || result >= 200) {
       return;
     } else {
       assert false;

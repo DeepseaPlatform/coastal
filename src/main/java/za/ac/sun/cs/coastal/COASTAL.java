@@ -90,7 +90,8 @@ public class COASTAL {
 	 */
 	private final InstrumentationClassManager classManager;
 
-	public static final String VERSION = CompileInfo.VERSION + " (" + CompileInfo.GIT_SHA.substring(0, 8) + '-' + Long.toHexString(CompileInfo.BUILD_UNIX_TIME) + ")";
+	public static final String VERSION = CompileInfo.VERSION + " (" + CompileInfo.GIT_SHA.substring(0, 8) + '-'
+			+ Long.toHexString(CompileInfo.BUILD_UNIX_TIME) + ")";
 
 	// ======================================================================
 	//
@@ -107,7 +108,7 @@ public class COASTAL {
 	 * A list of all full class names that will be instrumented.
 	 */
 	private final List<String> fullNamesToInstrument = new ArrayList<>();
-	
+
 	/**
 	 * A list of all triggers that switch on symbolic execution.
 	 */
@@ -492,7 +493,7 @@ public class COASTAL {
 	 * A flag to indicate that all COASTAL work has terminated.
 	 */
 	private final AtomicBoolean coastalDone = new AtomicBoolean(false);
-	
+
 	// ======================================================================
 	//
 	// CONSTRUCTOR
@@ -1879,7 +1880,8 @@ public class COASTAL {
 	 * 
 	 * @param execution
 	 *                  the execution to add
-	 * @throws InterruptedException if interrupted
+	 * @throws InterruptedException
+	 *                              if interrupted
 	 */
 	public void addPc(Execution execution) throws InterruptedException {
 		if (execution == null) {
@@ -1917,7 +1919,7 @@ public class COASTAL {
 	 * 
 	 * @param execution
 	 *                  the execution to add
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	public void addTrace(Execution execution) throws InterruptedException {
 		if (execution == null) {
@@ -2219,7 +2221,7 @@ public class COASTAL {
 		OperatingSystemMXBean bean = ManagementFactory.getOperatingSystemMXBean();
 		if (!(bean instanceof com.sun.management.OperatingSystemMXBean)) {
 			return 0L;
-		} else {	
+		} else {
 			return ((com.sun.management.OperatingSystemMXBean) bean).getProcessCpuTime() / 1000000;
 		}
 	}

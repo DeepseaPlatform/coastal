@@ -3,18 +3,19 @@
  *     license: 4-clause BSD (see /java/jbmc-regression/LICENSE)
  *     repo: https://github.com/diffblue/cbmc.git
  *     branch: develop
- *     directory: regression/cbmc-java/ArithmeticException5
+ *     directory: regression/cbmc-java/NullPointerException1
  * The benchmark was taken from the repo: 24 January 2018
  */
 package svcomp;
 
-public class ArithmeticException5 {
-  public static void main(String args[]) {
+class NullPointerException1X {
+  public static void main(String[] args) {
+    Object o = null;
     try {
-      double i = 0;
-      double j = 10 / i;
-    } catch (ArithmeticException exc) {
+      o.hashCode();
+      // should pass
       assert false;
+    } catch (Exception e) {
     }
   }
-}
+};

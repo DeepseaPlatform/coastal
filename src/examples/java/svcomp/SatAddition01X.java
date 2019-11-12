@@ -10,7 +10,7 @@ package svcomp;
 
 import org.sosy_lab.sv_benchmarks.Verifier;
 
-public class SatAddition01 {
+public class SatAddition01X {
 
   static int addition(int m, int n) {
     if (n == 0) {

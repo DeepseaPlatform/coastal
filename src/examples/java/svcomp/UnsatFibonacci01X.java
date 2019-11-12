@@ -10,7 +10,7 @@ package svcomp;
 
 import org.sosy_lab.sv_benchmarks.Verifier;
 
-public class UnsatFibonacci01 {
+public class UnsatFibonacci01X {
 
   static int fibonacci(int n) {
     if (n < 1) {

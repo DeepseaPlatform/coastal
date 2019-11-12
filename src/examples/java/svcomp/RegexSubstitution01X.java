@@ -10,7 +10,7 @@ package svcomp;
 
 import java.util.Arrays;
 
-public class RegexSubstitution01 {
+public class RegexSubstitution01X {
   public static void main(String[] args) {
     String firstString = "DiffBlue ***";
     String secondString = "Automatic Test Case Generation";

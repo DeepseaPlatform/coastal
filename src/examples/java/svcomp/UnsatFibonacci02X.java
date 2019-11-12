@@ -10,22 +10,22 @@ package svcomp;
 
 import org.sosy_lab.sv_benchmarks.Verifier;
 
-public class UnsatAddition01 {
-  static int addition(int m, int n) {
-    if (n == 0) {
-      return m;
-    } else if (n > 0) {
-      return addition(m + 1, n - 1);
+public class UnsatFibonacci02X {
+
+  static int fibonacci(int n) {
+    if (n < 1) {
+      return 0;
+    } else if (n == 1) {
+      return 1;
     } else {
-      return addition(m - 1, n + 1);
+      return fibonacci(n - 1) + fibonacci(n - 2);
     }
   }
 
   public static void main(String[] args) {
-    int m = Verifier.nondetInt();
-    int n = Verifier.nondetInt();
-    int result = addition(m, n);
-    if (result == m - n) {
+    int x = Verifier.nondetInt();
+    int result = fibonacci(x);
+    if (x < 8 || result >= 34) {
       return;
     } else {
       assert false;
