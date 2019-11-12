@@ -14,8 +14,6 @@ gversion {
 	srcDir = 'src/main/java/'
 	classPackage = 'za.ac.sun.cs.coastal'
 	className = 'CompileInfo'
-	// timeZone = 'Africa/Johanesburg'
-	// debug = false
 }
 
 // FOR USING THE ECLIPSE COMPILER
@@ -64,8 +62,7 @@ sourceSets {
 // Update compile time information before a build
 project.compileJava.dependsOn(createVersionFile)
 
-// So that property files in src/test/java/tests/* are copied
-// to the test sources directory.
+// Copy property files in src/test/java/tests/* to the test sources directory.
 sourceSets.test.resources.srcDirs += [ 'src/test/java' ]
 
 // Enforce gradle version for Travis CI
@@ -84,13 +81,6 @@ javadoc {
 	options.doclet = 'za.ac.sun.cs.coastal.utility.Doclet'
 	options.noQualifiers = [ 'java.lang.*', 'java.io.*', 'java.util.*', 'org.apache.*' , 'za.ac.sun.cs.coastal.' ]
 	options.memberLevel = JavadocMemberLevel.PRIVATE
-}
-
-// Add manifest attribute to identify instrumenter for system classes (java.*)
-jar {
-	manifest{
-		attributes 'Premain-Class' : 'za.ac.sun.cs.coastal.instrument.agent.InstrumentationAgent'
-	}
 }
 
 // Add JVM runtime option to switch off JIT compilation

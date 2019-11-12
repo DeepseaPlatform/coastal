@@ -1,0 +1,98 @@
+#!/bin/bash
+
+JAVAHOME=/usr/lib/jvm/java-8-openjdk-amd64/bin
+TOOL_BINARY=coastal/bin/coastal
+FIND_OPTIONS="-name '*.java'"
+
+#------------------------------------------------------------------------------
+# parse arguments
+#------------------------------------------------------------------------------
+declare -a BM
+BM=()
+PROP_FILE=""
+WITNESS_FILE=""
+
+while [ -n "$1" ] ; do
+  case "$1" in
+    --32|--64) BIT_WIDTH="${1##--}" ; shift 1 ;;
+    --propertyfile) PROP_FILE="$2" ; shift 2 ;;
+    --graphml-witness) WITNESS_FILE="$2" ; shift 2 ;;
+    --version) date -r coastal/bin/coastal ; exit 0 ;;
+    *) SRC=(`eval "find $1 $FIND_OPTIONS"`) ; BM=("${BM[@]}" "${SRC[@]}") ; shift 1 ;;
+  esac
+done
+
+if [ -z "${BM[0]}" ] || [ -z "$PROP_FILE" ] ; then
+  echo "Missing benchmark or property file"
+  exit 1
+fi
+
+if [ ! -s "${BM[0]}" ] || [ ! -s "$PROP_FILE" ] ; then
+  echo "Empty benchmark or property file"
+  exit 1
+fi
+
+#------------------------------------------------------------------------------
+# set working directories
+#------------------------------------------------------------------------------
+LOG=`mktemp -t coastal-log.XXXXXX`
+DIR=`mktemp -d -t coastal-benchmark.XXXXXX`
+#LOG=/tmp/svcomp-coastal.log
+#DIR=/tmp/svcomp-coastal-benchmark/
+trap "rm -rf $DIR" EXIT
+
+#------------------------------------------------------------------------------
+# create target directory
+#------------------------------------------------------------------------------
+mkdir -p $DIR
+
+#------------------------------------------------------------------------------
+# compile benchmark source files
+#------------------------------------------------------------------------------
+${JAVAHOME}/javac -cp $DIR -d $DIR "${BM[@]}"
+
+#------------------------------------------------------------------------------
+# create configuration file
+#------------------------------------------------------------------------------
+CURRENT=`pwd`
+cat > $DIR/config.properties <<EOF
+coastal.target.main = Main
+coastal.target.instrument = Main
+coastal.target.trigger = Main.main(String[])
+coastal.divers.threads = 4
+coastal.strategies = GEN
+coastal.strategies.DFS = za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory
+coastal.strategies.BFS = za.ac.sun.cs.coastal.strategy.pathbased.BreadthFirstFactory
+coastal.strategies.GEN = za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory
+coastal.strategies.GEN.top-down = false
+coastal.strategies.GEN.threads = 2
+coastal.observers = za.ac.sun.cs.coastal.observers.AssertControllerFactory
+coastal.settings.solver.z3-path = $CURRENT/coastal/z3/z3
+coastal.settings.hard-exit = true
+#coastal.settings.conjunct-limit = 1000
+#coastal.settings.time-limit = 240
+coastal.settings.conjunct-limit = 130
+coastal.settings.time-limit = 120
+EOF
+
+#------------------------------------------------------------------------------
+# run COASTAL
+#------------------------------------------------------------------------------
+cd $DIR
+${JAVAHOME}/java -Xmx2048m -Xint -ea -classpath $CURRENT/coastal/lib/\* za.ac.sun.cs.coastal.COASTAL --quiet config.properties | tee $LOG
+cd -
+
+#------------------------------------------------------------------------------
+# check the result
+#------------------------------------------------------------------------------
+grep "assert-failed: false" $LOG > /dev/null
+if [ $? -eq 0 ]; then
+	echo "SAFE"
+else
+	grep "assert-failed: true" $LOG > /dev/null
+	if [ $? -eq 0 ]; then
+		echo "UNSAFE"
+	else
+		echo "UNKNOWN"
+	fi
+fi
