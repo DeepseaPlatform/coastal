@@ -29,6 +29,7 @@ mkdir -p ${DIR}/coastal/coastal
 cp -r ${PROJECTDIR}/build/install/coastal/lib ${DIR}/coastal/coastal/
 mkdir -p ${DIR}/coastal/coastal/z3
 cp ${Z3EXEC} ${DIR}/coastal/coastal/z3
+cp ${PROJECTDIR}/src/main/resources/log4j2.xml ${DIR}/coastal/coastal/
 cp ${PROJECTDIR}/extra/svcomp/coastal-sv-comp ${DIR}/coastal/
 cp ${PROJECTDIR}/LICENSE.md ${DIR}/coastal/LICENSE
 SAVED="`pwd`"

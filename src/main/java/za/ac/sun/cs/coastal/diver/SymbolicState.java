@@ -176,6 +176,7 @@ public final class SymbolicState extends State {
 	private final List<String> lines = new ArrayList<>();
 
 	private int newSymbolicVariableCounter = 0;
+
 	/**
 	 * Create a new instance of the symbolic state.
 	 * 
@@ -364,12 +365,14 @@ public final class SymbolicState extends State {
 	 * 
 	 * @return {@code true} if and only if symbolic tracking mode is still switched
 	 *         on
-	 * @throws COASTALException should never happen
+	 * @throws COASTALException
+	 *                          should never happen
 	 */
 	private boolean methodReturn() throws COASTALException {
 		assert getTrackingMode();
 		assert !frames.isEmpty();
 		int methodNumber = frames.pop().getMethodNumber();
+		log.trace("(frames.hashCode()=={})", Integer.toHexString(frames.hashCode()));
 		if (frames.isEmpty() && getRecordingMode()) {
 			log.trace("******** symbolic record mode switched off ********");
 			setRecordingMode(false);
@@ -395,10 +398,12 @@ public final class SymbolicState extends State {
 	 * Dump the stack of invocation frames to the log.
 	 */
 	private void dumpFrames() {
+		log.trace("    symbolicState #{} frames #{} instanceData #{}", Integer.toHexString(hashCode()),
+				Integer.toHexString(frames.hashCode()), Integer.toHexString(instanceData.hashCode()));
 		for (Iterator<SymbolicFrame> iter = frames.iterator(); iter.hasNext();) {
 			SymbolicFrame frame = iter.next();
-			log.trace("    id={} st{} locals:{} <{}>", frame.getFrameId(), frame.stack, frame.locals,
-					frame.getInvokingInstruction());
+			log.trace("    id={} st{} locals:{} <{}> #{}", frame.getFrameId(), frame.stack, frame.locals,
+					frame.getInvokingInstruction(), Integer.toHexString(frame.hashCode()));
 		}
 		StringBuilder b = new StringBuilder();
 		StringBuilder bb = new StringBuilder();
@@ -476,8 +481,8 @@ public final class SymbolicState extends State {
 	 * flag is set, it is reset to {@code false}.
 	 * 
 	 * @throws COASTALException
-	 *                           if the path length limit has been reached or
-	 *                           exceeded
+	 *                          if the path length limit has been reached or
+	 *                          exceeded
 	 */
 	private void checkLimitConjuncts() throws COASTALException {
 		if (dangerFlag) {
@@ -869,6 +874,7 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public SymbolicValue pop() {
+		log.trace("@@@@@@@@@@@@@@ POP @@@@@@@@@@@@@@@@@");
 		return frames.isEmpty() ? null : frames.peek().pop();
 	}
 
@@ -1092,6 +1098,8 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return 0;
 		}
+		log.trace("--> createSymbolicInt({}, {})", currentValue, name);
+		dumpFrames();
 		pop();
 		long min = ((Number) coastal.getMinBound(name, int.class)).longValue();
 		long max = ((Number) coastal.getMaxBound(name, int.class)).longValue();
@@ -1172,6 +1180,8 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return null;
 		}
+		log.trace("--> createSymbolicInt(..., {})", currentValue, name);
+		dumpFrames();
 		int length = currentValue.length();
 		int stringId = createString();
 		setStringLength(stringId, new IntegerConstant(length, 32));
@@ -1202,7 +1212,7 @@ public final class SymbolicState extends State {
 			return new String(chars);
 		}
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -1346,7 +1356,7 @@ public final class SymbolicState extends State {
 	public String makeSymbolicString(String newName) {
 		return createSymbolicString(DEFAULT_NEW_STRING, newName);
 	}
-	
+
 	// ======================================================================
 	//
 	// METHOD ROUTINES
@@ -2540,8 +2550,7 @@ public final class SymbolicState extends State {
 	 * java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor)
-			throws COASTALException {
+	public void fieldInsn(int instr, int opcode, String owner, String name, String descriptor) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}

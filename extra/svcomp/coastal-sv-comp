@@ -79,7 +79,7 @@ EOF
 # run COASTAL
 #------------------------------------------------------------------------------
 cd $DIR
-${JAVAHOME}/java -Xmx2048m -Xint -ea -classpath $CURRENT/coastal/lib/\* za.ac.sun.cs.coastal.COASTAL --quiet config.properties | tee $LOG
+${JAVAHOME}/java -Xmx2048m -Xint -ea -classpath $CURRENT/coastal/:$CURRENT/coastal/lib/\* za.ac.sun.cs.coastal.COASTAL --quiet config.properties | tee $LOG
 cd -
 
 #------------------------------------------------------------------------------

@@ -258,6 +258,7 @@ public class DiverFactory implements TaskFactory {
 					broker.publish("system-exit", new Tuple(this, null));
 				} else if (t instanceof ErrorException) {
 					log.trace("*** I N T E R N A L   E R R O R ***", t.getCause());
+					log.trace("*** symbolic state: #{} ***", Integer.toHexString(symbolicState.hashCode()));
 				} else {
 					log.trace("exception in run, diverTaskCount={}, symbolicState={} frames={}", diverTaskCount,
 							symbolicState.hashCode(), symbolicState.frames.hashCode());

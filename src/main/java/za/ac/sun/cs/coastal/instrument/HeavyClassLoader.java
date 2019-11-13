@@ -97,7 +97,7 @@ public class HeavyClassLoader extends ClassLoader {
 		}
 		if ((clas != null) && name.equals(VM_NAME)) {
 			try {
-				log.trace("> try to set symbolic state {}", symbolicState.hashCode());
+				log.trace("> try to set symbolic state #{}", Integer.toHexString(symbolicState.hashCode()));
 				Method st = clas.getDeclaredMethod("setState", State.class);
 				st.invoke(null, symbolicState);
 			} catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException

@@ -2058,6 +2058,7 @@ public class COASTAL {
 			new Banner('~').println("COASTAL version " + VERSION).display(log);
 		}
 		// Dump the configuration
+		log.info("log: {}",  log.getName());
 		for (String key : configuration.getKeys()) {
 			log.info("{} = {}", key, configuration.getString(key));
 		}
@@ -2288,7 +2289,7 @@ public class COASTAL {
 			log = LogManager.getLogger("COASTAL-PROLIX");
 			break;
 		default:
-			log = LogManager.getLogger("COASTAL");
+			log = LogManager.getLogger("COASTAL-VERBOSE");
 			break;
 		}
 		new Banner('~').println("COASTAL version " + VERSION).display(log);
@@ -2308,7 +2309,7 @@ public class COASTAL {
 		}
 		new Banner('~').println("COASTAL DONE" + runNameParens).display(log);
 		LogManager.shutdown(true);
-		if (config.getBoolean("coastal.settings.hard-exit", false)) {
+		if ((config == null) || (config.getBoolean("coastal.settings.hard-exit", false))) {
 			System.exit(0);
 		}
 	}
