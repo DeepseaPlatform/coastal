@@ -281,7 +281,8 @@ public class DiverFactory implements TaskFactory {
 					}
 				}
 			}
-			log.trace("end of run, diverTaskCount={}, symbolicState={}", diverTaskCount, symbolicState);
+			log.trace("end of run, diverTaskCount={}, symbolicState #{}", diverTaskCount,
+					Integer.toHexString(symbolicState.hashCode()));
 		}
 
 	}
