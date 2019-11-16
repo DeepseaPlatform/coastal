@@ -267,6 +267,11 @@ public class DiverValueFactory implements SymbolicValueFactory {
 		}
 
 		@Override
+		public SymbolicValue l2d() {
+			return createSymbolicValue(Operation.l2d(expression));
+		}
+
+		@Override
 		public String toString() {
 			return expression.toString();
 		}

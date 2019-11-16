@@ -197,6 +197,7 @@ public final class Evaluator extends Visitor {
 		case I2B:
 		case I2F:
 		case I2D:
+		case L2D:
 		case F2D:
 		case D2I:
 		case D2L:

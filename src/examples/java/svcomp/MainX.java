@@ -30,48 +30,71 @@ import org.sosy_lab.sv_benchmarks.Verifier;
 
 public class MainX {
 
+	static int field;
+
 	public static void main(String[] args) {
-		long x = Verifier.nondetLong();
-		long y = 5;
+		int x = 3; /*
+					 * we want to specify in an annotation that this param should be symbolic
+					 */
+
 		MainX inst = new MainX();
-		inst.test(x, y);
+		field = 9;
+		// inst.test1(0.0, 0.0, 0.0, 0, 0, 0, 0.0, 0.0);
+		// inst.angleXY_(0.0, 0.0);
+		inst.test2(0.0);
 	}
 
-	/*
-	 * test LADD, LCMP, LMUL, LNEG, LSUB , Invokestatic bytecodes no globals
-	 */
-
-	public static void test(long x, long z) { // invokestatic
-
-		System.out.println("Testing ExSymExeLongBytecodes");
-
-		long a = x;
-		long b = z;
-		long c = 34565;
-
-		long negate = -z; // LNEG
-
-		long sum = a + b; // LADD
-		long sum2 = z + 9090909L; // LADD
-		long sum3 = 90908877L + z; // LADD
-
-		long diff = a - b; // LSUB
-		long diff2 = b - 19999999999L; // LSUB
-		long diff3 = 9999999999L - a; // LSUB
-
-		long mul = a * b; // LMUL
-		long mul2 = a * 19999999999L; // LMUL
-		long mul3 = 19999999999L * b; // LMUL
-
-		if (diff > c)
-			System.out.println("branch diff > c");
+	/* we want to let the user specify that this method should be symbolic */
+	public void test2(double in) {
+		if (Math.round(in) > 16.0)
+			System.out.println("do1()");
 		else {
 			assert false;
-			System.out.println("branch diff <= c");
+			System.out.println("do2()");
 		}
-		if (sum < z)
-			System.out.println("branch sum < z");
-		else
-			System.out.println("branch sum >= z");
+	}
+
+	public void test1(double C_v, double A_v, double bank_ang, int Cdir, int Cturn, int Aturn, double A_Psi0_deg,
+			double C_Psi0_deg) {
+
+		if (C_v > 0.0 && A_v > 0.0 && bank_ang < 90.0 && bank_ang > 0.0 && Cdir < 3 && Cdir >= 0)
+
+			if (0.0 == ((Math.pow(
+					((C_v * (Math.sin((((C_Psi0_deg * 0.017453292519943295) - (A_Psi0_deg * 0.017453292519943295))
+							+ ((((((((Math.pow(A_v, 2.0)) / ((Math.sin((bank_ang * 0.017453292519943295)))
+									/ (Math.cos((bank_ang * 0.017453292519943295))))) / 68443.0) * 0.0) / A_v) * -1.0)
+									* C_v)
+									/ (((Math.pow(C_v, 2.0)) / ((Math.sin((bank_ang * 0.017453292519943295)))
+											/ (Math.cos((bank_ang * 0.017453292519943295))))) / 68443.0))))))
+							- (A_v * 0.0)),
+					2.0))
+					+ (Math.pow(((C_v * (Math.cos((((C_Psi0_deg * 0.017453292519943295)
+							- (A_Psi0_deg * 0.017453292519943295))
+							+ ((((((((Math.pow(A_v, 2.0)) / ((Math.sin((bank_ang * 0.017453292519943295)))
+									/ (Math.cos((bank_ang * 0.017453292519943295))))) / 68443.0) * 0.0) / A_v) * -1.0)
+									* C_v)
+									/ (((Math.pow(C_v, 2.0)) / ((Math.sin((bank_ang * 0.017453292519943295)))
+											/ (Math.cos((bank_ang * 0.017453292519943295))))) / 68443.0))))))
+							- (A_v * 1.0)), 2.0)))
+					&& Cturn != 0 && Aturn != 0 &&
+					// Cdir == 0 &&
+					C_v > 0.0 && A_v > 0.0 && bank_ang < 90.0 && bank_ang > 0.0 && Cdir < 3 && Cdir >= 0)
+
+				System.out.println("Solved!");
+	}
+
+	public void angleXY_(double x1, double y1) {
+		double x = x1;
+		double y = y1;
+		if (x == 0 && y != 0) {
+			System.out.println(">>>>>>>>>>>> 1");
+		} else {
+			System.out.println(">>>>>>>>>>>> LOOK!");
+			if (x < 0) {
+				System.out.println(">>>>>>>>>>>>>>> ???");
+			} else if (x > 0) {
+				System.out.println(">>>>>>>>>>>>>>> !!!1");
+			}
+		}
 	}
 }

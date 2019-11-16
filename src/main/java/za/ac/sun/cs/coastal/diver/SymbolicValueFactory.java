@@ -360,6 +360,14 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 */
 		SymbolicValue i2f();
 
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
+		SymbolicValue l2d();
+
 	}
 
 }

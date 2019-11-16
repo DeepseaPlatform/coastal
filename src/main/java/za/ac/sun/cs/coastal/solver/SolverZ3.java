@@ -354,6 +354,7 @@ public class SolverZ3 extends Solver {
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 8));
 					break;
+				case L2D:
 				case I2D:
 					b.append("((_ to_fp 11 53) RNE ");
 					b.append(l.getEntry()).append(')');

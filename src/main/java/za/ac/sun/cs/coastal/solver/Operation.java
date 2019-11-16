@@ -237,6 +237,10 @@ public class Operation extends Expression {
 		return new Operation(Operator.I2F, a);
 	}
 
+	public static Expression l2d(Expression a) {
+		return new Operation(Operator.L2D, a);
+	}
+
 	public static Expression d2i(Expression a) {
 		return new Operation(Operator.D2I, a);
 	}
@@ -533,6 +537,7 @@ public class Operation extends Expression {
 		I2B("I2B", 1, Fix.PREFIX, null, null),
 		I2D("I2D", 1, Fix.PREFIX, null, null),
 		I2F("I2F", 1, Fix.PREFIX, null, null),
+		L2D("L2D", 1, Fix.PREFIX, null, null),
 		F2D("F2D", 1, Fix.PREFIX, null, null),
 		D2I("D2I", 1, Fix.PREFIX, null, null),
 		D2L("D2L", 1, Fix.PREFIX, null, null),
