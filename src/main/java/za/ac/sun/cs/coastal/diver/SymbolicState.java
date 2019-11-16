@@ -1950,8 +1950,11 @@ public final class SymbolicState extends State {
 				params.push(pop());
 			}
 			FRAMES.get().push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
+			int address = 0;
 			for (int i = 0; i < argCount; i++) {
-				setLocal(i, params.pop());
+				SymbolicValue value = params.pop();
+				setLocal(address, value);
+				address += (value.toExpression().getBitSize() > 32) ? 2 : 1;
 			}
 		}
 		dumpFrames();
