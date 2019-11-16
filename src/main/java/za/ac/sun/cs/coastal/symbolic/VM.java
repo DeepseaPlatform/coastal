@@ -178,6 +178,16 @@ public class VM {
 		}
 	}
 	
+	public static void assume(boolean condition) throws COASTALException {
+		try {
+			state.assume(condition);
+		} catch (ControlException x) {
+			throw x;
+		} catch (Throwable x) {
+			throw new ErrorException(x);
+		}
+	}
+	
 	public static int makeSymbolicInt(String newName) throws COASTALException {
 		try {
 			return state.makeSymbolicInt(newName);

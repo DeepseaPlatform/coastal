@@ -281,6 +281,17 @@ public final class TraceState extends State {
 		return null; // TODO
 	}
 
+	@Override
+	public void assume(boolean condition) throws COASTALException {
+		if (!condition) {
+			log.trace("******** symbolic record mode switched off (trace) - failed assumption ********");
+			setRecordingMode(false);
+			mayRecord = false;
+			setTrackingMode(false);
+			throw new CompletedRunException();
+		}
+	}
+	
 	public int makeSymbolicInt(String newName) {
 		return 0;
 	}

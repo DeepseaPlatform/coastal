@@ -16,6 +16,8 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	private static final String LIBRARY = "za/ac/sun/cs/coastal/symbolic/VM";
 
+	private static final String VERIFIER = "org/sosy_lab/sv_benchmarks/Verifier";
+
 	private static final String SYSTEM = "java/lang/System";
 
 	private final COASTAL coastal;
@@ -34,7 +36,8 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	private BitSet currentLinenumbers;
 
-	public LightMethodAdapter(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, boolean isStatic, int argCount) {
+	public LightMethodAdapter(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, boolean isStatic,
+			int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.coastal = coastal;
 		this.log = coastal.getLog();
@@ -215,16 +218,16 @@ public class LightMethodAdapter extends MethodVisitor {
 	public void visitCode() {
 		log.trace("Linstrument visitCode()");
 		if (triggerIndex >= 0) {
-			//--- IF (symbolicMode) {
+			// --- IF (symbolicMode) {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "getRecordingMode", "()Z", false);
 			Label label = new Label();
 			mv.visitJumpInsn(Opcodes.IFNE, label);
-			//---   triggerMethod()
+			// --- triggerMethod()
 			mv.visitLdcInsn(classManager.getNextMethodCounter());
 			mv.visitLdcInsn(triggerIndex);
 			mv.visitLdcInsn(isStatic);
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "triggerMethod", "(IIZ)V", false);
-			//---   GENERATE PARAMETER OVERRIDES
+			// --- GENERATE PARAMETER OVERRIDES
 			Trigger trigger = coastal.getTrigger(triggerIndex);
 			int n = trigger.getParamCount();
 			int offset = (isStatic ? 0 : 1);
@@ -236,12 +239,12 @@ public class LightMethodAdapter extends MethodVisitor {
 			mv.visitJumpInsn(Opcodes.GOTO, end);
 			mv.visitLabel(label);
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-			//--- } else {
-			//---   startMethod()
+			// --- } else {
+			// --- startMethod()
 			mv.visitLdcInsn(classManager.getMethodCounter());
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
-			//--- }
+			// --- }
 			mv.visitLabel(end);
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		} else {
@@ -269,9 +272,10 @@ public class LightMethodAdapter extends MethodVisitor {
 			break;
 		}
 		mv.visitInsn(opcode);
-		//		if (opcode == Opcodes.IDIV) {
-		//			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "noException", "()V", false);
-		//		}
+		// if (opcode == Opcodes.IDIV) {
+		// mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "noException", "()V",
+		// false);
+		// }
 	}
 
 	@Override
@@ -282,6 +286,8 @@ public class LightMethodAdapter extends MethodVisitor {
 			// pop params !!!!!!!!!!!
 		} else if (owner.equals(SYSTEM) && name.equals("exit")) {
 			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "systemExit", "(I)V", false);
+		} else if (owner.equals(VERIFIER) && name.equals("assume")) {
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "assume", "(Z)V", false);
 		} else {
 			mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 		}

@@ -316,6 +316,8 @@ public abstract class State {
 	 */
 	public abstract String createSymbolicString(String currentValue, int uniqueId) throws COASTALException;
 
+	public abstract void assume(boolean condition) throws COASTALException;
+	
 	public abstract int makeSymbolicInt(String newName) throws COASTALException;
 	
 	public abstract short makeSymbolicShort(String newName) throws COASTALException;

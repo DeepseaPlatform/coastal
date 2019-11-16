@@ -38,6 +38,7 @@ import za.ac.sun.cs.coastal.symbolic.State;
 import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.COASTALException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.CompletedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 import za.ac.sun.cs.coastal.utility.Translator;
 
@@ -1215,6 +1216,17 @@ public final class SymbolicState extends State {
 			push(new IntegerConstant(stringId, 32));
 			input.put(name, new String(chars));
 			return new String(chars);
+		}
+	}
+
+	@Override
+	public void assume(boolean condition) throws COASTALException {
+		if (!condition) {
+			log.trace("******** symbolic record mode switched off - failed assumption ********");
+			setRecordingMode(false);
+			mayRecord = false;
+			setTrackingMode(false);
+			throw new CompletedRunException();
 		}
 	}
 
