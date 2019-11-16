@@ -279,7 +279,7 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @return
 		 */
 		SymbolicValue d2l();
-		
+
 		/**
 		 *
 		 *
@@ -287,7 +287,7 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @return
 		 */
 		SymbolicValue f2i();
-		
+
 		/**
 		 *
 		 *
@@ -295,7 +295,7 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @return
 		 */
 		SymbolicValue f2l();
-		
+
 		/**
 		 *
 		 *
