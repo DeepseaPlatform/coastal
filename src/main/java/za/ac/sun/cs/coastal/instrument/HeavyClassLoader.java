@@ -25,13 +25,13 @@ public class HeavyClassLoader extends ClassLoader {
 
 	private final InstrumentationClassManager manager;
 
-	private final SymbolicState symbolicState;
+	private final ThreadLocal<SymbolicState> symbolicState = new ThreadLocal<>();
 
 	public HeavyClassLoader(COASTAL coastal, InstrumentationClassManager manager, SymbolicState symbolicState) {
 		this.coastal = coastal;
 		this.log = coastal.getLog();
 		this.manager = manager;
-		this.symbolicState = symbolicState;
+		this.symbolicState.set(symbolicState);
 	}
 
 	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
@@ -43,6 +43,7 @@ public class HeavyClassLoader extends ClassLoader {
 	}
 
 	public synchronized Class<?> loadClass0(String name, boolean resolve) throws ClassNotFoundException {
+		log.trace("> ((symbolicState #{}))", Integer.toHexString(symbolicState.get().hashCode()));
 		Class<?> clas = findLoadedClass(name);
 		if (clas != null) {
 			log.trace("> loading class {}, found in cache", name);
@@ -50,7 +51,7 @@ public class HeavyClassLoader extends ClassLoader {
 		}
 		if (name.equals(SYMBOLIC_STATE_NAME)) {
 			log.trace("> loading class {} from parent (1)", name);
-			return symbolicState.getClass();
+			return symbolicState.get().getClass();
 		} else if (name.equals(STATE_NAME)) {
 			log.trace("> loading class {} from parent (2)", name);
 			return State.class;
@@ -97,9 +98,9 @@ public class HeavyClassLoader extends ClassLoader {
 		}
 		if ((clas != null) && name.equals(VM_NAME)) {
 			try {
-				log.trace("> try to set symbolic state #{}", Integer.toHexString(symbolicState.hashCode()));
+				log.trace("> try to set symbolic state #{}", Integer.toHexString(symbolicState.get().hashCode()));
 				Method st = clas.getDeclaredMethod("setState", State.class);
-				st.invoke(null, symbolicState);
+				st.invoke(null, symbolicState.get());
 			} catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException
 					| InvocationTargetException e) {
 				e.printStackTrace();

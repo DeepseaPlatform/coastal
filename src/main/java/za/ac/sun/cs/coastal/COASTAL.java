@@ -2220,11 +2220,12 @@ public class COASTAL {
 	@SuppressWarnings("restriction")
 	private long getCpuTime() {
 		OperatingSystemMXBean bean = ManagementFactory.getOperatingSystemMXBean();
-		if (!(bean instanceof com.sun.management.OperatingSystemMXBean)) {
-			return 0L;
-		} else {
-			return ((com.sun.management.OperatingSystemMXBean) bean).getProcessCpuTime() / 1000000;
-		}
+//		if (!(bean instanceof com.sun.management.OperatingSystemMXBean)) {
+//			return 0L;
+//		} else {
+//			return ((com.sun.management.OperatingSystemMXBean) bean).getProcessCpuTime() / 1000000;
+//		}
+		return 0L;
 	}
 
 	/**
