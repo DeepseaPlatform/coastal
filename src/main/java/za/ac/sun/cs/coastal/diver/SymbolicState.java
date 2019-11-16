@@ -1995,8 +1995,15 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public void returnValue(double returnValue) {
-		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE double");
-		System.exit(1);
+		if (!getTrackingMode()) {
+			return;
+		}
+		if (justExecutedDelegate) {
+			justExecutedDelegate = false;
+		} else {
+			Expression value = new RealConstant(returnValue, 64);
+			pushExtraCondition(Operation.eq(peek().toExpression(), value));
+		}
 	}
 
 	/*
@@ -2006,8 +2013,15 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public void returnValue(float returnValue) {
-		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE float");
-		System.exit(1);
+		if (!getTrackingMode()) {
+			return;
+		}
+		if (justExecutedDelegate) {
+			justExecutedDelegate = false;
+		} else {
+			Expression value = new RealConstant(returnValue, 32);
+			pushExtraCondition(Operation.eq(peek().toExpression(), value));
+		}
 	}
 
 	/*
@@ -2035,8 +2049,15 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public void returnValue(long returnValue) {
-		log.fatal("UNIMPLEMENTED RETURN VALUE OF TYPE long");
-		System.exit(1);
+		if (!getTrackingMode()) {
+			return;
+		}
+		if (justExecutedDelegate) {
+			justExecutedDelegate = false;
+		} else {
+			Expression value = new IntegerConstant(returnValue, 64);
+			pushExtraCondition(Operation.eq(peek().toExpression(), value));
+		}
 	}
 
 	/*
@@ -2049,7 +2070,7 @@ public final class SymbolicState extends State {
 		if (justExecutedDelegate) {
 			justExecutedDelegate = false;
 		} else {
-			Expression value = new IntegerConstant(returnValue, 32);
+			Expression value = new IntegerConstant(returnValue, 16);
 			pushExtraCondition(Operation.eq(peek().toExpression(), value));
 		}
 	}
