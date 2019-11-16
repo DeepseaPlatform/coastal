@@ -133,6 +133,11 @@ public class DiverValueFactory implements SymbolicValueFactory {
 			return createSymbolicValue(Operation.rem(expression, value.toExpression()));
 		}
 
+		@Override
+		public SymbolicValue fneg() {
+			return createSymbolicValue(Operation.fneg(expression));
+		}
+
 		// ----------------------------------------------------------------------
 		//
 		// BIT OPERATIONS
@@ -249,6 +254,16 @@ public class DiverValueFactory implements SymbolicValueFactory {
 		@Override
 		public SymbolicValue i2c() {
 			return createSymbolicValue(Operation.i2c(expression));
+		}
+
+		@Override
+		public SymbolicValue i2d() {
+			return createSymbolicValue(Operation.i2d(expression));
+		}
+
+		@Override
+		public SymbolicValue i2f() {
+			return createSymbolicValue(Operation.i2f(expression));
 		}
 
 		@Override

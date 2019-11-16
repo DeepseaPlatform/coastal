@@ -158,6 +158,14 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 */
 		SymbolicValue rem(SymbolicValue value);
 
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
+		SymbolicValue fneg();
+
 		// ----------------------------------------------------------------------
 		//
 		// BIT OPERATIONS
@@ -335,6 +343,22 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @return
 		 */
 		SymbolicValue i2c();
+
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
+		SymbolicValue i2d();
+
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
+		SymbolicValue i2f();
 
 	}
 

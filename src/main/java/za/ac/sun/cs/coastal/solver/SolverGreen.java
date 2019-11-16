@@ -233,11 +233,14 @@ public class SolverGreen extends Solver {
 				case I2C:
 				case I2S:
 				case I2B:
+				case I2D:
+				case I2F:
+				case D2I:
+				case D2L:
 				case F2D:
 				case F2I:
 				case F2L:
-				case D2I:
-				case D2L:
+				case FNEG:
 					stack.push(l);
 					break;
 				default:

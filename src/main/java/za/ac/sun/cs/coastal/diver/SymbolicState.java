@@ -2261,6 +2261,9 @@ public final class SymbolicState extends State {
 		case Opcodes.INEG:
 			push(pop().mul(symbolicValueFactory.createSymbolicValue(new IntegerConstant(-1, 32))));
 			break;
+		case Opcodes.FNEG:
+			push(pop().fneg());
+			break;
 		case Opcodes.IADD:
 		case Opcodes.LADD:
 		case Opcodes.FADD:
@@ -2377,6 +2380,12 @@ public final class SymbolicState extends State {
 			break;
 		case Opcodes.I2C:
 			push(pop().i2c());
+			break;
+		case Opcodes.I2D:
+			push(pop().i2d());
+			break;
+		case Opcodes.I2F:
+			push(pop().i2f());
 			break;
 //		case Opcodes.L2I:
 //			push(Operation.l2i(pop()));

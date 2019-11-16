@@ -229,6 +229,14 @@ public class Operation extends Expression {
 		return new Operation(Operator.I2B, a);
 	}
 	
+	public static Expression i2d(Expression a) {
+		return new Operation(Operator.I2D, a);
+	}
+
+	public static Expression i2f(Expression a) {
+		return new Operation(Operator.I2F, a);
+	}
+
 	public static Expression d2i(Expression a) {
 		return new Operation(Operator.D2I, a);
 	}
@@ -247,6 +255,10 @@ public class Operation extends Expression {
 	
 	public static Expression f2d(Expression a) {
 		return new Operation(Operator.F2D, a);
+	}
+	
+	public static Expression fneg(Expression a) {
+		return new Operation(Operator.FNEG, a);
 	}
 	
 	public static Expression add(Expression a, Expression b) {
@@ -516,9 +528,11 @@ public class Operation extends Expression {
 		B2I("B2I", 1, Fix.PREFIX, null, null),
 		S2I("S2I", 1, Fix.PREFIX, null, null),
 		I2L("I2L", 1, Fix.PREFIX, null, null),
-		I2S("I2C", 1, Fix.PREFIX, null, null),
-		I2C("I2S", 1, Fix.PREFIX, null, null),
+		I2S("I2S", 1, Fix.PREFIX, null, null),
+		I2C("I2C", 1, Fix.PREFIX, null, null),
 		I2B("I2B", 1, Fix.PREFIX, null, null),
+		I2D("I2D", 1, Fix.PREFIX, null, null),
+		I2F("I2F", 1, Fix.PREFIX, null, null),
 		F2D("F2D", 1, Fix.PREFIX, null, null),
 		D2I("D2I", 1, Fix.PREFIX, null, null),
 		D2L("D2L", 1, Fix.PREFIX, null, null),
@@ -530,6 +544,7 @@ public class Operation extends Expression {
 		MUL("*", 2, Fix.INFIX, "bvmul", "fp.mul RNE"),
 		DIV("/", 2, Fix.INFIX, "bvsdiv", "fp.div RNE"),
 		REM("%", 2, Fix.INFIX, "bvsrem", "fp.rem RNE"),
+		FNEG("-", 1, Fix.PREFIX, null, "fp.neg RNE"),
 		// ---- Bitwise operators ----
 		BITOR("|", 2, Fix.INFIX, "bvor", null),
 		BITAND("&", 2, Fix.INFIX, "bvand", null),

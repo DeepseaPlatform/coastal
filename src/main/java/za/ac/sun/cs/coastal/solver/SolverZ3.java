@@ -354,6 +354,16 @@ public class SolverZ3 extends Solver {
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 8));
 					break;
+				case I2D:
+					b.append("((_ to_fp 11 53) RNE ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 8));
+					break;
+				case I2F:
+					b.append("((_ to_fp 8 24) RNE ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 8));
+					break;
 				case F2D:
 					b.append("((_ to_fp 11 53) RNE ");
 					b.append(l.getEntry()).append(')');
@@ -368,6 +378,11 @@ public class SolverZ3 extends Solver {
 				case F2L:
 				case D2L:
 					b.append("((_ fp.to_sbv 64) RNE ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
+					break;
+				case FNEG:
+					b.append("(fp.neg 32 RNE ");
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
 					break;

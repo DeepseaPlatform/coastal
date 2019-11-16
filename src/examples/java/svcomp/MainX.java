@@ -31,19 +31,19 @@ import org.sosy_lab.sv_benchmarks.Verifier;
 public class MainX {
 
 	public static void main(String[] args) {
-		double x = 3.0;
-
+		float x = Verifier.nondetFloat();
 		MainX inst = new MainX();
 		inst.test(x);
 	}
 
-	public void test(double x) {
-
-		int res = (int) ++x;
-		if (res > 0) {
+	public void test(float x) {
+		System.out.println("Testing FNEG");
+		float y = -x;
+		if (y > 0)
+			System.out.println("branch -x > 0");
+		else {
 			assert false;
-			System.out.println("x >0");
-		} else
-			System.out.println("x <=0");
+			System.out.println("branch -x <= 0");
+		}
 	}
 }
