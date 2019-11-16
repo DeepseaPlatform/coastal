@@ -2354,6 +2354,15 @@ public final class SymbolicState extends State {
 		case Opcodes.D2I:
 			push(pop().d2i());
 			break;
+		case Opcodes.D2L:
+			push(pop().d2l());
+			break;
+		case Opcodes.F2I:
+			push(pop().f2i());
+			break;
+		case Opcodes.F2L:
+			push(pop().f2l());
+			break;
 		case Opcodes.F2D:
 			push(pop().f2d());
 			break;

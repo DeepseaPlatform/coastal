@@ -278,6 +278,30 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @param value
 		 * @return
 		 */
+		SymbolicValue d2l();
+		
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
+		SymbolicValue f2i();
+		
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
+		SymbolicValue f2l();
+		
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
 		SymbolicValue f2d();
 
 		/**

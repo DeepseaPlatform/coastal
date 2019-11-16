@@ -359,8 +359,15 @@ public class SolverZ3 extends Solver {
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
 					break;
+				case F2I:
 				case D2I:
 					b.append("((_ fp.to_sbv 32) RNE ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
+					break;
+				case F2L:
+				case D2L:
+					b.append("((_ fp.to_sbv 64) RNE ");
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
 					break;
