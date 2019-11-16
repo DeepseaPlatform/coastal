@@ -234,6 +234,7 @@ public class SolverGreen extends Solver {
 				case I2S:
 				case I2B:
 				case F2D:
+				case D2I:
 					stack.push(l);
 					break;
 				default:

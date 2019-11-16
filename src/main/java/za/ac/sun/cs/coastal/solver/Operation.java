@@ -229,10 +229,14 @@ public class Operation extends Expression {
 		return new Operation(Operator.I2B, a);
 	}
 	
+	public static Expression d2i(Expression a) {
+		return new Operation(Operator.D2I, a);
+	}
+
 	public static Expression f2d(Expression a) {
 		return new Operation(Operator.F2D, a);
 	}
-
+	
 	public static Expression add(Expression a, Expression b) {
 		if (a instanceof IntegerConstant) {
 			if (b instanceof IntegerConstant) {
@@ -504,6 +508,7 @@ public class Operation extends Expression {
 		I2C("I2S", 1, Fix.PREFIX, null, null),
 		I2B("I2B", 1, Fix.PREFIX, null, null),
 		F2D("F2D", 1, Fix.PREFIX, null, null),
+		D2I("D2I", 1, Fix.PREFIX, null, null),
 		// ---- Arithmetic operators ----
 		ADD("+", 2, Fix.INFIX, "bvadd", "fp.add RNE"),
 		SUB("-", 2, Fix.INFIX, "bvsub", "fp.sub RNE"),
