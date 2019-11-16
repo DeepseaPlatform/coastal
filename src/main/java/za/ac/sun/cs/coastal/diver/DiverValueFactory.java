@@ -215,7 +215,7 @@ public class DiverValueFactory implements SymbolicValueFactory {
 		public SymbolicValue f2d() {
 			return createSymbolicValue(Operation.f2d(expression));
 		}
-		
+
 		@Override
 		public SymbolicValue i2l() {
 			return createSymbolicValue(Operation.i2l(expression));

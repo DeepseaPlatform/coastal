@@ -279,7 +279,7 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @return
 		 */
 		SymbolicValue f2d();
-		
+
 		/**
 		 *
 		 *

@@ -103,7 +103,8 @@ public class DiverFactory implements TaskFactory {
 		 * Add a reported dive time to the accumulator that tracks how long the dives
 		 * took.
 		 * 
-		 * @param time the time for this dive
+		 * @param time
+		 *             the time for this dive
 		 */
 		public void recordTime(long time) {
 			diverTime.addAndGet(time);
@@ -113,7 +114,8 @@ public class DiverFactory implements TaskFactory {
 		 * Add a reported dive wait time. This is used to determine if it makes sense to
 		 * create additional threads (or destroy them).
 		 * 
-		 * @param time the wait time for this dive
+		 * @param time
+		 *             the wait time for this dive
 		 */
 		public void recordWaitTime(long time) {
 			diverWaitTime.addAndGet(time);
