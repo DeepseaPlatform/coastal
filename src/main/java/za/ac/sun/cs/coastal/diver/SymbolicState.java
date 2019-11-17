@@ -2597,6 +2597,7 @@ public final class SymbolicState extends State {
 			int id = incrAndGetNewObjectId();
 			push(new IntegerConstant(id, 32), 32);
 			break;
+		case Opcodes.INSTANCEOF:
 		case Opcodes.CHECKCAST:
 			break;
 		case Opcodes.ANEWARRAY:
