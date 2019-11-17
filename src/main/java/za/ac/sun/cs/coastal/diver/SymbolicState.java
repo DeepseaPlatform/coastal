@@ -2405,10 +2405,12 @@ public final class SymbolicState extends State {
 		case Opcodes.L2D:
 			push(pop().l2d());
 			break;
-//		case Opcodes.L2I:
-//			push(Operation.l2i(pop()));
-//			break;
-
+		case Opcodes.L2F:
+			push(pop().l2f());
+			break;
+		case Opcodes.L2I:
+			push(pop().l2i());
+			break;
 		// case Opcodes.D2F:
 		// break;
 		case Opcodes.LCMP:
@@ -2463,7 +2465,9 @@ public final class SymbolicState extends State {
 			// broker.publish("assert-failed", new Tuple(this, null));
 			break;
 		case Opcodes.MONITORENTER:
-			pop();
+			noExceptionExpression.add(Operation.FALSE);
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = pop().toExpression();
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);

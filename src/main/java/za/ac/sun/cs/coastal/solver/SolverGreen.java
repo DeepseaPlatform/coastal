@@ -236,6 +236,8 @@ public class SolverGreen extends Solver {
 				case I2D:
 				case I2F:
 				case L2D:
+				case L2F:
+				case L2I:
 				case D2I:
 				case D2L:
 				case F2D:
