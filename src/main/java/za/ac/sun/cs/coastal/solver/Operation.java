@@ -13,19 +13,32 @@ public class Operation extends Expression {
 
 	protected final Expression[] operands;
 
+	protected final int resultingSize;
+	
 	public Operation(final Operator operator, Expression... operands) {
 		this.operator = operator;
 		this.operands = operands;
+		this.resultingSize = 0;
 	}
 
+	public Operation(final Operator operator, int resultingSize, Expression... operands) {
+		this.operator = operator;
+		this.operands = operands;
+		this.resultingSize = resultingSize;
+	}
+	
 	public Operator getOperator() {
 		return operator;
 	}
 
-	public int getOperatandCount() {
+	public int getOperandCount() {
 		return operands.length;
 	}
 
+	public int getResultingSize() {
+		return resultingSize;
+	}
+	
 	public Iterable<Expression> getOperands() {
 		return new Iterable<Expression>() {
 			@Override
@@ -186,7 +199,7 @@ public class Operation extends Expression {
 	}
 
 	public static Expression lcmp(Expression a, Expression b) {
-		return new Operation(Operator.LCMP, a, b);
+		return new Operation(Operator.LCMP, 32, a, b);
 	}
 
 	public static Expression fcmpl(Expression a, Expression b) {
@@ -198,11 +211,11 @@ public class Operation extends Expression {
 	}
 
 	public static Expression dcmpl(Expression a, Expression b) {
-		return new Operation(Operator.DCMPL, a, b);
+		return new Operation(Operator.DCMPL, 32, a, b);
 	}
 
 	public static Expression dcmpg(Expression a, Expression b) {
-		return new Operation(Operator.DCMPG, a, b);
+		return new Operation(Operator.DCMPG, 32, a, b);
 	}
 	
 	public static Expression b2i(Expression a) {
@@ -214,7 +227,7 @@ public class Operation extends Expression {
 	}
 	
 	public static Expression i2l(Expression a) {
-		return new Operation(Operator.I2L, a);
+		return new Operation(Operator.I2L, 64, a);
 	}
 	
 	public static Expression i2s(Expression a) {
@@ -230,7 +243,7 @@ public class Operation extends Expression {
 	}
 	
 	public static Expression i2d(Expression a) {
-		return new Operation(Operator.I2D, a);
+		return new Operation(Operator.I2D, 64, a);
 	}
 
 	public static Expression i2f(Expression a) {
@@ -242,15 +255,15 @@ public class Operation extends Expression {
 	}
 
 	public static Expression l2f(Expression a) {
-		return new Operation(Operator.L2F, a);
+		return new Operation(Operator.L2F, 32, a);
 	}
 
 	public static Expression l2i(Expression a) {
-		return new Operation(Operator.L2I, a);
+		return new Operation(Operator.L2I, 32, a);
 	}
 	
 	public static Expression d2i(Expression a) {
-		return new Operation(Operator.D2I, a);
+		return new Operation(Operator.D2I, 32, a);
 	}
 
 	public static Expression d2l(Expression a) {
@@ -262,11 +275,11 @@ public class Operation extends Expression {
 	}
 	
 	public static Expression f2l(Expression a) {
-		return new Operation(Operator.F2L, a);
+		return new Operation(Operator.F2L, 64, a);
 	}
 	
 	public static Expression f2d(Expression a) {
-		return new Operation(Operator.F2D, a);
+		return new Operation(Operator.F2D, 64, a);
 	}
 	
 	public static Expression fneg(Expression a) {

@@ -55,7 +55,7 @@ public abstract class SegmentedPC extends Branch {
 	public static final boolean isConstant(Expression expression) {
 		if (expression instanceof Operation) {
 			Operation operation = (Operation) expression;
-			int n = operation.getOperatandCount();
+			int n = operation.getOperandCount();
 			for (int i = 0; i < n; i++) {
 				if (!isConstant(operation.getOperand(i))) {
 					return false;

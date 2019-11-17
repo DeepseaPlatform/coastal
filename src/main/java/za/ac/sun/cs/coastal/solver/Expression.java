@@ -59,8 +59,8 @@ public abstract class Expression implements Comparable<Expression> {
 
 		@Override
 		public void postVisit(Operation operation) throws VisitorException {
-			int n = operation.getOperatandCount();
-			int result = 0;
+			int n = operation.getOperandCount();
+			int result = operation.getResultingSize();
 			while (n-- > 0) {
 				result = Math.max(result, stack.pop());
 			}
@@ -115,7 +115,7 @@ public abstract class Expression implements Comparable<Expression> {
 
 		@Override
 		public void postVisit(Operation operation) throws VisitorException {
-			int n = operation.getOperatandCount();
+			int n = operation.getOperandCount();
 			boolean result = true;
 			while (n-- > 0) {
 				result = stack.pop() ? result : false;

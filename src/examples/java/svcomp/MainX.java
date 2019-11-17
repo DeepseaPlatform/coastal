@@ -2,50 +2,114 @@ package svcomp;
 
 import org.sosy_lab.sv_benchmarks.Verifier;
 
-public class MainX {
+class LinkedListEntry {
 
-	public static void main(String[] args) {
-		long x = Verifier.nondetInt();
-		x = x > 0 ? -x : x;
-		long y = 5;
-		MainX inst = new MainX();
-		inst.test(x, y);
+	public LinkedListEntry Next;
+	public int Value;
+}
+
+class LinkedList {
+
+	public LinkedListEntry Head;
+
+	public int size() {
+		int count = 0;
+		for (LinkedListEntry entry = Head; entry != null; entry = entry.Next)
+			++count;
+		return count;
 	}
 
-	/*
-	 * test LADD, LCMP, LMUL, LNEG, LSUB , Invokestatic bytecodes no globals
-	 */
+	public void add(int index, int e) {
+		LinkedListEntry newEntry = new LinkedListEntry();
+		newEntry.Value = e;
+		if (index == 0) {
+			Head = newEntry;
+			return;
+		}
+		LinkedListEntry entry = Head;
+		for (int i = 1; i < index; ++i)
+			entry = entry.Next;
+		entry.Next = newEntry;
+	}
 
-	public static void test(long x, long z) { // invokestatic
+	public void add(int e) {
+		add(size(), e);
+	}
 
-		System.out.println("Testing ExSymExeLongBytecodes");
+	public void remove(int index) {
+		LinkedListEntry entry = Head;
+		for (int i = 1; i < index; ++i)
+			entry = entry.Next;
+		entry.Next = entry.Next.Next;
+	}
 
-		long a = x;
-		long b = z;
-		long c = 34565;
+	public int get(int index) {
+		LinkedListEntry entry = Head;
+		for (int i = 0; i < index; ++i)
+			entry = entry.Next;
+		return entry.Value;
+	}
+}
 
-		long negate = -z; // LNEG
+class Utils_nondet {
 
-		long sum = a + b; // LADD
-		long sum2 = z + 9090909L; // LADD
-		long sum3 = 90908877L + z; // LADD
+	public static int nondet_int() {
+		return Verifier.nondetInt();
+	}
+}
 
-		long diff = a - b; // LSUB
-		long diff2 = b - 19999999999L; // LSUB
-		long diff3 = 9999999999L - a; // LSUB
+class Utils_synthesis {
 
-		long mul = a * b; // LMUL
-		long mul2 = a * 19999999999L; // LMUL
-		long mul3 = 19999999999L * b; // LMUL
+	public static int accumulator(int aggregated, int e) {
+		if (e % 2 == 0)
+			if (aggregated < e)
+				return e;
+		return aggregated;
+	}
 
-		if (diff > c) {
-			assert false;
-			System.out.println("branch diff > c");
-		} else
-			System.out.println("branch diff <= c");
-		if (sum < z)
-			System.out.println("branch sum < z");
-		else
-			System.out.println("branch sum >= z");
+	public static boolean predicate(int lhs) {
+		return true;
+	}
+}
+
+public class MainX {
+
+	private static int stream(LinkedList list) {
+		// java.util.stream.Stream.filter(...)
+		int index = 0;
+		for (LinkedListEntry entry = list.Head; entry != null; entry = entry.Next)
+			if (Utils_synthesis.predicate(entry.Value))
+				++index;
+			else
+				list.remove(index);
+
+		// java.util.stream.Stream.reduce(...)
+		int aggregated = 0;
+		for (LinkedListEntry it = list.Head; it != null; it = it.Next)
+			aggregated = Utils_synthesis.accumulator(aggregated, it.Value);
+
+		return aggregated;
+	}
+
+	public static void main(String[] args) {
+		LinkedList lhs = new LinkedList();
+		LinkedList rhs = new LinkedList();
+		int size = 10;
+		for (int i = 0; i < size; ++i) {
+			int value = Utils_nondet.nondet_int();
+			lhs.add(i, value);
+			rhs.add(i, value);
+		}
+
+		int lhs_result = 0;
+		for (LinkedListEntry it = lhs.Head; it != null; it = it.Next) {
+			if (it.Value % 2 == 0)
+				if (lhs_result < it.Value)
+					lhs_result = it.Value;
+		}
+
+		int rhs_result = stream(rhs);
+
+		assert (lhs_result == rhs_result);
 	}
 }
