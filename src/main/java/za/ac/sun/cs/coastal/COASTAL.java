@@ -100,10 +100,22 @@ public class COASTAL {
 	// ======================================================================
 
 	/**
+	 * Whether or not ALL classes should be instrumented.
+	 * 
+	 * At the moment, this is not an option because java.* classes cannot be instrumented in the way that the instrumentation is implemented.
+	 */
+	private boolean instrumentEverything = false;
+
+	/**
+	 * Whether or not ALL classes with no package should be instrumented.
+	 */
+	private boolean instrumentPackageless = false;
+	
+	/**
 	 * A list of all prefixes of classes that will be instrumented.
 	 */
 	private final List<String> prefixesToInstrument = new ArrayList<>();
-
+	
 	/**
 	 * A list of all full class names that will be instrumented.
 	 */
@@ -621,7 +633,11 @@ public class COASTAL {
 		for (String instr : instrumented) {
 			String instrument = instr.trim();
 			if (instrument.length() > 0) {
-				if (instrument.endsWith(".*")) {
+				if (instrument.equals("*")) {
+					instrumentEverything = true;
+				} else if (instrument.equals("*.*")) {
+					instrumentPackageless = true;
+				} else if (instrument.endsWith(".*")) {
 					prefixesToInstrument.add(instrument.substring(0, instrument.length() - 1));
 				} else {
 					fullNamesToInstrument.add(instrument);
@@ -1407,8 +1423,14 @@ public class COASTAL {
 	 *         target
 	 */
 	public boolean isTarget(String potentialTarget) {
+		if (instrumentEverything) {
+			return true;
+		}
 		if (potentialTarget.indexOf('/') != -1) {
 			potentialTarget = potentialTarget.replaceAll("/", ".");
+		}
+		if (instrumentPackageless && (potentialTarget.indexOf('.') == -1)) {
+			return true;
 		}
 		for (String target : prefixesToInstrument) {
 			if (potentialTarget.startsWith(target)) {
