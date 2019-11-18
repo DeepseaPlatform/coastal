@@ -306,8 +306,9 @@ public final class SymbolicState extends State {
 	 *                  the new symbolic expression for the field
 	 */
 	private void putField(int objectId, String fieldName, SymbolicValue value) {
-		assert objectId != 0;
-		putField(Integer.toString(objectId), fieldName, value);
+		if (objectId != 0) {
+			putField(Integer.toString(objectId), fieldName, value);
+		}
 	}
 
 	/**
@@ -335,8 +336,11 @@ public final class SymbolicState extends State {
 	 * @return the symbolic expression for the value of the field
 	 */
 	private SymbolicValue getField(int objectId, String fieldName) {
-		assert objectId != 0;
-		return getField(Integer.toString(objectId), fieldName);
+		if (objectId != 0) {
+			return getField(Integer.toString(objectId), fieldName);
+		} else {
+			return symbolicValueFactory.createSymbolicValue(IntegerConstant.ZERO32);
+		}
 	}
 
 	/**
@@ -2648,11 +2652,17 @@ public final class SymbolicState extends State {
 		case Opcodes.GETFIELD:
 			int id = (int) (pop().toValue());
 			push(getField(id, name));
+			noExceptionExpression.add(Operation.ne(new IntegerConstant(id, 32), IntegerConstant.ZERO32));
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.PUTFIELD:
 			SymbolicValue v = pop();
 			id = (int) (pop().toValue());
 			putField(id, name, v);
+			noExceptionExpression.add(Operation.ne(new IntegerConstant(id, 32), IntegerConstant.ZERO32));
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = IntegerConstant.ZERO32;
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr, Bytecodes.toString(opcode),
