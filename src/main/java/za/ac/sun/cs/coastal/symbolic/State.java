@@ -308,13 +308,12 @@ public abstract class State {
 	/**
 	 * Create a new symbolic variable. It is the responsibility of the caller to
 	 * ensure that the identifier is unique.
-	 * 
-	 * @param currentValue default value to use in case no overriding value exists
 	 * @param uniqueId     identifier to assign to the new variable
+	 * 
 	 * @return value for the new variable
 	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract String createSymbolicString(String currentValue, int uniqueId) throws COASTALException;
+	public abstract String createSymbolicString(int uniqueId) throws COASTALException;
 
 	public abstract void assume(boolean condition) throws COASTALException;
 	

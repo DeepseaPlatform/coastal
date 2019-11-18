@@ -49,7 +49,9 @@ import za.ac.sun.cs.coastal.utility.Translator;
  */
 public final class SymbolicState extends State {
 
-	private static final String DEFAULT_NEW_STRING = "aaaaaaaa";
+	private static final String DEFAULT_NEW_STRING = "aaaaaaaaaa";
+
+	private static final int MAX_SYMBOLIC_STRING_LENGTH = DEFAULT_NEW_STRING.length();
 
 	/**
 	 * The limit on path lengths. In other words, this is the maximum number of
@@ -1186,7 +1188,10 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return null;
 		}
-		log.trace("--> createSymbolicInt(..., {})", currentValue, name);
+		if (currentValue.length() > MAX_SYMBOLIC_STRING_LENGTH) {
+			currentValue = currentValue.substring(0, MAX_SYMBOLIC_STRING_LENGTH);
+		}
+		log.trace("--> createSymbolicInt({}, {})", currentValue, name);
 		dumpFrames();
 		int length = currentValue.length();
 		int stringId = createString();
@@ -1324,8 +1329,8 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicString(String, int)
 	 */
 	@Override
-	public String createSymbolicString(String currentValue, int uniqueId) {
-		return createSymbolicString(currentValue, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+	public String createSymbolicString(int uniqueId) {
+		return createSymbolicString(DEFAULT_NEW_STRING, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
 		// return createSymbolicString(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 

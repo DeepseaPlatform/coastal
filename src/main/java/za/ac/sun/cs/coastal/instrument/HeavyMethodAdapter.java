@@ -392,6 +392,10 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			if (owner.equals(VERIFIER)) {
 				if (name.equals("assume")) {
 					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "assume", "(Z)V", false);
+				} else if (name.equals("nondetString")) {
+					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicString",
+							"(I)Ljava/lang/String;", false);
 				} else {
 					mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 					switch (name) {
@@ -426,11 +430,6 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					case "nondetDouble":
 						mv.visitLdcInsn(classManager.getNextNewVariableCounter());
 						mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicDouble", "(DI)D", false);
-						break;
-					case "nondetString":
-						mv.visitLdcInsn(classManager.getNextNewVariableCounter());
-						mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicString",
-								"(Ljava/lang/String;I)Ljava/lang/String;", false);
 						break;
 					default:
 						log.fatal("instrument unimplemented verifier method {}.{}", owner, name);

@@ -277,7 +277,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#createSymbolicShort(short, int)
 	 */
 	@Override
-	public String createSymbolicString(String currentValue, int uniqueId) {
+	public String createSymbolicString(int uniqueId) {
 		return null; // TODO
 	}
 

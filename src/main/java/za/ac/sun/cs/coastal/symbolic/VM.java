@@ -168,9 +168,9 @@ public class VM {
 		}
 	}
 
-	public static String createSymbolicString(String oldValue, int uniqueId) throws COASTALException {
+	public static String createSymbolicString(int uniqueId) throws COASTALException {
 		try {
-			return state.createSymbolicString(oldValue, uniqueId);
+			return state.createSymbolicString(uniqueId);
 		} catch (ControlException x) {
 			throw x;
 		} catch (Throwable x) {
