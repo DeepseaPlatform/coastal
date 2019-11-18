@@ -661,7 +661,9 @@ public class COASTAL {
 		for (int i = 0; i < mainEntrypoint.getParamCount(); i++) {
 			Class<?> type = mainEntrypoint.getParamType(i);
 			if (i >= args.length) {
-				// COMPLAIN ABOUT TOO FEW PARAMETERS
+				log.fatal("TOO FEW ARGUMENTS FOR ENTRY POINT -- TERMINATING");
+				log.fatal("(EXPECTED {} BUT FOUND {})", mainEntrypoint.getParamCount(), args.length);
+				System.exit(1);
 			} else if (type == boolean.class) {
 				mainArguments[i] = Boolean.valueOf(args[i]);
 			} else if (type == byte.class) {
@@ -681,63 +683,63 @@ public class COASTAL {
 			} else if (type == String.class) {
 				mainArguments[i] = (i < args.length) ? unescape(args[i]) : "";
 			} else if (type == boolean[].class) {
-				String[] stringValues = splitArrayArgs(args[i]);
+				String[] stringValues = splitArrayArgs(i, args[i]);
 				boolean[] values = new boolean[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Boolean.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == byte[].class) {
-				String[] stringValues = splitArrayArgs(args[i]);
+				String[] stringValues = splitArrayArgs(i, args[i]);
 				byte[] values = new byte[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Byte.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == short[].class) {
-				String[] stringValues = splitArrayArgs(args[i]);
+				String[] stringValues = splitArrayArgs(i, args[i]);
 				short[] values = new short[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Short.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == char[].class) {
-				String[] stringValues = splitArrayArgs(args[i]);
+				String[] stringValues = splitArrayArgs(i, args[i]);
 				char[] values = new char[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Character.valueOf(stringValues[k].charAt(0));
 				}
 				mainArguments[i] = values;
 			} else if (type == int[].class) {
-				String[] stringValues = splitArrayArgs(args[i]);
+				String[] stringValues = splitArrayArgs(i, args[i]);
 				int[] values = new int[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Integer.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == long[].class) {
-				String[] stringValues = splitArrayArgs(args[i]);
+				String[] stringValues = splitArrayArgs(i, args[i]);
 				long[] values = new long[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Long.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == float[].class) {
-				String[] stringValues = splitArrayArgs(args[i]);
+				String[] stringValues = splitArrayArgs(i, args[i]);
 				float[] values = new float[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Float.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == double[].class) {
-				String[] stringValues = splitArrayArgs(args[i]);
+				String[] stringValues = splitArrayArgs(i, args[i]);
 				double[] values = new double[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Double.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == String[].class) {
-				String[] stringValues = splitArrayArgs(args[i]);
+				String[] stringValues = splitArrayArgs(i, args[i]);
 				for (int k = 0; k < stringValues.length; k++) {
 					stringValues[k] = unescape(stringValues[k]);
 				}
@@ -748,14 +750,15 @@ public class COASTAL {
 		}
 	}
 
-	public static String[] splitArrayArgs(String str) {
+	public String[] splitArrayArgs(int nr, String str) {
 		if (!str.matches("^\\s*\\{.*\\}\\s*$")) {
-			// COMPLAIN WE EXPECTED AN ARRAY
+			log.fatal("EXPECTED AN ARRAY ARGUMENT #{} -- TERMINATING", nr + 1);
+			System.exit(1);
 		}
 		return splitArgs(str.replaceAll("^\\s*\\{(.*)\\}\\s*$", "$1"));
 	}
 
-	public static String[] splitArgs(String str) {
+	public String[] splitArgs(String str) {
 		if ((str == null) || (str.trim().length() == 0)) {
 			return new String[0];
 		}
