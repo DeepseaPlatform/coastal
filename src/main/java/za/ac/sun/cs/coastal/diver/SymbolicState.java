@@ -2550,6 +2550,9 @@ public final class SymbolicState extends State {
 				setArrayValue(id, i, initValue);
 			}
 			push(new IntegerConstant(id, 32), 32);
+			noExceptionExpression.add(Operation.ge(new IntegerConstant(n, 32), IntegerConstant.ZERO32));
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = IntegerConstant.ZERO32;
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", instr, Bytecodes.toString(opcode), operand,
@@ -2620,6 +2623,9 @@ public final class SymbolicState extends State {
 			id = incrAndGetNewObjectId();
 			setArrayLength(id, size);
 			push(new IntegerConstant(id, 32), 32);
+			noExceptionExpression.add(Operation.ge(new IntegerConstant(size, 32), IntegerConstant.ZERO32));
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = IntegerConstant.ZERO32;
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
