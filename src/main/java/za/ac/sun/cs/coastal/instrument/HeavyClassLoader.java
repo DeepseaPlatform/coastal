@@ -59,8 +59,8 @@ public class HeavyClassLoader extends ClassLoader {
 			log.trace("> loading class {} from parent (3)", name);
 			return super.loadClass(name, resolve);
 		}
-		String trueName = name.substring(4);
-		if (name.startsWith("ins.") && coastal.isTarget(trueName)) {
+		if (name.startsWith("ins.") && coastal.isTarget(name.substring(4))) {
+			String trueName = name.substring(4);
 			log.trace("> loading class {}, identified as target", trueName);
 			byte[] raw = manager.loadHeavyInstrumented(name, trueName);
 			if (raw != null) {
