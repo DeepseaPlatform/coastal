@@ -1,5 +1,6 @@
 #!/bin/bash
 
+DEBUG=0
 JAVAHOME=/usr/lib/jvm/java-8-openjdk-amd64/bin
 TOOL_BINARY=coastal/bin/coastal
 FIND_OPTIONS="-name '*.java'"
@@ -35,10 +36,15 @@ fi
 #------------------------------------------------------------------------------
 # set working directories
 #------------------------------------------------------------------------------
-LOG=`mktemp -t coastal-log.XXXXXX`
-DIR=`mktemp -d -t coastal-benchmark.XXXXXX`
-#LOG=/tmp/svcomp-coastal.log
-#DIR=/tmp/svcomp-coastal-benchmark/
+if [ ${DEBUG} -eq 0 ] ; then
+	LOG=`mktemp -t coastal-log.XXXXXX`
+	DIR=`mktemp -d -t coastal-benchmark.XXXXXX`
+	VERBOSITY=quiet
+else
+	LOG=/tmp/svcomp-coastal.log
+	DIR=/tmp/svcomp-coastal-benchmark/
+	VERBOSITY=verbose
+fi
 trap "rm -rf $DIR" EXIT
 
 #------------------------------------------------------------------------------
@@ -59,19 +65,18 @@ cat > $DIR/config.properties <<EOF
 coastal.target.main = Main
 coastal.target.instrument = Main
 coastal.target.trigger = Main.main(String[])
-coastal.divers.threads = 4
-coastal.strategies = GEN
+coastal.divers.threads = 1
+coastal.strategies = BFS
 coastal.strategies.DFS = za.ac.sun.cs.coastal.strategy.pathbased.DepthFirstFactory
 coastal.strategies.BFS = za.ac.sun.cs.coastal.strategy.pathbased.BreadthFirstFactory
 coastal.strategies.GEN = za.ac.sun.cs.coastal.strategy.pathbased.GenerationalFactory
 coastal.strategies.GEN.top-down = false
 coastal.strategies.GEN.threads = 2
+coastal.strategies.RND = za.ac.sun.cs.coastal.strategy.pathbased.RandomPathFactory
 coastal.observers = za.ac.sun.cs.coastal.observers.AssertControllerFactory
 coastal.settings.solver.z3-path = $CURRENT/coastal/z3/z3
 coastal.settings.hard-exit = true
-#coastal.settings.conjunct-limit = 1000
-#coastal.settings.time-limit = 240
-coastal.settings.conjunct-limit = 130
+coastal.settings.conjunct-limit = 150
 coastal.settings.time-limit = 120
 EOF
 
@@ -79,7 +84,7 @@ EOF
 # run COASTAL
 #------------------------------------------------------------------------------
 cd $DIR
-${JAVAHOME}/java -Xmx2048m -Xint -ea -classpath $CURRENT/coastal/:$CURRENT/coastal/lib/\* za.ac.sun.cs.coastal.COASTAL --quiet config.properties | tee $LOG
+${JAVAHOME}/java -Xmx2048m -Xint -ea -classpath $CURRENT/coastal/lib/:$CURRENT/coastal/lib/\* za.ac.sun.cs.coastal.COASTAL --${VERBOSITY} config.properties | tee $LOG
 cd -
 
 #------------------------------------------------------------------------------

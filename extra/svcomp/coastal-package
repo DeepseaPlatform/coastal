@@ -27,6 +27,8 @@ trap "rm -rf ${DIR}" EXIT
 #------------------------------------------------------------------------------
 mkdir -p ${DIR}/coastal/coastal
 cp -r ${PROJECTDIR}/build/install/coastal/lib ${DIR}/coastal/coastal/
+mkdir -p ${DIR}/coastal/coastal/bin
+touch ${DIR}/coastal/coastal/bin/coastal
 mkdir -p ${DIR}/coastal/coastal/z3
 cp ${Z3EXEC} ${DIR}/coastal/coastal/z3
 cp ${PROJECTDIR}/src/main/resources/log4j2.xml ${DIR}/coastal/coastal/
