@@ -2217,16 +2217,12 @@ public final class SymbolicState extends State {
 			noException();
 			break;
 		case Opcodes.AALOAD:
-			i = (int) (pop().toValue());
-			a = (int) (pop().toValue());
-			push(getArrayValue(a, i));
-			break;
 		case Opcodes.BALOAD:
-			i = (int) (pop().toValue());
-			a = (int) (pop().toValue());
-			push(getArrayValue(a, i));
-			break;
 		case Opcodes.CALOAD:
+		case Opcodes.DALOAD:
+		case Opcodes.FALOAD:
+		case Opcodes.LALOAD:
+		case Opcodes.SALOAD:
 			i = (int) (pop().toValue());
 			a = (int) (pop().toValue());
 			push(getArrayValue(a, i));
@@ -2246,6 +2242,10 @@ public final class SymbolicState extends State {
 		case Opcodes.AASTORE:
 		case Opcodes.BASTORE:
 		case Opcodes.CASTORE:
+		case Opcodes.DASTORE:
+		case Opcodes.FASTORE:
+		case Opcodes.LASTORE:
+		case Opcodes.SASTORE:
 			v = pop();
 			i = (int) (pop().toValue());
 			a = (int) (pop().toValue());
