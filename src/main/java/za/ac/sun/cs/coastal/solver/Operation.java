@@ -222,50 +222,14 @@ public class Operation extends Expression {
 		return new Operation(Operator.B2I, a);
 	}
 	
-	public static Expression s2i(Expression a) {
-		return new Operation(Operator.S2I, a);
-	}
-	
-	public static Expression i2l(Expression a) {
-		return new Operation(Operator.I2L, 64, a);
-	}
-	
-	public static Expression i2s(Expression a) {
-		return new Operation(Operator.I2S, a);
-	}
-	
-	public static Expression i2c(Expression a) {
-		return new Operation(Operator.I2C, a);
-	}
-	
-	public static Expression i2b(Expression a) {
-		return new Operation(Operator.I2B, a);
-	}
-	
-	public static Expression i2d(Expression a) {
-		return new Operation(Operator.I2D, 64, a);
-	}
-
-	public static Expression i2f(Expression a) {
-		return new Operation(Operator.I2F, a);
-	}
-
-	public static Expression l2d(Expression a) {
-		return new Operation(Operator.L2D, a);
-	}
-
-	public static Expression l2f(Expression a) {
-		return new Operation(Operator.L2F, 32, a);
-	}
-
-	public static Expression l2i(Expression a) {
-		return new Operation(Operator.L2I, 32, a);
+	public static Expression d2f(Expression a) {
+		return new Operation(Operator.D2F, 32, a);
 	}
 	
 	public static Expression d2i(Expression a) {
 		return new Operation(Operator.D2I, 32, a);
 	}
-
+	
 	public static Expression d2l(Expression a) {
 		return new Operation(Operator.D2L, a);
 	}
@@ -280,6 +244,46 @@ public class Operation extends Expression {
 	
 	public static Expression f2d(Expression a) {
 		return new Operation(Operator.F2D, 64, a);
+	}
+	
+	public static Expression i2b(Expression a) {
+		return new Operation(Operator.I2B, a);
+	}
+	
+	public static Expression i2c(Expression a) {
+		return new Operation(Operator.I2C, a);
+	}
+	
+	public static Expression i2d(Expression a) {
+		return new Operation(Operator.I2D, 64, a);
+	}
+	
+	public static Expression i2f(Expression a) {
+		return new Operation(Operator.I2F, a);
+	}
+	
+	public static Expression i2l(Expression a) {
+		return new Operation(Operator.I2L, 64, a);
+	}
+	
+	public static Expression i2s(Expression a) {
+		return new Operation(Operator.I2S, a);
+	}
+	
+	public static Expression l2d(Expression a) {
+		return new Operation(Operator.L2D, a);
+	}
+	
+	public static Expression l2f(Expression a) {
+		return new Operation(Operator.L2F, 32, a);
+	}
+	
+	public static Expression l2i(Expression a) {
+		return new Operation(Operator.L2I, 32, a);
+	}
+	
+	public static Expression s2i(Expression a) {
+		return new Operation(Operator.S2I, a);
 	}
 	
 	public static Expression fneg(Expression a) {
@@ -551,21 +555,22 @@ public class Operation extends Expression {
 		DCMPG("DCMPG", 2, Fix.PREFIX, null, null),
 		// ---- Conversion operators ----
 		B2I("B2I", 1, Fix.PREFIX, null, null),
-		S2I("S2I", 1, Fix.PREFIX, null, null),
-		I2L("I2L", 1, Fix.PREFIX, null, null),
-		I2S("I2S", 1, Fix.PREFIX, null, null),
-		I2C("I2C", 1, Fix.PREFIX, null, null),
+		D2F("D2F", 1, Fix.PREFIX, null, null),
+		D2I("D2I", 1, Fix.PREFIX, null, null),
+		D2L("D2L", 1, Fix.PREFIX, null, null),
+		F2D("F2D", 1, Fix.PREFIX, null, null),
+		F2I("F2I", 1, Fix.PREFIX, null, null),
+		F2L("F2L", 1, Fix.PREFIX, null, null),
 		I2B("I2B", 1, Fix.PREFIX, null, null),
+		I2C("I2C", 1, Fix.PREFIX, null, null),
 		I2D("I2D", 1, Fix.PREFIX, null, null),
 		I2F("I2F", 1, Fix.PREFIX, null, null),
+		I2L("I2L", 1, Fix.PREFIX, null, null),
+		I2S("I2S", 1, Fix.PREFIX, null, null),
 		L2D("L2D", 1, Fix.PREFIX, null, null),
 		L2F("L2F", 1, Fix.PREFIX, null, null),
 		L2I("L2I", 1, Fix.PREFIX, null, null),
-		F2D("F2D", 1, Fix.PREFIX, null, null),
-		D2I("D2I", 1, Fix.PREFIX, null, null),
-		D2L("D2L", 1, Fix.PREFIX, null, null),
-		F2I("F2I", 1, Fix.PREFIX, null, null),
-		F2L("F2L", 1, Fix.PREFIX, null, null),
+		S2I("S2I", 1, Fix.PREFIX, null, null),
 		// ---- Arithmetic operators ----
 		ADD("+", 2, Fix.INFIX, "bvadd", "fp.add RNE"),
 		SUB("-", 2, Fix.INFIX, "bvsub", "fp.sub RNE"),

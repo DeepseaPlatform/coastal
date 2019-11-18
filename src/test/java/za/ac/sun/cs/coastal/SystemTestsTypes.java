@@ -1,6 +1,5 @@
 package za.ac.sun.cs.coastal;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class SystemTestsTypes extends SystemTests {
@@ -87,31 +86,31 @@ public class SystemTestsTypes extends SystemTests {
 		checkMarkerCoverage(reporter, 4, 22);
 	}
 
-	@Ignore @Test
+	@Test
 	public void testFloat01() {
 		Reporter reporter = setup("Test01.properties", "types/Float01.properties");
 		checkDivers(reporter, 1, 5);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
-		checkPathTree(reporter, 6, 0, 1);
+		checkPathTree(reporter, 7, 1, 1);
 		checkInstrumentation(reporter, 32, 8, 1);
 		checkMarkerCoverage(reporter, 0, 1000, 1004);
-		checkMarkerCoverage(reporter, 1, 1002, 1003, 1006, 1007);
-		checkMarkerCoverage(reporter, 2, 1001);
-		checkMarkerCoverage(reporter, 3, 1005);
+		checkMarkerCoverage(reporter, 1, 1001, 1003, 1007);
+		checkMarkerCoverage(reporter, 2, 1006);
+		checkMarkerCoverage(reporter, 4, 1005);
 	}
 	
-	@Ignore @Test
+	@Test
 	public void testFloat02() {
 		Reporter reporter = setup("Test01.properties", "types/Float02.properties");
 		checkDivers(reporter, 1, 6);
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
-		checkPathTree(reporter, 6, 0, 0);
+		checkPathTree(reporter, 7, 1, 0);
 		checkInstrumentation(reporter, 36, 10, 1);
-		checkMarkerCoverage(reporter, 0, 9);
-		checkMarkerCoverage(reporter, 1, 17, 19, 21, 26, 28);
-		checkMarkerCoverage(reporter, 3, 14, 24);
+		checkMarkerCoverage(reporter, 1, 19, 21, 28);
+		checkMarkerCoverage(reporter, 2, 14, 26);
+		checkMarkerCoverage(reporter, 4, 24);
 	}
 
 	@Test

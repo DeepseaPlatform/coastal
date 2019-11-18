@@ -278,6 +278,22 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @param value
 		 * @return
 		 */
+		SymbolicValue b2i();
+
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
+		SymbolicValue d2f();
+
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
 		SymbolicValue d2i();
 
 		/**
@@ -294,6 +310,14 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @param value
 		 * @return
 		 */
+		SymbolicValue f2d();
+
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
 		SymbolicValue f2i();
 
 		/**
@@ -303,30 +327,6 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @return
 		 */
 		SymbolicValue f2l();
-
-		/**
-		 *
-		 *
-		 * @param value
-		 * @return
-		 */
-		SymbolicValue f2d();
-
-		/**
-		 *
-		 *
-		 * @param value
-		 * @return
-		 */
-		SymbolicValue i2l();
-
-		/**
-		 *
-		 *
-		 * @param value
-		 * @return
-		 */
-		SymbolicValue i2s();
 
 		/**
 		 *
@@ -366,6 +366,22 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @param value
 		 * @return
 		 */
+		SymbolicValue i2l();
+
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
+		SymbolicValue i2s();
+
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
 		SymbolicValue l2d();
 
 		/**
@@ -383,6 +399,14 @@ public interface SymbolicValueFactory extends ValueFactory {
 		 * @return
 		 */
 		SymbolicValue l2i();
+
+		/**
+		 *
+		 *
+		 * @param value
+		 * @return
+		 */
+		SymbolicValue s2i();
 
 	}
 

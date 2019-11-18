@@ -190,21 +190,22 @@ public final class Evaluator extends Visitor {
 			}
 			break;
 		case B2I:
-		case S2I:
+		case D2I:
+		case D2F:
+		case D2L:
+		case F2D:
+		case F2I:
+		case F2L:
+		case I2B:
+		case I2C:
+		case I2D:
+		case I2F:
 		case I2L:
 		case I2S:
-		case I2C:
-		case I2B:
-		case I2F:
-		case I2D:
 		case L2D:
 		case L2F:
 		case L2I:
-		case F2D:
-		case D2I:
-		case D2L:
-		case F2I:
-		case F2L:
+		case S2I:
 		case FNEG:
 			stack.push(l);
 			break;

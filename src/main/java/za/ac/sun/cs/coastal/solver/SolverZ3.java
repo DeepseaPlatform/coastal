@@ -333,33 +333,46 @@ public class SolverZ3 extends Solver {
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 64));
 					break;
-				case S2I:
-					b.append("((_ sign_extend 16) ");
+				case D2F:
+					b.append("((_ to_fp 8 24) RNE ");
 					b.append(l.getEntry()).append(')');
-					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 64));
+					stack.push(new StackEntry(b.toString(), RealConstant.class, 32));
 					break;
-				case I2L:
-					b.append("((_ sign_extend 32) ");
+				case D2I:
+					b.append("((_ fp.to_sbv 32) RNE ");
 					b.append(l.getEntry()).append(')');
-					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 64));
+					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
 					break;
-				case I2C:
-				case I2S:
-					b.append("((_ extract 15 0) ");
+				case D2L:
+					b.append("((_ fp.to_sbv 64) RNE ");
 					b.append(l.getEntry()).append(')');
-					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 16));
+					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
 					break;
-				case L2I:
-					b.append("((_ extract 31 0) ");
+				case F2D:
+					b.append("((_ to_fp 11 53) RNE ");
 					b.append(l.getEntry()).append(')');
-					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 32));
+					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
+					break;
+				case F2I:
+					b.append("((_ fp.to_sbv 32) RNE ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
+					break;
+				case F2L:
+					b.append("((_ fp.to_sbv 64) RNE ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
 					break;
 				case I2B:
 					b.append("((_ extract 7 0) ");
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 8));
 					break;
-				case L2D:
+				case I2C:
+					b.append("((_ extract 15 0) ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 16));
+					break;
 				case I2D:
 					b.append("((_ to_fp 11 53) RNE ");
 					b.append(l.getEntry()).append(')');
@@ -370,27 +383,35 @@ public class SolverZ3 extends Solver {
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 8));
 					break;
+				case I2L:
+					b.append("((_ sign_extend 32) ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 64));
+					break;
+				case I2S:
+					b.append("((_ extract 15 0) ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 16));
+					break;
+				case L2D:
+					b.append("((_ to_fp 11 53) RNE ");
+					b.append(l.getEntry()).append(')');
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 8));
+					break;
 				case L2F:
 					b.append("((_ to_fp 8 24) RNE ");
 					b.append(l.getEntry()).append(')');
 					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 32));
 					break;
-				case F2D:
-					b.append("((_ to_fp 11 53) RNE ");
+				case L2I:
+					b.append("((_ extract 31 0) ");
 					b.append(l.getEntry()).append(')');
-					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 32));
 					break;
-				case F2I:
-				case D2I:
-					b.append("((_ fp.to_sbv 32) RNE ");
+				case S2I:
+					b.append("((_ sign_extend 16) ");
 					b.append(l.getEntry()).append(')');
-					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
-					break;
-				case F2L:
-				case D2L:
-					b.append("((_ fp.to_sbv 64) RNE ");
-					b.append(l.getEntry()).append(')');
-					stack.push(new StackEntry(b.toString(), RealConstant.class, 64));
+					stack.push(new StackEntry(b.toString(), IntegerConstant.class, 64));
 					break;
 				case FNEG:
 					b.append("(fp.neg 32 RNE ");

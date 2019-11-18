@@ -2369,6 +2369,9 @@ public final class SymbolicState extends State {
 			v = pop();
 			push(pop().sub(v));
 			break;
+		case Opcodes.D2F:
+			push(pop().d2f());
+			break;
 		case Opcodes.D2I:
 			push(pop().d2i());
 			break;
@@ -2384,12 +2387,6 @@ public final class SymbolicState extends State {
 		case Opcodes.F2D:
 			push(pop().f2d());
 			break;
-		case Opcodes.I2L:
-			push(pop().i2l());
-			break;
-		case Opcodes.I2S:
-			push(pop().i2s());
-			break;
 		case Opcodes.I2B:
 			push(pop().i2b());
 			break;
@@ -2402,6 +2399,12 @@ public final class SymbolicState extends State {
 		case Opcodes.I2F:
 			push(pop().i2f());
 			break;
+		case Opcodes.I2L:
+			push(pop().i2l());
+			break;
+		case Opcodes.I2S:
+			push(pop().i2s());
+			break;
 		case Opcodes.L2D:
 			push(pop().l2d());
 			break;
@@ -2411,8 +2414,6 @@ public final class SymbolicState extends State {
 		case Opcodes.L2I:
 			push(pop().l2i());
 			break;
-		// case Opcodes.D2F:
-		// break;
 		case Opcodes.LCMP:
 			v = pop();
 			push(pop().lcmp(v));

@@ -212,6 +212,16 @@ public class DiverValueFactory implements SymbolicValueFactory {
 		// ----------------------------------------------------------------------
 
 		@Override
+		public SymbolicValue b2i() {
+			return createSymbolicValue(Operation.b2i(expression));
+		}
+
+		@Override
+		public SymbolicValue d2f() {
+			return createSymbolicValue(Operation.d2f(expression));
+		}
+
+		@Override
 		public SymbolicValue d2i() {
 			return createSymbolicValue(Operation.d2i(expression));
 		}
@@ -237,16 +247,6 @@ public class DiverValueFactory implements SymbolicValueFactory {
 		}
 
 		@Override
-		public SymbolicValue i2l() {
-			return createSymbolicValue(Operation.i2l(expression));
-		}
-
-		@Override
-		public SymbolicValue i2s() {
-			return createSymbolicValue(Operation.i2s(expression));
-		}
-
-		@Override
 		public SymbolicValue i2b() {
 			return createSymbolicValue(Operation.i2b(expression));
 		}
@@ -267,6 +267,16 @@ public class DiverValueFactory implements SymbolicValueFactory {
 		}
 
 		@Override
+		public SymbolicValue i2l() {
+			return createSymbolicValue(Operation.i2l(expression));
+		}
+
+		@Override
+		public SymbolicValue i2s() {
+			return createSymbolicValue(Operation.i2s(expression));
+		}
+
+		@Override
 		public SymbolicValue l2d() {
 			return createSymbolicValue(Operation.l2d(expression));
 		}
@@ -278,6 +288,11 @@ public class DiverValueFactory implements SymbolicValueFactory {
 
 		@Override
 		public SymbolicValue l2i() {
+			return createSymbolicValue(Operation.l2i(expression));
+		}
+
+		@Override
+		public SymbolicValue s2i() {
 			return createSymbolicValue(Operation.l2i(expression));
 		}
 

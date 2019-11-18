@@ -228,21 +228,22 @@ public class SolverGreen extends Solver {
 							new za.ac.sun.cs.green.expr.Operation(za.ac.sun.cs.green.expr.Operation.Operator.NOT, l));
 					break;
 				case B2I:
-				case S2I:
-				case I2L:
-				case I2C:
-				case I2S:
-				case I2B:
-				case I2D:
-				case I2F:
-				case L2D:
-				case L2F:
-				case L2I:
+				case D2F:
 				case D2I:
 				case D2L:
 				case F2D:
 				case F2I:
 				case F2L:
+				case I2B:
+				case I2C:
+				case I2D:
+				case I2F:
+				case I2L:
+				case I2S:
+				case L2D:
+				case L2F:
+				case L2I:
+				case S2I:
 				case FNEG:
 					stack.push(l);
 					break;
