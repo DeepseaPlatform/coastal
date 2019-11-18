@@ -1191,7 +1191,8 @@ public final class SymbolicState extends State {
 		if (currentValue.length() > MAX_SYMBOLIC_STRING_LENGTH) {
 			currentValue = currentValue.substring(0, MAX_SYMBOLIC_STRING_LENGTH);
 		}
-		log.trace("--> createSymbolicInt({}, {})", currentValue, name);
+		pop();
+		log.trace("--> createSymbolicString({}, {})", currentValue, name);
 		dumpFrames();
 		int length = currentValue.length();
 		int stringId = createString();
@@ -1203,6 +1204,8 @@ public final class SymbolicState extends State {
 			}
 			push(new IntegerConstant(stringId, 32));
 			input.put(name, currentValue);
+			log.trace("-->    AFTER (1):");
+			dumpFrames();
 			return currentValue;
 		} else {
 			char minChar = (Character) coastal.getDefaultMinValue(char.class);
@@ -1220,6 +1223,8 @@ public final class SymbolicState extends State {
 			}
 			push(new IntegerConstant(stringId, 32));
 			input.put(name, new String(chars));
+			log.trace("-->    AFTER (2):");
+			dumpFrames();
 			return new String(chars);
 		}
 	}
