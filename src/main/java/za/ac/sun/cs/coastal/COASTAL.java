@@ -648,94 +648,96 @@ public class COASTAL {
 			log.fatal("NO MAIN CLASS SPECIFIED -- TERMINATING");
 			System.exit(1);
 		}
+		String argString;
 		if (entrypoint != null) {
 			mainEntrypoint = Trigger.createTrigger(entrypoint, mainClass);
+			argString = getConfig().getString("coastal.target.args", null);
 		} else {
 			mainEntrypoint = Trigger.createTrigger("main(String[])", mainClass);
+			argString = getConfig().getString("coastal.target.args", "{}");
 		}
 		mainArguments = new Object[mainEntrypoint.getParamCount()];
-		String argString = getConfig().getString("coastal.target.args", null);
-		String[] args = (argString == null) ? new String[0] : argString.split(",");
+		String[] args = splitArgs(argString);
 		for (int i = 0; i < mainEntrypoint.getParamCount(); i++) {
 			Class<?> type = mainEntrypoint.getParamType(i);
-			if (type == boolean.class) {
-				mainArguments[i] = Boolean.valueOf((i < args.length) ? args[i] : "false");
+			if (i >= args.length) {
+				// COMPLAIN ABOUT TOO FEW PARAMETERS
+			} else if (type == boolean.class) {
+				mainArguments[i] = Boolean.valueOf(args[i]);
 			} else if (type == byte.class) {
-				mainArguments[i] = Byte.valueOf((i < args.length) ? args[i] : "0");
+				mainArguments[i] = Byte.valueOf(args[i]);
 			} else if (type == short.class) {
-				mainArguments[i] = Short.valueOf((i < args.length) ? args[i] : "0");
+				mainArguments[i] = Short.valueOf(args[i]);
 			} else if (type == char.class) {
-				mainArguments[i] = Character.valueOf((i < args.length) ? args[i].charAt(0) : ' ');
+				mainArguments[i] = Character.valueOf(args[i].length() > 0 ? args[i].charAt(0) : ' ');
 			} else if (type == int.class) {
-				mainArguments[i] = Integer.valueOf((i < args.length) ? args[i] : "0");
+				mainArguments[i] = Integer.valueOf(args[i]);
 			} else if (type == long.class) {
-				mainArguments[i] = Long.valueOf((i < args.length) ? args[i] : "0");
+				mainArguments[i] = Long.valueOf(args[i]);
 			} else if (type == float.class) {
-				mainArguments[i] = Float.valueOf((i < args.length) ? args[i] : "0.0");
+				mainArguments[i] = Float.valueOf(args[i]);
 			} else if (type == double.class) {
-				mainArguments[i] = Double.valueOf((i < args.length) ? args[i] : "0.0");
+				mainArguments[i] = Double.valueOf(args[i]);
 			} else if (type == String.class) {
-				mainArguments[i] = (i < args.length) ? args[i] : "";
-			} else if (type.isArray() && (i >= args.length)) {
-				mainArguments[i] = null;
+				mainArguments[i] = (i < args.length) ? unescape(args[i]) : "";
 			} else if (type == boolean[].class) {
-				String[] stringValues = args[i].split("\\s+");
+				String[] stringValues = splitArrayArgs(args[i]);
 				boolean[] values = new boolean[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Boolean.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == byte[].class) {
-				String[] stringValues = args[i].split("\\s+");
+				String[] stringValues = splitArrayArgs(args[i]);
 				byte[] values = new byte[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Byte.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == short[].class) {
-				String[] stringValues = args[i].split("\\s+");
+				String[] stringValues = splitArrayArgs(args[i]);
 				short[] values = new short[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Short.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == char[].class) {
-				String[] stringValues = args[i].split("\\s+");
+				String[] stringValues = splitArrayArgs(args[i]);
 				char[] values = new char[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Character.valueOf(stringValues[k].charAt(0));
 				}
 				mainArguments[i] = values;
 			} else if (type == int[].class) {
-				String[] stringValues = args[i].split("\\s+");
+				String[] stringValues = splitArrayArgs(args[i]);
 				int[] values = new int[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Integer.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == long[].class) {
-				String[] stringValues = args[i].split("\\s+");
+				String[] stringValues = splitArrayArgs(args[i]);
 				long[] values = new long[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Long.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == float[].class) {
-				String[] stringValues = args[i].split("\\s+");
+				String[] stringValues = splitArrayArgs(args[i]);
 				float[] values = new float[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Float.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == double[].class) {
-				String[] stringValues = args[i].split("\\s+");
+				String[] stringValues = splitArrayArgs(args[i]);
 				double[] values = new double[stringValues.length];
 				for (int k = 0; k < values.length; k++) {
 					values[k] = Double.valueOf(stringValues[k]);
 				}
 				mainArguments[i] = values;
 			} else if (type == String[].class) {
-				String[] stringValues = args[i].replaceFirst("^\\s+", "").split("(?<!\\\\)\\s+");
+				String[] stringValues = splitArrayArgs(args[i]);
 				for (int k = 0; k < stringValues.length; k++) {
 					stringValues[k] = unescape(stringValues[k]);
 				}
@@ -744,6 +746,66 @@ public class COASTAL {
 				mainArguments[i] = null;
 			}
 		}
+	}
+
+	public static String[] splitArrayArgs(String str) {
+		if (!str.matches("^\\s*\\{.*\\}\\s*$")) {
+			// COMPLAIN WE EXPECTED AN ARRAY
+		}
+		return splitArgs(str.replaceAll("^\\s*\\{(.*)\\}\\s*$", "$1"));
+	}
+
+	public static String[] splitArgs(String str) {
+		if ((str == null) || (str.trim().length() == 0)) {
+			return new String[0];
+		}
+		List<String> parts = new LinkedList<>();
+		int braceLevel = 0;
+		int state = 0;
+		int len = str.length();
+		StringBuffer buffer = new StringBuffer();
+		int i = 0;
+		while (i < len) {
+			char ch = str.charAt(i++);
+			if (state == 0) {
+				if (ch == '"') {
+					buffer.append(ch);
+					state = 1;
+				} else if (braceLevel == 0) {
+					if (ch == ',') {
+						parts.add(buffer.toString().trim());
+						buffer.setLength(0);
+					} else if (ch == '{') {
+						buffer.append(ch);
+						braceLevel++;
+					} else {
+						buffer.append(ch);
+					}
+				} else if (ch == '}') {
+					buffer.append(ch);
+					braceLevel--;
+				} else {
+					buffer.append(ch);
+				}
+			} else if (state == 1) {
+				if (ch == '"') {
+					buffer.append(ch);
+					state = 0;
+				} else if (ch == '\\') {
+					if (braceLevel >= 0) {
+						buffer.append(ch);
+					}
+					state = 2;
+				} else {
+					buffer.append(ch);
+				}
+			} else {
+				buffer.append(ch);
+				state = 1;
+			}
+		}
+		parts.add(buffer.toString().trim());
+		return parts.toArray(new String[] {});
 	}
 
 	/**
@@ -763,9 +825,10 @@ public class COASTAL {
 	 * @return The translated string.
 	 */
 	public static String unescape(String st) {
-
+		if (st.matches("^\\s*\".*\"\\s*$")) {
+			st = st.replaceAll("^\\s*\"(.*)\"\\s*$", "$1");
+		}
 		StringBuilder sb = new StringBuilder(st.length());
-
 		for (int i = 0; i < st.length(); i++) {
 			char ch = st.charAt(i);
 			if (ch == '\\') {
@@ -2058,7 +2121,7 @@ public class COASTAL {
 			new Banner('~').println("COASTAL version " + VERSION).display(log);
 		}
 		// Dump the configuration
-		log.info("log: {}",  log.getName());
+		log.info("log: {}", log.getName());
 		for (String key : configuration.getKeys()) {
 			log.info("{} = {}", key, configuration.getString(key));
 		}
