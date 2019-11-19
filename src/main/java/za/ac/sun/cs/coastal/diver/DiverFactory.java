@@ -243,8 +243,11 @@ public class DiverFactory implements TaskFactory {
 				meth.setAccessible(true);
 				meth.invoke(null, coastal.getMainArguments());
 			} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
-					| IllegalArgumentException x) {
+					| IllegalArgumentException | TypeNotPresentException x) {
+				log.trace("class loading or execution exception");
+				log.trace("exception details: ", x);
 				x.printStackTrace(coastal.getSystemErr());
+				System.exit(1);
 			} catch (InvocationTargetException x) {
 				Throwable t = x.getCause();
 				if (t instanceof AbortedRunException) {
