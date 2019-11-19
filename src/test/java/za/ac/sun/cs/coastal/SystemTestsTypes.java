@@ -72,7 +72,7 @@ public class SystemTestsTypes extends SystemTests {
 		checkMarkerCoverage(reporter, 4, 3, 4);
 		checkMarkerCoverage(reporter, 12, 2);
 	}
-	
+
 	@Test
 	public void testLong01() {
 		Reporter reporter = setup("Test01.properties", "types/Long01.properties");
