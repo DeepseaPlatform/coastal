@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Stack;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 import org.objectweb.asm.Opcodes;
@@ -1122,7 +1123,7 @@ public final class SymbolicState extends State {
 		if (concrete == null) {
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue));
-			return (int) (new Random().nextInt((int) (max - min + 1)) + min);
+			return ThreadLocalRandom.current().nextInt((int) min, (int) max);
 		} else {
 			int newValue = (int) concrete.getValue();
 			log.trace("create symbolic var {}, default value of {}", name, newValue);
