@@ -77,7 +77,7 @@ coastal.observers = za.ac.sun.cs.coastal.observers.AssertControllerFactory
 coastal.settings.solver.z3-path = $CURRENT/coastal/z3/z3
 coastal.settings.hard-exit = true
 coastal.settings.conjunct-limit = 150
-coastal.settings.time-limit = 120
+coastal.settings.time-limit = 90
 EOF
 
 #------------------------------------------------------------------------------
