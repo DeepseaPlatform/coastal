@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Stack;
 import java.util.function.Function;
 
@@ -1113,15 +1114,15 @@ public final class SymbolicState extends State {
 		log.trace("--> createSymbolicInt({}, {})", currentValue, name);
 		dumpFrames();
 		pop();
-		long min = ((Number) coastal.getMinBound(name, int.class)).longValue();
-		long max = ((Number) coastal.getMaxBound(name, int.class)).longValue();
+		long min = ((Number) coastal.getMinBound(name, COASTAL.NewInt.class)).longValue();
+		long max = ((Number) coastal.getMaxBound(name, COASTAL.NewInt.class)).longValue();
 		push(new IntegerVariable(name, 32, min, max), 32);
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
 		if (concrete == null) {
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue));
-			return currentValue;
+			return (int) (new Random().nextInt((int) (max - min + 1)) + min);
 		} else {
 			int newValue = (int) concrete.getValue();
 			log.trace("create symbolic var {}, default value of {}", name, newValue);

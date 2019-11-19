@@ -173,6 +173,8 @@ public class COASTAL {
 	 */
 	private final Map<String, Object> maxBounds = new HashMap<>();
 
+	public static final class NewInt { }
+
 	// ======================================================================
 	//
 	// DIVERS, SURFERS, STRATEGIES
@@ -936,6 +938,7 @@ public class COASTAL {
 		defaultMinBounds.put(long[].class, Long.MIN_VALUE + 1L);
 		defaultMinBounds.put(float[].class, -Float.MAX_VALUE);
 		defaultMinBounds.put(double[].class, -Double.MAX_VALUE);
+		defaultMinBounds.put(NewInt.class, Integer.MIN_VALUE + 1);
 		// defaultMinBounds.put(String[].class, Character.MIN_VALUE);
 		defaultMaxBounds.put(boolean.class, 1);
 		defaultMaxBounds.put(byte.class, Byte.MAX_VALUE);
@@ -954,6 +957,7 @@ public class COASTAL {
 		defaultMaxBounds.put(long[].class, Long.MAX_VALUE);
 		defaultMaxBounds.put(float[].class, Float.MAX_VALUE);
 		defaultMaxBounds.put(double[].class, Double.MAX_VALUE);
+		defaultMaxBounds.put(NewInt.class, Integer.MAX_VALUE);
 		// defaultMaxBounds.put(String[].class, Character.MAX_VALUE);
 		Configuration bounds = getConfig().subset("coastal.bounds");
 		Set<String> keys = new HashSet<>();
@@ -1053,6 +1057,11 @@ public class COASTAL {
 //				char u = (Character) defaultMaxBounds.get(String[].class);
 //				defaultMinBounds.put(String[].class, new Character((char) bounds.getInt(key + ".min", l)));
 //				defaultMaxBounds.put(String[].class, new Character((char) bounds.getInt(key + ".max", u)));
+			} else if (key.equals("$int")) {
+				int l = (Integer) defaultMinBounds.get(int.class);
+				int u = (Integer) defaultMaxBounds.get(int.class);
+				defaultMinBounds.put(NewInt.class, new Integer((int) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(NewInt.class, new Integer((int) bounds.getInt(key + ".max", u)));
 			} else {
 				addBound(minBounds, "coastal.bounds." + key + ".min", key);
 				addBound(maxBounds, "coastal.bounds." + key + ".max", key);
