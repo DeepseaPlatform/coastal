@@ -92,7 +92,7 @@ cd -
 #------------------------------------------------------------------------------
 grep "TIME LIMIT REACHED" $LOG > /dev/null
 if [ $? -eq 0 ]; then
-	echo "UNSAFE"
+	echo "UNKNOWN"
 else
 	grep "assert-failed: false" $LOG > /dev/null
 	if [ $? -eq 0 ]; then
