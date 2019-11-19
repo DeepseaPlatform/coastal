@@ -24,8 +24,8 @@ public class String {
 	private final int maxChar;
 
 	public String(COASTAL coastal, Configuration config) {
-		minChar = (Character) coastal.getDefaultMinValue(char.class);
-		maxChar = (Character) coastal.getDefaultMaxValue(char.class);
+		minChar = (java.lang.Character) coastal.getDefaultMinValue(char.class);
+		maxChar = (java.lang.Character) coastal.getDefaultMaxValue(char.class);
 	}
 
 	public boolean length____I(SymbolicState state) {
@@ -33,7 +33,7 @@ public class String {
 		if ((stringValue == null) || !stringValue.isConstant()) {
 			state.push(new IntegerVariable(state.getNewVariableName(), 32, Integer.MIN_VALUE, Integer.MAX_VALUE));
 		} else {
-			int thisAddress = (int) intConstantValue(state.pop().toExpression());
+			int thisAddress = (int) intConstantValue(stringValue.toExpression());
 			state.push(state.getStringLength(thisAddress));
 		}
 		return true;

@@ -1203,7 +1203,7 @@ public final class SymbolicState extends State {
 		setStringLength(stringId, new IntegerConstant(length, 32));
 		if (name == null) { // not symbolic
 			for (int i = 0; i < length; i++) {
-				IntegerConstant chValue = new IntegerConstant(currentValue.charAt(i), 32);
+				IntegerConstant chValue = new IntegerConstant(currentValue.charAt(i), 16);
 				setStringChar(stringId, i, chValue);
 			}
 			push(new IntegerConstant(stringId, 32));
@@ -1219,7 +1219,7 @@ public final class SymbolicState extends State {
 			for (int i = 0; i < length; i++) {
 				String entryName = name + CHAR_SEPARATOR + i;
 				Object concrete = ((name == null) || (input == null)) ? null : input.get(entryName);
-				Expression entryExpr = new IntegerVariable(entryName, 32, minChar, maxChar);
+				Expression entryExpr = new IntegerVariable(entryName, 16, minChar, maxChar);
 				if ((concrete != null) && (concrete instanceof Long)) {
 					chars[i] = (char) ((Long) concrete).intValue();
 				}
