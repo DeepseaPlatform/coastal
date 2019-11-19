@@ -2617,7 +2617,11 @@ public final class SymbolicState extends State {
 			push(new IntegerConstant(id, 32), 32);
 			break;
 		case Opcodes.INSTANCEOF:
+			break;
 		case Opcodes.CHECKCAST:
+			noExceptionExpression.add(Operation.eq(IntegerConstant.ZERO32, IntegerConstant.ZERO32));
+			exceptionDepth = Thread.currentThread().getStackTrace().length;
+			throwable = IntegerConstant.ZERO32;
 			break;
 		case Opcodes.ANEWARRAY:
 			int size = (int) (pop().toValue());
