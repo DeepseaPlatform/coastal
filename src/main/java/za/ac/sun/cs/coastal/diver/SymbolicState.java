@@ -41,6 +41,7 @@ import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.COASTALException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.CompletedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.UnsupportedOperationException;
 import za.ac.sun.cs.coastal.utility.Translator;
 
 /**
@@ -887,7 +888,7 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public SymbolicValue pop() {
-		log.trace("@@@@@@@@@@@@@@ POP @@@@@@@@@@@@@@@@@");
+		// log.trace("@@@@@@@@@@@@@@ POP @@@@@@@@@@@@@@@@@");
 		return FRAMES.get().isEmpty() ? null : FRAMES.get().peek().pop();
 	}
 
@@ -2540,6 +2541,10 @@ public final class SymbolicState extends State {
 			int n = 0;
 			if (e instanceof IntegerVariable) {
 				String name = ((IntegerVariable) e).getName();
+				Object value = input.get(name);
+				if (!(value instanceof Number)) {
+					throw new UnsupportedOperationException("NEWARRAY with symbolic value");
+				}
 				n = (int) new IntegerConstant((Long) input.get(name), 32).getValue();
 			} else {
 				n = (int) ((IntegerConstant) e).getValue();

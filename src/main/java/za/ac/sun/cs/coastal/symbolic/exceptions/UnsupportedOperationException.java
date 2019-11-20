@@ -9,21 +9,21 @@
 package za.ac.sun.cs.coastal.symbolic.exceptions;
 
 /**
- * Exception to signal that a significant event has occurred during execution to
- * which the system must react.
+ * Exception to signal that symbolic record mode has been switched off (in
+ * either a diver or surfer) and that the run is therefore complete.
  */
-public class ControlException extends COASTALException {
+public class UnsupportedOperationException extends ControlException {
 
 	/**
 	 * Required for serialization.
 	 */
-	private static final long serialVersionUID = 1282785987285619356L;
+	private static final long serialVersionUID = 1282665987285619356L;
 
-	public ControlException() {
+	public UnsupportedOperationException() {
 		super();
 	}
 
-	public ControlException(String message) {
+	public UnsupportedOperationException(String message) {
 		super(message);
 	}
 	

@@ -43,7 +43,7 @@ public class HeavyClassLoader extends ClassLoader {
 	}
 
 	public synchronized Class<?> loadClass0(String name, boolean resolve) throws ClassNotFoundException {
-		log.trace("> ((symbolicState #{}))", Integer.toHexString(symbolicState.get().hashCode()));
+		// log.trace("> ((symbolicState #{}))", Integer.toHexString(symbolicState.get().hashCode()));
 		Class<?> clas = findLoadedClass(name);
 		if (clas != null) {
 			log.trace("> loading class {}, found in cache", name);

@@ -17,12 +17,24 @@ package za.ac.sun.cs.coastal.symbolic.exceptions;
 public class COASTALException extends Exception {
 
 	/**
+	 * Required for serialization.
+	 */
+	private static final long serialVersionUID = 1282785987285619356L;
+
+	/**
 	 * Standard constructor.
 	 */
 	public COASTALException() {
 		super();
 	}
 
+	/**
+	 * Standard constructor.
+	 */
+	public COASTALException(String message) {
+		super(message);
+	}
+	
 	/**
 	 * Constructor to wrap another throwable.
 	 * 
@@ -31,10 +43,5 @@ public class COASTALException extends Exception {
 	public COASTALException(Throwable throwable) {
 		super(throwable);
 	}
-
-	/**
-	 * Required for serialization.
-	 */
-	private static final long serialVersionUID = 1282785987285619356L;
 
 }
