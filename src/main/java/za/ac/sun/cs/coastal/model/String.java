@@ -28,6 +28,23 @@ public class String {
 		maxChar = (java.lang.Character) coastal.getDefaultMaxValue(char.class);
 	}
 
+	public boolean _init___Ljava_1lang_1String_2__V(SymbolicState state) {
+		SymbolicValue stringValue = state.pop();
+		if ((stringValue == null) || !stringValue.isConstant()) {
+			state.push(new IntegerVariable(state.getNewVariableName(), 32, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		} else {
+			int thisAddress = (int) intConstantValue(stringValue.toExpression());
+			int length = (int) state.getStringLength(thisAddress).toValue();
+			int stringId = state.createString();
+			state.setStringLength(stringId, new IntegerConstant(length, 32));
+			for (int i = 0; i < length; i++) {
+				state.setStringChar(stringId, i, state.getStringChar(stringId, i));
+			}
+			state.push(new IntegerConstant(stringId, 32));
+		}
+		return true;
+	}
+
 	public boolean length____I(SymbolicState state) {
 		SymbolicValue stringValue = state.pop();
 		if ((stringValue == null) || !stringValue.isConstant()) {

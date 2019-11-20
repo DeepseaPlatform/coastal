@@ -468,6 +468,9 @@ public final class SymbolicState extends State {
 			return false;
 		}
 		String methodName = name + getAsciiSignature(descriptor);
+		if (name.equals("<init>")) {
+			methodName = "_init_" + getAsciiSignature(descriptor);
+		}
 		Method delegateMethod = null;
 		try {
 			delegateMethod = delegate.getClass().getDeclaredMethod(methodName, DELEGATE_PARAMETERS);
@@ -762,7 +765,7 @@ public final class SymbolicState extends State {
 	 * 
 	 * @return new string identifier
 	 */
-	private int createString() {
+	public int createString() {
 		return incrAndGetNewObjectId();
 	}
 
@@ -784,7 +787,7 @@ public final class SymbolicState extends State {
 	 * @param length
 	 *                 new length
 	 */
-	private void setStringLength(int stringId, SymbolicValue length) {
+	public void setStringLength(int stringId, SymbolicValue length) {
 		putField(stringId, "length", length);
 	}
 
@@ -796,7 +799,7 @@ public final class SymbolicState extends State {
 	 * @param length
 	 *                 new length
 	 */
-	private void setStringLength(int stringId, Expression length) {
+	public void setStringLength(int stringId, Expression length) {
 		setStringLength(stringId, symbolicValueFactory.createSymbolicValue(length));
 	}
 
@@ -820,7 +823,7 @@ public final class SymbolicState extends State {
 	 * @param value
 	 *                 value for the character
 	 */
-	private void setStringChar(int stringId, int index, SymbolicValue value) {
+	public void setStringChar(int stringId, int index, SymbolicValue value) {
 		putField(stringId, "" + index, value);
 	}
 
@@ -834,7 +837,7 @@ public final class SymbolicState extends State {
 	 * @param value
 	 *                 value for the character
 	 */
-	private void setStringChar(int stringId, int index, Expression value) {
+	public void setStringChar(int stringId, int index, Expression value) {
 		setStringChar(stringId, index, symbolicValueFactory.createSymbolicValue(value));
 	}
 
