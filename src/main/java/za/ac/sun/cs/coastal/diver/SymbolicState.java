@@ -2604,15 +2604,16 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#typeInsn(int, int)
 	 */
 	@Override
-	public void typeInsn(int instr, int opcode) throws COASTALException {
+	public void typeInsn(int instr, int opcode, String type) throws COASTALException {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("--> {} (offset={})", Bytecodes.toString(opcode), instr);
+		log.trace("--> {} {} (offset={})", Bytecodes.toString(opcode), type, instr);
 		broker.publishThread("type-insn", new Tuple(instr, opcode));
 		checkLimitConjuncts();
 		switch (opcode) {
 		case Opcodes.NEW:
+//			classLoader.loadClass(name)
 			int id = incrAndGetNewObjectId();
 			push(new IntegerConstant(id, 32), 32);
 			break;

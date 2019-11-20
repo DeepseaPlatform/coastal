@@ -771,9 +771,10 @@ public abstract class State {
 	 * 
 	 * @param instr  the number of the instruction
 	 * @param opcode the instruction opcode
+	 * @param opcode the type involved in the instruction
 	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void typeInsn(int instr, int opcode) throws COASTALException;
+	public abstract void typeInsn(int instr, int opcode, String type) throws COASTALException;
 
 	/**
 	 * Handle a field instruction. A field instruction is an instruction that loads

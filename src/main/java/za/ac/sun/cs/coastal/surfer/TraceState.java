@@ -1009,7 +1009,7 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#typeInsn(int, int)
 	 */
 	@Override
-	public void typeInsn(int instr, int opcode) throws COASTALException {
+	public void typeInsn(int instr, int opcode, String type) throws COASTALException {
 		throw new RuntimeException("INTERNAL ERROR -- SHOULD NOT BE INVOKED");
 	}
 

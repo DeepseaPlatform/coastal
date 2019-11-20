@@ -171,43 +171,28 @@ public class InstrumentationClassManager {
 	}
 
 	/*
-  private static class PrefixingClassReader extends ClassReader {
-    private final String prefix;
-
-    PrefixingClassReader(InputStream content, String prefix) throws IOException {
-      super(content);
-      this.prefix = prefix;
-    }
-
-    @Override
-    public void accept(ClassVisitor cv, Attribute[] attrs, int flags) {
-      cv =
-          new ClassRemapper(
-              cv,
-              new Remapper() {
-                @Override
-                public String map(String typeName) {
-                  return prefix(typeName);
-                }
-              });
-      super.accept(cv, attrs, flags);
-    }
-
-    * Prefixes core library class names with prefix. 
-    private String prefix(String typeName) {
-      if (shouldPrefix(typeName)) {
-        return prefix + typeName;
-      }
-      return typeName;
-    }
-  }
+	 * private static class PrefixingClassReader extends ClassReader { private final
+	 * String prefix;
+	 * 
+	 * PrefixingClassReader(InputStream content, String prefix) throws IOException {
+	 * super(content); this.prefix = prefix; }
+	 * 
+	 * @Override public void accept(ClassVisitor cv, Attribute[] attrs, int flags) {
+	 * cv = new ClassRemapper( cv, new Remapper() {
+	 * 
+	 * @Override public String map(String typeName) { return prefix(typeName); } });
+	 * super.accept(cv, attrs, flags); }
+	 * 
+	 * Prefixes core library class names with prefix. private String prefix(String
+	 * typeName) { if (shouldPrefix(typeName)) { return prefix + typeName; } return
+	 * typeName; } }
 	 */
 
-	public byte[] loadHeavyInstrumented(String name) {
+	public byte[] loadHeavyInstrumented(ClassLoader classLoader, String name) {
 		long t = System.currentTimeMillis();
 		byte[] instrumented = heavyCache.get(name);
 		if (instrumented == null) {
-			instrumented = loadHeavyInstrumented0(name);
+			instrumented = loadHeavyInstrumented0(classLoader, name);
 		} else {
 			cacheHitCount.incrementAndGet();
 		}
@@ -215,7 +200,7 @@ public class InstrumentationClassManager {
 		return instrumented;
 	}
 
-	private synchronized byte[] loadHeavyInstrumented0(String name) {
+	private synchronized byte[] loadHeavyInstrumented0(ClassLoader classLoader, String name) {
 		byte[] instrumented = heavyCache.get(name);
 		if (instrumented == null) {
 			byte[] in = loadFile(name.replace('.', '/').concat(".class"), true, true);
@@ -223,7 +208,12 @@ public class InstrumentationClassManager {
 				return null;
 			}
 			ClassReader cr = new ClassReader(in);
-			ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
+			ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES) {
+				@Override
+				protected ClassLoader getClassLoader() {
+					return classLoader;
+				}
+			};
 			HeavyAdapter ia = new HeavyAdapter(coastal, name, cw);
 			cr.accept(ia, 0);
 			instrumented = cw.toByteArray();
@@ -297,6 +287,7 @@ public class InstrumentationClassManager {
 		@Override
 		public void accept(ClassVisitor cv, Attribute[] attrs, int flags) {
 			cv = new ClassRemapper(cv, new Remapper() {
+
 				@Override
 				public String map(String typeName) {
 					if (coastal.isTarget(typeName) && typeName.startsWith("java/")) {

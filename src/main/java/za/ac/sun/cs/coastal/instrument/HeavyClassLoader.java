@@ -69,7 +69,7 @@ public class HeavyClassLoader extends ClassLoader {
 			}
 		} else if (coastal.isTarget(name)) {
 			log.trace("> loading class {}, identified as target", name);
-			byte[] raw = manager.loadHeavyInstrumented(name);
+			byte[] raw = manager.loadHeavyInstrumented(this, name);
 			if (raw != null) {
 				log.trace("> defining class {} instrumented", name);
 				clas = defineClass(name, raw, 0, raw.length);

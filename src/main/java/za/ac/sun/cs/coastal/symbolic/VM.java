@@ -620,9 +620,9 @@ public class VM {
 		}
 	}
 
-	public static void typeInsn(int instr, int opcode) throws COASTALException {
+	public static void typeInsn(int instr, int opcode, String type) throws COASTALException {
 		try {
-			state.typeInsn(instr, opcode);
+			state.typeInsn(instr, opcode, type);
 		} catch (ControlException x) {
 			throw x;
 		} catch (Throwable x) {

@@ -298,7 +298,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitInsn(int opcode) {
-		log.trace("Hinstrument visitInsn(opcode:{})", opcode);
+		log.trace("Hinstrument visitInsn(opcode:{} ({}))", opcode, Bytecodes.toString(opcode));
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "insn", "(II)V", false);
@@ -310,7 +310,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitIntInsn(int opcode, int operand) {
-		log.trace("Hinstrument visitIntInsn(opcode:{}, operand:{})", opcode, operand);
+		log.trace("Hinstrument visitIntInsn(opcode:{} ({}), operand:{})", opcode, Bytecodes.toString(opcode), operand);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(operand);
@@ -320,7 +320,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitVarInsn(int opcode, int var) {
-		log.trace("Hinstrument visitVarInsn(opcode:{}, var:{})", opcode, var);
+		log.trace("Hinstrument visitVarInsn(opcode:{} ({}), var:{})", opcode, Bytecodes.toString(opcode), var);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(var);
@@ -330,12 +330,18 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitTypeInsn(int opcode, String type) {
-		log.trace("Hinstrument visitTypeInsn(opcode:{}, type:{})", opcode, type);
+		log.trace("Hinstrument visitTypeInsn(opcode:{} ({}), type:{})", opcode, Bytecodes.toString(opcode), type);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "typeInsn", "(II)V", false);
-		if (coastal.isTarget(type) && type.startsWith("java/")) {
-			mv.visitTypeInsn(opcode, "ins/" + type);
+		mv.visitLdcInsn(type);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "typeInsn", "(IILjava/lang/String;)V", false);
+		if (coastal.isTarget(type)) {
+			// classManager.loadHeavyInstrumented(type);
+			if (type.startsWith("java/")) {
+				mv.visitTypeInsn(opcode, "ins/" + type);
+			} else {
+				mv.visitTypeInsn(opcode, type);
+			}
 		} else {
 			mv.visitTypeInsn(opcode, type);
 		}
@@ -343,7 +349,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-		log.trace("Hinstrument visitFieldInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
+		log.trace("Hinstrument visitFieldInsn(opcode:{} ({}), owner:{}, name:{})", opcode, Bytecodes.toString(opcode), owner, name);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(owner);
@@ -375,7 +381,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-		log.trace("Hinstrument visitMethodInsn(opcode:{}, owner:{}, name:{})", opcode, owner, name);
+		log.trace("Hinstrument visitMethodInsn(opcode:{} ({}), owner:{}, name:{})", opcode, Bytecodes.toString(opcode), owner, name);
 		if (owner.equals(SYMBOLIC)) {
 			mv.visitMethodInsn(opcode, LIBRARY, name, descriptor, isInterface);
 			// pop params !!!!!!!!!!!
@@ -472,7 +478,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitJumpInsn(int opcode, Label label) {
-		log.trace("Hinstrument visitJumpInsn(opcode:{}, label:{})", opcode, label);
+		log.trace("Hinstrument visitJumpInsn(opcode:{} ({}), label:{})", opcode, Bytecodes.toString(opcode), label);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "jumpInsn", "(II)V", false);
