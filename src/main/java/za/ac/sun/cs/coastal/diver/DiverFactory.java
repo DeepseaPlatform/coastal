@@ -262,6 +262,7 @@ public class DiverFactory implements TaskFactory {
 					broker.publish("system-exit", new Tuple(this, null));
 				} else if (t instanceof UnsupportedOperationException) {
 					log.trace("exception: unsupported operation: {}", t.getMessage());
+					log.info("UNSUPPORTED OPERATION: {}", t.getMessage());
 				} else if (t instanceof ErrorException) {
 					log.fatal("*** I N T E R N A L   E R R O R ***", t.getCause());
 					log.fatal("*** symbolic state: #{} ***", Integer.toHexString(symbolicState.hashCode()));
@@ -287,6 +288,7 @@ public class DiverFactory implements TaskFactory {
 						log.trace("exception: System.exit() invoked");
 					} catch (UnsupportedOperationException e) {
 						log.trace("exception: unsupported operation: {}", e.getMessage());
+						log.info("UNSUPPORTED OPERATION: {}", t.getMessage());
 					} catch (Exception e) {
 						log.trace("exception (cause unknown): ", e);
 					}
