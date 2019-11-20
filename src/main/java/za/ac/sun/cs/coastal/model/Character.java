@@ -59,4 +59,19 @@ public class Character {
 		return true;
 	}
 	
+	public boolean isLetter__C__Z(SymbolicState state) {
+		Expression arg = state.pop().toExpression();
+		Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
+		Expression pcu = Operation.and(Operation.ge(arg, upperA), Operation.eq(arg, upperZ));
+		Expression pcl = Operation.and(Operation.ge(arg, lowerA), Operation.eq(arg, lowerZ));
+		Expression pcy = Operation.or(pcu, pcl);
+		Expression pcn = Operation.or(pcu, pcl);
+		Expression pc0 = Operation.and(pcn, Operation.eq(var, IntegerConstant.ZERO32));
+		Expression pc1 = Operation.and(pcy, Operation.eq(var, IntegerConstant.ONE32));
+		Expression pc = Operation.or(pc0, pc1);
+		state.pushExtraCondition(pc);
+		state.push(state.getSymbolicValueFactory().createSymbolicValue(var));
+		return true;
+	}
+	
 }
