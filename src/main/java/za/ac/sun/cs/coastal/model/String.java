@@ -56,6 +56,42 @@ public class String {
 		return true;
 	}
 
+	public boolean equals__Ljava_1lang_1Object_2__Z(SymbolicState state) {
+		SymbolicValue stringValue1 = state.pop();
+		SymbolicValue stringValue2 = state.pop();
+		if ((stringValue1 == null) || !stringValue1.isConstant()) {
+			state.push(new IntegerVariable(state.getNewVariableName(), 32, 0, 1));
+		} else if ((stringValue2 == null) || !stringValue2.isConstant()) {
+			state.push(new IntegerVariable(state.getNewVariableName(), 32, 0, 1));
+		} else {
+			int thisAddress1 = (int) intConstantValue(stringValue1.toExpression());
+			int thisAddress2 = (int) intConstantValue(stringValue2.toExpression());
+			int length1 = (int) state.getStringLength(thisAddress1).toValue();
+			int length2 = (int) state.getStringLength(thisAddress2).toValue();
+			if (length1 != length2) {
+				state.push(IntegerConstant.ZERO32);
+			} else {
+				Expression guard = null;
+				for (int i = 0; i < length1; i++) {
+					Expression ch1 = state.getStringChar(thisAddress1, i).toExpression();
+					Expression ch2 = state.getStringChar(thisAddress2, i).toExpression();
+					Expression eq = Operation.eq(ch1, ch2);
+					if (i == 0) {
+						guard = eq;
+					} else {
+						guard = Operation.and(guard, eq);
+					}
+				}
+				Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
+				Expression pc = Operation.or(Operation.and(guard, Operation.eq(var, IntegerConstant.ONE32)),
+						Operation.and(Operation.not(guard), Operation.eq(var, IntegerConstant.ZERO32)));
+				state.pushExtraCondition(pc);
+				state.push(var);
+			}
+		}
+		return true;
+	}
+	
 	public boolean charAt__I__C(SymbolicState state) {
 		Expression index = state.pop().toExpression();
 		int thisAddress = (int) intConstantValue(state.pop());
@@ -195,17 +231,18 @@ public class String {
 	}
 
 	public boolean startsWith__Ljava_1lang_1String_2I__Z(SymbolicState state) {
-		Expression offset = state.pop().toExpression();
+		int first = 0;
+		Expression offset = state.peek().toExpression();
+		if (offset instanceof IntegerConstant) {
+			first = (int) intConstantValue(offset);
+			offset = state.pop().toExpression();
+		} else {
+			return false; // CANNOT (YET) HANDLE SYMBOLIC OFFSETS
+		}
 		int prefixAddress = (int) intConstantValue(state.pop());
 		int thisAddress = (int) intConstantValue(state.pop());
 		int prefixLength = (int) intConstantValue(state.getStringLength(prefixAddress));
 		int thisLength = (int) intConstantValue(state.getStringLength(thisAddress));
-		int first = 0;
-		if (offset instanceof IntegerConstant) {
-			first = (int) intConstantValue(offset);
-		} else {
-			return false; // CANNOT (YET) HANDLE SYMBOLIC OFFSETS
-		}
 		if (thisLength >= first + prefixLength) {
 			Expression guard = null;
 			for (int i = 0; i < prefixLength; i++) {

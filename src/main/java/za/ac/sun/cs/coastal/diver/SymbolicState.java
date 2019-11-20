@@ -901,7 +901,7 @@ public final class SymbolicState extends State {
 	 * 
 	 * @return the expression on top of the expression stack
 	 */
-	private SymbolicValue peek() {
+	public SymbolicValue peek() {
 		return FRAMES.get().peek().peek();
 	}
 
