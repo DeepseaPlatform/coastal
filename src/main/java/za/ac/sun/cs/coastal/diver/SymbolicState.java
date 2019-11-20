@@ -2549,8 +2549,10 @@ public final class SymbolicState extends State {
 					throw new UnsupportedOperationException("NEWARRAY with symbolic value");
 				}
 				n = (int) new IntegerConstant((Long) input.get(name), 32).getValue();
-			} else {
+			} else if (e instanceof IntegerConstant) {
 				n = (int) ((IntegerConstant) e).getValue();
+			} else {
+				throw new UnsupportedOperationException("NEWARRAY with symbolic value");
 			}
 			int id = createArray();
 			setArrayType(id, operand);

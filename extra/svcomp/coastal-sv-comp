@@ -96,19 +96,24 @@ cd -
 #------------------------------------------------------------------------------
 # check the result
 #------------------------------------------------------------------------------
-grep "TIME LIMIT REACHED" $LOG > /dev/null
+grep "exception: unsupported operation" $LOG > /dev/null
 if [ $? -eq 0 ]; then
 	echo "UNKNOWN"
 else
-	grep "assert-failed: false" $LOG > /dev/null
+	grep "TIME LIMIT REACHED" $LOG > /dev/null
 	if [ $? -eq 0 ]; then
-		echo "SAFE"
+		echo "UNKNOWN"
 	else
-		grep "assert-failed: true" $LOG > /dev/null
+		grep "assert-failed: false" $LOG > /dev/null
 		if [ $? -eq 0 ]; then
-			echo "UNSAFE"
+			echo "SAFE"
 		else
-			echo "UNKNOWN"
+			grep "assert-failed: true" $LOG > /dev/null
+			if [ $? -eq 0 ]; then
+				echo "UNSAFE"
+			else
+				echo "UNKNOWN"
+			fi
 		fi
 	fi
 fi
