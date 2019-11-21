@@ -1,3 +1,11 @@
+/*
+ * This file is part of the COASTAL tool, https://deepseaplatform.github.io/coastal/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.coastal;
 
 import java.text.DateFormat;
@@ -57,7 +65,7 @@ public class Reporter {
 	 * Construct a new reporter.
 	 * 
 	 * @param coastal
-	 *            an instance of COASTAL
+	 *                an instance of COASTAL
 	 */
 	public Reporter(COASTAL coastal) {
 		log = coastal.getLog();
@@ -74,7 +82,7 @@ public class Reporter {
 	 * information in {@link #statMap} so that it can be interrogated.
 	 * 
 	 * @param object
-	 *            dummy message parameter
+	 *               dummy message parameter
 	 */
 	private void report(Object object) {
 		stats.sort((a, b) -> ((String) a.get(0)).compareTo((String) b.get(0)));
@@ -102,8 +110,8 @@ public class Reporter {
 	}
 
 	/**
-	 * Interrogate the collected information and return the value that
-	 * corresponds to the given key parameter as a long value.
+	 * Interrogate the collected information and return the value that corresponds
+	 * to the given key parameter as a long value.
 	 * 
 	 * @param key
 	 *            the key to search for
@@ -121,8 +129,8 @@ public class Reporter {
 	}
 
 	/**
-	 * Interrogate the collected information and return the value that
-	 * corresponds to the given key parameter as a boolean value.
+	 * Interrogate the collected information and return the value that corresponds
+	 * to the given key parameter as a boolean value.
 	 * 
 	 * @param key
 	 *            the key to search for
@@ -138,8 +146,8 @@ public class Reporter {
 	}
 
 	/**
-	 * Interrogate the collected information and return the value that
-	 * corresponds to the given key parameter as a string value.
+	 * Interrogate the collected information and return the value that corresponds
+	 * to the given key parameter as a string value.
 	 * 
 	 * @param key
 	 *            the key to search for
@@ -161,34 +169,35 @@ public class Reporter {
 	// ======================================================================
 
 	/**
-	 * An interface to allow one component of COASTAL (such as an observer) to
-	 * interrogate other components with regard to any information they wish to
-	 * distribute. Strategies, observers, and other similar actors are expected
-	 * to implement this interface.
+	 * An interface to allow one component of COASTAL to interrogate other
+	 * components with regard to any information they wish to distribute.
+	 * Strategies, observers, and similar actors are expected to implement this
+	 * interface. For example, an observer may implement the interface so that, at
+	 * the end of the COASTAL run, a {@link Reporter} can obtain information (in the
+	 * form of a list of properties) about the execution of the observer during the
+	 * run.
 	 */
 	public interface Reportable {
 
 		/**
-		 * Return the name of this component. A return value of {@code null}
-		 * indicates that the component has no information to distribute.
+		 * Return the name of this component. A return value of {@code null} indicates
+		 * that the component has no information to distribute.
 		 * 
-		 * @return the name of this component
+		 * @return name of this component
 		 */
 		String getName();
 
 		/**
-		 * Return the names of the properties that a component wishes to
-		 * distribute.
+		 * Return the names of the properties that a component wishes to distribute.
 		 * 
-		 * @return an array of property names
+		 * @return array of property names
 		 */
 		String[] getPropertyNames();
 
 		/**
-		 * Return the values of the properties that a components wishes to
-		 * distribute.
+		 * Return the values of the properties that a component wishes to distribute.
 		 * 
-		 * @return an array of property values
+		 * @return array of property values
 		 */
 		Object[] getPropertyValues();
 

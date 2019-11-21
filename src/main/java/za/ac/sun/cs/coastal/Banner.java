@@ -21,20 +21,20 @@ import java.io.StringWriter;
  * Typical usage for a one-line banner:
  * </p>
  * 
- * <pre>
- *   log.info((Banner.getBannerLine("some error occurred", '*'));
- * </pre>
+ * {@prejava
+ *log.info((Banner.getBannerLine("some error occurred", '*'));
+ * }
  * 
  * <p>
  * Typical usage for a larger banner:
  * </p>
  * 
- * <pre>
- *   Banner bn = new Banner('@');
- *   bn.println("SOME SERIOUS ERROR:");
- *   bn.println(exception.getMessage());
- *   bn.display(log);
- * </pre>
+ * {@prejava
+ *Banner bn = new Banner('@');
+ *bn.println("SOME SERIOUS ERROR:");
+ *bn.println(exception.getMessage());
+ *bn.display(log);
+ * }
  * 
  * <p>
  * Two additional methods ({@link #getElapsed(COASTAL)} and
@@ -86,8 +86,8 @@ public class Banner {
 	private final String borderRight;
 
 	/**
-	 * An empty line in the border for creating space between the top border and
-	 * the content, or the content and the bottom border.
+	 * An empty line in the border for creating space between the top border and the
+	 * content, or the content and the bottom border.
 	 */
 	private final String borderEmpty;
 
@@ -98,14 +98,14 @@ public class Banner {
 	private final StringBuilder sb = new StringBuilder();
 
 	/**
-	 * Construct a new banner. The main task of this routine is to create the
-	 * border elements. It would be possible to cache constructed banners so
-	 * that the borders do not have to be created every time. But banners are
-	 * used infrequently, mostly during startup or termination, and it is not
-	 * worth the effort.
+	 * Construct a new banner. The main task of this routine is to create the border
+	 * elements. It would be possible to cache constructed banners so that the
+	 * borders do not have to be created every time. But banners are used
+	 * infrequently, mostly during startup or termination, and it is not worth the
+	 * effort.
 	 * 
 	 * @param borderChar
-	 *            the character used for forming the border
+	 *                   the character used for forming the border
 	 */
 	public Banner(char borderChar) {
 		// Construct "====================="
@@ -114,7 +114,7 @@ public class Banner {
 			sb.append(borderChar);
 		}
 		borderLine = sb.toString();
-		// Construct "====  "
+		// Construct "==== "
 		sb.setLength(0);
 		for (int i = 0; i < SIDE_WIDTH; i++) {
 			sb.append(borderChar);
@@ -123,7 +123,7 @@ public class Banner {
 			sb.append(' ');
 		}
 		borderLeft = sb.toString();
-		// Construct "  ===="
+		// Construct " ===="
 		sb.setLength(0);
 		for (int i = 0; i < SIDE_SPACE; i++) {
 			sb.append(' ');
@@ -132,7 +132,7 @@ public class Banner {
 			sb.append(borderChar);
 		}
 		borderRight = sb.toString();
-		// Construct "====             ===="
+		// Construct "==== ===="
 		sb.setLength(0);
 		sb.append(borderLeft);
 		while (sb.length() < WIDTH - SIDE_WIDTH - SIDE_SPACE) {
@@ -146,9 +146,8 @@ public class Banner {
 	 * Add content to the banner.
 	 * 
 	 * @param message
-	 *            the content to add
-	 * @return the same instance of the banner so that these calls can be
-	 *         chained
+	 *                the content to add
+	 * @return the same instance of the banner so that these calls can be chained
 	 */
 	public Banner println(String message) {
 		for (String line : message.split("\n")) {
@@ -200,7 +199,7 @@ public class Banner {
 		log.trace(borderLine);
 		log.trace(borderLine);
 	}
-	
+
 	/**
 	 * Display the banner to the given writer.
 	 * 
@@ -239,9 +238,9 @@ public class Banner {
 	 * Produce a short, one-line banner.
 	 * 
 	 * @param string
-	 *            the content of the banner
+	 *                   the content of the banner
 	 * @param bannerChar
-	 *            the character to place around the content
+	 *                   the character to place around the content
 	 * @return a one-line banner
 	 */
 	public static String getBannerLine(String string, char bannerChar) {
@@ -271,11 +270,11 @@ public class Banner {
 	// ======================================================================
 
 	/**
-	 * Format the elapsed time for a COASTAL analysis run in human-readable
-	 * form. It checks the duration and decides which units to include.
+	 * Format the elapsed time for a COASTAL analysis run in human-readable form. It
+	 * checks the duration and decides which units to include.
 	 * 
 	 * @param coastal
-	 *            the instance of COASTAL for which to compute the elapsed time
+	 *                the instance of COASTAL for which to compute the elapsed time
 	 * @return the nicely-formatted elapsed time
 	 */
 	public static String getElapsed(COASTAL coastal) {
@@ -284,13 +283,13 @@ public class Banner {
 	}
 
 	/**
-	 * Format the elapsed time in human-readable form. It checks the duration
-	 * and decides which units to include.
+	 * Format the elapsed time in human-readable form. It checks the duration and
+	 * decides which units to include.
 	 * 
 	 * @since 0.0.3
 	 * 
 	 * @param delta
-	 *            the elapsed time in milliseconds
+	 *              the elapsed time in milliseconds
 	 * @return the nicely-formatted elapsed time
 	 *
 	 */

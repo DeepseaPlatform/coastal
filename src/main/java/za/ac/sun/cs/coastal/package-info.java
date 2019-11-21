@@ -1,3 +1,11 @@
+/*
+ * This file is part of the COASTAL tool, https://deepseaplatform.github.io/coastal/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 /**
  * Main package for the COASTAL concolic execution framework. Includes some
  * helper classes, mainly for initialization and very high-level abstractions.
@@ -21,8 +29,8 @@
  *
  *{
  *   final Logger log = LogManager.getLogger("MY-COASTAL");
- *   ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, "basic.xml",
- *      "<coastal><target><trigger>mypackage.MyProgram.calculate(X: int)</trigger></target></coastal>");
+ *   ImmutableConfiguration config = ConfigHelper.loadConfiguration(log, "basic.properties",
+ *      "coastal.target.trigger = mypackage.MyProgram.calculate(X: int)");
  *   if (config == null) {
  *      System.out.println("Configuration error");
  *      System.exit(1);

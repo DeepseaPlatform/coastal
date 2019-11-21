@@ -38,7 +38,7 @@ public class String {
 			int stringId = state.createString();
 			state.setStringLength(stringId, new IntegerConstant(length, 32));
 			for (int i = 0; i < length; i++) {
-				state.setStringChar(stringId, i, state.getStringChar(stringId, i));
+				state.setStringChar(stringId, i, state.getStringChar(thisAddress, i));
 			}
 			state.push(new IntegerConstant(stringId, 32));
 		}

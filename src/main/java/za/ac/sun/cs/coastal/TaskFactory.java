@@ -1,9 +1,17 @@
+/*
+ * This file is part of the COASTAL tool, https://deepseaplatform.github.io/coastal/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.coastal;
 
 import za.ac.sun.cs.coastal.Reporter.Reportable;
 
 /**
- * Base class for diver, surfer, and strategy factories.
+ * Base interface for diver, surfer, and strategy factories.
  */
 public interface TaskFactory {
 
@@ -11,8 +19,9 @@ public interface TaskFactory {
 	 * Create a new manager for this class of tasks. Only one manager should ever be
 	 * created, but this singleton rule is not enforced in any way.
 	 * 
-	 * @param coastal instance of COASTAL
-	 * @return a new task manager
+	 * @param coastal
+	 *                instance of COASTAL
+	 * @return new task manager
 	 */
 	TaskManager createManager(COASTAL coastal);
 
@@ -21,9 +30,11 @@ public interface TaskFactory {
 	 * on the user configuration) and each task may actually consist of more than
 	 * one task component. Each component runs in a separate thread.
 	 * 
-	 * @param coastal instance of COASTAL
-	 * @param manager the manager that controls
-	 * @return an array of new task instances
+	 * @param coastal
+	 *                instance of COASTAL
+	 * @param manager
+	 *                the manager that controls
+	 * @return array of new task instances
 	 */
 	Task[] createTask(COASTAL coastal, TaskManager manager);
 
@@ -47,7 +58,8 @@ public interface TaskFactory {
 	// ======================================================================
 
 	/**
-	 * A task that will be run inside its own threads.
+	 * A general interface for tasks. Each task that will be run inside its own
+	 * thread.
 	 */
 	public interface Task extends Runnable {
 	}

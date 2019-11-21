@@ -1,3 +1,11 @@
+/*
+ * This file is part of the COASTAL tool, https://deepseaplatform.github.io/coastal/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
+ */
 package za.ac.sun.cs.coastal;
 
 import java.util.Map;
@@ -16,30 +24,30 @@ import za.ac.sun.cs.coastal.symbolic.VM;
  * 
  * One important aspect of triggers is that they used to handle the type
  * information for parameters. Over time, the locus of control for types has
- * moved to other places, but for historical reasons, this class contains the
- * information for adding new types:
+ * moved to other places, but for historical reasons, this class contains some
+ * information for managing types.  To add a new type XXX, add the following:
  * 
  * <ol>
  * 
- * <li>Add an appropriate <code>if</code>-statement to
+ * <li>An appropriate <code>if</code>-statement in
  * {@link #parseType(String)}.</li>
  * 
- * <li>Add the appropriate code to {@link #toString()}.</li>
+ * <li>The appropriate code in {@link #toString()}.</li>
  * 
- * <li>Add instrumentation to "pick up" values for the type to
+ * <li>Instrumentation to recognize values for the type in
  * {@link HeavyMethodAdapter#visitParameter(String, int)}.</li>
  * 
- * <li>Add instrumentation to "pick up" values for the type to
+ * <li>Instrumentation to recognize values for the type in
  * {@link LightMethodAdapter#visitParameter(String, int)}.</li>
  * 
- * <li>Add a <code>getConcreteXXX(...)</code> method to {@link VM}.</li>
+ * <li>A <code>getConcreteXXX(...)</code> method in {@link VM}.</li>
  * 
- * <li>Add a <code>getConcreteXXX(...)</code> method to
+ * <li>A <code>getConcreteXXX(...)</code> method in
  * {@link SymbolicState}.</li>
  * 
- * <li>Add a <code>getConcreteXXX(...)</code> method to {@link TraceState}.</li>
+ * <li>A <code>getConcreteXXX(...)</code> method in {@link TraceState}.</li>
  * 
- * <li>Add appropriate code to {@link COASTAL#parseConfigBounds()}.</li>
+ * <li>Appropriate code in {@link COASTAL#parseConfigBounds()}.</li>
  * 
  * </ol>
  */

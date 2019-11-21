@@ -11,12 +11,14 @@ package za.ac.sun.cs.coastal;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import java.lang.reflect.Method;
+import java.net.UnknownHostException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -434,13 +436,11 @@ public class COASTAL {
 	 * The wall-clock-time that the analysis run was started.
 	 */
 	private Calendar startingTime;
-	private long startingCpuTime;
 
 	/**
 	 * The wall-clock-time that the analysis run was stopped.
 	 */
 	private Calendar stoppingTime;
-	private long stoppingCpuTime;
 
 	/**
 	 * The number of milliseconds of elapsed time when we next write a console
@@ -2149,7 +2149,6 @@ public class COASTAL {
 	 */
 	public void start(boolean showBanner, boolean showBriefReport, String runName) {
 		startingTime = Calendar.getInstance();
-		startingCpuTime = getCpuTime();
 		getBroker().publish("coastal-init", this);
 		if (showBanner) {
 			new Banner('~').println("COASTAL version " + VERSION).display(log);
@@ -2189,7 +2188,6 @@ public class COASTAL {
 			stopTasks();
 		}
 		stoppingTime = Calendar.getInstance();
-		stoppingCpuTime = getCpuTime();
 		getBroker().publish("coastal-stop", this);
 		getBroker().publish("coastal-report", this);
 		System.setOut(getSystemOut());
@@ -2205,12 +2203,10 @@ public class COASTAL {
 		}
 		if (showBriefReport) {
 			long duration = getStoppingTime() - getStartingTime();
-			long cpuDuration = stoppingCpuTime - startingCpuTime;
 			System.out.print("COASTAL");
 			System.out.print(" version: " + VERSION);
 			System.out.print(" model: " + runName);
 			System.out.print(" paths: " + getPathTree().getUniqueCount());
-			System.out.print(" cputime: " + cpuDuration);
 			System.out.print(" time: " + duration);
 			System.out.println();
 		}
@@ -2310,22 +2306,6 @@ public class COASTAL {
 	}
 
 	/**
-	 * Calculate and return CPU usage.
-	 *
-	 * @return CPU time used by the process in nanoseconds
-	 */
-	@SuppressWarnings("restriction")
-	private long getCpuTime() {
-		OperatingSystemMXBean bean = ManagementFactory.getOperatingSystemMXBean();
-//		if (!(bean instanceof com.sun.management.OperatingSystemMXBean)) {
-//			return 0L;
-//		} else {
-//			return ((com.sun.management.OperatingSystemMXBean) bean).getProcessCpuTime() / 1000000;
-//		}
-		return 0L;
-	}
-
-	/**
 	 * Reports some statistics about the analysis run at the end of the run.
 	 * 
 	 * @param object
@@ -2337,9 +2317,7 @@ public class COASTAL {
 		getBroker().publish("report", new Tuple("COASTAL.start", startingTime));
 		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
 		long duration = stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis();
-		long cpuDuration = stoppingCpuTime - startingCpuTime;
 		getBroker().publish("report", new Tuple("COASTAL.time", duration));
-		getBroker().publish("report", new Tuple("COASTAL.cpu-time", cpuDuration));
 	}
 
 	// ======================================================================
@@ -2461,7 +2439,31 @@ public class COASTAL {
 	private static void displayVersion() {
 		System.out.println();
 		System.out.println("COASTAL version " + VERSION);
-		System.out.println("Compiled: " + CompileInfo.BUILD_DATE);
+	
+		System.out.println();
+		String osArch = System.getProperty("os.arch");
+		String osName = System.getProperty("os.name");
+		String osVersion = System.getProperty("os.version");
+		String arch = (osArch == null) ? "" : osArch;
+		arch += (osName == null) ? "" : ((arch.length() == 0) ? osName : (" / " + osName));
+		arch += (osVersion == null) ? "" : ((arch.length() == 0) ? osVersion : (" " + osVersion));
+		try {
+			Date buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(CompileInfo.BUILD_DATE);
+			String buildString = new SimpleDateFormat("EEE d MMM yyyy HH:mm:ss").format(buildDate);
+			System.out.println("Compiled: " + buildString);
+		} catch (ParseException e) {
+			// ignore
+			System.out.println("Compiled: " + CompileInfo.BUILD_DATE);
+		}
+		System.out.println("Compiled by: " + System.getProperty("user.name", "unknown"));
+		System.out.println("Architecture: " + ((arch.length() == 0) ? "unknown" : arch));
+		try {
+			String hostName = java.net.InetAddress.getLocalHost().getHostName();
+			System.out.println("Host name: " + hostName);
+		} catch (UnknownHostException e) {
+			System.out.println("Host name: unknown");
+		}
+
 		System.out.println();
 		System.out.println("Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.");
 		System.out.println("License: GNU GPL version 3 or later, http://gnu.org/licenses/gpl.html");
@@ -2481,7 +2483,7 @@ public class COASTAL {
 		System.out.println("Options:");
 		System.out.println("  -brief      run without logging; only print running time and unique paths");
 		System.out.println("  -quiet      run without generating a detailed log");
-		System.out.println("  -verbose    run with a detailed log (written to log file)");
+		System.out.println("  -verbose    run with a detailed log (written to log file) (DEFAULT)");
 		System.out.println("  -prolix     run with a detailed log (written to standard output)");
 		System.out.println("  -set K=V    add the key K with value V to end of configuration");
 		System.out.println("  -version    display version information and exit");

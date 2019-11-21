@@ -140,7 +140,9 @@ public class DocRun {
 					"/Users/jaco/Public/Dropbox/WORKSPACE/coastal/src/main/java/examples/bintree/BinTree2.java",
 					"/Users/jaco/Public/Dropbox/WORKSPACE/coastal/src/main/java/examples/bintree/BinTree4.java"
 			};
-			com.sun.tools.javadoc.Main.execute(params);
+			System.out.println("HELLO");
+			System.out.println(System.getProperty("user.dir"));
+			// com.sun.tools.javadoc.Main.execute(params);
 		} else {
 			com.sun.tools.javadoc.Main.execute(args);
 		}

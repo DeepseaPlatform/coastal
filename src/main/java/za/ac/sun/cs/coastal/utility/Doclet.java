@@ -301,7 +301,8 @@ public class Doclet {
 						writer.h2(null, field.name(), field.name());
 						writer.prejava();
 						writer.cdata(field.modifiers() + " ");
-						writer.cdata(excludeQualifier(field.type().qualifiedTypeName()) + " ");
+						writer.cdata(
+								excludeQualifier(field.type().qualifiedTypeName()) + field.type().dimension() + " ");
 						writer.cdata(field.name());
 						writer.cdata("\n").prejavaEnd();
 						writer.p().tags(field.inlineTags()).pEnd();
@@ -352,7 +353,7 @@ public class Doclet {
 				} else {
 					writer.cdata(", ");
 				}
-				writer.cdata(excludeQualifier(param.type().qualifiedTypeName()) + " ");
+				writer.cdata(excludeQualifier(param.type().qualifiedTypeName()) + param.type().dimension() + " ");
 				writer.cdata(param.name());
 			}
 		}
