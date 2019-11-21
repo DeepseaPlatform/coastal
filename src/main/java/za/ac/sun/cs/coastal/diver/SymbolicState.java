@@ -905,6 +905,16 @@ public final class SymbolicState extends State {
 		return FRAMES.get().peek().peek();
 	}
 
+	/**
+	 * Return (but do not remove) the index-most top expression of the expression stack
+	 * of the topmost invocation frame.
+	 * 
+	 * @return the index-most top expression of the expression stack
+	 */
+	public SymbolicValue peek(int index) {
+		return FRAMES.get().peek().peek(index);
+	}
+	
 	// ----------------------------------------------------------------------
 	// ROUTINES TO MANIPULATE THE PATH
 	// ----------------------------------------------------------------------

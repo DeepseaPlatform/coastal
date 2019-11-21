@@ -65,7 +65,7 @@ public class SymbolicFrame {
 	}
 
 	public SymbolicValue peek(int index) {
-		return stack.get(index);
+		return stack.get(stack.size() - 1 - index);
 	}
 
 	public void push(SymbolicValue value) {

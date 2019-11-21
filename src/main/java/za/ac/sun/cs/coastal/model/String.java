@@ -91,7 +91,55 @@ public class String {
 		}
 		return true;
 	}
-	
+
+	public boolean regionMatches__ILjava_1lang_1String_2II__Z(SymbolicState state) {
+		Expression len = state.peek().toExpression();
+		Expression ooffset = state.peek(1).toExpression();
+		Expression other = state.peek(2).toExpression();
+		Expression toffset = state.peek(3).toExpression();
+		Expression thiss = state.peek(4).toExpression();
+		if (!(len instanceof IntegerConstant) || !(ooffset instanceof IntegerConstant)
+				|| !(other instanceof IntegerConstant) || !(toffset instanceof IntegerConstant)
+				|| !(thiss instanceof IntegerConstant)) {
+			return false; // CANNOT HANDLE SYMBOLIC OFFSETS
+		}
+		len = state.pop().toExpression();
+		ooffset = state.pop().toExpression();
+		other = state.pop().toExpression();
+		toffset = state.pop().toExpression();
+		thiss = state.pop().toExpression();
+		int length = (int) intConstantValue(len);
+		int ooffsetValue = (int) intConstantValue(ooffset);
+		int toffsetValue = (int) intConstantValue(toffset);
+		int otherAddress = (int) intConstantValue(other);
+		int thisAddress = (int) intConstantValue(thiss);
+		int otherLength = (int) intConstantValue(state.getStringLength(otherAddress));
+		int thisLength = (int) intConstantValue(state.getStringLength(thisAddress));
+		if ((toffsetValue < 0) || (ooffsetValue < 0) || (toffsetValue + length > thisLength)
+				|| (ooffsetValue > otherLength)) {
+			state.push(IntegerConstant.ZERO32);
+		} else {
+			Expression guard = null;
+			for (int i = 0; i < length; i++) {
+				Expression otherChar = state.getStringChar(otherAddress, i + ooffsetValue).toExpression();
+				Expression thisChar = state.getStringChar(thisAddress, i + toffsetValue).toExpression();
+				Expression eq = Operation.eq(otherChar, thisChar);
+				if (i == 0) {
+					guard = eq;
+				} else {
+					guard = Operation.and(guard, eq);
+				}
+			}
+			Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
+			Expression posGuard = Operation.and(guard, Operation.eq(var, IntegerConstant.ONE32));
+			Expression negGuard = Operation.and(Operation.not(guard), Operation.eq(var, IntegerConstant.ZERO32));
+			Expression pc = Operation.or(posGuard, negGuard);
+			state.pushExtraCondition(pc);
+			state.push(var);
+		}
+		return true;
+	}
+
 	public boolean charAt__I__C(SymbolicState state) {
 		Expression index = state.pop().toExpression();
 		int thisAddress = (int) intConstantValue(state.pop());
@@ -167,8 +215,10 @@ public class String {
 		return true;
 	}
 
-	// Encode the constraint that the first occurrence of character "chr" in string "strAddresss"
-	// occurs at position "rval".  The string has fixed concrete length "len" and the first occurrence
+	// Encode the constraint that the first occurrence of character "chr" in string
+	// "strAddresss"
+	// occurs at position "rval". The string has fixed concrete length "len" and the
+	// first occurrence
 	// is at least "ofs".
 	private Expression firstOccurrenceGuard(SymbolicState state, int strAddress, Expression chr, Expression rval,
 			int ofs, int len) {
@@ -311,5 +361,5 @@ public class String {
 	private long intConstantValue(SymbolicValue expr) {
 		return intConstantValue(expr.toExpression());
 	}
-	
+
 }
