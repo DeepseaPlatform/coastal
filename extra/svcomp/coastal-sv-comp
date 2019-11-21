@@ -75,7 +75,7 @@ coastal.strategies.GEN.threads = 2
 coastal.strategies.RND = za.ac.sun.cs.coastal.strategy.pathbased.RandomPathFactory
 coastal.observers = za.ac.sun.cs.coastal.observers.AssertControllerFactory
 coastal.bounds.$$int.min = -10
-coastal.bounds.$int.min = 10
+coastal.bounds.$$int.min = 10
 coastal.settings.solver.z3-path = $CURRENT/coastal/z3/z3
 coastal.settings.hard-exit = true
 coastal.settings.conjunct-limit = 1000
@@ -98,7 +98,7 @@ cd -
 #------------------------------------------------------------------------------
 # check the result
 #------------------------------------------------------------------------------
-grep "exception: unsupported operation" $LOG > /dev/null
+grep "UNSUPPORTED OPERATION" $LOG > /dev/null
 if [ $? -eq 0 ]; then
 	echo "UNKNOWN"
 else
