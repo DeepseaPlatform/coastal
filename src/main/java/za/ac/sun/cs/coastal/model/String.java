@@ -92,6 +92,53 @@ public class String {
 		return true;
 	}
 
+	public boolean contains__Ljava_1lang_1CharSequence_2__Z(SymbolicState state) {
+		Expression other = state.peek().toExpression();
+		Expression thiss = state.peek(1).toExpression();
+		if (!(other instanceof IntegerConstant) || !(thiss instanceof IntegerConstant)) {
+			return false; // CANNOT HANDLE SYMBOLIC OFFSETS
+		}
+		other = state.pop().toExpression();
+		thiss = state.pop().toExpression();
+		int otherAddress = (int) intConstantValue(other);
+		int thisAddress = (int) intConstantValue(thiss);
+		int otherLength = (int) intConstantValue(state.getStringLength(otherAddress));
+		int thisLength = (int) intConstantValue(state.getStringLength(thisAddress));
+		if (otherLength > thisLength) {
+			state.push(IntegerConstant.ZERO32);
+		} else if (otherLength == 0) {
+			state.push(IntegerConstant.ONE32);
+		} else {
+			Expression guard = null;
+			int maxShift = thisLength - otherLength;
+			for (int shift = 0; shift <= maxShift; shift++) {
+				Expression subguard = null;
+				for (int i = 0; i < otherLength; i++) {
+					Expression otherChar = state.getStringChar(otherAddress, i).toExpression();
+					Expression thisChar = state.getStringChar(thisAddress, i + shift).toExpression();
+					Expression eq = Operation.eq(otherChar, thisChar);
+					if (subguard == null) {
+						subguard = eq;
+					} else {
+						subguard = Operation.and(subguard, eq);
+					}
+				}
+				if (guard == null) {
+					guard = subguard;
+				} else {
+					guard = Operation.or(guard, subguard);
+				}
+			}
+			Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
+			Expression posGuard = Operation.and(guard, Operation.eq(var, IntegerConstant.ONE32));
+			Expression negGuard = Operation.and(Operation.not(guard), Operation.eq(var, IntegerConstant.ZERO32));
+			Expression pc = Operation.or(posGuard, negGuard);
+			state.pushExtraCondition(pc);
+			state.push(var);
+		}
+		return true;
+	}
+
 	public boolean regionMatches__ILjava_1lang_1String_2II__Z(SymbolicState state) {
 		Expression len = state.peek().toExpression();
 		Expression ooffset = state.peek(1).toExpression();
