@@ -51,16 +51,22 @@ import za.ac.sun.cs.coastal.utility.Translator;
  */
 public final class SymbolicState extends State {
 
-	private static final String DEFAULT_NEW_STRING = "aaaaaaaaaa";
-
-	private static final int MAX_SYMBOLIC_STRING_LENGTH = DEFAULT_NEW_STRING.length();
-
 	/**
 	 * The limit on path lengths. In other words, this is the maximum number of
 	 * branches per path.
 	 */
 	private final long limitConjuncts;
 
+	/**
+	 * The limit on the length of new symbolic strings.
+	 */
+	private final int maxSymbolicStringLength;
+	
+	/**
+	 * Default value for new symbolic strings.
+	 */
+	private final String defaultSymbolicString;
+	
 	/**
 	 * Whether or not the program state should be tracked from the very beginning of
 	 * the execution, or whether it should only be switched on when a trigger method
@@ -198,6 +204,12 @@ public final class SymbolicState extends State {
 	public SymbolicState(COASTAL coastal, Input input) { // throws InterruptedException
 		super(coastal, input);
 		limitConjuncts = coastal.getConfig().getLongMaxed("coastal.settings.conjunct-limit");
+		maxSymbolicStringLength = coastal.getConfig().getInt("coastal.settings.max-sym-string", 10);
+		StringBuilder s = new StringBuilder();
+		for (int i = 0; i < maxSymbolicStringLength; i++) {
+			s.append('a');
+		}
+		defaultSymbolicString = s.toString();
 		trackAll = coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		constantElimination = coastal.getConfig().getBoolean("coastal.settings.constant-elimination", true);
 		if (constantElimination) {
@@ -1233,8 +1245,8 @@ public final class SymbolicState extends State {
 		if (!getTrackingMode()) {
 			return null;
 		}
-		if (currentValue.length() > MAX_SYMBOLIC_STRING_LENGTH) {
-			currentValue = currentValue.substring(0, MAX_SYMBOLIC_STRING_LENGTH);
+		if (currentValue.length() > maxSymbolicStringLength) {
+			currentValue = currentValue.substring(0, maxSymbolicStringLength);
 		}
 		pop();
 		log.trace("--> createSymbolicString({}, {})", currentValue, name);
@@ -1380,7 +1392,7 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public String createSymbolicString(int uniqueId) {
-		return createSymbolicString(DEFAULT_NEW_STRING, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
+		return createSymbolicString(defaultSymbolicString, CREATE_VAR_PREFIX + newSymbolicVariableCounter++);
 		// return createSymbolicString(currentValue, CREATE_VAR_PREFIX + uniqueId);
 	}
 
@@ -1426,7 +1438,7 @@ public final class SymbolicState extends State {
 
 	@Override
 	public String makeSymbolicString(String newName) {
-		return createSymbolicString(DEFAULT_NEW_STRING, newName);
+		return createSymbolicString(defaultSymbolicString, newName);
 	}
 
 	// ======================================================================
