@@ -23,6 +23,10 @@ public class String {
 
 	private final int maxChar;
 
+	private int falseStringId = -1;
+
+	private int trueStringId = -1;
+
 	public String(COASTAL coastal, Configuration config) {
 		minChar = (java.lang.Character) coastal.getDefaultMinValue(char.class);
 		maxChar = (java.lang.Character) coastal.getDefaultMaxValue(char.class);
@@ -166,6 +170,34 @@ public class String {
 				}
 			}
 		}
+		return true;
+	}
+
+	public boolean valueOf__Z__Ljava_1lang_1String_2(SymbolicState state) {
+		SymbolicValue bool = state.pop();
+		if (falseStringId == -1) {
+			falseStringId = state.createString();
+			state.setStringLength(falseStringId, new IntegerConstant(5, 32));
+			state.setStringChar(falseStringId, 0, new IntegerConstant('f', 16));
+			state.setStringChar(falseStringId, 0, new IntegerConstant('a', 16));
+			state.setStringChar(falseStringId, 0, new IntegerConstant('l', 16));
+			state.setStringChar(falseStringId, 0, new IntegerConstant('s', 16));
+			state.setStringChar(falseStringId, 0, new IntegerConstant('e', 16));
+			trueStringId = state.createString();
+			state.setStringLength(trueStringId, new IntegerConstant(4, 32));
+			state.setStringChar(trueStringId, 0, new IntegerConstant('t', 16));
+			state.setStringChar(trueStringId, 0, new IntegerConstant('r', 16));
+			state.setStringChar(trueStringId, 0, new IntegerConstant('u', 16));
+			state.setStringChar(trueStringId, 0, new IntegerConstant('e', 16));
+		}
+		Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
+		Expression posGuard = Operation.and(Operation.eq(bool.toExpression(), IntegerConstant.ONE32),
+				Operation.eq(var, new IntegerConstant(trueStringId, 32)));
+		Expression negGuard = Operation.and(Operation.eq(bool.toExpression(), IntegerConstant.ZERO32),
+				Operation.eq(var, new IntegerConstant(falseStringId, 32)));
+		Expression pc = Operation.or(posGuard, negGuard);
+		state.pushExtraCondition(pc);
+		state.push(var);
 		return true;
 	}
 

@@ -1276,7 +1276,7 @@ public final class SymbolicState extends State {
 				if ((concrete != null) && (concrete instanceof Long)) {
 					chars[i] = (char) ((Long) concrete).intValue();
 				}
-				setArrayValue(stringId, i, entryExpr);
+				setStringChar(stringId, i, entryExpr);
 			}
 			push(new IntegerConstant(stringId, 32));
 			input.put(name, new String(chars));
