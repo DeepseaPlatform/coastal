@@ -179,16 +179,16 @@ public class String {
 			falseStringId = state.createString();
 			state.setStringLength(falseStringId, new IntegerConstant(5, 32));
 			state.setStringChar(falseStringId, 0, new IntegerConstant('f', 16));
-			state.setStringChar(falseStringId, 0, new IntegerConstant('a', 16));
-			state.setStringChar(falseStringId, 0, new IntegerConstant('l', 16));
-			state.setStringChar(falseStringId, 0, new IntegerConstant('s', 16));
-			state.setStringChar(falseStringId, 0, new IntegerConstant('e', 16));
+			state.setStringChar(falseStringId, 1, new IntegerConstant('a', 16));
+			state.setStringChar(falseStringId, 2, new IntegerConstant('l', 16));
+			state.setStringChar(falseStringId, 3, new IntegerConstant('s', 16));
+			state.setStringChar(falseStringId, 4, new IntegerConstant('e', 16));
 			trueStringId = state.createString();
 			state.setStringLength(trueStringId, new IntegerConstant(4, 32));
 			state.setStringChar(trueStringId, 0, new IntegerConstant('t', 16));
-			state.setStringChar(trueStringId, 0, new IntegerConstant('r', 16));
-			state.setStringChar(trueStringId, 0, new IntegerConstant('u', 16));
-			state.setStringChar(trueStringId, 0, new IntegerConstant('e', 16));
+			state.setStringChar(trueStringId, 1, new IntegerConstant('r', 16));
+			state.setStringChar(trueStringId, 2, new IntegerConstant('u', 16));
+			state.setStringChar(trueStringId, 3, new IntegerConstant('e', 16));
 		}
 		Expression var = new IntegerVariable(state.getNewVariableName(), 32, 0, 1);
 		Expression posGuard = Operation.and(Operation.eq(bool.toExpression(), IntegerConstant.ONE32),
