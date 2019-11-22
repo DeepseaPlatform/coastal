@@ -14,7 +14,7 @@ import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.diver.SymbolicValueFactory.SymbolicValue;
 import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.solver.IntegerConstant;
-import za.ac.sun.cs.coastal.solver.IntegerVariable;
+import za.ac.sun.cs.coastal.solver.Operation;
 
 /**
  * A model of some operations of {@link java.lang.StringBuilder}.
@@ -25,38 +25,47 @@ public class StringBuilder {
 	}
 
 	public boolean _init___Ljava_1lang_1String_2__V(SymbolicState state) {
-		SymbolicValue sbValue = state.pop();
-		if ((sbValue == null) || !sbValue.isConstant()) {
-			state.push(new IntegerVariable(state.getNewVariableName(), 32, Integer.MIN_VALUE, Integer.MAX_VALUE));
-		} else {
-			int thisAddress = (int) intConstantValue(sbValue.toExpression());
-			int length = (int) state.getStringLength(thisAddress).toValue();
-			int stringId = state.createString();
-			state.setStringLength(stringId, new IntegerConstant(length, 32));
-			for (int i = 0; i < length; i++) {
-				state.setStringChar(stringId, i, state.getStringChar(thisAddress, i));
-			}
-			state.push(new IntegerConstant(stringId, 32));
+		// Pick up the parameters
+		SymbolicValue str = state.peek();
+		SymbolicValue thiss = state.peek(1);
+		// Check that the required parameters are constants.
+		if (!str.isConstant()) {
+			return false;
+		}
+		// Remove the parameters for real!
+		state.multiPop(2);
+		// Symbolic modelling
+		int strAddress = (int) intConstantValue(str.toExpression());
+		int strLength = (int) state.getStringLength(strAddress).toValue();
+		int thisAddress = (int) intConstantValue(thiss.toExpression());
+		state.setStringLength(thisAddress, new IntegerConstant(strLength, 32));
+		for (int i = 0; i < strLength; i++) {
+			state.setStringChar(thisAddress, i, state.getStringChar(strAddress, i));
 		}
 		return true;
 	}
 
 	public boolean charAt__I__C(SymbolicState state) {
-		int indexValue = 0;
-		Expression index = state.peek().toExpression();
-		if (index instanceof IntegerConstant) {
-			indexValue = (int) intConstantValue(index);
-			index = state.pop().toExpression();
-		} else {
-			return false; // CANNOT (YET) HANDLE SYMBOLIC OFFSETS
+		// Pick up the parameters
+		SymbolicValue index = state.peek();
+		SymbolicValue thiss = state.peek(1);
+		// Check that the required parameters are constants.
+		if (!index.isConstant()) {
+			return false;
 		}
-		int thisAddress = (int) intConstantValue(state.pop());
-		int thisLength = (int) intConstantValue(state.getStringLength(thisAddress));
+		if (!thiss.isConstant()) {
+			return false;
+		}
+		// Remove the parameters for real!
+		state.multiPop(2);
+		// Symbolic modelling
+		int indexValue = (int) intConstantValue(index.toExpression());
+		int thisAddress = (int) intConstantValue(thiss.toExpression());
+		int thisLength = (int) state.getStringLength(thisAddress).toValue();
 		if ((indexValue >= 0) && (indexValue < thisLength)) {
 			state.push(state.getStringChar(thisAddress, indexValue));
 		} else {
-			// SHOULD BE THROWING AN EXCEPTION
-			state.push(IntegerConstant.ZERO32);
+			state.produceException(Operation.TRUE, IntegerConstant.ZERO32);
 		}
 		return true;
 	}
@@ -64,10 +73,6 @@ public class StringBuilder {
 	private long intConstantValue(Expression expr) {
 		assert expr instanceof IntegerConstant;
 		return ((IntegerConstant) expr).getValue();
-	}
-
-	private long intConstantValue(SymbolicValue expr) {
-		return intConstantValue(expr.toExpression());
 	}
 
 }

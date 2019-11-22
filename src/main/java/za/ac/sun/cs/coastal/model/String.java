@@ -28,19 +28,143 @@ public class String {
 		maxChar = (java.lang.Character) coastal.getDefaultMaxValue(char.class);
 	}
 
+	/**
+	 * Model the routine {@code String.<init>()} symbolically.
+	 *
+	 * @param state
+	 *              reference to the current symbolic state
+	 * @return {@code true} if and only if the modelling succeeded
+	 */
+	public boolean _init_____V(SymbolicState state) {
+		// Pick up the parameters
+		SymbolicValue thiss = state.peek();
+		// Check that the required parameters are constants.
+		if (!thiss.isConstant()) {
+			return false;
+		}
+		// Remove the parameters for real!
+		state.pop();
+		// Symbolic modelling
+		int thisAddress = (int) intConstantValue(thiss.toExpression());
+		state.setStringLength(thisAddress, IntegerConstant.ZERO32);
+		return true;
+	}
+
+	/**
+	 * Model the routine {@code String.<init>(String str)} symbolically.
+	 *
+	 * @param state
+	 *              reference to the current symbolic state
+	 * @return {@code true} if and only if the modelling succeeded
+	 */
 	public boolean _init___Ljava_1lang_1String_2__V(SymbolicState state) {
-		SymbolicValue stringValue = state.pop();
-		if ((stringValue == null) || !stringValue.isConstant()) {
+		// Pick up the parameters
+		SymbolicValue str = state.peek();
+		SymbolicValue thiss = state.peek(1);
+		// Check that the required parameters are constants.
+		if (!str.isConstant()) {
+			return false;
+		}
+		if (!thiss.isConstant()) {
+			return false;
+		}
+		// Remove the parameters for real!
+		state.multiPop(2);
+		// Symbolic modelling
+		int strAddress = (int) intConstantValue(str.toExpression());
+		if (strAddress == 0) {
 			state.push(new IntegerVariable(state.getNewVariableName(), 32, Integer.MIN_VALUE, Integer.MAX_VALUE));
 		} else {
-			int thisAddress = (int) intConstantValue(stringValue.toExpression());
-			int length = (int) state.getStringLength(thisAddress).toValue();
-			int stringId = state.createString();
-			state.setStringLength(stringId, new IntegerConstant(length, 32));
-			for (int i = 0; i < length; i++) {
-				state.setStringChar(stringId, i, state.getStringChar(thisAddress, i));
+			int thisAddress = (int) intConstantValue(thiss.toExpression());
+			int strLength = (int) state.getStringLength(strAddress).toValue();
+			state.setStringLength(thisAddress, new IntegerConstant(strLength, 32));
+			for (int i = 0; i < strLength; i++) {
+				state.setStringChar(thisAddress, i, state.getStringChar(strAddress, i));
 			}
-			state.push(new IntegerConstant(stringId, 32));
+		}
+		return true;
+	}
+
+	/**
+	 * Model the routine {@code String.<init>(char[] value)} symbolically.
+	 *
+	 * @param state
+	 *              reference to the current symbolic state
+	 * @return {@code true} if and only if the modelling succeeded
+	 */
+	public boolean _init____3C__V(SymbolicState state) {
+		// Pick up the parameters
+		SymbolicValue value = state.peek();
+		SymbolicValue thiss = state.peek(1);
+		// Check that the required parameters are constants.
+		if (!value.isConstant()) {
+			return false;
+		}
+		if (!thiss.isConstant()) {
+			return false;
+		}
+		// Remove the parameters for real!
+		state.multiPop(2);
+		// Symbolic modelling
+		int valueAddress = (int) intConstantValue(value.toExpression());
+		if (valueAddress == 0) {
+			state.push(new IntegerVariable(state.getNewVariableName(), 32, Integer.MIN_VALUE, Integer.MAX_VALUE));
+		} else {
+			int thisAddress = (int) intConstantValue(thiss.toExpression());
+			int valueLength = (int) state.getStringLength(valueAddress).toValue();
+			state.setStringLength(thisAddress, new IntegerConstant(valueLength, 32));
+			for (int i = 0; i < valueLength; i++) {
+				state.setStringChar(thisAddress, i, state.getStringChar(valueAddress, i));
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Model the routine {@code String.<init>(char[] value, int offset, int count)}
+	 * symbolically.
+	 *
+	 * @param state
+	 *              reference to the current symbolic state
+	 * @return {@code true} if and only if the modelling succeeded
+	 */
+	public boolean _init____3CII__V(SymbolicState state) {
+		// Pick up the parameters
+		SymbolicValue count = state.peek();
+		SymbolicValue offset = state.peek(1);
+		SymbolicValue value = state.peek(2);
+		SymbolicValue thiss = state.peek(3);
+		// Check that the required parameters are constants.
+		if (!count.isConstant()) {
+			return false;
+		}
+		if (!offset.isConstant()) {
+			return false;
+		}
+		if (!value.isConstant()) {
+			return false;
+		}
+		if (!thiss.isConstant()) {
+			return false;
+		}
+		// Remove the parameters for real!
+		state.multiPop(4);
+		// Symbolic modelling
+		int countValue = (int) intConstantValue(count.toExpression());
+		int offsetValue = (int) intConstantValue(offset.toExpression());
+		int valueAddress = (int) intConstantValue(value.toExpression());
+		if (valueAddress != 0) {
+			int valueLength = (int) state.getArrayLength(valueAddress).toValue();
+			if ((offsetValue < 0) || (countValue < 0) || (offsetValue + countValue > valueLength)) {
+				// exception will occur
+				state.produceException(Operation.FALSE, IntegerConstant.ZERO32);
+			} else {
+				int thisAddress = (int) intConstantValue(thiss.toExpression());
+				state.setStringLength(thisAddress, count.toExpression());
+				for (int i = 0; i < countValue; i++) {
+					state.setStringChar(thisAddress, i, state.getArrayValue(valueAddress, i + offsetValue));
+				}
+			}
 		}
 		return true;
 	}
@@ -70,6 +194,8 @@ public class String {
 			int length2 = (int) state.getStringLength(thisAddress2).toValue();
 			if (length1 != length2) {
 				state.push(IntegerConstant.ZERO32);
+			} else if (length1 == 0) {
+				state.push(IntegerConstant.ONE32);
 			} else {
 				Expression guard = null;
 				for (int i = 0; i < length1; i++) {

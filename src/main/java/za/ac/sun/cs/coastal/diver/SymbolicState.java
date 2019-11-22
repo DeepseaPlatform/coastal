@@ -687,6 +687,17 @@ public final class SymbolicState extends State {
 	}
 
 	/**
+	 * Return the length of an array.
+	 * 
+	 * @param arrayId
+	 *                the array identifier
+	 * @return length of the array
+	 */
+	public SymbolicValue getArrayLength(int arrayId) {
+		return getField(arrayId, "length");
+	}
+
+	/**
 	 * Set the length of an array.
 	 * 
 	 * @param arrayId
@@ -698,7 +709,7 @@ public final class SymbolicState extends State {
 		SymbolicValue value = symbolicValueFactory.createSymbolicValue(new IntegerConstant(length, 32));
 		putField(arrayId, "length", value);
 	}
-
+	
 	/**
 	 * Return the symbolic value stored in an array at a particular index.
 	 * 
@@ -708,7 +719,7 @@ public final class SymbolicState extends State {
 	 *                the index of the element
 	 * @return the symbolic element value in the array
 	 */
-	private SymbolicValue getArrayValue(int arrayId, int index) {
+	public SymbolicValue getArrayValue(int arrayId, int index) {
 		return getField(arrayId, "" + index);
 	}
 
@@ -895,6 +906,18 @@ public final class SymbolicState extends State {
 		return FRAMES.get().isEmpty() ? null : FRAMES.get().peek().pop();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see za.ac.sun.cs.coastal.symbolic.State#pop()
+	 */
+	public SymbolicValue multiPop(int times) {
+		while (times-- > 1) {
+			pop();
+		}
+		return pop();
+	}
+	
 	/**
 	 * Return (but do not remove) the expression on the top of the expression stack
 	 * of the topmost invocation frame.
@@ -2139,6 +2162,16 @@ public final class SymbolicState extends State {
 	 * RETURN SALOAD SASTORE
 	 */
 
+	public void produceException(Expression guard, Expression throwing) {
+		noExceptionExpression.add(guard);
+		exceptionDepth = Thread.currentThread().getStackTrace().length - 1;
+		throwable = throwing;
+	}
+
+	public void produceException(Expression guard, int throwing) {
+		produceException(guard, new IntegerConstant(throwing, 32));
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2238,9 +2271,7 @@ public final class SymbolicState extends State {
 			int a = (int) (pop().toValue());
 			push(getArrayValue(a, i));
 			Expression len = getField(a, "length").toExpression();
-			noExceptionExpression.add(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, len)));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = new IntegerConstant(i, 32);
+			produceException(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, len)), i);
 			noException();
 			break;
 		case Opcodes.AALOAD:
@@ -2261,9 +2292,7 @@ public final class SymbolicState extends State {
 			a = (int) (pop().toValue());
 			setArrayValue(a, i, v);
 			len = getField(a, "length").toExpression();
-			noExceptionExpression.add(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, len)));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = new IntegerConstant(i, 32);
+			produceException(Operation.and(Operation.le(IntegerConstant.ZERO32, idx), Operation.lt(idx, len)), i);
 			noException();
 			break;
 		case Opcodes.AASTORE:
@@ -2358,23 +2387,17 @@ public final class SymbolicState extends State {
 		case Opcodes.IDIV:
 			v = pop();
 			push(pop().div(v));
-			noExceptionExpression.add(Operation.ne(v.toExpression(), IntegerConstant.ZERO32));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			produceException(Operation.ne(v.toExpression(), IntegerConstant.ZERO32), IntegerConstant.ZERO32);
 			break;
 		case Opcodes.LDIV:
 			v = pop();
 			push(pop().div(v));
-			noExceptionExpression.add(Operation.ne(v.toExpression(), IntegerConstant.ZERO64));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO64;
+			produceException(Operation.ne(v.toExpression(), IntegerConstant.ZERO64), IntegerConstant.ZERO64);
 			break;
 		case Opcodes.FDIV:
 			v = pop();
 			push(pop().div(v));
-			noExceptionExpression.add(Operation.ne(v.toExpression(), RealConstant.ZERO32));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			produceException(Operation.ne(v.toExpression(), RealConstant.ZERO32), IntegerConstant.ZERO32);
 			break;
 		case Opcodes.DDIV:
 			v = pop();
@@ -2383,18 +2406,12 @@ public final class SymbolicState extends State {
 		case Opcodes.LREM:
 			v = pop();
 			push(pop().rem(v));
-			noExceptionExpression.add(Operation.ne(v.toExpression(), RealConstant.ZERO64));
-			// Add ExceptionExpression to noExceptionExpressionList
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO64;
+			produceException(Operation.ne(v.toExpression(), RealConstant.ZERO64), IntegerConstant.ZERO64);
 			break;
 		case Opcodes.IREM:
 			v = pop();
 			push(pop().rem(v));
-			noExceptionExpression.add(Operation.ne(v.toExpression(), RealConstant.ZERO32));
-			// Add ExceptionExpression to noExceptionExpressionList
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			produceException(Operation.ne(v.toExpression(), RealConstant.ZERO32), IntegerConstant.ZERO32);
 			break;
 		case Opcodes.LSUB:
 		case Opcodes.ISUB:
@@ -2492,15 +2509,11 @@ public final class SymbolicState extends State {
 			push(getField(id, "length"));
 			break;
 		case Opcodes.ATHROW:
-			noExceptionExpression.add(Operation.FALSE);
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = pop().toExpression();
+			produceException(Operation.FALSE, pop().toExpression());
 			// broker.publish("assert-failed", new Tuple(this, null));
 			break;
 		case Opcodes.MONITORENTER:
-			noExceptionExpression.add(Operation.FALSE);
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = pop().toExpression();
+			produceException(Operation.FALSE, pop().toExpression());
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
@@ -2574,9 +2587,7 @@ public final class SymbolicState extends State {
 				setArrayValue(id, i, initValue);
 			}
 			push(new IntegerConstant(id, 32), 32);
-			noExceptionExpression.add(Operation.ge(new IntegerConstant(n, 32), IntegerConstant.ZERO32));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			produceException(Operation.ge(new IntegerConstant(n, 32), IntegerConstant.ZERO32), IntegerConstant.ZERO32);
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} (opcode: {})", instr, Bytecodes.toString(opcode), operand,
@@ -2643,18 +2654,14 @@ public final class SymbolicState extends State {
 		case Opcodes.INSTANCEOF:
 			break;
 		case Opcodes.CHECKCAST:
-			noExceptionExpression.add(Operation.eq(IntegerConstant.ZERO32, IntegerConstant.ZERO32));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			produceException(Operation.eq(IntegerConstant.ZERO32, IntegerConstant.ZERO32), IntegerConstant.ZERO32);
 			break;
 		case Opcodes.ANEWARRAY:
 			int size = (int) (pop().toValue());
 			id = incrAndGetNewObjectId();
 			setArrayLength(id, size);
 			push(new IntegerConstant(id, 32), 32);
-			noExceptionExpression.add(Operation.ge(new IntegerConstant(size, 32), IntegerConstant.ZERO32));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			produceException(Operation.ge(new IntegerConstant(size, 32), IntegerConstant.ZERO32), IntegerConstant.ZERO32);
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
@@ -2687,17 +2694,13 @@ public final class SymbolicState extends State {
 		case Opcodes.GETFIELD:
 			int id = (int) (pop().toValue());
 			push(getField(id, name));
-			noExceptionExpression.add(Operation.ne(new IntegerConstant(id, 32), IntegerConstant.ZERO32));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			produceException(Operation.ne(new IntegerConstant(id, 32), IntegerConstant.ZERO32), IntegerConstant.ZERO32);
 			break;
 		case Opcodes.PUTFIELD:
 			SymbolicValue v = pop();
 			id = (int) (pop().toValue());
 			putField(id, name, v);
-			noExceptionExpression.add(Operation.ne(new IntegerConstant(id, 32), IntegerConstant.ZERO32));
-			exceptionDepth = Thread.currentThread().getStackTrace().length;
-			throwable = IntegerConstant.ZERO32;
+			produceException(Operation.ne(new IntegerConstant(id, 32), IntegerConstant.ZERO32), IntegerConstant.ZERO32);
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} {} {} {} (opcode: {})", instr, Bytecodes.toString(opcode),
@@ -2736,9 +2739,7 @@ public final class SymbolicState extends State {
 						pop();
 					}
 					SymbolicValue target = pop();
-					noExceptionExpression.add(Operation.ne(target.toExpression(), IntegerConstant.ZERO32));
-					exceptionDepth = Thread.currentThread().getStackTrace().length;
-					throwable = IntegerConstant.ZERO32;
+					produceException(Operation.ne(target.toExpression(), IntegerConstant.ZERO32), IntegerConstant.ZERO32);
 					// insert return type on stack
 					pushReturnValue(getReturnType(descriptor).charAt(0));
 				}
