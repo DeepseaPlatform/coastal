@@ -1,28 +1,27 @@
+//==============================================================================
+// Gradle build file for COASTAL
+//==============================================================================
+
 plugins {
 	id 'application'
 	id 'java'
 	id 'eclipse'
 	id 'checkstyle'
-	// FOR COLLECTING COMPILE-TIME INFORMATION
-	id 'com.peterabeles.gversion' version '1.5.2'
-	// FOR USING THE ECLIPSE COMPILER
-	// id 'de.set.ecj' version '1.4.1'
+	id 'maven-publish'
+	id 'signing'
+	id 'com.peterabeles.gversion' version '1.5.2' // for compile-time info
+	// id 'de.set.ecj' version '1.4.1' // for using the eclipse compiler
 }
 
-// FOR COLLECTING COMPILE-TIME INFORMATION
-gversion {
-	srcDir = 'src/main/java/'
-	classPackage = 'za.ac.sun.cs.coastal'
-	className = 'CompileInfo'
-}
-
-// FOR USING THE ECLIPSE COMPILER
-// (VERSION FROM "ABOUT" INFORMATION FOR "Eclipse Java Development Tools")
-// ecj.toolVersion = '3.18.0'
-
-group = 'za.ac.sun.cs.coastal'
+group = 'com.github.DeepseaPlatform'
 mainClassName = 'za.ac.sun.cs.coastal.COASTAL'
-version = '0.0.3'
+version = '0.1.0'
+
+ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
+
+//------------------------------------------------------------------------------
+// Repositories and dependencies
+//------------------------------------------------------------------------------
 
 repositories {
 	jcenter()
@@ -30,50 +29,60 @@ repositories {
 }
 
 dependencies {
-	compile group: 'com.github.green-solver', name: 'green', version: '0.2.0'
-	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
-	compile group: 'commons-io', name: 'commons-io', version: '2.6'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
-	compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
-	compile group: 'org.ow2.asm', name: 'asm', version: '7.2'
-	compile group: 'org.ow2.asm', name: 'asm-commons', version: '7.2'
-	compile group: 'org.ow2.asm', name: 'asm-util', version: '7.2'
-	testCompile group: 'junit', name: 'junit', version: '4.12'
-	testCompile group: 'org.slf4j', name: 'slf4j-nop', version: '1.7.25'
+	implementation 'com.github.green-solver:green:0.2.0'
+	implementation 'commons-io:commons-io:2.6'
+	implementation 'org.ow2.asm:asm:7.2'
+	implementation 'org.ow2.asm:asm-commons:7.2'
+	implementation 'org.ow2.asm:asm-util:7.2'
+	implementation 'org.apache.logging.log4j:log4j-api:2.10.0'
+	implementation 'org.apache.logging.log4j:log4j-core:2.10.0'
+	testImplementation 'junit:junit:4.12'
+	testImplementation 'org.slf4j:slf4j-nop:1.7.25'
 	implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
-	compile files('libs/commons-collections4-4.4.jar')
-	compile files('libs/antlr-4.7.2-complete.jar')
 }
 
-// Includes sources for examples
+//------------------------------------------------------------------------------
+// Settings for generation of compile-time information.
+//------------------------------------------------------------------------------
+
+gversion {
+	srcDir = 'src/main/java/'
+	classPackage = 'za.ac.sun.cs.coastal'
+	className = 'CompileInfo'
+}
+
+project.compileJava.dependsOn(createVersionFile)
+
+//------------------------------------------------------------------------------
+// Settings for using the Eclipse compiler.
+// Currently not activated.
+// This version number comes from clicking on "About" in Eclipse, and then
+// clicking on "Eclipse Java Development Tools".
+//------------------------------------------------------------------------------
+
+// ecj.toolVersion = '3.18.0'
+
+//------------------------------------------------------------------------------
+// Include the test classes and property files.
+//------------------------------------------------------------------------------
+
 sourceSets {
-	examples {
-		java.srcDir file('src/examples/java')
-		resources.srcDir file('src/examples/resources')
-		output.resourcesDir = 'build/classes/java/examples'
-		compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
-		runtimeClasspath += output + compileClasspath
-	}
 	test {
 		output.resourcesDir = 'build/classes/java/test'
 	}
 }
 
-// Update compile time information before a build
-project.compileJava.dependsOn(createVersionFile)
-
-// Copy property files in src/test/java/tests/* to the test sources directory.
-sourceSets.test.resources.srcDirs += [ 'src/test/java' ]
-
-// Enforce gradle version for Travis CI
-task wrapper(type: Wrapper) {
-	gradleVersion = '4.3'
-}
-
+//------------------------------------------------------------------------------
 // Chosen version of https://checkstyle.org/
+//------------------------------------------------------------------------------
+
 checkstyle {
 	toolVersion '8.1'
 }
+
+//------------------------------------------------------------------------------
+// Fine-tuning for javadoc.
+//------------------------------------------------------------------------------
 
 javadoc {
 	destinationDir = file('build/docs/api')
@@ -83,10 +92,12 @@ javadoc {
 	options.memberLevel = JavadocMemberLevel.PRIVATE
 }
 
-// Add JVM runtime option to switch off JIT compilation
+//------------------------------------------------------------------------------
+// Fine-tuning for installation scripts.
+//------------------------------------------------------------------------------
+
 applicationDefaultJvmArgs = [ '-Xint -ea' ]
 
-// Fix to make scripts more portable 
 startScripts {
 	doLast {
 		unixScript.text = unixScript.text.replace('COASTAL_APP_HOME', '\$APP_HOME')
@@ -94,7 +105,86 @@ startScripts {
 	}
 }
 
-run {
-	if (project.hasProperty('args'))
-		args findProperty('args')
+//------------------------------------------------------------------------------
+// Enforce gradle version for Travis CI
+//------------------------------------------------------------------------------
+
+wrapper {
+	gradleVersion = '6.0.1'
+}
+
+//------------------------------------------------------------------------------
+// Publication settings
+//------------------------------------------------------------------------------
+
+java {
+	withSourcesJar()
+    withJavadocJar()
+}
+	
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			groupId = group
+			pom {
+				name = 'COASTAL'
+				description = 'Concolic analysis tool for Java'
+				url = 'https://github.com/DeepseaPlatform/coastal'
+				packaging = 'jar'
+				organization {
+					name = 'DeepseaPlatform'
+					url = 'https://github.com/DeepseaPlatform'
+				}
+				issueManagement {
+					system = 'GitHub'
+					url = 'https://github.com/DeepseaPlatform/coastal/issues'
+				}
+				licenses {
+					license {
+						name = 'GNU Lesser General Public License'
+						url = 'https://www.gnu.org/licenses/lgpl-3.0.en.html'
+						distribution = 'repo'
+					}
+				}
+				scm {
+					url = 'https://github.com/DeepseaPlatform/coastal'
+					connection = 'scm:git:git@github.com:DeepseaPlatform/coastal.git'
+					developerConnection = 'scm:git:git@github.com:DeepseaPlatform/coastal.git'
+				}
+				developers {
+					developer {
+						id = 'jacogeld'
+						name = 'Jaco Geldenhuys'
+						email = 'jacogeld@gmail.com'
+					}
+					developer {
+						id = 'wvisser'
+						name = 'Willem Visser'
+					}
+				}
+			}
+		}
+	}
+	repositories {
+		maven {
+			// credentials {
+			// 	username repo_username
+			// 	password repo_password
+			// }
+			if (isReleaseVersion) {
+				url = "file://${buildDir}/repo"
+				// url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+			} else {
+				url = "file://${buildDir}/snap"
+				// url = 'https://oss.sonatype.org/content/repositories/snapshots'
+			}
+		}
+	}
+}
+
+signing {
+    if (isReleaseVersion) {
+    	sign publishing.publications
+    }
 }

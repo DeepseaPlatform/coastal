@@ -1,0 +1,6 @@
+signing.keyId=01234567
+signing.password=secret
+signing.secretKeyRingFile=/users/me/.gnupg/secring.gpg
+
+repo_username=username
+repo_password=password

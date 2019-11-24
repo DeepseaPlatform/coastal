@@ -7,35 +7,142 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- Tests for line coverage [e5f6236](https://github.com/DeepseaPlatform/coastal/commit/e5f623608a2f62a6e79f94029ced39e7db9e58d2)
-- Javadoc for ```za.ac.sun.cs.coastal``` package [dba5ce3](https://github.com/DeepseaPlatform/coastal/commit/dba5ce3acfe230c4d6942cf4cc011a5231462bef)
-- Caching of models inside COASTAL [1e3022c](https://github.com/DeepseaPlatform/coastal/commit/1e3022cda63225c873a4dc68a6f0ced9cb8f3516)
-- In-house solver [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
-- Support for all Java primitive types [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
-- Average speed in GUI (number of divers/surfers/refinements per second) [e395280](https://github.com/DeepseaPlatform/coastal/commit/e395280f8e8b573f012f491e62691ec3c91807c4)
-- [Issue #23](https://github.com/DeepseaPlatform/coastal/issues/23) Options to write instrumented code to file and to the log [69a7255](https://github.com/DeepseaPlatform/coastal/commit/69a72555dd664427a872a6e52234430cfe2663aa)
-- [Issue #25](https://github.com/DeepseaPlatform/coastal/issues/25) Add support for user specified program entry points and (command-line) arguments [3edc259](https://github.com/DeepseaPlatform/coastal/commit/3edc259910277c4d33e0e5e5313b47c2b6aa10e4)
-- User specified seeds for RandomTesting strategy [159ed27](https://github.com/DeepseaPlatform/coastal/commit/159ed27e44f796923929fba7bc4c8517624d82a8)
-- [Issue #24](https://github.com/DeepseaPlatform/coastal/issues/24) Tests for the RandomTesting strategy [159ed27](https://github.com/DeepseaPlatform/coastal/commit/159ed27e44f796923929fba7bc4c8517624d82a8)
-- Hybrid fuzzer [dd5fb83](https://github.com/DeepseaPlatform/coastal/commit/dd5fb83ee98981f9187f5a0d8c384f7b5942b95a) [71d7cda](https://github.com/DeepseaPlatform/coastal/commit/71d7cda9645646bae36415a27a3ccd4f3afcca40) [aadcfc1](https://github.com/DeepseaPlatform/coastal/commit/aadcfc1289055c2343273b999af3097e3b1dc177)
-- Add command-line option (```-quiet```) to switch off detailed log [daa866d](https://github.com/DeepseaPlatform/coastal/commit/daa866df324d66cf6692c85099053ea6bd4d95be)
-- Add "Stop" button for the GUI. [cbb488b](https://github.com/DeepseaPlatform/coastal/commit/cbb488b20327aa12e4514a78b9b0565868523ed7)
+- ...
 
 ### Changed
-- Improved text-based drawing of path trees [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
-- Better handling of exceptions [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
-- Improved support for random testing [60eccd2](https://github.com/DeepseaPlatform/coastal/commit/60eccd27562304b69a991f6ecb14b65dd6e8ce84) [691c43c](https://github.com/DeepseaPlatform/coastal/commit/691c43c0dd02149d4664c7ec716caa6b4c7d194b)
+- ...
 
 ### Deprecated
 - ...
 
 ### Removed
-- Removed dependency on GREEN [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
+- ...
+
+### Fixed
+- ...
+
+## [0.1.0] - 2019.11.24
+
+This list is incomplete because we did not commit often enough and did not exercise enough self-discipline to update this file carefully.
+
+### Added
+- Add gradle configuration to publish COASTAL on Maven Central Repository
+- Add model for String.valueOf()
+  [6711b3e](https://github.com/DeepseaPlatform/coastal/commit/6711b3eaae451ba743b37a2a2196286ce1305c83)
+  [e36b38c](https://github.com/DeepseaPlatform/coastal/commit/e36b38cacdff5dd228d46656ec471fcb3ec73633)
+- Add model for String.contains()
+  [86db343](https://github.com/DeepseaPlatform/coastal/commit/86db343141bdc4558600dafc62ca9cf2732f6963)
+- Add model for String.equals()
+  [125140a](https://github.com/DeepseaPlatform/coastal/commit/125140a578625fb561d78fc73abd2089e9559758)
+- Add model for String.<init>()
+  [fc97dc5](https://github.com/DeepseaPlatform/coastal/commit/fc97dc577cf6861d12f3dff6d5e8abd2d85e6b5c)
+- Add model for Character.isLetter()
+  [57a451b](https://github.com/DeepseaPlatform/coastal/commit/57a451b79de786e7a4586459c4121f67bb683e81)
+- Add model for StringBuilder
+  [8bf651d](https://github.com/DeepseaPlatform/coastal/commit/8bf651d370f3fb62b60e26a0651e9f971438e9b8)
+- [Issue #29](https://github.com/DeepseaPlatform/coastal/issues/29)
+  Add instruction ``ANEWARRAY``
+  [9116d42](https://github.com/DeepseaPlatform/coastal/commit/9116d42f1949edc04e8825f4427f6bd8519c35a0)
+- Add instruction ``LOOKUPSWITCH``
+  [68512dc](https://github.com/DeepseaPlatform/coastal/commit/68512dcc24b403ab4a096fa5939b1b78dd82e04e)
+- Add instruction ``D2I``
+  [d4ebe95](https://github.com/DeepseaPlatform/coastal/commit/d4ebe95be6e1526bfb868a002b9a71c7c4d003db)
+  [2b58d95](https://github.com/DeepseaPlatform/coastal/commit/2b58d95edc79931462b0d6c8e5128eddea2eacba)
+- Add instruction ``F2I``, ``F2L``, ``D2L``
+  [cd46640](https://github.com/DeepseaPlatform/coastal/commit/cd466408230531d2bc3c268bc7954d20cebfcbc9)
+- Add instruction ``I2D``, ``I2F``, ``FNEG``
+  [21212ce](https://github.com/DeepseaPlatform/coastal/commit/21212cea251d5f7f2f0887aa26c5652b60fd1a2a)
+- Add instruction ``L2D``
+  [14603ff](https://github.com/DeepseaPlatform/coastal/commit/14603ffee306e365552ef13ad8126b3e39a2b260)
+- Add instruction ``L2F``, ``L2I``
+  [8672856](https://github.com/DeepseaPlatform/coastal/commit/86728562c8ffbaac9af5c6f1d1b24696edc1bf03)
+- Add instruction ``INSTANCEOF``
+  [ce24b0e](https://github.com/DeepseaPlatform/coastal/commit/ce24b0e7d9554b6e76a61dd6bbb319525253740b)
+- Add instruction ``D2F``
+  [43ad3b7](https://github.com/DeepseaPlatform/coastal/commit/43ad3b7e8cfdaae8b021f86a9596f5468700a9a2)
+- Add instruction ``DASTORE``, ``FASTORE``, ``LASTORE``, ``BASTORE``, ``DALOAD``, ``FALOAD``, ``LALOAD``, ``BALOAD``
+  [081cfb5](https://github.com/DeepseaPlatform/coastal/commit/081cfb51cef3342893784d92c7cf422298233d2d)
+- Add SV-COMP 2019 as test cases.  (But for now these tests are ignored.)
+  [e3939d1](https://github.com/DeepseaPlatform/coastal/commit/e3939d119e1f97f4d9d1458aa37734df4455b994)
+- Tests for line coverage
+  [e5f6236](https://github.com/DeepseaPlatform/coastal/commit/e5f623608a2f62a6e79f94029ced39e7db9e58d2)
+- Javadoc for ``za.ac.sun.cs.coastal`` package
+  [dba5ce3](https://github.com/DeepseaPlatform/coastal/commit/dba5ce3acfe230c4d6942cf4cc011a5231462bef)
+- Caching of models inside COASTAL
+  [1e3022c](https://github.com/DeepseaPlatform/coastal/commit/1e3022cda63225c873a4dc68a6f0ced9cb8f3516)
+- In-house solver
+  [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
+- Support for all Java primitive types
+  [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
+- Average speed in GUI (number of divers/surfers/refinements per second)
+  [e395280](https://github.com/DeepseaPlatform/coastal/commit/e395280f8e8b573f012f491e62691ec3c91807c4)
+- [Issue #23](https://github.com/DeepseaPlatform/coastal/issues/23)
+  Options to write instrumented code to file and to the log
+  [69a7255](https://github.com/DeepseaPlatform/coastal/commit/69a72555dd664427a872a6e52234430cfe2663aa)
+- [Issue #25](https://github.com/DeepseaPlatform/coastal/issues/25)
+  Add support for user specified program entry points and (command-line) arguments
+  [3edc259](https://github.com/DeepseaPlatform/coastal/commit/3edc259910277c4d33e0e5e5313b47c2b6aa10e4)
+- User specified seeds for RandomTesting strategy
+  [159ed27](https://github.com/DeepseaPlatform/coastal/commit/159ed27e44f796923929fba7bc4c8517624d82a8)
+- [Issue #24](https://github.com/DeepseaPlatform/coastal/issues/24)
+  Tests for the RandomTesting strategy
+  [159ed27](https://github.com/DeepseaPlatform/coastal/commit/159ed27e44f796923929fba7bc4c8517624d82a8)
+- Hybrid fuzzer
+  [dd5fb83](https://github.com/DeepseaPlatform/coastal/commit/dd5fb83ee98981f9187f5a0d8c384f7b5942b95a)
+  [71d7cda](https://github.com/DeepseaPlatform/coastal/commit/71d7cda9645646bae36415a27a3ccd4f3afcca40)
+  [aadcfc1](https://github.com/DeepseaPlatform/coastal/commit/aadcfc1289055c2343273b999af3097e3b1dc177)
+- Add command-line option (``-quiet``) to switch off detailed log
+  [daa866d](https://github.com/DeepseaPlatform/coastal/commit/daa866df324d66cf6692c85099053ea6bd4d95be)
+- Add "Stop" button for the GUI.
+  [cbb488b](https://github.com/DeepseaPlatform/coastal/commit/cbb488b20327aa12e4514a78b9b0565868523ed7)
+- Add display of inputs for each dive/surf
+  [1bd9605](https://github.com/DeepseaPlatform/coastal/commit/1bd960517045fe9852dc1d1f27f35ee19b4dfd88)
+- Add creation of symbolic variables
+  [244e468](https://github.com/DeepseaPlatform/coastal/commit/244e4682df19bfd7a4c0b8d0bf93823b31934bbb)
+
+### Changed
+- Eclipse launch configurations for quiet and verbose runs
+  [a9a5a30](https://github.com/DeepseaPlatform/coastal/commit/a9a5a3073bd2d1c5464678f9fdc86ba4b2eab2e4)
+- [Issue #32](https://github.com/DeepseaPlatform/coastal/issues/32)
+  Z3 path now set in coastal configuration.
+  [7349894](https://github.com/DeepseaPlatform/coastal/commit/7349894a7be0397d30ad973e75ba96222abbbb29)
+- Improved text-based drawing of path trees
+  [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
+- Better handling of exceptions
+  [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
+  [a8386c4](https://github.com/DeepseaPlatform/coastal/commit/a8386c4c7f6c327d263cd38b897b253fa24da041)
+- Improved support for random testing
+  [60eccd2](https://github.com/DeepseaPlatform/coastal/commit/60eccd27562304b69a991f6ecb14b65dd6e8ce84)
+  [691c43c](https://github.com/DeepseaPlatform/coastal/commit/691c43c0dd02149d4664c7ec716caa6b4c7d194b)
+- Improved fuzzing
+- Updated documentation
+  [5a8e5cd](https://github.com/DeepseaPlatform/coastal/commit/5a8e5cd7af9f2f00ce99a294dcb4067d54a9a3cc)
+  [1d65545](https://github.com/DeepseaPlatform/coastal/commit/1d6554591e2c36c81ae1c7b620b299d3ddd3d1ca)
+  [04eeef0](https://github.com/DeepseaPlatform/coastal/commit/04eeef0acbfb2797f8aaec3344c750eb2c266535)
+  [173925e](https://github.com/DeepseaPlatform/coastal/commit/173925ebb0c79a05ced6affaa1edc5e60960f948)
+  [3887c1f](https://github.com/DeepseaPlatform/coastal/commit/3887c1f943fa4e0cf089490084a8c2c8f76fe622)
+  [5bdc976](https://github.com/DeepseaPlatform/coastal/commit/5bdc97693b33aa8162e00869320349bc744d921a)
+- Change COASTAL configuration files from XML to Java properties
+  [b2cec72](https://github.com/DeepseaPlatform/coastal/commit/b2cec7218f2cb5cbfeca21017f7eef129e5771ff)
+  [8ce795b](https://github.com/DeepseaPlatform/coastal/commit/8ce795ba1896f7a4792b5144812d517f6b208c42)
+  [7f51209](https://github.com/DeepseaPlatform/coastal/commit/7f51209f722408d2139130a22ad6f8470f153451)
+
+### Removed
+- Removed dependency on GREEN
+  [2dad358](https://github.com/DeepseaPlatform/coastal/commit/2dad358bd8c8134c998038f67adf18aaa2e8b3fe)
 
 ### Fixed
 - Fixed bug with stack sizes
 - Fixed bug with character description in in-house solver output
-- Removed tricky COASTAL version code [#37](https://github.com/DeepseaPlatform/coastal/issues/37)
+- [Issue #37](https://github.com/DeepseaPlatform/coastal/issues/37)
+  Removed tricky COASTAL version code
+  [d18fc4f](https://github.com/DeepseaPlatform/coastal/commit/d18fc4fd7aafe9cc8386c4be6ade6a1a39058c75)
+- Fix bug in generational strategy
+  [0b3be3a](https://github.com/DeepseaPlatform/coastal/commit/0b3be3a6bcc8ec078e04b37867f4e8aea07a934a)
+  [aab8c61](https://github.com/DeepseaPlatform/coastal/commit/aab8c61ca4f770961b3add7ad7eaaad199b2f5a1)
+  [6437a3b](https://github.com/DeepseaPlatform/coastal/commit/6437a3ba3bacfe99767dd2695891e6afb68a81a8)
+- Fix error in advanced DUP instructions
+  [183dfdb](https://github.com/DeepseaPlatform/coastal/commit/183dfdb96109153b7974903eecdfe1cdf5b1abe3)
 
 ## [0.0.2] - 2018.12.14
 
