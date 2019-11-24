@@ -350,6 +350,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
 		log.trace("Hinstrument visitFieldInsn(opcode:{} ({}), owner:{}, name:{})", opcode, Bytecodes.toString(opcode), owner, name);
+		mv.visitFieldInsn(opcode, owner, name, descriptor);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
 		mv.visitLdcInsn(owner);
@@ -357,7 +358,6 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		mv.visitLdcInsn(descriptor);
 		mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "fieldInsn",
 				"(IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V", false);
-		mv.visitFieldInsn(opcode, owner, name, descriptor);
 	}
 
 	private char primitiveReturnType(String descriptor) {
