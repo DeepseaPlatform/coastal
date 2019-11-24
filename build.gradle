@@ -168,16 +168,16 @@ publishing {
 	}
 	repositories {
 		maven {
-			// credentials {
-			// 	username repo_username
-			// 	password repo_password
-			// }
+			credentials {
+			 	username repo_username
+			 	password repo_password
+			}
 			if (isReleaseVersion) {
-				url = "file://${buildDir}/repo"
-				// url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+				// url = "file://${buildDir}/repo"
+				url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
 			} else {
-				url = "file://${buildDir}/snap"
-				// url = 'https://oss.sonatype.org/content/repositories/snapshots'
+				// url = "file://${buildDir}/snap"
+				url = 'https://oss.sonatype.org/content/repositories/snapshots'
 			}
 		}
 	}
