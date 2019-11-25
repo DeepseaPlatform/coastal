@@ -602,10 +602,11 @@ public abstract class State {
 	 * switched on.
 	 * 
 	 * @param methodNumber unique number of the method
+	 * @param methodName name of the method
 	 * @param argCount     number of formal parameters for the method
 	 * @throws COASTALException if a symbolic exception occurs during the method
 	 */
-	public abstract void startMethod(int methodNumber, int argCount) throws COASTALException;
+	public abstract void startMethod(int methodNumber, String methodName, int argCount) throws COASTALException;
 
 	/**
 	 * Ensure that the return value of a method is placed onto the top of the

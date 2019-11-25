@@ -835,11 +835,11 @@ public final class TraceState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#startMethod(int, int)
 	 */
 	@Override
-	public void startMethod(int methodNumber, int argCount) {
+	public void startMethod(int methodNumber, String methodName, int argCount) {
 		if (!getTrackingMode()) {
 			return;
 		}
-		log.trace("transferring {} arguments, methodNumber={}", argCount, methodNumber);
+		log.trace("transferring {} arguments, methodNumber={}, methodName={}", argCount, methodNumber, methodName);
 		frameCount++;
 		broker.publishThread("enter-method", methodNumber);
 	}

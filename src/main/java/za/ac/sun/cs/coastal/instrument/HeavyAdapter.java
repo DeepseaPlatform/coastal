@@ -78,13 +78,13 @@ public class HeavyAdapter extends ClassVisitor {
 			mv = new TraceMethodVisitor(mv, p);
 		}
 		if (mv != null) {
-			mv = new HeavyMethodAdapter(coastal, mv, this.name, triggerIndex, isStatic, argCount);
+			mv = new HeavyMethodAdapter(coastal, mv, this.name, triggerIndex, name, isStatic, argCount);
 		}
 		return mv;
 	}
 
 	private static final Pattern ALL_PARAMS_PATTERN = Pattern.compile("(\\(.*?\\))");
-	private static final Pattern PARAMS_PATTERN = Pattern.compile("(\\[?)(C|Z|S|I|J|F|D|(:?L[^;]+;))");
+	private static final Pattern PARAMS_PATTERN = Pattern.compile("(\\[?)(B|C|Z|S|I|J|F|D|(:?L[^;]+;))");
 
 	private static int countArguments(String desc) {
 		Matcher m0 = ALL_PARAMS_PATTERN.matcher(desc);

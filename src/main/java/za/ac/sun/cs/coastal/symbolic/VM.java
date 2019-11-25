@@ -484,9 +484,9 @@ public class VM {
 		}
 	}
 
-	public static void startMethod(int methodNumber, int argCount) throws COASTALException {
+	public static void startMethod(int methodNumber, String methodName, int argCount) throws COASTALException {
 		try {
-			state.startMethod(methodNumber, argCount);
+			state.startMethod(methodNumber, methodName, argCount);
 		} catch (ControlException x) {
 			throw x;
 		} catch (Throwable x) {

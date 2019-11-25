@@ -30,13 +30,15 @@ public class LightMethodAdapter extends MethodVisitor {
 
 	private final int triggerIndex;
 
+	private final String name;
+	
 	private final boolean isStatic;
 
 	private final int argCount;
 
 	private BitSet currentLinenumbers;
 
-	public LightMethodAdapter(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, boolean isStatic,
+	public LightMethodAdapter(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, String name, boolean isStatic,
 			int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.coastal = coastal;
@@ -44,6 +46,7 @@ public class LightMethodAdapter extends MethodVisitor {
 		this.classManager = coastal.getClassManager();
 		this.filename = filename;
 		this.triggerIndex = triggerIndex;
+		this.name = name;
 		this.isStatic = isStatic;
 		this.argCount = argCount;
 	}
@@ -242,15 +245,17 @@ public class LightMethodAdapter extends MethodVisitor {
 			// --- } else {
 			// --- startMethod()
 			mv.visitLdcInsn(classManager.getMethodCounter());
+			mv.visitLdcInsn(name);
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(ILjava/lang/String;I)V", false);
 			// --- }
 			mv.visitLabel(end);
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		} else {
 			mv.visitLdcInsn(classManager.getNextMethodCounter());
+			mv.visitLdcInsn(name);
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(ILjava/lang/String;I)V", false);
 		}
 		classManager.registerFirstInstruction();
 		currentLinenumbers = new BitSet();

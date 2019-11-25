@@ -270,7 +270,7 @@ public class DiverFactory implements TaskFactory {
 				} else {
 					log.trace("exception in run, diverTaskCount={}, symbolicState #{} frames #{} instanceData #{}",
 							diverTaskCount, Integer.toHexString(symbolicState.hashCode()),
-							Integer.toHexString(symbolicState.FRAMES.hashCode()),
+							Integer.toHexString(symbolicState.frames.hashCode()),
 							Integer.toHexString(symbolicState.instanceData.hashCode()));
 					log.trace("exception details: ", t);
 					if (t instanceof AssertionError) {

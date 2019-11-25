@@ -61,12 +61,12 @@ public final class SymbolicState extends State {
 	 * The limit on the length of new symbolic strings.
 	 */
 	private final int maxSymbolicStringLength;
-	
+
 	/**
 	 * Default value for new symbolic strings.
 	 */
 	private final String defaultSymbolicString;
-	
+
 	/**
 	 * Whether or not the program state should be tracked from the very beginning of
 	 * the execution, or whether it should only be switched on when a trigger method
@@ -99,12 +99,7 @@ public final class SymbolicState extends State {
 	 * A symbolic representation of the method invocation stack of the true
 	 * execution.
 	 */
-	public static final ThreadLocal<Stack<SymbolicFrame>> FRAMES = new ThreadLocal<Stack<SymbolicFrame>>() {
-		@Override
-		protected Stack<SymbolicFrame> initialValue() {
-			return new Stack<>();
-		}
-	};
+	public final Stack<SymbolicFrame> frames = new Stack<>();
 
 	/**
 	 * The number of objects created during this execution.
@@ -280,7 +275,7 @@ public final class SymbolicState extends State {
 	 * @return the symbolic value of the local variable
 	 */
 	private SymbolicValue getLocal(int index) {
-		return FRAMES.get().peek().getLocal(index);
+		return frames.peek().getLocal(index);
 	}
 
 	/**
@@ -293,7 +288,7 @@ public final class SymbolicState extends State {
 	 *              the new symbolic value of the local variable
 	 */
 	private void setLocal(int index, SymbolicValue value) {
-		FRAMES.get().peek().setLocal(index, value);
+		frames.peek().setLocal(index, value);
 	}
 
 	/**
@@ -396,10 +391,10 @@ public final class SymbolicState extends State {
 	 */
 	private boolean methodReturn() throws COASTALException {
 		assert getTrackingMode();
-		assert !FRAMES.get().isEmpty();
-		int methodNumber = FRAMES.get().pop().getMethodNumber();
-		log.trace("(frames.hashCode()=={})", Integer.toHexString(FRAMES.hashCode()));
-		if (FRAMES.get().isEmpty() && getRecordingMode()) {
+		assert !frames.isEmpty();
+		int methodNumber = frames.pop().getMethodNumber();
+		log.trace("(frames.hashCode()=={})", Integer.toHexString(frames.hashCode()));
+		if (frames.isEmpty() && getRecordingMode()) {
 			log.trace("******** symbolic record mode switched off ********");
 			setRecordingMode(false);
 			mayRecord = false;
@@ -425,11 +420,11 @@ public final class SymbolicState extends State {
 	 */
 	private void dumpFrames() {
 		log.trace("    symbolicState #{} frames #{} instanceData #{}", Integer.toHexString(hashCode()),
-				Integer.toHexString(FRAMES.hashCode()), Integer.toHexString(instanceData.hashCode()));
-		for (Iterator<SymbolicFrame> iter = FRAMES.get().iterator(); iter.hasNext();) {
+				Integer.toHexString(frames.hashCode()), Integer.toHexString(instanceData.hashCode()));
+		for (Iterator<SymbolicFrame> iter = frames.iterator(); iter.hasNext();) {
 			SymbolicFrame frame = iter.next();
-			log.trace("    id={} st{} locals:{} <{}> #{}", frame.getFrameId(), frame.stack, frame.locals,
-					frame.getInvokingInstruction(), Integer.toHexString(frame.hashCode()));
+			log.trace("    id={} st{} locals:{} ({}) <{}> #{}", frame.getFrameId(), frame.stack, frame.locals,
+					frame.getMethodName(), frame.getInvokingInstruction(), Integer.toHexString(frame.hashCode()));
 		}
 		StringBuilder b = new StringBuilder();
 		StringBuilder bb = new StringBuilder();
@@ -721,7 +716,7 @@ public final class SymbolicState extends State {
 		SymbolicValue value = symbolicValueFactory.createSymbolicValue(new IntegerConstant(length, 32));
 		putField(arrayId, "length", value);
 	}
-	
+
 	/**
 	 * Return the symbolic value stored in an array at a particular index.
 	 * 
@@ -876,11 +871,11 @@ public final class SymbolicState extends State {
 	 */
 	@Override
 	public void push(Value expr) {
-		FRAMES.get().peek().push((SymbolicValue) expr);
+		frames.peek().push((SymbolicValue) expr);
 	}
 
 	public void push(SymbolicValue expr, int bitSize) {
-		FRAMES.get().peek().push(expr);
+		frames.peek().push(expr);
 	}
 
 	/**
@@ -915,7 +910,7 @@ public final class SymbolicState extends State {
 	@Override
 	public SymbolicValue pop() {
 		// log.trace("@@@@@@@@@@@@@@ POP @@@@@@@@@@@@@@@@@");
-		return FRAMES.get().isEmpty() ? null : FRAMES.get().peek().pop();
+		return frames.isEmpty() ? null : frames.peek().pop();
 	}
 
 	/*
@@ -929,7 +924,7 @@ public final class SymbolicState extends State {
 		}
 		return pop();
 	}
-	
+
 	/**
 	 * Return (but do not remove) the expression on the top of the expression stack
 	 * of the topmost invocation frame.
@@ -937,19 +932,19 @@ public final class SymbolicState extends State {
 	 * @return the expression on top of the expression stack
 	 */
 	public SymbolicValue peek() {
-		return FRAMES.get().peek().peek();
+		return frames.peek().peek();
 	}
 
 	/**
-	 * Return (but do not remove) the index-most top expression of the expression stack
-	 * of the topmost invocation frame.
+	 * Return (but do not remove) the index-most top expression of the expression
+	 * stack of the topmost invocation frame.
 	 * 
 	 * @return the index-most top expression of the expression stack
 	 */
 	public SymbolicValue peek(int index) {
-		return FRAMES.get().peek().peek(index);
+		return frames.peek().peek(index);
 	}
-	
+
 	// ----------------------------------------------------------------------
 	// ROUTINES TO MANIPULATE THE PATH
 	// ----------------------------------------------------------------------
@@ -1991,7 +1986,8 @@ public final class SymbolicState extends State {
 				mayRecord = false;
 				setTrackingMode(true);
 				SymbolicValue thisValue = isStatic ? null : peek();
-				FRAMES.get().push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
+				frames.push(new SymbolicFrame(methodNumber, coastal.getTrigger(triggerIndex).getMethodName(),
+						lastInvokingInstruction));
 				if (!isStatic) {
 					setLocal(0, thisValue);
 				}
@@ -2013,13 +2009,13 @@ public final class SymbolicState extends State {
 	 * @see za.ac.sun.cs.coastal.symbolic.State#startMethod(int, int)
 	 */
 	@Override
-	public void startMethod(int methodNumber, int argCount) {
+	public void startMethod(int methodNumber, String methodName, int argCount) {
 		if (!getTrackingMode()) {
 			return;
 		}
 		log.trace("transferring {} arguments, methodNumber={}", argCount, methodNumber);
-		if (FRAMES.get().isEmpty()) {
-			FRAMES.get().push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
+		if (frames.isEmpty()) {
+			frames.push(new SymbolicFrame(methodNumber, methodName, lastInvokingInstruction));
 			for (int i = 0; i < argCount; i++) {
 				setLocal(1, IntegerConstant.ZERO32);
 			}
@@ -2028,7 +2024,7 @@ public final class SymbolicState extends State {
 			for (int i = 0; i < argCount; i++) {
 				params.push(pop());
 			}
-			FRAMES.get().push(new SymbolicFrame(methodNumber, lastInvokingInstruction));
+			frames.push(new SymbolicFrame(methodNumber, methodName, lastInvokingInstruction));
 			int address = 0;
 			for (int i = 0; i < argCount; i++) {
 				SymbolicValue value = params.pop();
@@ -2183,7 +2179,7 @@ public final class SymbolicState extends State {
 	public void produceException(Expression guard, int throwing) {
 		produceException(guard, new IntegerConstant(throwing, 32));
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -2673,7 +2669,8 @@ public final class SymbolicState extends State {
 			id = incrAndGetNewObjectId();
 			setArrayLength(id, size);
 			push(new IntegerConstant(id, 32), 32);
-			produceException(Operation.ge(new IntegerConstant(size, 32), IntegerConstant.ZERO32), IntegerConstant.ZERO32);
+			produceException(Operation.ge(new IntegerConstant(size, 32), IntegerConstant.ZERO32),
+					IntegerConstant.ZERO32);
 			break;
 		default:
 			log.fatal("UNIMPLEMENTED INSTRUCTION: <{}> {} (opcode: {})", instr, Bytecodes.toString(opcode), opcode);
@@ -2751,7 +2748,8 @@ public final class SymbolicState extends State {
 						pop();
 					}
 					SymbolicValue target = pop();
-					produceException(Operation.ne(target.toExpression(), IntegerConstant.ZERO32), IntegerConstant.ZERO32);
+					produceException(Operation.ne(target.toExpression(), IntegerConstant.ZERO32),
+							IntegerConstant.ZERO32);
 					// insert return type on stack
 					pushReturnValue(getReturnType(descriptor).charAt(0));
 				}
@@ -3198,16 +3196,16 @@ public final class SymbolicState extends State {
 		log.trace("exception occurred");
 		int catchDepth = Thread.currentThread().getStackTrace().length;
 		int deltaDepth = exceptionDepth - catchDepth;
-		if (deltaDepth >= FRAMES.get().size()) {
+		if (deltaDepth >= frames.size()) {
 			log.trace("******** symbolic record mode switched off ********");
 			setRecordingMode(false);
 			mayRecord = false;
 			setTrackingMode(trackAll);
 		} else {
 			while (deltaDepth-- > 0) {
-				FRAMES.get().pop();
+				frames.pop();
 			}
-			FRAMES.get().peek().clear();
+			frames.peek().clear();
 			push(throwable);
 		}
 		for (Expression e : noExceptionExpression) {

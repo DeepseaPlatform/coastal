@@ -39,6 +39,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	private final int triggerIndex;
 
+	private final String name;
+	
 	private final boolean isStatic;
 
 	private final int argCount;
@@ -74,8 +76,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	// private static BitSet currentBranchInstructions;
 
-	public HeavyMethodAdapter(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, boolean isStatic,
-			int argCount) {
+	public HeavyMethodAdapter(COASTAL coastal, MethodVisitor cv, String filename, int triggerIndex, String name,
+			boolean isStatic, int argCount) {
 		super(Opcodes.ASM6, cv);
 		this.coastal = coastal;
 		this.log = coastal.getLog();
@@ -83,6 +85,7 @@ public class HeavyMethodAdapter extends MethodVisitor {
 		this.classManager = coastal.getClassManager();
 		this.filename = filename;
 		this.triggerIndex = triggerIndex;
+		this.name = name;
 		this.isStatic = isStatic;
 		this.argCount = argCount;
 	}
@@ -280,15 +283,17 @@ public class HeavyMethodAdapter extends MethodVisitor {
 			// --- } else {
 			// --- startMethod()
 			mv.visitLdcInsn(classManager.getMethodCounter());
+			mv.visitLdcInsn(name);
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(ILjava/lang/String;I)V", false);
 			// --- }
 			mv.visitLabel(end);
 			mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		} else {
 			mv.visitLdcInsn(classManager.getNextMethodCounter());
+			mv.visitLdcInsn(name);
 			mv.visitLdcInsn(argCount + (isStatic ? 0 : 1));
-			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(II)V", false);
+			mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "startMethod", "(ILjava/lang/String;I)V", false);
 		}
 		classManager.registerFirstInstruction();
 		currentLinenumbers = new BitSet();
@@ -349,7 +354,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-		log.trace("Hinstrument visitFieldInsn(opcode:{} ({}), owner:{}, name:{})", opcode, Bytecodes.toString(opcode), owner, name);
+		log.trace("Hinstrument visitFieldInsn(opcode:{} ({}), owner:{}, name:{})", opcode, Bytecodes.toString(opcode),
+				owner, name);
 		mv.visitFieldInsn(opcode, owner, name, descriptor);
 		mv.visitLdcInsn(classManager.getNextInstructionCounter());
 		mv.visitLdcInsn(opcode);
@@ -381,7 +387,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 
 	@Override
 	public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-		log.trace("Hinstrument visitMethodInsn(opcode:{} ({}), owner:{}, name:{})", opcode, Bytecodes.toString(opcode), owner, name);
+		log.trace("Hinstrument visitMethodInsn(opcode:{} ({}), owner:{}, name:{})", opcode, Bytecodes.toString(opcode),
+				owner, name);
 		if (owner.equals(SYMBOLIC)) {
 			mv.visitMethodInsn(opcode, LIBRARY, name, descriptor, isInterface);
 			// pop params !!!!!!!!!!!
@@ -400,8 +407,8 @@ public class HeavyMethodAdapter extends MethodVisitor {
 					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "assume", "(Z)V", false);
 				} else if (name.equals("nondetString")) {
 					mv.visitLdcInsn(classManager.getNextNewVariableCounter());
-					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicString",
-							"(I)Ljava/lang/String;", false);
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, LIBRARY, "createSymbolicString", "(I)Ljava/lang/String;",
+							false);
 				} else {
 					mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
 					switch (name) {

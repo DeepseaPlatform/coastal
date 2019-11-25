@@ -23,14 +23,17 @@ public class SymbolicFrame {
 
 	protected final int methodNumber;
 	
+	protected final String methodName;
+	
 	protected final int invokingInstruction;
 	
 	protected final Stack<SymbolicValue> stack = new Stack<>();
 
 	protected final Map<Integer, SymbolicValue> locals = new HashMap<>();
 
-	public SymbolicFrame(int methodNumber, int invokingInstruction) {
+	public SymbolicFrame(int methodNumber, String methodName, int invokingInstruction) {
 		this.methodNumber = methodNumber;
+		this.methodName = methodName;
 		this.invokingInstruction = invokingInstruction;
 	}
 
@@ -42,6 +45,10 @@ public class SymbolicFrame {
 		return methodNumber;
 	}
 
+	public String getMethodName() {
+		return methodName;
+	}
+	
 	public int getInvokingInstruction() {
 		return invokingInstruction;
 	}
