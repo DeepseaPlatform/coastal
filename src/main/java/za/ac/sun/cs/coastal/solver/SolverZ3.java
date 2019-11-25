@@ -312,10 +312,25 @@ public class SolverZ3 extends Solver {
 					}
 					break;
 				default:
+					maxSize = (lSize > rSize) ? lSize : rSize;
 					b.append('(').append(setOperator(op, lType)).append(' ');
-					b.append(l.getEntry()).append(' ');
-					b.append(r.getEntry()).append(')');
-					stack.push(new StackEntry(b.toString(), lType, lSize));
+					if (lSize < maxSize) {
+						b.append("((_ sign_extend ").append(maxSize - lSize).append(") ").append(l.getEntry())
+								.append(") ");
+					} else {
+						b.append(l.getEntry()).append(' ');
+					}
+					if (rSize < maxSize) {
+						b.append("((_ sign_extend ").append(maxSize - rSize).append(") ").append(r.getEntry())
+								.append("))");
+					} else {
+						b.append(r.getEntry()).append(')');
+					}
+					stack.push(new StackEntry(b.toString(), lType, maxSize));
+//					b.append('(').append(setOperator(op, lType)).append(' ');
+//					b.append(l.getEntry()).append(' ');
+//					b.append(r.getEntry()).append(')');
+//					stack.push(new StackEntry(b.toString(), lType, lSize));
 					break;
 				}
 			} else if (arity == 1) {
