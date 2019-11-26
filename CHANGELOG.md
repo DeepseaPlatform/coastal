@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Documentation for some classes
+  [878f159](https://github.com/DeepseaPlatform/coastal/commit/878f159064ac52508a6e199b2aec53f7bd1c1e24)
 - Method names are now displayed next to frame in detailed log
   [f24a40d](https://github.com/DeepseaPlatform/coastal/commit/f24a40def8a1fe9c267777955ae6bcf8e59dea12)
 
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - ...
 
 ### Removed
+- Unneeded libraries
 - Examples have moved to a [separate project](https://github.com/DeepseaPlatform/coastal-examples)
 
 ### Fixed
