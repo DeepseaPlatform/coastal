@@ -1,5 +1,10 @@
-/**
- * 
+/*
+ * This file is part of the COASTAL tool, https://deepseaplatform.github.io/coastal/
+ *
+ * Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.
+ *
+ * Licensed under GNU Lesser General Public License, version 3.
+ * See LICENSE.md file in the project root for full license information.
  */
 package za.ac.sun.cs.coastal.utility;
 
@@ -10,10 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Various methods for string translations.
  */
 public class Translator {
 
+	/**
+	 * Mapping of source characters to translated characters.
+	 */
 	private static final Map<Character, String> TRANSLATE_MAP = new HashMap<>();
 
 	static {
@@ -26,6 +34,9 @@ public class Translator {
 		TRANSLATE_MAP.put('\t', "\\t");
 	}
 
+	/**
+	 * Hexadecimal digits.
+	 */
 	private static final char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
 			'E', 'F' };
 
@@ -33,8 +44,8 @@ public class Translator {
 	 * Helper for non-Writer usage.
 	 * 
 	 * @param input
-	 *              CharSequence to be translated
-	 * @return String output of translation
+	 *              sequence of characters to be translated
+	 * @return translated string
 	 */
 	public static String translate(final CharSequence input) {
 		if (input == null) {
@@ -51,19 +62,19 @@ public class Translator {
 	}
 
 	/**
-	 * Translate an input onto a Writer. This is intentionally final as its
-	 * algorithm is tightly coupled with the abstract method of this class.
+	 * Translate an input string and write it to a writer. This method handles
+	 * Unicode characters.
 	 *
 	 * @param input
-	 *              CharSequence that is being translated
+	 *              string that is being translated
 	 * @param out
-	 *              Writer to translate the text to
+	 *              writer to translate the text to
 	 * @throws IOException
-	 *                     if and only if the Writer produces an IOException
+	 *                     if the writer produces an IOException
 	 */
 	private static void translate(final CharSequence input, final Writer out) throws IOException {
 		if (out == null) {
-			throw new IllegalArgumentException("The Writer must not be null");
+			throw new IllegalArgumentException("The output writer must not be null");
 		}
 		if (input == null) {
 			return;
@@ -91,6 +102,21 @@ public class Translator {
 		}
 	}
 
+	/**
+	 * Translate a special character at a given index of a string and output it to a
+	 * writer.
+	 *
+	 * @param input
+	 *              input string
+	 * @param index
+	 *              index of special character
+	 * @param out
+	 *              writer to output to
+	 * @return 0 if the character is not special, 1 if special character was
+	 *         processed
+	 * @throws IOException
+	 *                     if the writer produces an IOException
+	 */
 	private static int translate(final CharSequence input, final int index, final Writer out) throws IOException {
 		char ch = input.charAt(index);
 		if (TRANSLATE_MAP.containsKey(ch)) {
