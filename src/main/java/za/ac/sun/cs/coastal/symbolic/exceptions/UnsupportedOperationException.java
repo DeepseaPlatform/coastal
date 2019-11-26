@@ -19,10 +19,19 @@ public class UnsupportedOperationException extends ControlException {
 	 */
 	private static final long serialVersionUID = 1282665987285619356L;
 
+	/**
+	 * Standard constructor.
+	 */
 	public UnsupportedOperationException() {
 		super();
 	}
 
+	/**
+	 * Standard constructor.
+	 *
+	 * @param message
+	 *                exception message
+	 */
 	public UnsupportedOperationException(String message) {
 		super(message);
 	}

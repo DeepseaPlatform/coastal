@@ -19,12 +19,21 @@ public class ControlException extends COASTALException {
 	 */
 	private static final long serialVersionUID = 1282785987285619356L;
 
+	/**
+	 * Standard constructor.
+	 */
 	public ControlException() {
 		super();
 	}
 
+	/**
+	 * Standard constructor.
+	 *
+	 * @param message
+	 *                exception message
+	 */
 	public ControlException(String message) {
 		super(message);
 	}
-	
+
 }

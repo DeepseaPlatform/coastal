@@ -10,7 +10,7 @@ package za.ac.sun.cs.coastal.symbolic.exceptions;
 
 /**
  * Exception to signal that a run has been prematurely aborted because the
- * surfer has detected that the corrent execution path has been explored before.
+ * surfer has detected that the current execution path has been explored before.
  */
 public class AbortedRunException extends ControlException {
 

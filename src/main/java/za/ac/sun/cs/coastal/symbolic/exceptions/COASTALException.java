@@ -30,15 +30,19 @@ public class COASTALException extends Exception {
 
 	/**
 	 * Standard constructor.
+	 *
+	 * @param message
+	 *                exception message
 	 */
 	public COASTALException(String message) {
 		super(message);
 	}
-	
+
 	/**
 	 * Constructor to wrap another throwable.
 	 * 
-	 * @param throwable Another {@link Throwable} to wrap
+	 * @param throwable
+	 *                  Another {@link Throwable} to wrap
 	 */
 	public COASTALException(Throwable throwable) {
 		super(throwable);
