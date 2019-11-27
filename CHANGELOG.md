@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Documentation for some classes
+  [22ccafc](https://github.com/DeepseaPlatform/coastal/commit/22ccafc762f2a679b6cec5410383f779f536d815)
   [878f159](https://github.com/DeepseaPlatform/coastal/commit/878f159064ac52508a6e199b2aec53f7bd1c1e24)
 - Method names are now displayed next to frame in detailed log
   [f24a40d](https://github.com/DeepseaPlatform/coastal/commit/f24a40def8a1fe9c267777955ae6bcf8e59dea12)
@@ -27,7 +28,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix bug in Z3 translation that caused mismatched bit vector sizes
   [f3c8218](https://github.com/DeepseaPlatform/coastal/commit/f3c8218031f32fb5f730738365f7ddd6b7f74349)
 - [Issue #42](https://github.com/DeepseaPlatform/coastal/issues/42)
-  Fix bug that executely symbolic instruction before related classes were initialized
+  Fix bug that execute symbolic instruction before related classes were initialized
   [227236e](https://github.com/DeepseaPlatform/coastal/commit/227236e3347dbaadfd3f97c71a157d322e9490b6)
 
 ## [0.1.0] - 2019.11.24
