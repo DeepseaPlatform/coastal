@@ -1085,7 +1085,7 @@ public final class SymbolicState extends State {
 		if (concrete == null) {
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue ? 1 : 0));
-			return currentValue;
+			return false;
 		} else {
 			boolean newValue = concrete.getValue() != 0;
 			log.trace("get symbolic var {}, default value of {}", name, newValue);
