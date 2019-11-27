@@ -263,6 +263,7 @@ public class DiverFactory implements TaskFactory {
 				} else if (t instanceof UnsupportedOperationException) {
 					log.trace("exception: unsupported operation: {}", t.getMessage());
 					log.info("UNSUPPORTED OPERATION: {}", t.getMessage());
+					System.exit(1);
 				} else if (t instanceof ErrorException) {
 					log.fatal("*** I N T E R N A L   E R R O R ***", t.getCause());
 					log.fatal("*** symbolic state: #{} ***", Integer.toHexString(symbolicState.hashCode()));

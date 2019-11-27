@@ -83,12 +83,17 @@ coastal.settings.conjunct-limit = 800
 coastal.settings.time-limit = 240
 #-coastal.delegates = C
 coastal.delegates = C, S, SB
+#-coastal.delegates = C, S, SB, P, SC
 coastal.delegates.C.model = za.ac.sun.cs.coastal.model.Character
 coastal.delegates.C.for = java.lang.Character
 coastal.delegates.S.model = za.ac.sun.cs.coastal.model.String
 coastal.delegates.S.for = java.lang.String
 coastal.delegates.SB.model = za.ac.sun.cs.coastal.model.StringBuilder
 coastal.delegates.SB.for = java.lang.StringBuilder
+coastal.delegates.P.model = za.ac.sun.cs.coastal.model.Pattern
+coastal.delegates.P.for = java.util.regex.Pattern
+coastal.delegates.SC.model = za.ac.sun.cs.coastal.model.Scanner
+coastal.delegates.SC.for = java.util.Scanner
 EOF
 
 #------------------------------------------------------------------------------

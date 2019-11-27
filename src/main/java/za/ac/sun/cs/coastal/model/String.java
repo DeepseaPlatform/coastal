@@ -8,6 +8,8 @@ import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.solver.IntegerConstant;
 import za.ac.sun.cs.coastal.solver.IntegerVariable;
 import za.ac.sun.cs.coastal.solver.Operation;
+import za.ac.sun.cs.coastal.symbolic.exceptions.COASTALException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.UnsupportedOperationException;
 
 /**
  * A model of some operations of {@link java.lang.String}. This implementation
@@ -526,6 +528,10 @@ public class String {
 		return true;
 	}
 
+	public boolean split__Ljava_1lang_1String_2___3Ljava_1lang_1String_2(SymbolicState state) throws COASTALException {
+		throw new UnsupportedOperationException("String.split() is unimplemented");
+	}
+	
 	public boolean endsWith__Ljava_1lang_1String_2__Z(SymbolicState state) {
 		int prefixAddress = (int) intConstantValue(state.pop());
 		int thisAddress = (int) intConstantValue(state.pop());
