@@ -2,7 +2,6 @@ package za.ac.sun.cs.coastal.diver;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +39,7 @@ import za.ac.sun.cs.coastal.symbolic.ValueFactory.Value;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.COASTALException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.CompletedRunException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.ErrorException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.UnsupportedOperationException;
 import za.ac.sun.cs.coastal.utility.Translator;
@@ -469,7 +469,7 @@ public final class SymbolicState extends State {
 	 */
 	private final Object[] delegateArguments = new Object[] { this };
 
-	private boolean executeDelegate(String owner, String name, String descriptor) {
+	private boolean executeDelegate(String owner, String name, String descriptor) throws COASTALException {
 		Object delegate = coastal.findDelegate(owner);
 		if (delegate == null) {
 			return false;
@@ -492,9 +492,12 @@ public final class SymbolicState extends State {
 				justExecutedDelegate = true;
 				return true;
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException x) {
-			// This should never happen!
-			x.printStackTrace();
+		} catch (Exception x) {
+			Throwable t = x.getCause();
+			if (t instanceof COASTALException) {
+				throw (COASTALException) t;
+			}
+			throw new ErrorException(t);
 		}
 		return false;
 	}
