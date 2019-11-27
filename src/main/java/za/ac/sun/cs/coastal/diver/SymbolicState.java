@@ -1083,9 +1083,10 @@ public final class SymbolicState extends State {
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 32);
 		if (concrete == null) {
+			currentValue = false;
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue ? 1 : 0));
-			return false;
+			return currentValue;
 		} else {
 			boolean newValue = concrete.getValue() != 0;
 			log.trace("get symbolic var {}, default value of {}", name, newValue);
@@ -1144,6 +1145,7 @@ public final class SymbolicState extends State {
 		Long concreteVal = (input == null) ? null : (Long) input.get(name);
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
 		if (concrete == null) {
+			currentValue = ' ';
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
 			input.put(name, new Long(currentValue));
 			return currentValue;
