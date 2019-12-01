@@ -1,0 +1,19 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------
+# Execute coastal on the command line
+#
+# To install COASTAL:
+#
+# (1) Download coastal-a.b.c.zip and unzip in /usr/local/share
+# (2) Place this file in /usr/local/bin
+#
+#-------------------------------------------------------------------------------
+
+[[ "${COASTAL_OPTS}" == "" ]] && COASTAL_OPTS="-ea"
+[[ "${COASTAL_PATH}" == "" ]] && COASTAL_PATH="/usr/local/share/coastal"
+${COASTAL_PATH}/bin/coastal ${*}
+
+#export COASTAL_PATH=.:${HOME}/Dropbox/WORKSPACE/coastal/build/install/coastal/bin
+#export COASTAL_OPTS="-ea -Xms128m -Xmx384m -Xss4m -XX:PermSize=128m -XX:MaxPermSize=384m -XX:CompileThreshold=1000000 -XX:MaxGCPauseMillis=10 -XX:MaxHeapFreeRatio=70 -XX:+CMSIncrementalPacing -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:+UseFastAccessorMethods"
+#export COASTAL_OPTS="-ea -Xms128m -Xmx384m -Xss4m -XX:CompileThreshold=1000000 -XX:MaxGCPauseMillis=10 -XX:MaxHeapFreeRatio=70 -XX:+CMSIncrementalPacing -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:+UseFastAccessorMethods"
+#[[ ":$PATH:" != *":${COASTAL_PATH}:"* ]] && PATH="${COASTAL_PATH}:${PATH}"
