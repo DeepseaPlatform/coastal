@@ -2158,6 +2158,11 @@ public class COASTAL {
 		for (String key : configuration.getKeys()) {
 			log.info("{} = {}", key, configuration.getString(key));
 		}
+		// Dump the classpaths
+		log.trace("classpaths:");
+		for (String classPath : getClassManager().getClassPaths()) {
+			log.trace("  {}", classPath);
+		}
 		// Now we can start by creating run-level observers
 		for (Tuple observer : getObserversPerRun()) {
 			ObserverFactory observerFactory = (ObserverFactory) observer.get(0);

@@ -122,6 +122,10 @@ public class InstrumentationClassManager {
 		}
 	}
 
+	public List<String> getClassPaths() {
+		return classPaths;
+	}
+
 	private void parseJar(String prefix) {
 		String jar = coastal.getConfig().getString(prefix);
 		if (jar == null) {
