@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 
 import org.apache.logging.log4j.Logger;
 
+import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.symbolic.State;
@@ -25,13 +26,13 @@ public class HeavyClassLoader extends ClassLoader {
 
 	private final InstrumentationClassManager manager;
 
-	private final ThreadLocal<SymbolicState> symbolicState = new ThreadLocal<>();
+	private final SymbolicState symbolicState;
 
 	public HeavyClassLoader(COASTAL coastal, InstrumentationClassManager manager, SymbolicState symbolicState) {
 		this.coastal = coastal;
 		this.log = coastal.getLog();
 		this.manager = manager;
-		this.symbolicState.set(symbolicState);
+		this.symbolicState = symbolicState;
 	}
 
 	public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
@@ -51,7 +52,7 @@ public class HeavyClassLoader extends ClassLoader {
 		}
 		if (name.equals(SYMBOLIC_STATE_NAME)) {
 			log.trace("> loading class {} from parent (1)", name);
-			return symbolicState.get().getClass();
+			return symbolicState.getClass();
 		} else if (name.equals(STATE_NAME)) {
 			log.trace("> loading class {} from parent (2)", name);
 			return State.class;
@@ -80,6 +81,8 @@ public class HeavyClassLoader extends ClassLoader {
 			if (raw != null) {
 				log.trace("> loading class {}, uninstrumented (1)", name);
 				clas = defineClass(name, raw, 0, raw.length);
+			} else if (name.equals(VM_NAME)) {
+                new Banner('@').println("WARNING: VM.class will be shared").trace(log);
 			}
 		}
 		if (clas == null) {
@@ -98,9 +101,9 @@ public class HeavyClassLoader extends ClassLoader {
 		}
 		if ((clas != null) && name.equals(VM_NAME)) {
 			try {
-				log.trace("> try to set symbolic state #{}", Integer.toHexString(symbolicState.get().hashCode()));
+				log.trace("> try to set symbolic state #{}", Integer.toHexString(symbolicState.hashCode()));
 				Method st = clas.getDeclaredMethod("setState", State.class);
-				st.invoke(null, symbolicState.get());
+				st.invoke(null, symbolicState);
 			} catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException
 					| InvocationTargetException e) {
 				e.printStackTrace();

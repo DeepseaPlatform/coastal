@@ -1,6 +1,7 @@
 package za.ac.sun.cs.coastal.instrument;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -19,7 +20,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassReader;
@@ -213,6 +213,7 @@ public class InstrumentationClassManager {
 			}
 			ClassReader cr = new ClassReader(in);
 			ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES) {
+
 				@Override
 				protected ClassLoader getClassLoader() {
 					return classLoader;
@@ -381,53 +382,62 @@ public class InstrumentationClassManager {
 				if (in == null) {
 					continue;
 				}
-				try (ZipInputStream zin = new ZipInputStream(new BufferedInputStream(in))) {
-					String fullFilename = entry.getValue();
-					if (fullFilename != null) {
-						if (fullFilename.endsWith("/")) {
-							fullFilename += filename;
-						} else {
-							fullFilename += "/" + filename;
-						}
+				String fullFilename = entry.getValue();
+				if (fullFilename != null) {
+					if (fullFilename.endsWith("/")) {
+						fullFilename += filename;
 					} else {
-						fullFilename = filename;
+						fullFilename += "/" + filename;
 					}
-					ZipEntry ze = zin.getNextEntry();
-					while (ze != null) {
-						if (ze.getName().equals(fullFilename)) {
-							ByteArrayOutputStream out = new ByteArrayOutputStream();
-							byte[] buffer = new byte[8192];
-							int len = 0;
-							while ((len = zin.read(buffer, 0, 8192)) != -1) {
-								out.write(buffer, 0, len);
-							}
-							zin.closeEntry();
-							out.close();
-							log.trace("file {} found: {}::{}", filename, entry.getKey(), fullFilename);
-							return out.toByteArray();
-						}
-						ze = zin.getNextEntry();
-					}
-				} catch (IOException x) {
-					// ignore
+				} else {
+					fullFilename = filename;
+				}
+				byte[] out = loadFromJar(entry.getKey(), fullFilename);
+				if (out != null) {
+					return out;
 				}
 			}
 		}
 		return null;
 	}
 
+	private byte[] loadFromJar(String jarFilename, String filename) {
+		try (FileInputStream in = new FileInputStream(jarFilename);
+				ZipInputStream zin = new ZipInputStream(new BufferedInputStream(in))) {
+			ZipEntry ze = zin.getNextEntry();
+			while (ze != null) {
+				if (ze.getName().equals(filename)) {
+					return IOUtils.toByteArray(zin);
+				}
+				ze = zin.getNextEntry();
+			}
+		} catch (IOException x) {
+			// ignore
+		}
+		return null;
+	}
+
 	private InputStream searchFor(String filename, boolean tryResource) {
 		for (String classPath : classPaths) {
-			File file = new File(classPath, filename);
-			if (file.exists() && !file.isDirectory()) {
-				try {
-					log.trace("file {} found: {}", filename, file.getAbsolutePath());
-					FileInputStream in = new FileInputStream(file);
-					if (in != null) {
-						return new BufferedInputStream(in);
+			File classPathFile = new File(classPath);
+			if (classPathFile.isDirectory()) {
+				File file = new File(classPathFile, filename);
+				if (file.isFile()) {
+					try {
+						FileInputStream in = new FileInputStream(file);
+						if (in != null) {
+							log.trace("file {} found as file {}", filename, file.getAbsolutePath());
+							return new BufferedInputStream(in);
+						}
+					} catch (FileNotFoundException x) {
+						// ignore
 					}
-				} catch (FileNotFoundException x) {
-					// ignore
+				}
+			} else if (classPathFile.isFile() && classPath.endsWith(".jar") && classPath.contains("coastal")) {
+				byte[] out = loadFromJar(classPath, filename);
+				if (out != null) {
+					log.trace("file {} found in jar-file {}", filename, classPath);
+					return new ByteArrayInputStream(out);
 				}
 			}
 		}
@@ -435,7 +445,7 @@ public class InstrumentationClassManager {
 			final ClassLoader loader = Thread.currentThread().getContextClassLoader();
 			InputStream in = loader.getResourceAsStream(filename);
 			if (in != null) {
-				log.trace("resource {} found", filename);
+				log.trace("resource {} found as resource", filename);
 			}
 			return in;
 		} else {

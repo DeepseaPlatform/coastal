@@ -63,7 +63,7 @@ project.compileJava.dependsOn(createVersionFile)
 // ecj.toolVersion = '3.18.0'
 
 //------------------------------------------------------------------------------
-// Include the test classes and property files.
+// Put the ".properties" files in the same directory as the ".class" files.
 //------------------------------------------------------------------------------
 
 sourceSets {
@@ -96,7 +96,7 @@ javadoc {
 // Fine-tuning for installation scripts.
 //------------------------------------------------------------------------------
 
-applicationDefaultJvmArgs = [ '-Xint -ea' ]
+applicationDefaultJvmArgs = [ '-ea' ]
 
 startScripts {
 	doLast {
