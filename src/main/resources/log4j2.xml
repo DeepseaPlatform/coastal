@@ -8,9 +8,9 @@
 		<Console name="VCONSOLE" target="SYSTEM_OUT" direct="true">
       		<PatternLayout pattern="{%T} %d{HH:mm:ss.SSS} %msg%n"/>
   		</Console>
-		<File name="FILE" fileName="/tmp/coastal.log" append="false">
+		<RandomAccessFile name="FILE" fileName="/tmp/coastal.log" immediateFlush="false" append="false">
       		<PatternLayout pattern="{%T} %d{HH:mm:ss.SSS} %msg%n"/>
-		</File>
+		</RandomAccessFile>
 	</Appenders>
 	<Loggers>
 		<Logger name="GREEN" level="ALL" additivity="false"/>

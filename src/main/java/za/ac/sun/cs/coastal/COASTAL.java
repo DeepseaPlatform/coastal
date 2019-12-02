@@ -60,6 +60,10 @@ import za.ac.sun.cs.coastal.symbolic.Input;
  */
 public class COASTAL {
 
+	static {
+		System.setProperty("Log4jContextSelector", "org.apache.logging.log4j.core.async.AsyncLoggerContextSelector");
+	}
+
 	/**
 	 * The logger for this analysis run. This is not created but set by the outside
 	 * world.
@@ -104,7 +108,8 @@ public class COASTAL {
 	/**
 	 * Whether or not ALL classes should be instrumented.
 	 * 
-	 * At the moment, this is not an option because java.* classes cannot be instrumented in the way that the instrumentation is implemented.
+	 * At the moment, this is not an option because java.* classes cannot be
+	 * instrumented in the way that the instrumentation is implemented.
 	 */
 	private boolean instrumentEverything = false;
 
@@ -112,12 +117,12 @@ public class COASTAL {
 	 * Whether or not ALL classes with no package should be instrumented.
 	 */
 	private boolean instrumentPackageless = false;
-	
+
 	/**
 	 * A list of all prefixes of classes that will be instrumented.
 	 */
 	private final List<String> prefixesToInstrument = new ArrayList<>();
-	
+
 	/**
 	 * A list of all full class names that will be instrumented.
 	 */
@@ -175,7 +180,8 @@ public class COASTAL {
 	 */
 	private final Map<String, Object> maxBounds = new HashMap<>();
 
-	public static final class NewInt { }
+	public static final class NewInt {
+	}
 
 	// ======================================================================
 	//
@@ -2444,7 +2450,7 @@ public class COASTAL {
 	private static void displayVersion() {
 		System.out.println();
 		System.out.println("COASTAL version " + VERSION);
-	
+
 		System.out.println();
 		String osArch = System.getProperty("os.arch");
 		String osName = System.getProperty("os.name");
