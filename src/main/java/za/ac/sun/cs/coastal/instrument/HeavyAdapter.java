@@ -20,12 +20,6 @@ public class HeavyAdapter extends ClassVisitor {
 
 	private final String name;
 
-//	private final String nameWithSlashes;
-//	
-//	private final String trueName;
-//
-//	private final boolean renamingOn;
-	
 	private final StringWriter swriter = new StringWriter();
 
 	private final PrintWriter pwriter = new PrintWriter(swriter);
@@ -34,27 +28,7 @@ public class HeavyAdapter extends ClassVisitor {
 		super(Opcodes.ASM7, cv);
 		this.coastal = coastal;
 		this.name = name;
-//		this.nameWithSlashes = name.replace('.', '/');
-//		this.trueName = trueName.replace('.', '/');
-//		this.renamingOn = !name.equals(trueName);
 	}
-
-//	@Override
-//	public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-//		coastal.getLog().trace("###### Outer class: {}, {}, {}", name, superName, String.join(":", interfaces));
-//		cv.visit(version, access, nameWithSlashes, signature, superName, interfaces);
-//	}
-//
-//	@Override
-//	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-//		coastal.getLog().trace("###### Inner class: {}, {}, {}", name, outerName, innerName);
-//		if (renamingOn && outerName.equals(trueName)) {
-//			cv.visitInnerClass(nameWithSlashes + "$" + innerName, nameWithSlashes, innerName, access);			
-//			coastal.getLog().trace("###### Inner class: -> {}", nameWithSlashes + "$" + innerName);
-//		} else {
-//			cv.visitInnerClass(name, outerName, innerName, access);
-//		}
-//	}
 
 	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {

@@ -14,12 +14,12 @@ public class HeavyClassLoader extends ClassLoader {
 
 	private static final String VM_NAME = "za.ac.sun.cs.coastal.symbolic.VM";
 
-	private static final String SYMBOLIC_STATE_NAME = "za.ac.sun.cs.coastal.symbolic.SymbolicState";
+	private static final String COASTAL_EXCEPTION_PREFIX = "za.ac.sun.cs.coastal.symbolic.exceptions.";
 
 	private static final String STATE_NAME = "za.ac.sun.cs.coastal.symbolic.State";
 
-	private static final String COASTAL_EXCEPTION_PREFIX = "za.ac.sun.cs.coastal.symbolic.exceptions.";
-	
+	private static final String SYMBOLIC_STATE_NAME = "za.ac.sun.cs.coastal.symbolic.SymbolicState";
+
 	private final COASTAL coastal;
 
 	private final Logger log;
@@ -44,7 +44,8 @@ public class HeavyClassLoader extends ClassLoader {
 	}
 
 	public synchronized Class<?> loadClass0(String name, boolean resolve) throws ClassNotFoundException {
-		// log.trace("> ((symbolicState #{}))", Integer.toHexString(symbolicState.get().hashCode()));
+		// log.trace("> ((symbolicState #{}))",
+		// Integer.toHexString(symbolicState.get().hashCode()));
 		Class<?> clas = findLoadedClass(name);
 		if (clas != null) {
 			log.trace("> loading class {}, found in cache", name);
@@ -82,7 +83,7 @@ public class HeavyClassLoader extends ClassLoader {
 				log.trace("> loading class {}, uninstrumented (1)", name);
 				clas = defineClass(name, raw, 0, raw.length);
 			} else if (name.equals(VM_NAME)) {
-                new Banner('@').println("WARNING: VM.class will be shared").trace(log);
+				new Banner('@').println("WARNING: VM.class will be shared").trace(log);
 			}
 		}
 		if (clas == null) {

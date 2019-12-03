@@ -79,6 +79,11 @@ public class DiverFactory implements TaskFactory {
 		 */
 		private final AtomicLong diverWaitCount = new AtomicLong(0);
 
+		/**
+		 * The number of aborted dives.
+		 */
+		private final AtomicLong abortCount = new AtomicLong(0);
+
 		DiverManager(COASTAL coastal) {
 			broker = coastal.getBroker();
 			broker.subscribe("coastal-stop", this::report);
@@ -109,7 +114,7 @@ public class DiverFactory implements TaskFactory {
 		 * @param time
 		 *             the time for this dive
 		 */
-		public void recordTime(long time) {
+		public void recordDiverTime(long time) {
 			diverTime.addAndGet(time);
 		}
 
@@ -125,10 +130,20 @@ public class DiverFactory implements TaskFactory {
 			diverWaitCount.incrementAndGet();
 		}
 
+		/**
+		 * Increment and return the abort counter.
+		 * 
+		 * @return the incremented value of the abort counter
+		 */
+		public long incrementAbortCount() {
+			return abortCount.incrementAndGet();
+		}
+
 		public void report(Object object) {
 			double dwt = diverWaitTime.get() / diverWaitCount.doubleValue();
 			broker.publish("report", new Tuple("Divers.tasks", getDiverTaskCount()));
 			broker.publish("report", new FreqTuple("Divers.count", getDiveCount()));
+			broker.publish("report", new Tuple("Divers.aborted", abortCount.get()));
 			broker.publish("report", new TimeTuple("Divers.time", diverTime.get()));
 			broker.publish("report", new TimeTuple("Divers.wait-time", dwt));
 		}
@@ -218,7 +233,7 @@ public class DiverFactory implements TaskFactory {
 					}
 					classLoader = coastal.getClassManager().createHeavyClassLoader(symbolicState);
 					performRun(symbolicState, classLoader);
-					manager.recordTime(System.currentTimeMillis() - t1);
+					manager.recordDiverTime(System.currentTimeMillis() - t1);
 					coastal.addPc(symbolicState.getExecution());
 					broker.publishThread("dive-end", this);
 					if (!symbolicState.mayContinue()) {
@@ -255,6 +270,7 @@ public class DiverFactory implements TaskFactory {
 				Throwable t = x.getCause();
 				if (t instanceof AbortedRunException) {
 					log.trace("exception: aborted run");
+					manager.incrementAbortCount();
 				} else if (t instanceof CompletedRunException) {
 					log.trace("exception: completed run");
 				} else if (t instanceof LimitConjunctException) {
@@ -283,6 +299,7 @@ public class DiverFactory implements TaskFactory {
 						symbolicState.startCatch(-1);
 					} catch (AbortedRunException e) {
 						log.trace("exception: aborted run");
+						manager.incrementAbortCount();
 					} catch (CompletedRunException e) {
 						log.trace("exception: completed run");
 					} catch (LimitConjunctException e) {

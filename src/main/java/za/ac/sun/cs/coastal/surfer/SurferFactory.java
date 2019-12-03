@@ -2,12 +2,14 @@ package za.ac.sun.cs.coastal.surfer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
+import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.TaskFactory;
 import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.messages.Broker;
@@ -20,20 +22,21 @@ import za.ac.sun.cs.coastal.symbolic.Execution;
 import za.ac.sun.cs.coastal.symbolic.Input;
 import za.ac.sun.cs.coastal.symbolic.exceptions.AbortedRunException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.LimitConjunctException;
-import za.ac.sun.cs.coastal.symbolic.exceptions.COASTALException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.CompletedRunException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.ErrorException;
 import za.ac.sun.cs.coastal.symbolic.exceptions.SystemExitException;
+import za.ac.sun.cs.coastal.symbolic.exceptions.UnsupportedOperationException;
 
 public class SurferFactory implements TaskFactory {
 
 	/**
-	 * Prefix added to log messages.
-	 */
-	private static final String LOG_PREFIX = "...";
-
-	/**
 	 * The number of surfer tasks started (ever).
 	 */
-	private int surferTaskCount = 0;
+	private AtomicInteger surferTaskCount = new AtomicInteger(0);
+
+	private int getSurferTaskCount() {
+		return surferTaskCount.get();
+	}
 
 	@Override
 	public SurferManager createManager(COASTAL coastal) {
@@ -42,8 +45,7 @@ public class SurferFactory implements TaskFactory {
 
 	@Override
 	public Surfer[] createTask(COASTAL coastal, TaskManager manager) {
-		surferTaskCount++;
-		return new Surfer[] { new Surfer(coastal, (SurferManager) manager) };
+		return new Surfer[] { new Surfer(coastal, (SurferManager) manager, surferTaskCount.getAndIncrement()) };
 	}
 
 	// ======================================================================
@@ -79,7 +81,7 @@ public class SurferFactory implements TaskFactory {
 		private final AtomicLong surferWaitCount = new AtomicLong(0);
 
 		/**
-		 * The number of aborted surfs. 
+		 * The number of aborted surfs.
 		 */
 		private final AtomicLong abortCount = new AtomicLong(0);
 
@@ -107,22 +109,22 @@ public class SurferFactory implements TaskFactory {
 		}
 
 		/**
-		 * Add a reported surf time to the accumulator that tracks how long the
-		 * surfs took.
+		 * Add a reported surf time to the accumulator that tracks how long the surfs
+		 * took.
 		 * 
 		 * @param time
-		 *            the time for this surf
+		 *             the time for this surf
 		 */
 		public void recordSurferTime(long time) {
 			surferTime.addAndGet(time);
 		}
 
 		/**
-		 * Add a reported surf wait time. This is used to determine if it makes
-		 * sense to create additional threads (or destroy them).
+		 * Add a reported surf wait time. This is used to determine if it makes sense to
+		 * create additional threads (or destroy them).
 		 * 
 		 * @param time
-		 *            the wait time for this surf
+		 *             the wait time for this surf
 		 */
 		public void recordWaitTime(long time) {
 			surferWaitTime.addAndGet(time);
@@ -161,9 +163,10 @@ public class SurferFactory implements TaskFactory {
 		public Object[] getPropertyValues() {
 			Object[] propertyValues = new Object[4];
 			double swt = surferWaitTime.get() / surferWaitCount.doubleValue();
+			int stc = getSurferTaskCount();
 			long c = getSurfCount();
 			long t = surferTime.get();
-			propertyValues[0] = surferTaskCount;
+			propertyValues[0] = stc;
 			propertyValues[1] = String.format("%d (%.1f/sec)", c, c / (0.001 * t));
 			propertyValues[2] = swt;
 			propertyValues[3] = t;
@@ -180,27 +183,33 @@ public class SurferFactory implements TaskFactory {
 
 	public class Surfer implements Task {
 
-		private final COASTAL coastal;
+		protected final COASTAL coastal;
 
-		private final Logger log;
+		protected final Logger log;
 
-		private final Broker broker;
+		protected final Configuration configuration;
 
-		private final SurferManager manager;
+		protected final Broker broker;
 
-		private final boolean safeMode;
+		protected final SurferManager manager;
 
-		public Surfer(COASTAL coastal, SurferManager manager) {
+		protected final int surferTaskId;
+
+		protected final boolean safeMode;
+
+		public Surfer(COASTAL coastal, SurferManager manager, int id) {
 			this.coastal = coastal;
 			log = coastal.getLog();
+			configuration = coastal.getConfig();
 			broker = coastal.getBroker();
 			this.manager = manager;
+			surferTaskId = id;
 			safeMode = !coastal.getConfig().getBoolean("coastal.settings.trace-all", false);
 		}
 
 		@Override
 		public void run() {
-			log.trace("{} surfer task starting", LOG_PREFIX);
+			log.trace("starting surfer task, surferTaskId={}", surferTaskId);
 			for (Tuple observer : coastal.getObserversPerTask()) {
 				ObserverFactory observerFactory = (ObserverFactory) observer.get(0);
 				ObserverManager observerManager = (ObserverManager) observer.get(1);
@@ -220,7 +229,8 @@ public class SurferFactory implements TaskFactory {
 					Input input = coastal.getNextSurferInput();
 					long t1 = System.currentTimeMillis();
 					manager.recordWaitTime(t1 - t0);
-					String banner = "starting surf " + manager.getNextSurfCount(); // + " @" + Banner.getElapsed(coastal)
+					String banner = "(" + surferTaskId + ") starting surf " + manager.getNextSurfCount() + " @"
+							+ Banner.getElapsed(coastal);
 					log.trace(Banner.getBannerLine(banner, '-'));
 					if (input == null) {
 						log.trace(Banner.getBannerLine("NO CONCRETE VALUES", '*'));
@@ -234,35 +244,53 @@ public class SurferFactory implements TaskFactory {
 						traceState.reset(input);
 						try {
 							meth.invoke(null, coastal.getMainArguments());
-						} catch (SecurityException | IllegalAccessException | IllegalArgumentException x) {
+						} catch (SecurityException | IllegalAccessException | IllegalArgumentException
+								| TypeNotPresentException x) {
+							log.trace("class loading or execution exception");
+							log.trace("exception details: ", x);
 							x.printStackTrace(coastal.getSystemErr());
+							System.exit(1);
 						} catch (InvocationTargetException x) {
 							Throwable t = x.getCause();
-							log.trace("{} InvocationTargetException, t.class={}", LOG_PREFIX, t.getClass().getName());
-//							if ((t != null) && t.getClass().getName().equals("java.lang.NullPointerException")) {
-//								x.printStackTrace(coastal.getSystemErr());
-//								System.out.println("Hello world!");
-//							}
-							if ((t == null) || !(t instanceof COASTALException)) {
-								// x.printStackTrace();
-								try {
-									traceState.startCatch(-1);
-								} catch (LimitConjunctException e) {
-									// ignore, since run is over in any case
-								} catch (COASTALException e) {
-									// should we do something here?
-								}
-							} else if (t instanceof AbortedRunException) {
+							if (t instanceof AbortedRunException) {
 								aborted = true;
-							} else if (!(t instanceof COASTALException)) {
-								log.info("P R O G R A M   E X C E P T I O N:", t);
+								log.trace("exception: aborted run");
+							} else if (t instanceof CompletedRunException) {
+								log.trace("exception: completed run");
+							} else if (t instanceof LimitConjunctException) {
+								log.trace("exception: conjunct limit reached");
+							} else if (t instanceof SystemExitException) {
+								log.trace("exception: System.exit() invoked");
+								broker.publish("system-exit", new Tuple(this, null));
+							} else if (t instanceof UnsupportedOperationException) {
+								log.trace("exception: unsupported operation: {}", t.getMessage());
+								log.info("UNSUPPORTED OPERATION: {}", t.getMessage());
+								System.exit(1);
+							} else if (t instanceof ErrorException) {
+								log.fatal("*** I N T E R N A L   E R R O R ***", t.getCause());
+								System.exit(1);
+							} else {
+								log.trace("exception in run, surferTaskCount={}", surferTaskCount);
+								log.trace("exception details: ", t);
 								if (t instanceof AssertionError) {
 									broker.publish("assert-failed", new Tuple(this, null));
 								}
 								try {
-								traceState.startCatch(-1);
-								} catch (COASTALException e) {
-									// ignore, since run is over in any case
+									traceState.startCatch(-1);
+								} catch (AbortedRunException e) {
+									log.trace("exception: aborted run");
+								} catch (CompletedRunException e) {
+									log.trace("exception: completed run");
+								} catch (LimitConjunctException e) {
+									log.trace("exception: conjunct limit reached");
+								} catch (SystemExitException e) {
+									log.trace("exception: System.exit() invoked");
+								} catch (UnsupportedOperationException e) {
+									log.trace("exception: unsupported operation: {}", e.getMessage());
+									log.info("UNSUPPORTED OPERATION: {}", t.getMessage());
+									System.exit(1);
+								} catch (Exception e) {
+									log.trace("exception (cause unknown): ", e);
 								}
 							}
 						}
@@ -274,38 +302,53 @@ public class SurferFactory implements TaskFactory {
 							meth = clas.getMethod(trigger.getMethodName(), trigger.getParamTypes());
 							meth.setAccessible(true);
 							meth.invoke(null, coastal.getMainArguments());
-						} catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException
-								| IllegalArgumentException x) {
+						} catch (ClassNotFoundException | NoSuchMethodException | SecurityException
+								| IllegalAccessException | IllegalArgumentException | TypeNotPresentException x) {
+							log.trace("class loading or execution exception");
+							log.trace("exception details: ", x);
 							x.printStackTrace(coastal.getSystemErr());
+							System.exit(1);
 						} catch (InvocationTargetException x) {
 							Throwable t = x.getCause();
-							log.trace("{} InvocationTargetException, t.class={}", LOG_PREFIX, t.getClass().getName());
-//							if ((t != null) && t.getClass().getName().equals("java.lang.NullPointerException")) {
-//								x.printStackTrace(coastal.getSystemErr());
-//								System.out.println("Hello world!");
-//							}
-							if ((t == null) || !(t instanceof COASTALException)) {
-								// x.printStackTrace();
-								try {
-									traceState.startCatch(-1);
-								} catch (LimitConjunctException e) {
-									// ignore, since run is over in any case
-								} catch (COASTALException e) {
-									// should we do something here?
-								}
-							} else if (t instanceof SystemExitException) {
-								broker.publish("system-exit", new Tuple(this, null));
-							} else if (t instanceof AbortedRunException) {
+							if (t instanceof AbortedRunException) {
 								aborted = true;
-							} else if (!(t instanceof COASTALException)) {
-								log.info("P R O G R A M   E X C E P T I O N:", t);
+								log.trace("exception: aborted run");
+							} else if (t instanceof CompletedRunException) {
+								log.trace("exception: completed run");
+							} else if (t instanceof LimitConjunctException) {
+								log.trace("exception: conjunct limit reached");
+							} else if (t instanceof SystemExitException) {
+								log.trace("exception: System.exit() invoked");
+								broker.publish("system-exit", new Tuple(this, null));
+							} else if (t instanceof UnsupportedOperationException) {
+								log.trace("exception: unsupported operation: {}", t.getMessage());
+								log.info("UNSUPPORTED OPERATION: {}", t.getMessage());
+								System.exit(1);
+							} else if (t instanceof ErrorException) {
+								log.fatal("*** I N T E R N A L   E R R O R ***", t.getCause());
+								System.exit(1);
+							} else {
+								log.trace("exception in run, surferTaskCount={}", surferTaskCount);
+								log.trace("exception details: ", t);
 								if (t instanceof AssertionError) {
 									broker.publish("assert-failed", new Tuple(this, null));
 								}
 								try {
 									traceState.startCatch(-1);
-								} catch (COASTALException e) {
-									// ignore, since run is over in any case
+								} catch (AbortedRunException e) {
+									log.trace("exception: aborted run");
+								} catch (CompletedRunException e) {
+									log.trace("exception: completed run");
+								} catch (LimitConjunctException e) {
+									log.trace("exception: conjunct limit reached");
+								} catch (SystemExitException e) {
+									log.trace("exception: System.exit() invoked");
+								} catch (UnsupportedOperationException e) {
+									log.trace("exception: unsupported operation: {}", e.getMessage());
+									log.info("UNSUPPORTED OPERATION: {}", t.getMessage());
+									System.exit(1);
+								} catch (Exception e) {
+									log.trace("exception (cause unknown): ", e);
 								}
 							}
 						}
@@ -313,7 +356,6 @@ public class SurferFactory implements TaskFactory {
 					// ------- END MANUAL INLINE
 					manager.recordSurferTime(System.currentTimeMillis() - t1);
 					if (aborted) {
-						log.trace("{} execution aborted, fully explored", LOG_PREFIX);
 						manager.incrementAbortCount();
 					} else {
 						Execution execution = traceState.getExecution();
@@ -326,13 +368,10 @@ public class SurferFactory implements TaskFactory {
 					}
 				}
 			} catch (InterruptedException e) {
-				// broker.publishThread("surfer-task-end", this);
-				// log.trace("{} surfer task canceled", LOG_PREFIX);
-				// throw e;
+				// ignore
 			}
 			broker.publishThread("surfer-task-end", this);
-			log.trace("{} surfer task canceled", LOG_PREFIX);
-			// return null;
+			log.trace("end of run, surferTaskCount={}", surferTaskCount);
 		}
 
 	}

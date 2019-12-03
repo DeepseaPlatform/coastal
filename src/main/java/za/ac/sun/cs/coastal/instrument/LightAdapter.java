@@ -17,7 +17,7 @@ import za.ac.sun.cs.coastal.COASTAL;
 public class LightAdapter extends ClassVisitor {
 
 	private final COASTAL coastal;
-	
+
 	private final String name;
 
 	private final StringWriter swriter = new StringWriter();
@@ -38,6 +38,7 @@ public class LightAdapter extends ClassVisitor {
 		MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
 		if (mv != null) {
 			Printer p = new Textifier(Opcodes.ASM6) {
+
 				@Override
 				public void visitCode() {
 					pwriter.println("------ " + name + " ------");
