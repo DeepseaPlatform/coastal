@@ -11,6 +11,8 @@ import org.apache.logging.log4j.Logger;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.FreqTuple;
+import za.ac.sun.cs.coastal.messages.TimeTuple;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.solver.Expression;
 import za.ac.sun.cs.coastal.surfer.Trace;
@@ -153,11 +155,11 @@ public class PathTree implements Comparator<PathTreeNode> {
 	 *               dummy
 	 */
 	public void report(Object object) {
-		broker.publish("report", new Tuple("PathTree.inserted-count", getInsertedCount()));
+		broker.publish("report", new FreqTuple("PathTree.inserted-count", getInsertedCount()));
 		broker.publish("report", new Tuple("PathTree.revisit-count", getRevisitCount()));
 		broker.publish("report", new Tuple("PathTree.infeasible-count", getInfeasibleCount()));
 		broker.publish("report", new Tuple("PathTree.unique-count", getUniqueCount()));
-		broker.publish("report", new Tuple("PathTree.insert-time", insertTime.get()));
+		broker.publish("report", new TimeTuple("PathTree.insert-time", insertTime.get()));
 	}
 
 	// ======================================================================

@@ -11,6 +11,8 @@ import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.TaskFactory;
 import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.FreqTuple;
+import za.ac.sun.cs.coastal.messages.TimeTuple;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
@@ -139,10 +141,10 @@ public class SurferFactory implements TaskFactory {
 		public void report(Object object) {
 			double swt = surferWaitTime.get() / surferWaitCount.doubleValue();
 			broker.publish("report", new Tuple("Surfers.tasks", surferTaskCount));
-			broker.publish("report", new Tuple("Surfers.count", getSurfCount()));
+			broker.publish("report", new FreqTuple("Surfers.count", getSurfCount()));
 			broker.publish("report", new Tuple("Surfers.aborted", abortCount.get()));
-			broker.publish("report", new Tuple("Surfers.total-time", surferTime.get()));
-			broker.publish("report", new Tuple("Surfers.wait-time", swt));
+			broker.publish("report", new TimeTuple("Surfers.total-time", surferTime.get()));
+			broker.publish("report", new TimeTuple("Surfers.wait-time", swt));
 		}
 
 		@Override

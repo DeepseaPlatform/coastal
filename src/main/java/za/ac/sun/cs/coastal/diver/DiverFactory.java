@@ -13,6 +13,8 @@ import za.ac.sun.cs.coastal.Configuration;
 import za.ac.sun.cs.coastal.TaskFactory;
 import za.ac.sun.cs.coastal.Trigger;
 import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.FreqTuple;
+import za.ac.sun.cs.coastal.messages.TimeTuple;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
@@ -126,9 +128,9 @@ public class DiverFactory implements TaskFactory {
 		public void report(Object object) {
 			double dwt = diverWaitTime.get() / diverWaitCount.doubleValue();
 			broker.publish("report", new Tuple("Divers.tasks", getDiverTaskCount()));
-			broker.publish("report", new Tuple("Divers.count", getDiveCount()));
-			broker.publish("report", new Tuple("Divers.time", diverTime.get()));
-			broker.publish("report", new Tuple("Divers.wait-time", dwt));
+			broker.publish("report", new FreqTuple("Divers.count", getDiveCount()));
+			broker.publish("report", new TimeTuple("Divers.time", diverTime.get()));
+			broker.publish("report", new TimeTuple("Divers.wait-time", dwt));
 		}
 
 		@Override

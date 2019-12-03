@@ -32,6 +32,8 @@ import za.ac.sun.cs.coastal.Banner;
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.FreqTuple;
+import za.ac.sun.cs.coastal.messages.TimeTuple;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.surfer.TraceState;
 
@@ -45,6 +47,8 @@ public class InstrumentationClassManager {
 
 	private final boolean showInstrumentation;
 
+	// private final boolean showClassList;
+	
 	private final String writeClassfile;
 
 	private final List<String> classPaths = new ArrayList<>();
@@ -81,6 +85,7 @@ public class InstrumentationClassManager {
 		broker = coastal.getBroker();
 		broker.subscribe("coastal-stop", this::report);
 		showInstrumentation = coastal.getConfig().getBoolean("coastal.settings.show-instrumentation", false);
+		// showClassList = coastal.getConfig().getBoolean("coastal.settings.show-classlist", false);
 		// Check the directory
 		String wcf = coastal.getConfig().getString("coastal.settings.write-classfile", null);
 		if (wcf != null) {
@@ -454,14 +459,14 @@ public class InstrumentationClassManager {
 	}
 
 	public void report(Object object) {
-		broker.publish("report", new Tuple("Instrumentation.requests-count", requestCount.get()));
-		broker.publish("report", new Tuple("Instrumentation.cache-hit-count", cacheHitCount.get()));
-		broker.publish("report", new Tuple("Instrumentation.instrumented-count", instrumentedCount.get()));
+		broker.publish("report", new FreqTuple("Instrumentation.requests-count", requestCount.get()));
+		broker.publish("report", new FreqTuple("Instrumentation.cache-hit-count", cacheHitCount.get()));
+		broker.publish("report", new FreqTuple("Instrumentation.instrumented-count", instrumentedCount.get()));
 		broker.publish("report", new Tuple("Instrumentation.pre-instrumented-size", preInstrumentedSize.get()));
 		broker.publish("report", new Tuple("Instrumentation.post-instrumented-size", postInstrumentedSize.get()));
-		broker.publish("report", new Tuple("Instrumentation.load-time", loadTime.get()));
-		broker.publish("report", new Tuple("Instrumentation.instrumented-time", instrumentedTime.get()));
-		broker.publish("report", new Tuple("Instrumentation.uninstrumented-time", uninstrumentedTime.get()));
+		broker.publish("report", new TimeTuple("Instrumentation.load-time", loadTime.get()));
+		broker.publish("report", new TimeTuple("Instrumentation.instrumented-time", instrumentedTime.get()));
+		broker.publish("report", new TimeTuple("Instrumentation.uninstrumented-time", uninstrumentedTime.get()));
 	}
 
 	public synchronized int addLookupKeys(int id, int[] keys) {

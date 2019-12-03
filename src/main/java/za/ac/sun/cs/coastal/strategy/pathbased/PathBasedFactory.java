@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import za.ac.sun.cs.coastal.COASTAL;
 import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.TimeTuple;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.pathtree.PathTree;
 import za.ac.sun.cs.coastal.pathtree.PathTreeNode;
@@ -134,10 +135,10 @@ public abstract class PathBasedFactory implements StrategyFactory {
 			String name = getName();
 			double swt = strategyWaitTime.get() / strategyWaitCount.doubleValue();
 			broker.publish("report", new Tuple(name + ".tasks", getTaskCount()));
-			broker.publish("report", new Tuple(name + ".solver-time", solverTime.get()));
-			broker.publish("report", new Tuple(name + ".extraction-time", extractionTime.get()));
-			broker.publish("report", new Tuple(name + ".wait-time", swt));
-			broker.publish("report", new Tuple(name + ".total-time", strategyTime.get()));
+			broker.publish("report", new TimeTuple(name + ".solver-time", solverTime.get()));
+			broker.publish("report", new TimeTuple(name + ".extraction-time", extractionTime.get()));
+			broker.publish("report", new TimeTuple(name + ".wait-time", swt));
+			broker.publish("report", new TimeTuple(name + ".total-time", strategyTime.get()));
 			Solver.report();
 		}
 

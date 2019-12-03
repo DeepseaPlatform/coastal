@@ -18,6 +18,8 @@ import java.util.Map;
 
 import org.apache.logging.log4j.Logger;
 
+import za.ac.sun.cs.coastal.messages.FreqTuple;
+import za.ac.sun.cs.coastal.messages.TimeTuple;
 import za.ac.sun.cs.coastal.messages.Tuple;
 
 /**
@@ -85,6 +87,14 @@ public class Reporter {
 	 *               dummy message parameter
 	 */
 	private void report(Object object) {
+		double totalTime = -1;
+		for (Tuple stat : stats) {
+			String key = (String) stat.get(0);
+			if ("COASTAL.time".equals(key)) {
+				totalTime = (Long) stat.get(1) / 1000.0;
+				break;
+			}
+		}
 		stats.sort((a, b) -> ((String) a.get(0)).compareTo((String) b.get(0)));
 		String curPrefix = "";
 		for (Tuple stat : stats) {
@@ -101,6 +111,28 @@ public class Reporter {
 			Object value = stat.get(1);
 			if (value instanceof Calendar) {
 				log.info("  {}: {}", suffix, DATE_FORMAT.format(((Calendar) value).getTime()));
+			} else if (stat instanceof TimeTuple) {
+				if (value instanceof Long) {
+					value = String.format("%.3f", 1.0 * (long) value);
+				} else if (value instanceof Integer) {
+					value = String.format("%.3f", 1.0 * (int) value);
+				} else if (value instanceof Double) {
+					value = String.format("%.3f", (double) value);
+				} else if (value instanceof String) {
+					value = String.format("%.3f", Double.parseDouble((String) value));
+				}
+				log.info("  {}: {} ms", suffix, value);
+			} else if ((stat instanceof FreqTuple) && (totalTime > 0)) {
+				if (value instanceof Long) {
+					value = String.format("%s (%.3f/s)", value, (long) value / totalTime);
+				} else if (value instanceof Integer) {
+					value = String.format("%s (%.3f/s)", value, (int) value / totalTime);
+				} else if (value instanceof Double) {
+					value = String.format("%s (%.3f/s)", value, (double) value / totalTime);
+				} else if (value instanceof String) {
+					value = String.format("%s (%.3f/s)", value, Double.parseDouble((String) value) / totalTime);
+				}
+				log.info("  {}: {}", suffix, value);
 			} else {
 				log.info("  {}: {}", suffix, value);
 			}

@@ -1,10 +1,11 @@
 package za.ac.sun.cs.coastal.messages;
 
 /**
- * Convenience class for pairs of objects. As it happens, the primary use is to
- * publish statistic about a run of COASTAL. In this case, the field names "key"
- * and "value" are appropriate. However, the class can also be used where the
- * objects in the pair have a different relationship.
+ * Convenience class for collections of two (or more) objects. As it happens,
+ * the primary use is to publish statistic about a run of COASTAL. In this case,
+ * the field names "key" and "value" are appropriate. However, the class can
+ * also be used where the objects in the collection have a different
+ * relationship.
  */
 public class Tuple {
 

@@ -44,6 +44,8 @@ import za.ac.sun.cs.coastal.diver.DiverFactory.DiverManager;
 import za.ac.sun.cs.coastal.diver.SymbolicState;
 import za.ac.sun.cs.coastal.instrument.InstrumentationClassManager;
 import za.ac.sun.cs.coastal.messages.Broker;
+import za.ac.sun.cs.coastal.messages.FreqTuple;
+import za.ac.sun.cs.coastal.messages.TimeTuple;
 import za.ac.sun.cs.coastal.messages.Tuple;
 import za.ac.sun.cs.coastal.observers.ObserverFactory;
 import za.ac.sun.cs.coastal.observers.ObserverFactory.ObserverManager;
@@ -2323,12 +2325,12 @@ public class COASTAL {
 	 *               dummy object
 	 */
 	private void report(Object object) {
-		getBroker().publish("report", new Tuple("COASTAL.diver-models", visitedDiverInputs.size()));
-		getBroker().publish("report", new Tuple("COASTAL.surfer-models", visitedSurferInputs.size()));
+		getBroker().publish("report", new FreqTuple("COASTAL.diver-models", visitedDiverInputs.size()));
+		getBroker().publish("report", new FreqTuple("COASTAL.surfer-models", visitedSurferInputs.size()));
 		getBroker().publish("report", new Tuple("COASTAL.start", startingTime));
 		getBroker().publish("report", new Tuple("COASTAL.stop", stoppingTime));
 		long duration = stoppingTime.getTimeInMillis() - startingTime.getTimeInMillis();
-		getBroker().publish("report", new Tuple("COASTAL.time", duration));
+		getBroker().publish("report", new TimeTuple("COASTAL.time", duration));
 	}
 
 	// ======================================================================
