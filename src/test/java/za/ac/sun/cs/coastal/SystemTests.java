@@ -45,17 +45,6 @@ public class SystemTests {
 		assertEquals(infeasible, reporter.getLong("PathTree.infeasible-count"));
 	}
 
-	protected void checkInstrumentation(Reporter reporter, int requests, int cache, int instrumented) {
-//		assertEquals(requests, reporter.getLong("Instrumentation.requests-count"));
-//		assertEquals(cache, reporter.getLong("Instrumentation.cache-hit-count"));
-//		assertEquals(instrumented, reporter.getLong("Instrumentation.instrumented-count"));
-	}
-
-	protected void checkInstrumentation(Reporter reporter, int cache, int instrumented) {
-//		assertEquals(cache, reporter.getLong("Instrumentation.cache-hit-count"));
-//		assertEquals(instrumented, reporter.getLong("Instrumentation.instrumented-count"));
-	}
-
 	protected void checkMarkerCoverage(Reporter reporter, int count, int... markers) {
 		for (int marker : markers) {
 			assertEquals(count, reporter.getLong("MarkerCoverage.marker[" + marker + "]"));

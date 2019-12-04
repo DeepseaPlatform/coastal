@@ -24,7 +24,6 @@ public class SystemTestsRandomTesting extends SystemTests {
 		checkSurfers(reporter, 1, 101);
 		checkRandomTestingStrategy(reporter, 1);
 		checkPathTree(reporter, 100, 98, 0);
-		checkInstrumentation(reporter, 505, 200, 1);
 		checkMarkerCoverage(reporter, 53, 1);
 		checkMarkerCoverage(reporter, 48, 2);
 		checkMarkerCoverage(reporter, 0, 3);
@@ -45,7 +44,6 @@ public class SystemTestsRandomTesting extends SystemTests {
 		checkSurfers(reporter, 1, 73);
 		checkRandomTestingStrategy(reporter, 1);
 		checkPathTree(reporter, 73, 69, 0);
-		checkInstrumentation(reporter, 365, 144, 1);
 		checkMarkerCoverage(reporter, 39, 1);
 		checkMarkerCoverage(reporter, 34, 2);
 		checkMarkerCoverage(reporter, 2, 3);
@@ -66,7 +64,6 @@ public class SystemTestsRandomTesting extends SystemTests {
 		checkSurfers(reporter, 1, 101);
 		checkRandomTestingStrategy(reporter, 1);
 		checkPathTree(reporter, 100, 97, 0);
-		checkInstrumentation(reporter, 505, 200, 1);
 		checkMarkerCoverage(reporter, 53, 1);
 		checkMarkerCoverage(reporter, 48, 2);
 		checkMarkerCoverage(reporter, 1, 3);
@@ -87,7 +84,6 @@ public class SystemTestsRandomTesting extends SystemTests {
 		checkSurfers(reporter, 1, 101);
 		checkRandomTestingStrategy(reporter, 1);
 		checkPathTree(reporter, 100, 98, 0);
-		checkInstrumentation(reporter, 505, 200, 1);
 		checkMarkerCoverage(reporter, 50, 1);
 		checkMarkerCoverage(reporter, 51, 2);
 		checkMarkerCoverage(reporter, 0, 3);
@@ -108,7 +104,6 @@ public class SystemTestsRandomTesting extends SystemTests {
 		checkSurfers(reporter, 1, 101);
 		checkRandomTestingStrategy(reporter, 1);
 		checkPathTree(reporter, 100, 97, 0);
-		checkInstrumentation(reporter, 505, 200, 1);
 		checkMarkerCoverage(reporter, 45, 1);
 		checkMarkerCoverage(reporter, 56, 2);
 		checkMarkerCoverage(reporter, 1, 3);
@@ -129,7 +124,6 @@ public class SystemTestsRandomTesting extends SystemTests {
 		checkSurfers(reporter, 1, 101);
 		checkRandomTestingStrategy(reporter, 1);
 		checkPathTree(reporter, 100, 98, 0);
-		checkInstrumentation(reporter, 505, 200, 1);
 		checkMarkerCoverage(reporter, 83, 1);
 		checkMarkerCoverage(reporter, 18, 2);
 		checkMarkerCoverage(reporter, 0, 3);

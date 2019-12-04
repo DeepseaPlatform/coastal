@@ -23,7 +23,6 @@ public class SystemTestsJars extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 4, 0, 0);
-		checkInstrumentation(reporter, 48, 15, 1);
 	}
 
 	@Test
@@ -38,7 +37,6 @@ public class SystemTestsJars extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 8, 0, 1);
-		checkInstrumentation(reporter, 84, 30, 1);
 	}
 
 	@Test
@@ -53,7 +51,6 @@ public class SystemTestsJars extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 4, 0, 0);
-		checkInstrumentation(reporter, 48, 15, 1);
 	}
 
 	@Test
@@ -68,7 +65,6 @@ public class SystemTestsJars extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 4, 0, 0);
-		checkInstrumentation(reporter, 48, 15, 1);
 	}
 	
 }

@@ -155,8 +155,13 @@ public class Reporter {
 			return 0;
 		} else if (value instanceof Integer) {
 			return (Integer) value;
-		} else {
+		} else if (value instanceof Long) {
 			return (Long) value;
+		} else if (value instanceof String) {
+			String str = ((String) value).split(" ")[0];
+			return Long.parseLong(str);
+		} else {
+			return 0;
 		}
 	}
 

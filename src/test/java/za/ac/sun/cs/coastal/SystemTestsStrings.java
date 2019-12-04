@@ -21,7 +21,6 @@ public class SystemTestsStrings extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 2, 0, 0);
-		checkInstrumentation(reporter, 20, 5, 1);
 		checkMarkerCoverage(reporter, 0, 0);
 		checkMarkerCoverage(reporter, 1, 1, 2);
 	}
@@ -39,7 +38,6 @@ public class SystemTestsStrings extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 2, 0, 0);
-		checkInstrumentation(reporter, 30, 10, 1);
 		checkMarkerCoverage(reporter, 1, 1, 2);
 		checkMarkerCoverage(reporter, 2, 0, 3);
 	}
@@ -57,7 +55,6 @@ public class SystemTestsStrings extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 30, 10, 1);
 		checkMarkerCoverage(reporter, 0, 0);
 		checkMarkerCoverage(reporter, 1, 1, 2, 3);
 	}
@@ -75,7 +72,6 @@ public class SystemTestsStrings extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 30, 10, 1);
 		checkMarkerCoverage(reporter, 0, 0);
 		checkMarkerCoverage(reporter, 1, 1, 2, 3);
 	}

@@ -21,7 +21,6 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 30, 10, 1);
 	}
 
 	@Ignore @Test
@@ -36,7 +35,6 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 9, 3, 0);
-		checkInstrumentation(reporter, 39, 10, 1);
 	}
 	
 	@Test
@@ -51,7 +49,6 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 30, 10, 1);
 	}
 	
 	@Test
@@ -66,7 +63,6 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 30, 10, 1);
 	}
 	
 	@Test
@@ -81,7 +77,6 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 30, 10, 1);
 	}
 	
 	@Test
@@ -96,22 +91,19 @@ public class SystemTestsArrays extends SystemTests {
 		checkSurfers(reporter, 0, 0);
 		checkDFStrategy(reporter, 1);
 		checkPathTree(reporter, 3, 0, 0);
-		checkInstrumentation(reporter, 30, 10, 1);
 	}
 	
 //	@Test
 //	public void testSorting01() {
 //		final Logger log = LogManager.getLogger("COASTAL-TEST");
-//		ImmutableConfiguration config = COASTAL.loadConfiguration(log, new String[] { "Test01.properties", "arrays/Sorting01.properties" });
+//		Configuration config = Configuration.load(log, new String[] { "Test01.properties", "arrays/Sorting01.properties" });
 //		assertNotNull(config);
 //		COASTAL coastal = new COASTAL(log, config);
 //		coastal.start(false);
 //		Reporter reporter = coastal.getReporter();
 //		checkDivers(reporter, 1, 11);
 //		checkSurfers(reporter, 0, 0);
-//		checkStrategy(reporter, 1);
 //		checkPathTree(reporter, 33, 0, 22);
-//		checkInstrumentation(reporter, 88, 20, 1);
 //	}
 //	
 //	@Test
