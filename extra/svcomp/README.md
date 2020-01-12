@@ -11,7 +11,7 @@ This directory contains additional files for COASTAL for the [SV-COMP 2020 compe
   - ``coastal-sv-comp`` is a shell script that compiles the source files, generates the correct properties file, runs COASTAL, and translates the output to the required format.  It is included by the zipping shell script and does not need to submitted separately.
 
 
-  - ``coastal.xml`` is a high-description of the tool entry in the competition.  It is submitted by forking [https://github.com/sosy-lab/sv-comp](https://github.com/sosy-lab/sv-comp), cloning, adding the file in the right place (``benchmark-defs/coastal.xml``), committing, and issuing a merge request.
+  - ``coastal.xml`` is a high-level description of the tool entry in the competition.  It is submitted by forking [https://github.com/sosy-lab/sv-comp](https://github.com/sosy-lab/sv-comp), cloning, adding the file in the right place (``benchmark-defs/coastal.xml``), committing, and issuing a merge request.
 
 
   - ``coastal.py`` is a Python-script that describes how to run our tool from within the framework of the competition.  It is submitted by forking [https://github.com/sosy-lab/benchexec](https://github.com/sosy-lab/benchexec), cloning, adding the file in the right place (``tools/coastal.py``), committing, and issuing a merge request.

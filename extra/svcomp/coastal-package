@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# First run "./gradlew clean build install" in the project root directory.
+#
 
 DESTINATION=/tmp/coastal.zip
 PROJECTDIR=../..
