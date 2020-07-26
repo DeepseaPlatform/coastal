@@ -65,6 +65,7 @@ public class SolverZ3 extends Solver {
 			String output = outReader.readLine();
 
 			if (output.equals("unsat")) {
+				outReader.close();
 				stdin.close();
 				stdout.close();
 				process.destroy();
@@ -74,6 +75,7 @@ public class SolverZ3 extends Solver {
 				bn.println("Z3 RETURNED A NULL:\n");
 				bn.println(output);
 				bn.display(log);
+				outReader.close();
 				stdin.close();
 				stdout.close();
 				process.destroy();
@@ -89,6 +91,7 @@ public class SolverZ3 extends Solver {
 			stdin.flush();
 			stdin.close();
 			output = outReader.lines().collect(Collectors.joining());
+			outReader.close();
 			stdout.close();
 			process.destroy();
 			log.trace("Z3 output: {}", output);
