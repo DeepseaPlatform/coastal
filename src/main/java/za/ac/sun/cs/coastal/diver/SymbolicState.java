@@ -1085,7 +1085,7 @@ public final class SymbolicState extends State {
 		if (concrete == null) {
 			currentValue = false;
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
-			input.put(name, new Long(currentValue ? 1 : 0));
+			input.put(name, Long.valueOf(currentValue ? 1 : 0));
 			return currentValue;
 		} else {
 			boolean newValue = concrete.getValue() != 0;
@@ -1106,7 +1106,7 @@ public final class SymbolicState extends State {
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 8);
 		if (concrete == null) {
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
-			input.put(name, new Long(currentValue));
+			input.put(name, Long.valueOf(currentValue));
 			return currentValue;
 		} else {
 			byte newValue = (byte) concrete.getValue();
@@ -1127,7 +1127,7 @@ public final class SymbolicState extends State {
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 16);
 		if (concrete == null) {
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
-			input.put(name, new Long(currentValue));
+			input.put(name, Long.valueOf(currentValue));
 			return currentValue;
 		} else {
 			short newValue = (short) concrete.getValue();
@@ -1147,7 +1147,7 @@ public final class SymbolicState extends State {
 		if (concrete == null) {
 			currentValue = ' ';
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
-			input.put(name, new Long(currentValue));
+			input.put(name, Long.valueOf(currentValue));
 			return currentValue;
 		} else {
 			char newValue = (char) concrete.getValue();
@@ -1171,7 +1171,7 @@ public final class SymbolicState extends State {
 		if (concrete == null) {
 			int newValue = ThreadLocalRandom.current().nextInt((int) min, (int) max);
 			log.trace("create symbolic var {}, default value of {}, replaced by {}", name, currentValue, newValue);
-			input.put(name, new Long(newValue));
+			input.put(name, Long.valueOf(newValue));
 			dumpFrames();
 			return newValue;
 		} else {
@@ -1194,7 +1194,7 @@ public final class SymbolicState extends State {
 		IntegerConstant concrete = concreteVal == null ? null : new IntegerConstant(concreteVal, 64);
 		if (concrete == null) {
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
-			input.put(name, new Long(currentValue));
+			input.put(name, Long.valueOf(currentValue));
 			return currentValue;
 		} else {
 			long newValue = (long) concrete.getValue();
@@ -1213,7 +1213,7 @@ public final class SymbolicState extends State {
 		RealConstant concrete = concreteVal == null ? null : new RealConstant(concreteVal, 32);
 		if (concrete == null) {
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
-			input.put(name, new Double(currentValue));
+			input.put(name, Double.valueOf(currentValue));
 			return currentValue;
 		} else {
 			float newValue = (float) concrete.getValue();
@@ -1232,7 +1232,7 @@ public final class SymbolicState extends State {
 		RealConstant concrete = concreteVal == null ? null : new RealConstant(concreteVal, 64);
 		if (concrete == null) {
 			log.trace("create symbolic var {}, default value of {}", name, currentValue);
-			input.put(name, new Double(currentValue));
+			input.put(name, Double.valueOf(currentValue));
 			return currentValue;
 		} else {
 			double newValue = (double) concrete.getValue();
