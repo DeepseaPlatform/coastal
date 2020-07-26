@@ -176,7 +176,7 @@ public final class Configuration {
 		String value = (String) properties.get(key);
 		if (value != null) {
 			try {
-				return new Integer(value);
+				return Integer.valueOf(value);
 			} catch (NumberFormatException x) {
 				// do nothing
 			}
@@ -241,7 +241,7 @@ public final class Configuration {
 		String value = (String) properties.get(key);
 		if (value != null) {
 			try {
-				return new Short(value);
+				return Short.valueOf(value);
 			} catch (NumberFormatException x) {
 				// do nothing
 			}
@@ -253,7 +253,7 @@ public final class Configuration {
 		String value = (String) properties.get(key);
 		if (value != null) {
 			try {
-				return new Byte(value);
+				return Byte.valueOf(value);
 			} catch (NumberFormatException x) {
 				// do nothing
 			}
@@ -265,7 +265,7 @@ public final class Configuration {
 		String value = (String) properties.get(key);
 		if (value != null) {
 			try {
-				return new Long(value);
+				return Long.valueOf(value);
 			} catch (NumberFormatException x) {
 				// do nothing
 			}
@@ -277,7 +277,7 @@ public final class Configuration {
 		String value = (String) properties.get(key);
 		if (value != null) {
 			try {
-				return new Float(value);
+				return Float.valueOf(value);
 			} catch (NumberFormatException x) {
 				// do nothing
 			}
@@ -289,7 +289,7 @@ public final class Configuration {
 		String value = (String) properties.get(key);
 		if (value != null) {
 			try {
-				return new Double(value);
+				return Double.valueOf(value);
 			} catch (NumberFormatException x) {
 				// do nothing
 			}

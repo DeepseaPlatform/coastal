@@ -978,88 +978,88 @@ public class COASTAL {
 			if (key.equals("boolean")) {
 				int l = (Integer) defaultMinBounds.get(boolean.class);
 				int u = (Integer) defaultMaxBounds.get(boolean.class);
-				defaultMinBounds.put(boolean.class, new Integer(bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(boolean.class, new Integer(bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(boolean.class, Integer.valueOf(bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(boolean.class, Integer.valueOf(bounds.getInt(key + ".max", u)));
 			} else if (key.equals("boolean[]")) {
 				int l = (Integer) defaultMinBounds.get(boolean[].class);
 				int u = (Integer) defaultMaxBounds.get(boolean[].class);
-				defaultMinBounds.put(boolean[].class, new Integer(bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(boolean[].class, new Integer(bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(boolean[].class, Integer.valueOf(bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(boolean[].class, Integer.valueOf(bounds.getInt(key + ".max", u)));
 			} else if (key.equals("byte")) {
 				byte l = (Byte) defaultMinBounds.get(byte.class);
 				byte u = (Byte) defaultMaxBounds.get(byte.class);
-				defaultMinBounds.put(byte.class, new Byte((byte) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(byte.class, new Byte((byte) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(byte.class, Byte.valueOf((byte) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(byte.class, Byte.valueOf((byte) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("byte[]")) {
 				byte l = (Byte) defaultMinBounds.get(byte[].class);
 				byte u = (Byte) defaultMaxBounds.get(byte[].class);
-				defaultMinBounds.put(byte[].class, new Byte((byte) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(byte[].class, new Byte((byte) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(byte[].class, Byte.valueOf((byte) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(byte[].class, Byte.valueOf((byte) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("short")) {
 				short l = (Short) defaultMinBounds.get(short.class);
 				short u = (Short) defaultMaxBounds.get(short.class);
-				defaultMinBounds.put(short.class, new Short((short) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(short.class, new Short((short) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(short.class, Short.valueOf((short) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(short.class, Short.valueOf((short) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("short[]")) {
 				short l = (Short) defaultMinBounds.get(short[].class);
 				short u = (Short) defaultMaxBounds.get(short[].class);
-				defaultMinBounds.put(short[].class, new Short((short) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(short[].class, new Short((short) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(short[].class, Short.valueOf((short) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(short[].class, Short.valueOf((short) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("char")) {
 				char l = (Character) defaultMinBounds.get(char.class);
 				char u = (Character) defaultMaxBounds.get(char.class);
-				defaultMinBounds.put(char.class, new Character((char) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(char.class, new Character((char) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(char.class, Character.valueOf((char) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(char.class, Character.valueOf((char) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("char[]")) {
 				char l = (Character) defaultMinBounds.get(char[].class);
 				char u = (Character) defaultMaxBounds.get(char[].class);
-				defaultMinBounds.put(char[].class, new Character((char) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(char[].class, new Character((char) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(char[].class, Character.valueOf((char) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(char[].class, Character.valueOf((char) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("int")) {
 				int l = (Integer) defaultMinBounds.get(int.class);
 				int u = (Integer) defaultMaxBounds.get(int.class);
-				defaultMinBounds.put(int.class, new Integer((int) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(int.class, new Integer((int) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(int.class, Integer.valueOf((int) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(int.class, Integer.valueOf((int) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("int[]")) {
 				int l = (Integer) defaultMinBounds.get(int[].class);
 				int u = (Integer) defaultMaxBounds.get(int[].class);
-				defaultMinBounds.put(int[].class, new Integer((int) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(int[].class, new Integer((int) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(int[].class, Integer.valueOf((int) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(int[].class, Integer.valueOf((int) bounds.getInt(key + ".max", u)));
 			} else if (key.equals("long")) {
 				long l = (Long) defaultMinBounds.get(long.class);
 				long u = (Long) defaultMaxBounds.get(long.class);
-				defaultMinBounds.put(long.class, new Long((long) bounds.getLong(key + ".min", l)));
-				defaultMaxBounds.put(long.class, new Long((long) bounds.getLong(key + ".max", u)));
+				defaultMinBounds.put(long.class, Long.valueOf((long) bounds.getLong(key + ".min", l)));
+				defaultMaxBounds.put(long.class, Long.valueOf((long) bounds.getLong(key + ".max", u)));
 			} else if (key.equals("long[]")) {
 				long l = (Long) defaultMinBounds.get(long[].class);
 				long u = (Long) defaultMaxBounds.get(long[].class);
-				defaultMinBounds.put(long[].class, new Long((long) bounds.getLong(key + ".min", l)));
-				defaultMaxBounds.put(long[].class, new Long((long) bounds.getLong(key + ".max", u)));
+				defaultMinBounds.put(long[].class, Long.valueOf((long) bounds.getLong(key + ".min", l)));
+				defaultMaxBounds.put(long[].class, Long.valueOf((long) bounds.getLong(key + ".max", u)));
 			} else if (key.equals("float")) {
 				float l = (Float) defaultMinBounds.get(float.class);
 				float u = (Float) defaultMaxBounds.get(float.class);
-				defaultMinBounds.put(float.class, new Float((float) bounds.getFloat(key + ".min", l)));
-				defaultMaxBounds.put(float.class, new Float((float) bounds.getFloat(key + ".max", u)));
+				defaultMinBounds.put(float.class, Float.valueOf((float) bounds.getFloat(key + ".min", l)));
+				defaultMaxBounds.put(float.class, Float.valueOf((float) bounds.getFloat(key + ".max", u)));
 			} else if (key.equals("float[]")) {
 				float l = (Float) defaultMinBounds.get(float[].class);
 				float u = (Float) defaultMaxBounds.get(float[].class);
-				defaultMinBounds.put(float[].class, new Float((float) bounds.getFloat(key + ".min", l)));
-				defaultMaxBounds.put(float[].class, new Float((float) bounds.getFloat(key + ".max", u)));
+				defaultMinBounds.put(float[].class, Float.valueOf((float) bounds.getFloat(key + ".min", l)));
+				defaultMaxBounds.put(float[].class, Float.valueOf((float) bounds.getFloat(key + ".max", u)));
 			} else if (key.equals("double")) {
 				double l = (Double) defaultMinBounds.get(double.class);
 				double u = (Double) defaultMaxBounds.get(double.class);
-				defaultMinBounds.put(double.class, new Double((double) bounds.getDouble(key + ".min", l)));
-				defaultMaxBounds.put(double.class, new Double((double) bounds.getDouble(key + ".max", u)));
+				defaultMinBounds.put(double.class, Double.valueOf((double) bounds.getDouble(key + ".min", l)));
+				defaultMaxBounds.put(double.class, Double.valueOf((double) bounds.getDouble(key + ".max", u)));
 			} else if (key.equals("double[]")) {
 				double l = (Double) defaultMinBounds.get(double[].class);
 				double u = (Double) defaultMaxBounds.get(double[].class);
-				defaultMinBounds.put(double[].class, new Double((double) bounds.getDouble(key + ".min", l)));
-				defaultMaxBounds.put(double[].class, new Double((double) bounds.getDouble(key + ".max", u)));
+				defaultMinBounds.put(double[].class, Double.valueOf((double) bounds.getDouble(key + ".min", l)));
+				defaultMaxBounds.put(double[].class, Double.valueOf((double) bounds.getDouble(key + ".max", u)));
 			} else if (key.equals("String")) {
 				char l = (Character) defaultMinBounds.get(String.class);
 				char u = (Character) defaultMaxBounds.get(String.class);
-				defaultMinBounds.put(String.class, new Character((char) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(String.class, new Character((char) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(String.class, Character.valueOf((char) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(String.class, Character.valueOf((char) bounds.getInt(key + ".max", u)));
 //			} else if (key.equals("String[]")) {
 //				char l = (Character) defaultMinBounds.get(String[].class);
 //				char u = (Character) defaultMaxBounds.get(String[].class);
@@ -1068,8 +1068,8 @@ public class COASTAL {
 			} else if (key.equals("$int")) {
 				int l = (Integer) defaultMinBounds.get(int.class);
 				int u = (Integer) defaultMaxBounds.get(int.class);
-				defaultMinBounds.put(NewInt.class, new Integer((int) bounds.getInt(key + ".min", l)));
-				defaultMaxBounds.put(NewInt.class, new Integer((int) bounds.getInt(key + ".max", u)));
+				defaultMinBounds.put(NewInt.class, Integer.valueOf((int) bounds.getInt(key + ".min", l)));
+				defaultMaxBounds.put(NewInt.class, Integer.valueOf((int) bounds.getInt(key + ".max", u)));
 			} else {
 				addBound(minBounds, "coastal.bounds." + key + ".min", key);
 				addBound(maxBounds, "coastal.bounds." + key + ".max", key);
