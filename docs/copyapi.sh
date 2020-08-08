@@ -1,4 +1,9 @@
 #!/bin/bash
+#===============================================================================
+# Copy the markdown files generated from Javadoc, process the files by adding a
+# preamble and extracting the important parts, and place them in a mirror of
+# the generated directories under the docs/api directory.
+#===============================================================================
 
 #-------------------------------------------------------------------------------
 # Variables
