@@ -163,19 +163,49 @@ public class Operation extends Expression {
 	// ======================================================================
 
 	public static Expression or(Expression a, Expression b) {
-		return new Operation(Operator.OR, a, b);
+		if (a == FALSE) {
+			return b;
+		} else if (b == FALSE) {
+			return a;
+		} else if (a == TRUE) {
+			return TRUE;
+		} else if (b == TRUE) {
+			return TRUE;
+		} else {
+			return new Operation(Operator.OR, a, b);
+		}
 	}
 
 	public static Expression and(Expression a, Expression b) {
-		return new Operation(Operator.AND, a, b);
+		if (a == FALSE) {
+			return FALSE;
+		} else if (b == FALSE) {
+			return FALSE;
+		} else if (a == TRUE) {
+			return b;
+		} else if (b == TRUE) {
+			return a;
+		} else {
+			return new Operation(Operator.AND, a, b);
+		}
 	}
 
 	public static Expression not(Expression a) {
-		return new Operation(Operator.NOT, a);
+		if (a == FALSE) {
+			return TRUE;
+		} else if (a == TRUE) {
+			return FALSE;
+		} else {
+			return new Operation(Operator.NOT, a);
+		}
 	}
 
 	public static Expression eq(Expression a, Expression b) {
-		return new Operation(Operator.EQ, a, b);
+		if (a == b) {
+			return TRUE;
+		} else {
+			return new Operation(Operator.EQ, a, b);
+		}
 	}
 
 	public static Expression ne(Expression a, Expression b) {
