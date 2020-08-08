@@ -39,7 +39,7 @@ dependencies {
 	implementation 'org.apache.logging.log4j:log4j-core:2.10.0'
 	testImplementation 'junit:junit:4.12'
 	testImplementation 'org.slf4j:slf4j-nop:1.7.25'
-	implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
+	// implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
 }
 
 //------------------------------------------------------------------------------
