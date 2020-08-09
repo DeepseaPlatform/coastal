@@ -3,20 +3,22 @@
 # Update the copyright information in the headers of Java source files.
 #===============================================================================
 
-SRC=../src
-NEW=extra/license-01.txt
+SRC=../../src/main/
+NEW=license-01.txt
 
-find ${SRC} -name '*.java' \
+for FILE in $( find ${SRC} -name '*.java' \
 	| grep -v sosy_lab \
-	| xargs grep -l 'This file is part of the COASTAL tool' \
-	| xargs sed -i'0' -e '1,/\*\// {
+	| xargs grep -l 'This file is part of the COASTAL tool' ) ; do
+	sed -i '' -e '1,/\*\// {
 		1r '${NEW}'
 		d
-	}'
+	}' ${FILE}
+done
 
-find ${SRC} -name '*.java' \
+for FILE in $( find ${SRC} -name '*.java' \
 	| grep -v sosy_lab \
-	| xargs grep -L 'This file is part of the COASTAL tool' \
-	| xargs sed -i'0' -e '1 {r '${NEW}'
-		h;d;};2{H;g;}'
+	| xargs grep -L 'This file is part of the COASTAL tool' ) ; do
+	sed -i '' -e '1 {r '${NEW}'
+		h;d;};2{H;g;}' ${FILE}
+done
 
