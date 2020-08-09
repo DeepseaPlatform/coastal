@@ -88,7 +88,7 @@ checkstyle {
 javadoc {
 	destinationDir = file('build/docs/api')
 	options.docletpath = [ file('build/classes/java/main') ]
-	options.doclet = 'za.ac.sun.cs.coastal.utility.Doclet'
+	options.doclet = 'za.ac.sun.cs.coastal.utility.CoastalDoclet'
 	options.noQualifiers = [ 'java.lang.*', 'java.io.*', 'java.util.*', 'org.apache.*' , 'za.ac.sun.cs.coastal.' ]
 	options.memberLevel = JavadocMemberLevel.PRIVATE
 }
