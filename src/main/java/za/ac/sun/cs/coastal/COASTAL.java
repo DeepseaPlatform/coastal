@@ -2488,8 +2488,8 @@ public class COASTAL {
 		}
 
 		System.out.println();
-		System.out.println("Copyright (c) 2019, Computer Science, Stellenbosch University.  All rights reserved.");
-		System.out.println("License: GNU GPL version 3 or later, http://gnu.org/licenses/gpl.html");
+		System.out.println("Copyright (c) 2019-2020, Computer Science, Stellenbosch University.  All rights reserved.");
+		System.out.println("License: Apache version 2, http://www.apache.org/licenses/LICENSE-2.0");
 		System.out.println("Documentation: https://deepseaplatform.github.io/coastal/");
 		System.out.println();
 		System.exit(0);
