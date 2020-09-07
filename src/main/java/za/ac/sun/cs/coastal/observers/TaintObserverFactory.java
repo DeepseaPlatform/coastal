@@ -64,7 +64,7 @@ public class TaintObserverFactory implements ObserverFactory {
 		private final Broker broker;
 
 		// Line number to taint leak information
-		private HashMap<Integer, TaintInfo> taintedPaths = new HashMap<Integer, TaintInfo>();
+		private final HashMap<Integer, TaintInfo> taintedPaths = new HashMap<Integer, TaintInfo>();
 
 		TaintCoverageManager(COASTAL coastal) {
 			broker = coastal.getBroker();
@@ -207,28 +207,32 @@ public class TaintObserverFactory implements ObserverFactory {
 			// Tuple data = (Tuple) object;
 			// String varName = (String) data.get(0);
 			// String classAndMethodName = (String) data.get(1);
-			// System.out.println("[taint-sanitised]: " + varName + " was sanitised with: " + classAndMethodName + " on line: " + currentLine);
+			// System.out.println("[taint-sanitised]: " + varName + " was sanitised with: "
+			// + classAndMethodName + " on line: " + currentLine);
 		}
 
 		public void taintIntroduced(Object object) {
 			// Tuple data = (Tuple) object;
 			// String varName = (String) data.get(0);
 			// String classAndMethodName = (String) data.get(1);
-			// System.out.println("[taint-introduced]: " + varName + " with source: " + classAndMethodName + " on line: " + currentLine);
+			// System.out.println("[taint-introduced]: " + varName + " with source: "
+			// + classAndMethodName + " on line: " + currentLine);
 		}
 
 		public void taintPropagation(Object object) {
 			// Tuple data = (Tuple) object;
 			// String varName = (String) data.get(0);
 			// String classAndMethodName = (String) data.get(1);
-			// System.out.println("[taint-propagated]: " + varName + " with method: " + classAndMethodName + " on line: " + currentLine);
+			// System.out.println("[taint-propagated]: " + varName + " with method: "
+			// + classAndMethodName + " on line: " + currentLine);
 		}
 
 		public void potentialTaintPropagation(Object object) {
 			// Tuple data = (Tuple) object;
 			// String varName = (String) data.get(0);
 			// String classAndMethodName = (String) data.get(1);
-			// System.out.println("[potential-taint-propagated]: " + varName + " with method: " + classAndMethodName + " on line: " + currentLine);
+			// System.out.println("[potential-taint-propagated]: " + varName + " with method: "
+			// + classAndMethodName + " on line: " + currentLine);
 		}
 
 		public void update(Object object) {
@@ -246,13 +250,13 @@ public class TaintObserverFactory implements ObserverFactory {
 		int line;
 		String methodName;
 
-		public TaintInfo(String input, String methodName, int line) {
+		TaintInfo(String input, String methodName, int line) {
 			this.input = input;
 			this.methodName = methodName;
 			this.line = line;
 		}
 
-		public TaintInfo(String methodName, int line) {
+		TaintInfo(String methodName, int line) {
 			this.methodName = methodName;
 			this.line = line;
 		}

@@ -50,7 +50,7 @@ public class TaintValueFactory implements SymbolicValueFactory {
 	 * taint, and {@link #CUSTOM} means that the user must specify which methods
 	 * introduce and kill taint.
 	 */
-	private static enum ApproximationLevel {
+	private enum ApproximationLevel {
 		KILL, CUSTOM, TAINT,
 	}
 
