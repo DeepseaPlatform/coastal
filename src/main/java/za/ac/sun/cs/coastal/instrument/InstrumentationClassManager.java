@@ -90,6 +90,7 @@ public class InstrumentationClassManager {
 	private final AtomicLong postInstrumentedSize = new AtomicLong(0);
 
 	private final Map<String, byte[]> clearCache = new HashMap<>();
+	private static final byte[] LOAD_FILE_FAILED = new byte[0];
 
 	private final Map<String, byte[]> heavyCache = new HashMap<>();
 
@@ -179,7 +180,7 @@ public class InstrumentationClassManager {
 	public byte[] loadUninstrumented(String name) {
 		long t = System.currentTimeMillis();
 		byte[] unInstrumented = clearCache.get(name);
-		if (unInstrumented == null) {
+		if (unInstrumented == null || unInstrumented == LOAD_FILE_FAILED) {
 			unInstrumented = loadUninstrumented0(name);
 		} else {
 			cacheHitCount.incrementAndGet();
@@ -194,22 +195,22 @@ public class InstrumentationClassManager {
 			unInstrumented = loadFile(name.replace('.', '/').concat(".class"), false, false);
 			clearCache.put(name, unInstrumented);
 		}
-		return unInstrumented;
+		return unInstrumented != LOAD_FILE_FAILED ? unInstrumented : null;
 	}
 
 	/*
 	 * private static class PrefixingClassReader extends ClassReader { private final
 	 * String prefix;
-	 * 
+	 *
 	 * PrefixingClassReader(InputStream content, String prefix) throws IOException {
 	 * super(content); this.prefix = prefix; }
-	 * 
+	 *
 	 * @Override public void accept(ClassVisitor cv, Attribute[] attrs, int flags) {
 	 * cv = new ClassRemapper( cv, new Remapper() {
-	 * 
+	 *
 	 * @Override public String map(String typeName) { return prefix(typeName); } });
 	 * super.accept(cv, attrs, flags); }
-	 * 
+	 *
 	 * Prefixes core library class names with prefix. private String prefix(String
 	 * typeName) { if (shouldPrefix(typeName)) { return prefix + typeName; } return
 	 * typeName; } }
@@ -421,7 +422,7 @@ public class InstrumentationClassManager {
 				}
 			}
 		}
-		return null;
+		return LOAD_FILE_FAILED;
 	}
 
 	private byte[] loadFromJar(String jarFilename, String filename) {
