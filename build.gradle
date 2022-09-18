@@ -10,7 +10,6 @@ plugins {
 	id 'maven-publish'
 	id 'signing'
 	id 'com.peterabeles.gversion' version '1.5.2' // for compile-time info
-	// id 'de.set.ecj' version '1.4.1' // for using the eclipse compiler
 }
 
 group = 'com.github.DeepseaPlatform'
@@ -26,20 +25,20 @@ ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 repositories {
 	jcenter()
 	maven { url 'https://plugins.gradle.org/m2/' }
+	maven { url 'https://repo.maven.apache.org/maven2' }
 }
 
 dependencies {
 	implementation 'com.github.green-solver:green:0.2.0'
-	implementation 'commons-io:commons-io:2.6'
-	implementation 'org.ow2.asm:asm:7.2'
-	implementation 'org.ow2.asm:asm-commons:7.2'
-	implementation 'org.ow2.asm:asm-util:7.2'
+	implementation 'commons-io:commons-io:2.11.0'
+	implementation 'org.ow2.asm:asm:9.2'
+	implementation 'org.ow2.asm:asm-commons:9.2'
+	implementation 'org.ow2.asm:asm-util:9.2'
 	implementation 'com.lmax:disruptor:3.4.2'
-	implementation 'org.apache.logging.log4j:log4j-api:2.10.0'
-	implementation 'org.apache.logging.log4j:log4j-core:2.10.0'
-	testImplementation 'junit:junit:4.12'
-	testImplementation 'org.slf4j:slf4j-nop:1.7.25'
-	// implementation files(org.gradle.internal.jvm.Jvm.current().toolsJar)
+	implementation 'org.apache.logging.log4j:log4j-api:2.14.1'
+	implementation 'org.apache.logging.log4j:log4j-core:2.14.1'
+	testImplementation 'junit:junit:4.13.2'
+	testImplementation 'org.slf4j:slf4j-nop:1.7.32'
 }
 
 //------------------------------------------------------------------------------
@@ -53,15 +52,6 @@ gversion {
 }
 
 project.compileJava.dependsOn(createVersionFile)
-
-//------------------------------------------------------------------------------
-// Settings for using the Eclipse compiler.
-// Currently not activated.
-// This version number comes from clicking on "About" in Eclipse, and then
-// clicking on "Eclipse Java Development Tools".
-//------------------------------------------------------------------------------
-
-// ecj.toolVersion = '3.18.0'
 
 //------------------------------------------------------------------------------
 // Put the ".properties" files in the same directory as the ".class" files.
@@ -107,14 +97,6 @@ startScripts {
 }
 
 //------------------------------------------------------------------------------
-// Enforce gradle version for Travis CI
-//------------------------------------------------------------------------------
-
-wrapper {
-	gradleVersion = '6.0.1'
-}
-
-//------------------------------------------------------------------------------
 // Publication settings
 //------------------------------------------------------------------------------
 
@@ -122,7 +104,7 @@ java {
 	withSourcesJar()
     withJavadocJar()
 }
-	
+
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
